@@ -81,18 +81,23 @@ in `src/components/` when reuse is justified. Avoid unused folders or placeholde
 services. The generator's `reset-project` moves starter code; do not run it as
 unrelated cleanup.
 
-Approved later backend: Supabase PostgreSQL, Auth, RLS, and Storage. No Supabase
-package, client, schema, credentials, or connection is configured. React state
+Backend: Supabase PostgreSQL, Auth, RLS and Storage. The shared client is
+configured; auth screens, schema and RLS policies are not implemented. React state
 is the default; TanStack Query and Zustand require demonstrated needs.
 See [mobile stack decision](docs/decisions/001-mobile-stack.md).
 
 ## Environment and security
 
-`.env.example` reserves empty public configuration fields for the later Supabase
-task. It is unused by the starter; no `.env` is required to run it. Actual `.env`
-variants are ignored. Public Expo variables are bundled app content: never use
+Copy `.env.example` to `.env` and supply your project API URL and public
+publishable key before launching the app. The client validates these values;
+restart Expo after changes. Actual `.env` variants are ignored. Public Expo variables are bundled app content: never use
 these for service-role keys, database passwords, signing secrets, or AI provider
 credentials. Production domains, bundle IDs, and EAS project IDs are undecided.
+
+Run `npm run check:supabase` with Node 24 for the read-only live connection check.
+The probe expects the `profiles` table to be missing until schema migrations run.
+See [required development inputs](docs/DEVELOPMENT_INPUTS.md) and
+[Supabase client decision](docs/decisions/002-supabase-auth.md).
 
 ## Release discipline
 
