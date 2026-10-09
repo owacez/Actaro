@@ -53,8 +53,9 @@ This is an Expo/React Native mobile application. Prioritize mobile-first pattern
 - Run `npm run check` before marking work complete. Run meaningful relevant
   tests and manual flow checks when applicable. Do not add tests that merely
   mirror trivial code or claim checks that were not run.
-- There is currently no test runner or CI. Establish those in a separately
-  approved quality-baseline task; do not create a fake passing `test` script.
+- Jest/Expo and React Native Testing Library are configured; `npm run check`
+  includes tests. CI remains a separate quality-baseline task. Never create a
+  fake passing test script or use `--passWithNoTests` to claim coverage.
 - Update `docs/DEVELOPMENT_STATUS.md` with exact evidence, approved statuses,
   and the Development Plan's weights. Partial progress counts only verified
   completed subtasks. A scaffold, export, or passing lint is not feature completion.

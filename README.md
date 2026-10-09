@@ -1,7 +1,7 @@
 # Actaro
 
 Premium personal fitness and wellness mobile application, developed incrementally.
-Current implementation: official Expo starter plus repository initialization.
+Current implementation: official Expo starter, repository initialization and a verified test baseline.
 The starter screens, colors, icons, and assets are Expo examples, not the approved
 Actaro design system or implemented product features. Version `0.1.0` is project
 metadata; v0.1's release gate has not passed.
@@ -24,7 +24,7 @@ not authorize completing the rest of v0.1.
 
 Install a supported Node.js LTS with npm, and Git. This setup uses portable
 Node.js 24.21.0/npm 11.19.0 and Git 2.56.0 from a temporary directory because
-none were installed on PATH. They were not installed system-wide. Optionally
+Node/npm were not installed on PATH. Git is now installed system-wide. Optionally
 make these temporary tools available in the current Windows terminal:
 
 ```powershell
@@ -49,11 +49,14 @@ npm run typecheck
 npm run lint
 npm run format:check
 npm run check
+npm test
+npm run test:watch
 ```
 
 `npm run format` applies Prettier. Canonical documents and binary assets are
-excluded from formatting. No test runner or CI exists yet; establish these in
-an approved quality-baseline task with meaningful verification.
+excluded from formatting. Jest uses the SDK 57 Expo preset and React Native Testing Library. Tests cover
+server/client hydration and preference updates. `npm run check` includes tests
+and fails if any check fails. CI remains a separate task.
 
 ## Structure and architecture
 
