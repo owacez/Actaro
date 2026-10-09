@@ -98,6 +98,8 @@ Run `npm run check:supabase` with Node 24 for the read-only live connection chec
 The probe expects the `profiles` table to be missing until schema migrations run.
 See [required development inputs](docs/DEVELOPMENT_INPUTS.md) and
 [Supabase client decision](docs/decisions/002-supabase-auth.md).
+The [schema design](docs/decisions/003-core-schema.md) specifies the first
+profile/preferences migration and historical data rules; no schema is applied yet.
 
 ## Release discipline
 

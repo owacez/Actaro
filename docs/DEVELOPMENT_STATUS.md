@@ -6,11 +6,11 @@ Updated: 2026-10-09 (America/Los_Angeles).
 
 - Current Release: **v0.1 — Foundation**
 - Release Completion: **26.625% (10.65 / 40 weight)**
-- Current Phase: **Phase 0 — foundation Supabase client integration**
-- Current Focus: Client/configuration and read-only live API probes verified; schema design next. Native integration verification remains pending.
+- Current Phase: **Phase 0 — foundation schema design**
+- Current Focus: Client task and schema design recorded. Next: inspect the live database and implement the first profile/preferences migration with ownership tests. Native integration verification remains pending.
 - Status: **IN_PROGRESS**
 - Blockers: Git is installed; Node.js/npm use temporary portable tools.
-  Expo Doctor config-schema check is blocked by the Expo API connection; dependency advisories remain open.
+  Supabase database tools are not yet exposed after plugin authorization. Expo Doctor config-schema check has an external API blocker; dependency advisories remain open.
 - Approval boundary: User authorized resuming v0.1 sequentially on 2026-10-09; complete and verify one task before the next. Later releases remain outside scope.
 
 The supplied canonical plan is `docs/ACTARO_DECELOPMENT_PLAN.md`; the requested
@@ -33,7 +33,7 @@ release gates separately, without inventing a numeric weight.
 
 Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 4/5 + 2 × 2/2 + 3 × 3/4 = 10.65`.
 Release completion: `10.65 / 40 × 100 = 26.625%`. Rounded table percentages never
-replace these exact fractions. This is setup progress, not a completed v0.1 release.
+replace these exact fractions. This is verified foundation progress, not a completed v0.1 release.
 
 ## Feature Table
 
@@ -248,6 +248,15 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 
 ## Last Completed
 
+**DONE — Analytics-aware schema design document (2026-10-09), unweighted planning work.**
+
+- `docs/decisions/003-core-schema.md` specifies the first two private foundation tables, identity/foreign keys, constraints, default decisions, least-privilege grants and ownership acceptance tests.
+- Documents historical facts/snapshots, canonical units, local dates/timezones, ownership-preserving relationships, query-driven indexes and reproducible deterministic reports. Later domain entities stay in their approved releases.
+- Design is not applied SQL, generated database types, working profile persistence, or verified RLS. Items 0.9/0.10/0.11 earn no implementation weight from this document.
+- Supabase installation is confirmed and user-authorized; no project/database tools are callable in this session yet. No request for repeat authorization.
+
+### Client integration history
+
 **DONE — Supabase client/configuration task (2026-10-09); release item 0.7 remains IN_PROGRESS.**
 
 - Added a validated lazy singleton client, native session storage and foreground refresh with cleanup; browser branch and static export remain supported.
@@ -314,7 +323,7 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-Sequential foundation development is authorized. Supabase client task is verified. The user selected and authorized the Supabase plugin; installation is confirmed, but its project/database tools are not yet exposed to this session. Prepare the first schema design, then inspect the live database before applying migrations.
+Sequential foundation development is authorized. Supabase client task is verified. The user selected and authorized the Supabase plugin; installation is confirmed, but its project/database tools are not yet exposed to this session. The first schema design is recorded in ADR 003. Inspect the live database before applying migrations.
 
 ## Next 3 Actions
 
@@ -369,3 +378,10 @@ Sequential foundation development is authorized. Supabase client task is verifie
 - `npx expo export --platform all`: PASS, Android/iOS Hermes bundles, web bundle and all four static routes.
 - `git check-ignore .env`: PASS. `git diff --check`: required before commit.
 - Native launches, real sign-in/session persistence, profile persistence and two-user RLS verification remain NOT_STARTED. No product feature completion inferred from these connection checks.
+
+## Schema design evidence (2026-10-09)
+
+- Read canonical profile/preferences, ownership, analytics and release-boundary requirements; cross-checked current Supabase RLS/user-trigger/type-generation and PostgreSQL timestamp documentation.
+- Design scope is a first v0.1 migration specification plus later-domain data rules, not early implementation of future features. No schema was applied.
+- `npm run check`: PASS (exit 0), including typecheck, lint, formatting and 19 tests. Blueprint review and passing application checks do not constitute database security verification.
+- Client commit: `31849bd` (`feat: configure validated Supabase client integration`). Test baseline commit: `f5e2cc6` (`test: establish Expo foundation regression checks`). Neither was pushed.

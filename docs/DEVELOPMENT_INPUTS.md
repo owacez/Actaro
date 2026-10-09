@@ -23,8 +23,8 @@ credentials, or signing credentials in these variables or send them in chat.
 
 ## Needed for upcoming foundation tasks
 
-1. Install/connect Supabase and authorize this project for database inspection
-   and reviewed migrations. The user selected this route; installation is confirmed and the user authorized connection, but database
+1. Supabase database tools must become available for project inspection and
+   reviewed migrations. The user selected this route; installation is confirmed and the user authorized connection, but database
    tools are not yet exposed to this session. No administrative credential is needed in the app's environment.
 2. Android and iPhone device access for launch/session tests. Native build setup
    will need a locally authenticated Expo account and user-approved application
