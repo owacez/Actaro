@@ -80,12 +80,21 @@ configuration or cross-device confirmation has been fixed. See
    must show an error. Reset responses must not reveal account existence.
 5. Check confirmation resend within sender rate limits. Test failed sign-in and
    network failure without displaying raw provider errors or logging credentials.
+6. Check that form errors are plain text, without an input-like border. On web,
+   errors also appear at the upper right; hover or focus the dismiss button to
+   pause automatic dismissal. Check manual dismissal and replacement by a newer
+   message. Successful sign-in/sign-out feedback must survive the screen change.
+   On mobile, check that success/information snackbars stay within safe areas
+   and remain usable with the keyboard open. Success/information messages expire
+   after eight seconds; error notifications after ten. Inline errors remain.
 
 ## Evidence and limits
 
 Automated tests cover validation, request contracts, duplicate submissions,
 password clearing, safe reset responses, session restoration races, listener
 cleanup, recovery/sign-out transitions, and callback validation/exchange failures.
+Feedback tests cover success after sign-in, screen replacement, timer replacement,
+manual dismissal, web hover/focus pauses and a single live error announcement.
 SDK boundaries are mocked; these tests do not prove live email delivery or device
 session persistence. Exports verify bundling, not native launches.
 

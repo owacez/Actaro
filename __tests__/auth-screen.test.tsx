@@ -1,8 +1,10 @@
-import { beforeEach, expect, jest, test } from '@jest/globals';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { afterEach, beforeEach, expect, jest, test } from '@jest/globals';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
+import { Platform } from 'react-native';
 
 import { AuthScreen } from '@/features/auth/auth-screen';
 import { authService } from '@/features/auth/auth-service';
+import { FeedbackTestRoot } from './helpers/feedback-root';
 
 jest.mock('@/features/auth/auth-provider', () => ({
   useAuth: () => ({ finishRecovery: jest.fn() }),
@@ -26,6 +28,9 @@ const service = jest.mocked(authService);
 beforeEach(() => {
   jest.resetAllMocks();
 });
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 async function enterEmailAndPassword(password = 'test-password-123') {
   await fireEvent.changeText(screen.getByLabelText('Email'), 'tester@example.com');
@@ -33,7 +38,7 @@ async function enterEmailAndPassword(password = 'test-password-123') {
 }
 
 test('rejects invalid input before requesting sign-in', async () => {
-  await render(<AuthScreen />);
+  await render(<AuthScreen />, { wrapper: FeedbackTestRoot });
   await fireEvent.press(screen.getByRole('button', { name: 'Sign in' }));
   expect(screen.getByText('Enter a valid email address.')).toBeTruthy();
   expect(service.signIn).not.toHaveBeenCalled();
@@ -47,7 +52,7 @@ test('guards pending sign-in and renders a safe server error', async () => {
         rejectRequest = reject;
       }),
   );
-  await render(<AuthScreen />);
+  await render(<AuthScreen />, { wrapper: FeedbackTestRoot });
   await enterEmailAndPassword();
   const button = screen.getByRole('button', { name: 'Sign in' });
   await fireEvent.press(button);
@@ -64,7 +69,7 @@ test('guards pending sign-in and renders a safe server error', async () => {
 
 test('requires matching signup passwords then clears them for verification', async () => {
   service.signUp.mockResolvedValue({ needsConfirmation: true });
-  await render(<AuthScreen />);
+  await render(<AuthScreen />, { wrapper: FeedbackTestRoot });
   await fireEvent.press(screen.getByRole('button', { name: 'Create account' }));
   await enterEmailAndPassword();
   await fireEvent.changeText(screen.getByLabelText('Confirm password'), 'different-password');
@@ -81,7 +86,7 @@ test('requires matching signup passwords then clears them for verification', asy
 
 test('reset success does not reveal account existence', async () => {
   service.requestReset.mockResolvedValue(undefined);
-  await render(<AuthScreen />);
+  await render(<AuthScreen />, { wrapper: FeedbackTestRoot });
   await fireEvent.press(screen.getByRole('button', { name: 'Forgot password?' }));
   await fireEvent.changeText(screen.getByLabelText('Email'), 'unknown@example.com');
   await fireEvent.press(screen.getByRole('button', { name: 'Send reset link' }));
@@ -91,11 +96,32 @@ test('reset success does not reveal account existence', async () => {
 
 test('password recovery validates confirmation before updating the user', async () => {
   service.updatePassword.mockResolvedValue(undefined);
-  await render(<AuthScreen recovery />);
+  await render(<AuthScreen recovery />, { wrapper: FeedbackTestRoot });
   expect(screen.queryByLabelText('Email')).toBeNull();
   await fireEvent.changeText(screen.getByLabelText('Password'), 'replacement-password');
   await fireEvent.changeText(screen.getByLabelText('Confirm password'), 'replacement-password');
   await fireEvent.press(screen.getByRole('button', { name: 'Update password' }));
   await waitFor(() => expect(service.updatePassword).toHaveBeenCalledWith('replacement-password'));
   expect(screen.getByLabelText('Password')).toHaveProp('value', '');
+});
+
+test('a successful sign-in displays success feedback', async () => {
+  service.signIn.mockResolvedValue(undefined);
+  await render(<AuthScreen />, { wrapper: FeedbackTestRoot });
+  await enterEmailAndPassword();
+  await fireEvent.press(screen.getByRole('button', { name: 'Sign in' }));
+  expect(await screen.findByText('Signed in successfully.')).toBeTruthy();
+});
+
+test('web failures display a toast without adding another form input', async () => {
+  jest.replaceProperty(Platform, 'OS', 'web');
+  service.signIn.mockRejectedValue({ code: 'invalid_credentials' });
+  await render(<AuthScreen />, { wrapper: FeedbackTestRoot });
+  await enterEmailAndPassword();
+  await fireEvent.press(screen.getByRole('button', { name: 'Sign in' }));
+  const toast = await screen.findByTestId('auth-feedback');
+  expect(within(toast).getByText('Email or password is incorrect.')).toBeTruthy();
+  expect(screen.getAllByRole('alert')).toHaveLength(1);
+  expect(screen.getByLabelText('Email')).toBeTruthy();
+  expect(screen.getByLabelText('Password')).toBeTruthy();
 });

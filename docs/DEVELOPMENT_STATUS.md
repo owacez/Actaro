@@ -430,3 +430,17 @@ Authentication is the user's authorized current task. Client connection and Supa
 - `npm run check`: PASS (exit 0), typecheck, lint, formatting and 41 tests across eight suites. Tests cover confirmation proof, one-use callback success/error and recovery routing.
 - `npx expo export --platform all`: PASS (exit 0), Android/iOS/web bundles and seven static routes including `/auth/confirmed`. Exports are not phone launches or live email verification.
 - Weighted completion remains 34.125%; this bug fix adds no new plan weight. Callback configuration/live confirmation, reset, sign-out and native persistence acceptance remain pending.
+
+## Auth feedback presentation (2026-10-09)
+
+**DONE — Auth feedback presentation fix; auth task 0.8 remains IN_PROGRESS.**
+
+- Replaced input-like error cards with persistent plain text. Mobile success/information messages use a bottom snackbar; web error/success/information messages use a dismissible upper-right notification.
+- Mounted feedback above the auth routes so successful sign-in/sign-out messages survive screen replacement. Success/information messages expire after eight seconds, errors after ten; hover and keyboard focus pause dismissal. A newer message replaces the previous message safely.
+- Preserved existing safe error mapping, generic reset/resend responses and actual SDK success requirements. Web form errors have one live announcement through the notification; standalone and native inline errors retain accessible announcements. No dependencies, credentials, remote Auth settings or Figma content changed.
+- Added notification regression tests and updated README/AUTH_TESTING with behavior and manual checks.
+- `npm.cmd run check`: PASS (exit 0), typecheck, lint, formatting and 46 tests across nine suites.
+- `npx.cmd expo export --platform all`: PASS (exit 0), Android/iOS/web bundles and seven static routes. Exports do not establish native runtime behavior.
+- `git diff --check` and `git check-ignore .env`: PASS. The environment file remains outside the change set.
+- Browser visual verification: BLOCKED; the automation runtime failed to start with a Windows sandbox helper error. No screenshot comparison or device check is claimed. Native safe-area/keyboard and live auth acceptance checks remain pending in AUTH_TESTING.
+- Weighted foundation completion remains 34.125%; this bug fix adds no plan weight. Next actions remain web confirmation/reset verification, Android/iOS persistence/sign-out checks, then the independently verified profile/preferences migration.

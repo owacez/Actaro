@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import {
   AuthButton,
@@ -11,6 +11,7 @@ import {
   authStyles,
 } from './auth-components';
 import { useAuth } from './auth-provider';
+import { useAuthFeedback } from './auth-feedback';
 import { authErrorMessage, authService, validateAuthForm, type AuthMode } from './auth-service';
 
 const headings: Record<AuthMode, string> = {
@@ -38,12 +39,12 @@ const buttons: Record<AuthMode, string> = {
 
 export function AuthScreen({ recovery = false }: { recovery?: boolean }) {
   const { finishRecovery } = useAuth();
+  const { notify, clear } = useAuthFeedback();
   const [mode, setMode] = useState<AuthMode>(recovery ? 'update-password' : 'sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
 
@@ -52,30 +53,44 @@ export function AuthScreen({ recovery = false }: { recovery?: boolean }) {
     setPassword('');
     setConfirmation('');
     setError(null);
-    setNotice(null);
+    clear();
+  }
+  function reportError(message: string) {
+    setError(message);
+    if (Platform.OS === 'web') notify(message, 'error');
   }
   async function submit() {
     if (pending.current) return;
     const invalid = validateAuthForm(mode, email, password, confirmation);
-    setError(invalid);
-    setNotice(null);
-    if (invalid) return;
+    setError(null);
+    clear();
+    if (invalid) {
+      reportError(invalid);
+      return;
+    }
     pending.current = true;
     setBusy(true);
     try {
-      if (mode === 'sign-in') await authService.signIn(email, password);
+      if (mode === 'sign-in') {
+        await authService.signIn(email, password);
+        notify('Signed in successfully.', 'success');
+      }
       if (mode === 'sign-up') {
         const { needsConfirmation } = await authService.signUp(email, password);
-        if (needsConfirmation) changeMode('verify');
+        if (needsConfirmation) {
+          changeMode('verify');
+          notify('Check your email for confirmation instructions.', 'info');
+        } else notify('Signed in successfully.', 'success');
       }
       if (mode === 'verify') {
         await authService.resendConfirmation(email);
-        setNotice('If confirmation is needed, a new email will arrive shortly.');
+        notify('If confirmation is needed, a new email will arrive shortly.', 'info');
       }
       if (mode === 'reset') {
         await authService.requestReset(email);
-        setNotice(
+        notify(
           'If this email has an account, a reset link will arrive shortly. Open it on this device.',
+          'info',
         );
       }
       if (mode === 'update-password') {
@@ -83,9 +98,10 @@ export function AuthScreen({ recovery = false }: { recovery?: boolean }) {
         setPassword('');
         setConfirmation('');
         finishRecovery();
+        notify('Password updated successfully.', 'success');
       }
     } catch (requestError) {
-      setError(authErrorMessage(requestError));
+      reportError(authErrorMessage(requestError));
     } finally {
       pending.current = false;
       setBusy(false);
@@ -96,11 +112,12 @@ export function AuthScreen({ recovery = false }: { recovery?: boolean }) {
     pending.current = true;
     setBusy(true);
     setError(null);
+    clear();
     try {
       await authService.signOut();
       finishRecovery();
     } catch (requestError) {
-      setError(authErrorMessage(requestError));
+      reportError(authErrorMessage(requestError));
     } finally {
       pending.current = false;
       setBusy(false);
@@ -171,8 +188,11 @@ export function AuthScreen({ recovery = false }: { recovery?: boolean }) {
           <AuthLink title="Forgot password?" disabled={busy} onPress={() => changeMode('reset')} />
         </View>
       )}
-      {error && <AuthNotice error>{error}</AuthNotice>}
-      {notice && <AuthNotice>{notice}</AuthNotice>}
+      {error && (
+        <AuthNotice error announce={Platform.OS !== 'web'}>
+          {error}
+        </AuthNotice>
+      )}
       <AuthButton title={buttons[mode]} busy={busy} onPress={() => void submit()} />
       {mode === 'sign-in' && (
         <>
@@ -207,6 +227,7 @@ export function AuthScreen({ recovery = false }: { recovery?: boolean }) {
 
 export function AccountScreen() {
   const { session } = useAuth();
+  const { notify, clear } = useAuthFeedback();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const pending = useRef(false);
@@ -215,10 +236,13 @@ export function AccountScreen() {
     pending.current = true;
     setBusy(true);
     setError(null);
+    clear();
     try {
       await authService.signOut();
+      notify('Signed out successfully.', 'success');
     } catch (requestError) {
       setError(authErrorMessage(requestError));
+      if (Platform.OS === 'web') notify(authErrorMessage(requestError), 'error');
     } finally {
       pending.current = false;
       setBusy(false);
@@ -232,7 +256,11 @@ export function AccountScreen() {
       <AuthNotice>
         Training, nutrition and progress features are coming in later releases.
       </AuthNotice>
-      {error && <AuthNotice error>{error}</AuthNotice>}
+      {error && (
+        <AuthNotice error announce={Platform.OS !== 'web'}>
+          {error}
+        </AuthNotice>
+      )}
       <AuthButton title="Sign out" busy={busy} onPress={() => void signOut()} />
     </AuthFrame>
   );

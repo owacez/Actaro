@@ -115,7 +115,21 @@ export function AuthLink({
   );
 }
 
-export function AuthNotice({ children, error = false }: PropsWithChildren<{ error?: boolean }>) {
+export function AuthNotice({
+  children,
+  error = false,
+  announce = true,
+}: PropsWithChildren<{ error?: boolean; announce?: boolean }>) {
+  if (error)
+    return (
+      <Text
+        accessibilityRole={announce ? 'alert' : undefined}
+        accessibilityLiveRegion={announce ? 'polite' : undefined}
+        style={styles.errorText}
+      >
+        {children}
+      </Text>
+    );
   return (
     <View style={styles.notice}>
       <Text
@@ -192,5 +206,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 16,
     color: authColors.muted,
+  },
+  errorText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 12,
+    lineHeight: 18,
+    color: authColors.text,
   },
 });

@@ -158,6 +158,11 @@ repeating requests. No additional app key or paid SMTP service was configured.
 These auth views exist in code and have automated logic/contract tests; full
 live email and Android/iOS verification remain pending.
 
+Auth errors appear as plain text beside the form. On mobile, successful actions
+and email instructions use a bottom snackbar. On web, errors and successful
+actions also use a dismissible notification at the upper right. Notifications
+expire automatically; hovering or focusing the web notification pauses dismissal.
+
 | Screen / state              | Present behavior                                                           |
 | --------------------------- | -------------------------------------------------------------------------- |
 | Sign In                     | Validated email/password sign-in.                                          |

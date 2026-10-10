@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 
 import { AuthButton, AuthFrame, AuthNotice, authColors } from '@/features/auth/auth-components';
 import { AuthProvider, useAuth } from '@/features/auth/auth-provider';
+import { AuthFeedbackProvider } from '@/features/auth/auth-feedback';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -59,8 +60,10 @@ export default function RootLayout() {
     );
   if (!loaded) return null;
   return (
-    <AuthProvider>
-      <AuthRoutes />
-    </AuthProvider>
+    <AuthFeedbackProvider>
+      <AuthProvider>
+        <AuthRoutes />
+      </AuthProvider>
+    </AuthFeedbackProvider>
   );
 }
