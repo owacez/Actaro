@@ -332,7 +332,7 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-Client connection and Supabase MCP authorization are verified. Application auth flows are implemented with contract tests. The user now reports authentication testing, explicitly including sign-out; the platform and coverage of confirmation, password reset and session persistence have been requested. Record this evidence without inferring those additional flows or both native platforms. The next proposed implementation module is Profile / Preferences, beginning with the existing first-migration specification. No application tables or migrations exist yet.
+Client connection and Supabase MCP authorization are verified. Application auth flows are implemented with contract tests. The user reports web authentication testing, explicitly including sign-out. Confirmation, password reset and persistence coverage are not specified. Native testing is pending; the supplied terminal output shows npx offering a temporary Expo install from C:\Windows\System32 rather than the project root. Record this evidence without inferring additional flows or either native platform. The next proposed implementation module is Profile / Preferences, beginning with the existing first-migration specification. No application tables or migrations exist yet.
 
 ## Next 3 Actions
 
@@ -449,8 +449,15 @@ Confirm the remaining auth test matrix alongside these tasks; do not mark task 0
 
 ## User testing and next module (2026-10-09)
 
-- User reports that authentication has been tested and explicitly confirms testing sign-out. The tested platform(s), confirmation/reset coverage and persistence after reopening are not specified; a clarification is pending.
+- User reports web authentication testing, explicitly including sign-out. Confirmation/reset coverage and persistence after reopening are not specified. The follow-up confirms that native testing is pending: `npx expo login` was launched from `C:\Windows\System32`, offered a temporary Expo install and was cancelled once with Ctrl+C. This is CLI setup evidence, not a captured Expo Go app runtime error.
 - Authentication remains IN_PROGRESS. Weighted foundation completion remains 34.125% until the live acceptance groups can be reconciled with specific evidence; the user report is preserved rather than treated as a complete Android/iOS test matrix.
 - Next proposed module: v0.1 Profile / Preferences, split into independently verifiable schema/RLS, typed data-access and persisted UI tasks. The existing schema design is the starting specification; no migration or feature code is implemented by this planning update.
 - No new API key is required for those tasks; the existing authorized Supabase connection and public application configuration suffice. Figma access is needed for exact profile UI matching.
 - Planning-update validation: `npm.cmd run check` PASS (exit 0), including typecheck, lint, formatting and all 46 tests across nine suites. `git diff --check` PASS. No application code or database changes were made.
+
+## Expo CLI working-directory guidance (2026-10-09)
+
+- Confirmed that `node_modules/expo/package.json` exists in the Actaro root. `npx.cmd --no-install expo login --help` PASS (exit 0), using the installed CLI without downloading a second package.
+- Added README troubleshooting for running login from the project root and using `--no-install`; Command Prompt uses `cd /d` to switch directories/drives. No dependencies or app configuration changed, and no interactive Expo account login was performed by the agent.
+- Web auth/sign-out tests are user-reported; Android/iOS launch, confirmation/reset and persistence acceptance remain pending. Foundation completion stays 34.125%.
+- `npm.cmd run check` PASS (exit 0): typecheck, lint, formatting and 46 tests across nine suites. No native launch or Expo account authentication is inferred from these checks.

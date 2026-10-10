@@ -123,6 +123,14 @@ repeating requests. No additional app key or paid SMTP service was configured.
 
 ### Troubleshooting
 
+- **`npx expo login` asks to install Expo:** run it from the Actaro folder,
+  where `package.json` and the installed dependencies live. Running from
+  `C:\Windows\System32` makes npx offer a temporary Expo download. In Command
+  Prompt, run `cd /d C:\Users\Owais\VSCodeProjects\Actaro`, then
+  `npx.cmd --no-install expo login`. The `--no-install` flag prevents a temporary
+  download. If dependencies are genuinely missing, run `npm.cmd ci` in the
+  project root first. Pressing `Ctrl+C` cancels the current command; it does not
+  establish an Expo login.
 - **`npm` or `node` is not recognized:** install Node 24 LTS and reopen the
   terminal. The temporary PATH workaround for this machine is below.
 - **PowerShell blocks `npm.ps1`:** use `npm.cmd ci` and
