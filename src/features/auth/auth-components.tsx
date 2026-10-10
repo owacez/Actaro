@@ -12,16 +12,10 @@ import {
   type TextInputProps,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { actaroColors, actaroLayout, actaroTypography } from '@/constants/actaro-theme';
 
-// Verified Sign In / Password Reset Figma values; limited to this auth feature.
-export const authColors = {
-  background: '#f4f0e8',
-  surface: '#fffdf8',
-  text: '#121211',
-  muted: '#6d6961',
-  accent: '#ff681e',
-  border: '#ddd5c8',
-};
+// Preserve current consumers while sharing the verified foundation with navigation.
+export const authColors = actaroColors;
 
 export function AuthFrame({ children }: PropsWithChildren) {
   return (
@@ -151,25 +145,21 @@ export const authStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: authColors.background },
   scroll: { flexGrow: 1, alignItems: 'center' },
-  content: { width: '100%', maxWidth: 430, padding: 20, gap: 14 },
-  text: { fontFamily: 'Inter_400Regular', color: authColors.text },
-  body: { fontSize: 12, lineHeight: 18, color: authColors.muted },
-  title: { fontFamily: 'Inter_600SemiBold', fontSize: 30, lineHeight: 36 },
-  heading: { fontFamily: 'Inter_600SemiBold', fontSize: 22, lineHeight: 28 },
-  eyebrow: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 10,
-    letterSpacing: 1,
-    color: authColors.accent,
+  content: {
+    width: '100%',
+    maxWidth: actaroLayout.contentWidth,
+    padding: actaroLayout.screenPadding,
+    gap: actaroLayout.contentGap,
   },
-  muted: { fontSize: 10, color: authColors.muted },
+  text: { fontFamily: 'Inter_400Regular', color: authColors.text },
+  ...actaroTypography,
   field: { gap: 5 },
   label: { fontFamily: 'Inter_500Medium', fontSize: 11, color: authColors.text },
   input: {
-    minHeight: 44,
+    minHeight: actaroLayout.minimumTouchHeight,
     paddingHorizontal: 12,
     paddingVertical: 12,
-    borderRadius: 13,
+    borderRadius: actaroLayout.fieldRadius,
     borderWidth: 1,
     borderColor: authColors.border,
     backgroundColor: authColors.surface,
@@ -178,24 +168,24 @@ const styles = StyleSheet.create({
     color: authColors.text,
   },
   button: {
-    minHeight: 44,
+    minHeight: actaroLayout.minimumTouchHeight,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 18,
     paddingVertical: 12,
     borderWidth: 1,
     borderColor: authColors.text,
-    borderRadius: 12,
+    borderRadius: actaroLayout.controlRadius,
     backgroundColor: authColors.accent,
   },
   outlined: { borderColor: authColors.border, backgroundColor: 'transparent' },
   dimmed: { opacity: 0.65 },
   buttonText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: authColors.background },
   outlinedText: { color: authColors.text },
-  link: { minHeight: 44, justifyContent: 'center' },
+  link: { minHeight: actaroLayout.minimumTouchHeight, justifyContent: 'center' },
   linkText: { fontFamily: 'Inter_500Medium', fontSize: 10, color: authColors.text },
   notice: {
-    borderRadius: 13,
+    borderRadius: actaroLayout.fieldRadius,
     borderWidth: 1,
     borderColor: authColors.border,
     padding: 12,
