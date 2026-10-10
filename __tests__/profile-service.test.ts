@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, expect, jest, test } from '@jest/globals';
-import { AuthSessionMissingError, createClient, type User } from '@supabase/supabase-js';
+import {
+  AuthSessionMissingError,
+  createClient,
+  type SupabaseClient,
+  type User,
+} from '@supabase/supabase-js';
 
 import {
   validatePreferencesUpdate,
@@ -38,8 +43,10 @@ const preferences: Preferences = {
   updated_at: user.created_at,
 };
 
-const mockFetch = jest.fn<typeof fetch>();
-function createTestClient() {
+// Accept both DOM and React Native fetch inputs without depending on overload order.
+const mockFetch =
+  jest.fn<(input: unknown, init?: { method?: string; body?: unknown }) => Promise<Response>>();
+function createTestClient(): SupabaseClient<Database> {
   return createClient<Database>('https://example-project.supabase.co', 'test-public-key', {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
     global: { fetch: mockFetch },
