@@ -28,9 +28,12 @@ Client contract tests check singleton creation, persistence options, foreground
 refresh, background suspension, cleanup, and the browser branch. These use native
 boundary mocks; they do not prove persistence on a device.
 
-`npm run check:supabase` sends only read-only requests: Auth settings and an SDK
-query for zero `profiles` rows. A `PGRST205` missing-table response is expected
-before migrations. This confirms API/key reachability, not schema or RLS correctness.
+`npm run check:supabase` sends only read-only requests: Auth settings and SDK
+queries for zero profile/preferences rows. After the first migration, anonymous
+requests must receive database permission denial (`42501`, HTTP 401/403). The
+earlier pre-migration probe expected `PGRST205` for the missing profile table.
+The probe confirms API/key reachability and anonymous grants, not authenticated
+ownership; real two-user SQL tests verify that separately.
 The script requires Node 24, used by this workspace, to load the shared TypeScript
 configuration validator without introducing a second configuration implementation.
 

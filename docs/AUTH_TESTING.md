@@ -9,8 +9,9 @@ key listed in `.env.example`. No new API key, administrative secret, paid servic
 or SMTP setup is required for this implementation.
 
 Supabase MCP access is verified: project `teqqepzihflflnvhacze` is ACTIVE_HEALTHY.
-The public schema has no tables. Authentication uses Supabase's existing Auth
-service; profile tables and RLS migrations are a separate foundation task.
+The first private profile/preferences tables and RLS migration are applied.
+Authentication uses Supabase's existing Auth service; profile editing in the app
+is a separate foundation task. SQL trigger/ownership tests passed without sending emails.
 
 The project currently requires email confirmation. This setting was preserved.
 The default email sender only delivers to project-team addresses and currently

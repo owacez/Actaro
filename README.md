@@ -220,6 +220,14 @@ excluded from formatting. Jest uses the SDK 57 Expo preset and React Native Test
 server/client hydration, Supabase configuration, auth forms/services, callback handling and session transitions. `npm run check` includes tests
 and fails if any check fails. CI remains a separate task.
 
+For database ownership regression checks, run the entire
+[profile/preferences SQL test](supabase/tests/profile_preferences.sql) through
+the authorized Supabase MCP connection or the project's SQL Editor as an
+administrator. It creates disposable test users, checks grants/RLS and validation,
+then rolls back all fixtures. It sends no emails and does not edit the existing
+account. These database checks complement the app tests; profile UI acceptance
+remains pending.
+
 ## Structure and architecture
 
 The scaffold follows Expo's default template and supported SDK versions:
@@ -245,7 +253,8 @@ services. The generator's `reset-project` moves starter code; do not run it as
 unrelated cleanup.
 
 Backend: Supabase PostgreSQL, Auth, RLS and Storage. The shared client is
-configured; auth screens and service flows exist. Schema and RLS policies are not implemented. React state
+configured; auth screens and service flows exist. The profile/preferences schema
+and ownership policies are applied and database-tested; profile editing is pending. React state
 is the default; TanStack Query and Zustand require demonstrated needs.
 See [mobile stack decision](docs/decisions/001-mobile-stack.md).
 
@@ -258,11 +267,11 @@ these for service-role keys, database passwords, signing secrets, or AI provider
 credentials. Production domains, bundle IDs, and EAS project IDs are undecided.
 
 Run `npm run check:supabase` with Node 24 for the read-only live connection check.
-The probe expects the `profiles` table to be missing until schema migrations run.
+The probe requires anonymous permission denial for the private profile/preferences tables.
 See [required development inputs](docs/DEVELOPMENT_INPUTS.md) and
 [Supabase client decision](docs/decisions/002-supabase-auth.md).
 The [schema design](docs/decisions/003-core-schema.md) specifies the first
-profile/preferences migration and historical data rules; no schema is applied yet.
+profile/preferences migration and historical data rules; later module schemas remain pending.
 
 ## Release discipline
 

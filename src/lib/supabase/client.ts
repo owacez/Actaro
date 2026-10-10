@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { AppState, Platform, type AppStateStatus } from 'react-native';
 
 import { readSupabaseConfiguration } from './config';
+import type { Database } from './database.types';
 
 function createSupabaseClient() {
   // Expo inlines public variables only when accessed with static dot notation.
@@ -13,7 +14,7 @@ function createSupabaseClient() {
     process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   );
 
-  return createClient(config.url, config.publishableKey, {
+  return createClient<Database>(config.url, config.publishableKey, {
     auth: {
       flowType: 'pkce',
       ...(Platform.OS !== 'web' ? { storage: AsyncStorage } : {}),

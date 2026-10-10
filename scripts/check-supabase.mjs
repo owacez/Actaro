@@ -25,17 +25,20 @@ try {
       fetch: (url, options) => fetch(url, { ...options, signal: AbortSignal.timeout(15000) }),
     },
   });
-  // A missing foundation table is expected in a newly created project.
-  // limit(0) also prevents reading user rows once that table exists.
-  const { error, status } = await client.from('profiles').select('id').limit(0);
-  if (error && !(status === 404 && error.code === 'PGRST205')) {
-    throw new Error(`Supabase database probe returned HTTP ${status}.`);
+  // These tables are private. The anonymous public client must be denied even
+  // when requesting zero rows; never read real profile/preference values here.
+  for (const [table, column] of [
+    ['profiles', 'id'],
+    ['user_preferences', 'user_id'],
+  ]) {
+    const { error, status } = await client.from(table).select(column).limit(0);
+    // PostgREST uses 401 for permission denial without a signed-in user and
+    // 403 for authenticated denial. Require the database permission code too.
+    if ((status !== 401 && status !== 403) || error?.code !== '42501') {
+      throw new Error(`Supabase ${table} anonymous access probe failed (HTTP ${status}).`);
+    }
+    console.log(`PASS: Database API denied anonymous ${table} access as required.`);
   }
-  console.log(
-    error
-      ? 'PASS: Database API accepted the SDK request; profiles has not been created yet.'
-      : 'PASS: Database API accepted the SDK request without reading user rows.',
-  );
   console.log('Read-only connection checks passed; no tables or users were created.');
 } catch (error) {
   // Fetch errors may contain sensitive request details; report only known messages.

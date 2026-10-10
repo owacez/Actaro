@@ -23,7 +23,7 @@ credentials, or signing credentials in these variables or send them in chat.
 
 ## Needed for upcoming foundation tasks
 
-1. Supabase MCP authorization is established; the project is ACTIVE_HEALTHY and public tables are empty. No additional database credential is needed for reviewed migrations.
+1. Supabase MCP authorization is established. The first profile/preferences migration is applied with database ownership tests; no additional database credential is needed for subsequent reviewed tasks.
 2. Android and iPhone device access for launch/session tests. Native build setup
    will need a locally authenticated Expo account and user-approved application
    identifiers. Do not invent signing identities or bundle IDs.

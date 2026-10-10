@@ -2,14 +2,14 @@
 
 Date: 2026-10-09
 
-Status: design recorded; no database schema or migration has been applied.
+Status: first profile/preferences migration applied and database ownership tests passed; application data access and UI remain pending.
 
 ## Scope and authority
 
 The user requested a schema suitable for later analytics and confirmed that the
 Supabase project is newly created. Source of Truth §§6, 14, 19–22 define the
 requirements; the Development Plan determines when each domain is implemented.
-This document records design decisions and a first migration specification.
+This document records design decisions and the first migration specification.
 Future-domain entries are planning, not implemented tables or final column APIs.
 Inspect the actual project's schema before applying even the first migration.
 
@@ -46,6 +46,8 @@ authorization. Its SECURITY DEFINER function must have a fixed empty search path
 qualified object names, restricted direct execution and only the required writes.
 Test the trigger before deploying: a broken signup trigger can block account creation.
 Backfill only verified existing accounts, with explicit evidence if any are found.
+The first deployment verified one existing account, already email-confirmed, and
+created its two foundation records without copying identity or credential fields.
 
 Grant `authenticated` only the required SELECT and column-level UPDATE access;
 initial records are created by the trusted trigger. Revoke anonymous access and
@@ -121,6 +123,28 @@ defined in those releases. Retained/deferred requirements stay in Development St
   Use server/admin context only for controlled setup/cleanup, never the mobile client.
 - Run `npm run check` and meaningful database ownership checks. A passing mocked
   client test or SQL text review does not establish schema/RLS completion.
+
+## Deployment evidence (2026-10-09)
+
+- Supabase MCP applied `profile_preferences_foundation`; migration history reports
+  version `20261009165708`. The CLI-generated local SQL filename was aligned with
+  that actual remote version. SQL is saved in `supabase/migrations/`.
+- `supabase/tests/profile_preferences.sql` passed against the real database via
+  MCP execute_sql. It impersonates anonymous/authenticated roles with disposable
+  users and rolls back all fixtures. It verifies defaults, ownership, updates,
+  protected IDs/timestamps, invalid values, trigger privileges and cascades.
+- Post-test counts: one Auth account, one profile, one preferences record; no
+  missing confirmed profiles/preferences. Both tables have RLS and four policies
+  total. Private functions use an empty search path; only the Auth insert trigger
+  uses definer privileges. No signup emails were sent by SQL tests.
+- Generated `src/lib/supabase/database.types.ts` from the applied database and
+  wired it into the shared client. Generated Update types reflect columns, not
+  grants; feature services must restrict updates to permitted editable fields.
+- Performance advisor: no findings. Security advisor: no table/RLS findings;
+  existing [leaked-password protection warning](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)
+  remains. No paid service or Auth setting was enabled.
+- This is database foundation evidence, not a completed Profile screen or
+  verified application profile persistence. Future-domain tables remain absent.
 
 References:
 
