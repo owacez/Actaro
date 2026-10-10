@@ -263,6 +263,12 @@ export function AccountScreen() {
         disabled={busy}
         onPress={() => router.push('/profile')}
       />
+      <AuthButton
+        title="Preferences"
+        outlined
+        disabled={busy}
+        onPress={() => router.push('/preferences')}
+      />
       {error && (
         <AuthNotice error announce={Platform.OS !== 'web'}>
           {error}

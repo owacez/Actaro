@@ -60,9 +60,9 @@ export const profileService = {
       return requireRecord(data, error);
     });
   },
-  getPreferences() {
+  getPreferences(expectedUserId?: string) {
     return safely(async () => {
-      const id = await currentUserId();
+      const id = await currentUserId(expectedUserId);
       const { data, error } = await getSupabase()
         .from('user_preferences')
         .select('*')
@@ -84,10 +84,10 @@ export const profileService = {
       return requireRecord(data, error);
     });
   },
-  updatePreferences(patch: PreferencesUpdate) {
+  updatePreferences(patch: PreferencesUpdate, expectedUserId?: string) {
     return safely(async () => {
       const values = validatePreferencesUpdate(patch);
-      const id = await currentUserId();
+      const id = await currentUserId(expectedUserId);
       const { data, error } = await getSupabase()
         .from('user_preferences')
         .update(values)

@@ -138,6 +138,12 @@ test('an editor opened by another account cannot read or overwrite the current a
   await expect(
     profileService.updateProfile({ display_name: 'Old account draft' }, priorOwner),
   ).rejects.toMatchObject({ code: 'AUTH_REQUIRED' });
+  await expect(profileService.getPreferences(priorOwner)).rejects.toMatchObject({
+    code: 'AUTH_REQUIRED',
+  });
+  await expect(
+    profileService.updatePreferences({ weight_unit: 'lb' }, priorOwner),
+  ).rejects.toMatchObject({ code: 'AUTH_REQUIRED' });
   expect(mockFetch).not.toHaveBeenCalled();
 });
 
