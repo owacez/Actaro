@@ -89,7 +89,7 @@ test('blocks duplicate saves/editing/navigation and reports success only after s
   expect(service.updateProfile).toHaveBeenCalledTimes(1);
   expect(service.updateProfile).toHaveBeenCalledWith({ display_name: 'New name' }, profile.id);
   expect(screen.getByLabelText('Display name')).toHaveProp('editable', false);
-  expect(screen.getByRole('button', { name: '← Your account' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '← More' })).toBeDisabled();
   expect(screen.queryByText('Profile saved.')).toBeNull();
   await act(() => resolveSave({ ...profile, display_name: 'New name' }));
   expect(within(screen.getByTestId('auth-feedback')).getByText('Profile saved.')).toBeTruthy();

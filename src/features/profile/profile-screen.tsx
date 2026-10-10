@@ -39,7 +39,7 @@ export function ProfileScreen({
 
   return (
     <AuthFrame>
-      <AuthLink title="← Your account" disabled={editor.saving || securityBusy} onPress={onBack} />
+      <AuthLink title="← More" disabled={editor.saving || securityBusy} onPress={onBack} />
       <AuthText kind="heading">Profile</AuthText>
       {editor.loading ? (
         <AuthText>Loading your profile…</AuthText>

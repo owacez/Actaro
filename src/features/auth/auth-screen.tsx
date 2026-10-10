@@ -252,13 +252,13 @@ export function AccountScreen() {
   return (
     <AuthFrame>
       <AuthText kind="eyebrow">ACTARO</AuthText>
-      <AuthText kind="title">Your account</AuthText>
+      <AuthText kind="title">More</AuthText>
       <AuthText>{session?.user.email}</AuthText>
       <AuthNotice>
         Training, nutrition and progress features are coming in later releases.
       </AuthNotice>
       <AuthButton
-        title="Edit profile"
+        title="Profile management"
         outlined
         disabled={busy}
         onPress={() => router.push('/profile')}

@@ -11,7 +11,7 @@ export default function ProfileRoute() {
       key={session.user.id}
       userId={session.user.id}
       email={session.user.email}
-      onBack={() => router.replace('/')}
+      onBack={() => router.replace('/more')}
     />
   );
 }

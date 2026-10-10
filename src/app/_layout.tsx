@@ -41,6 +41,7 @@ function AuthRoutes() {
       <Stack.Screen name="auth/confirmed" />
       <Stack.Screen name="auth/recovery" />
       <Stack.Protected guard={!!session && !recovery}>
+        <Stack.Screen name="(tabs)" />
         <Stack.Screen name="profile" />
       </Stack.Protected>
       <Stack.Protected guard={!!session}>

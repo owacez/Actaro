@@ -1,8 +1,10 @@
+import { Redirect } from 'expo-router';
+
 import { useAuth } from '@/features/auth/auth-provider';
-import { AccountScreen, AuthScreen } from '@/features/auth/auth-screen';
+import { AuthScreen } from '@/features/auth/auth-screen';
 
 export default function IndexScreen() {
   const { session, recovery } = useAuth();
   if (session && recovery) return <AuthScreen key="recovery" recovery />;
-  return session ? <AccountScreen /> : <AuthScreen key="sign-in" />;
+  return session ? <Redirect href="/today" /> : <AuthScreen key="sign-in" />;
 }
