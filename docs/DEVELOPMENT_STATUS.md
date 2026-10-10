@@ -7,7 +7,7 @@ Updated: 2026-10-09 (America/Los_Angeles).
 - Current Release: **v0.1 — Foundation**
 - Release Completion: **34.125% (13.65 / 40 weight)**
 - Current Phase: **Phase 0 — authentication**
-- Current Focus: Fix and verify confirmation feedback/redirects, then finish live auth and Android/iOS persistence checks. Your Account is the current destination; Home/Today and product navigation remain unimplemented.
+- Current Focus: Record user-reported authentication/sign-out testing and reconcile the remaining live/device acceptance checks. Next proposed module is Profile / Preferences: schema and ownership verification first, typed access second, persisted UI third. Your Account remains the current destination; Home/Today and product navigation are unimplemented.
 - Status: **IN_PROGRESS**
 - Blockers: Git is installed; Node.js/npm use temporary portable tools.
   Live email callbacks and native session persistence remain unverified; browser automation failed to start. Expo Doctor config-schema check has an external API blocker; dependency advisories remain open.
@@ -332,13 +332,15 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-Authentication is the user's authorized current task. Client connection and Supabase MCP authorization are verified. Application auth flows are implemented with contract tests; live email/callback and Android/iOS persistence checks remain. Supabase's existing Auth service does not require the forthcoming profile schema. No application tables or migrations exist yet.
+Client connection and Supabase MCP authorization are verified. Application auth flows are implemented with contract tests. The user now reports authentication testing, explicitly including sign-out; the platform and coverage of confirmation, password reset and session persistence have been requested. Record this evidence without inferring those additional flows or both native platforms. The next proposed implementation module is Profile / Preferences, beginning with the existing first-migration specification. No application tables or migrations exist yet.
 
 ## Next 3 Actions
 
-1. Verify web callback allowlists and complete confirmation in the initiating browser with the server running; test the new Email Confirmed view and reset flow using a Supabase team email.
-2. Validate persistence and sign-out cleanup on Android and iOS, then close task 0.8 only when its acceptance checks pass.
-3. Apply only the first profile/preferences migration with constraints, least-privilege grants and two-user RLS tests, then generate types from the real schema.
+1. Profile/preferences schema task: inspect the current database, apply only the two-table foundation migration, verify initial row creation/backfill, validation, timestamps and anonymous/two-user ownership restrictions, and generate types. This is the next proposed focused work order, not applied schema.
+2. Profile/preferences data-access task: add typed feature-local reads/updates and verify successful saves, invalid writes and auth/network failures; preserve UI/data separation.
+3. Profile/preferences UI task: implement the relevant verified Figma screen with real persistence, loading/error states and reload verification. Close the module only after its acceptance criteria pass.
+
+Confirm the remaining auth test matrix alongside these tasks; do not mark task 0.8 DONE until its six live acceptance groups are verified. Then finish the broader design system, five-tab navigation, CI/native build checks and v0.1 release gate before starting v0.2. Keeping this headless schema/data work ahead of visual foundation work follows the previously documented Supabase/auth sequencing exception and prevents implementing a profile form before secure persistence exists.
 
 ## Blockers / Decisions
 
@@ -444,3 +446,11 @@ Authentication is the user's authorized current task. Client connection and Supa
 - `git diff --check` and `git check-ignore .env`: PASS. The environment file remains outside the change set.
 - Browser visual verification: BLOCKED; the automation runtime failed to start with a Windows sandbox helper error. No screenshot comparison or device check is claimed. Native safe-area/keyboard and live auth acceptance checks remain pending in AUTH_TESTING.
 - Weighted foundation completion remains 34.125%; this bug fix adds no plan weight. Next actions remain web confirmation/reset verification, Android/iOS persistence/sign-out checks, then the independently verified profile/preferences migration.
+
+## User testing and next module (2026-10-09)
+
+- User reports that authentication has been tested and explicitly confirms testing sign-out. The tested platform(s), confirmation/reset coverage and persistence after reopening are not specified; a clarification is pending.
+- Authentication remains IN_PROGRESS. Weighted foundation completion remains 34.125% until the live acceptance groups can be reconciled with specific evidence; the user report is preserved rather than treated as a complete Android/iOS test matrix.
+- Next proposed module: v0.1 Profile / Preferences, split into independently verifiable schema/RLS, typed data-access and persisted UI tasks. The existing schema design is the starting specification; no migration or feature code is implemented by this planning update.
+- No new API key is required for those tasks; the existing authorized Supabase connection and public application configuration suffice. Figma access is needed for exact profile UI matching.
+- Planning-update validation: `npm.cmd run check` PASS (exit 0), including typecheck, lint, formatting and all 46 tests across nine suites. `git diff --check` PASS. No application code or database changes were made.
