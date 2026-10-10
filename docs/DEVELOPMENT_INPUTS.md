@@ -1,6 +1,6 @@
 # Development inputs
 
-Updated: 2026-10-09
+Updated: 2026-10-10
 
 ## Already supplied
 
@@ -29,9 +29,11 @@ that project before administrative tasks; the public key cannot apply migrations
 ## Needed for upcoming foundation tasks
 
 1. Supabase MCP authorization is established. The first profile/preferences migration is applied with database ownership tests; no additional database credential is needed for subsequent reviewed tasks.
-2. Android and iPhone device access for launch/session tests. Native build setup
-   will need a locally authenticated Expo account and user-approved application
-   identifiers. Do not invent signing identities or bundle IDs.
+2. EAS login was verified and Actaro is linked to that account. The user approved
+   `com.actaro.app` for Android/iOS development. Internal development profiles
+   and Expo's compatible development client are configured. Native compilation
+   and launch remain pending; Android is currently unavailable. A physical iPhone
+   cloud build needs Apple signing/account access. Do not send signing secrets.
 3. For free authentication testing, use a Supabase team email and allow the exact runtime callback URLs. Email confirmation stays enabled; no custom SMTP or paid resource was configured. See [auth testing](AUTH_TESTING.md). The default sender is limited; public production email delivery is a later release requirement.
 
 ## Later core-release inputs
@@ -46,6 +48,19 @@ that project before administrative tasks; the public key cannot apply migrations
 No AI, maps/GPS, wearable or health-platform credentials are required for v1.0.
 Those belong to the explicitly scheduled future releases. Request each input only
 when its corresponding task needs it.
+
+## Outstanding v0.1 evidence and access
+
+- Figma's Starter call limit blocks the remaining component/theme reads. The
+  verified light values and approved existing components are used; exact visual
+  matching and theme switching remain open.
+- Complete the [auth](AUTH_TESTING.md) and [profile/preferences](PROFILE_TESTING.md)
+  checklists. iPhone sign-in/out, tabs and name editing are user-confirmed;
+  confirmation/reset/reopening, account updates and preference save/reopen still
+  need individual results. No extra application API key is needed.
+- Before a cloud development build, set the two public variables in the linked
+  EAS project's development environment and confirm available free build quota.
+  No paid service was enabled.
 
 ## Current testing
 

@@ -37,8 +37,9 @@ not authorize completing the rest of v0.1.
   to Expo Go with the same Expo account. This is separate from your Actaro account.
 
 No Android Studio, Xcode, EAS build, or custom SMTP setup is needed to start
-testing the current app in a compatible Expo Go. Phone runtime checks remain
-pending; SDK-compatible dependencies and bundle exports are already verified.
+testing the current app in a compatible Expo Go. The user verified sign-in,
+sign-out, tab switching and name editing on iPhone Expo Go. Android and the
+remaining live acceptance checks are pending.
 
 References: [SDK requirements](https://docs.expo.dev/versions/v57.0.0/),
 [opening the app on a phone](https://docs.expo.dev/get-started/start-developing/).
@@ -170,18 +171,19 @@ and email instructions use a bottom snackbar. On web, errors and successful
 actions also use a dismissible notification at the upper right. Notifications
 expire automatically; hovering or focusing the web notification pauses dismissal.
 
-| Screen / state                         | Present behavior                                                                        |
-| -------------------------------------- | --------------------------------------------------------------------------------------- |
-| Sign In                                | Validated email/password sign-in.                                                       |
-| Sign Up                                | Email, password and confirmation; creates a Supabase account.                           |
-| Check Your Email                       | Confirmation instructions and resend.                                                   |
-| Reset Password                         | Requests a recovery link without revealing account existence.                           |
-| Set a New Password                     | Updates the password after the SDK recovery event.                                      |
-| Callback processing / error            | Exchanges a one-use code or displays a safe link error.                                 |
-| Email Confirmed                        | Shows verified status from the Supabase session, then Continue to Account.              |
-| Today / Fitness / Nutrition / Progress | Signed-in tab destinations showing planned release scope; no tracking data yet.         |
-| More                                   | Real signed-in email, Profile management and local sign-out.                            |
-| Profile                                | Edit/clear name, view/change email and change password. Open More → Profile management. |
+| Screen / state                         | Present behavior                                                                                                            |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Sign In                                | Validated email/password sign-in.                                                                                           |
+| Sign Up                                | Email, password and confirmation; creates a Supabase account.                                                               |
+| Check Your Email                       | Confirmation instructions and resend.                                                                                       |
+| Reset Password                         | Requests a recovery link without revealing account existence.                                                               |
+| Set a New Password                     | Updates the password after the SDK recovery event.                                                                          |
+| Callback processing / error            | Exchanges a one-use code or displays a safe link error.                                                                     |
+| Email Confirmed                        | Shows verified status from the Supabase session, then Continue to Account.                                                  |
+| Today / Fitness / Nutrition / Progress | Signed-in tab destinations showing planned release scope; no tracking data yet.                                             |
+| More                                   | Real signed-in email, Profile management and local sign-out.                                                                |
+| Profile                                | Edit/clear name, view/change email and change password. Open More → Profile management.                                     |
+| Preferences                            | Save units, time zone, notification and gamification preferences. Open More → Preferences. Theme switching remains pending. |
 
 The remaining `/explore` route is an Expo starter example, not an Actaro feature.
 The five-tab navigation shell is implemented; sign-in opens Today. The populated
@@ -191,6 +193,41 @@ nutrition, habits/goals and progress screens remain in their scheduled releases.
 Tunnel setup and flags follow the [Expo CLI documentation](https://docs.expo.dev/more/expo-cli/).
 
 ### Other commands
+
+### Native development builds
+
+`expo-dev-client` is installed and `eas.json` defines internal development and
+iOS Simulator profiles. Android and iOS use the approved development identifier
+`com.actaro.app`. This checkout is linked to the verified EAS project through
+`app.json`; a fork should link its own project with `npx eas-cli@latest init`.
+
+Before building, sign in with `npx eas-cli@latest login` and set the two public
+Supabase variables in that project's **development** EAS environment. Ignored
+local `.env` files are not uploaded in the build archive. Use the same API URL
+and publishable key as your local checkout; never add privileged secrets.
+Check your account's available build allowance first. No cloud build, paid
+subscription or store submission was performed by this setup.
+
+```bash
+npx eas-cli@latest build --profile development --platform android
+npx eas-cli@latest build --profile development --platform ios
+```
+
+A physical iPhone EAS build requires Apple signing/account setup. Continue using
+Expo Go while that is unavailable. The `development-simulator` profile creates
+an iOS Simulator build for a Mac. A configured profile or successful JS export
+does not establish a successful native build or device launch.
+See [Expo's development-build guide](https://docs.expo.dev/develop/development-builds/introduction/).
+
+After installing your development build, start Metro with:
+
+```bash
+npm start -- --dev-client --lan
+```
+
+For Expo Go, keep using `npm start -- --go --lan` instead.
+
+### Checks and other platforms
 
 For web testing, run `npm run web`. For an installed Android emulator, use
 `npm run android`; `npm run ios` requires an iOS Simulator on a Mac. A physical
@@ -208,7 +245,9 @@ npm run test:watch
 `npm run format` applies Prettier. Canonical documents and binary assets are
 excluded from formatting. Jest uses the SDK 57 Expo preset and React Native Testing Library. Tests cover
 server/client hydration, Supabase configuration, auth forms/services, callback handling and session transitions. `npm run check` includes tests
-and fails if any check fails. CI remains a separate task.
+and fails if any check fails. `.github/workflows/check.yml` runs the locked
+install, these checks and Android/iOS/web exports on pushes to `main` and pull
+requests. CI requires no Supabase credentials; exports do not run authenticated requests.
 
 For database ownership regression checks, run the entire
 [profile/preferences SQL test](supabase/tests/profile_preferences.sql) through
@@ -230,7 +269,7 @@ src/features/auth/ Auth UI, business/service logic and session context
 src/features/profile/ Typed profile/preferences services and input validation
 src/components/   Existing Expo starter components
 src/hooks/        Existing starter presentation hooks
-src/constants/    Existing starter theme (not Actaro tokens)
+src/constants/    Verified Actaro light tokens plus the preserved starter theme
 src/expo.d.ts     Expo global typings for checks before generated files exist
 assets/           Expo starter media and icons
 scripts/          Generator-provided reset script
@@ -248,7 +287,9 @@ configured; auth screens and service flows exist. The profile/preferences schema
 and ownership policies are applied and database-tested; typed profile/preferences
 services have SDK request tests. Profile edits names through the database service;
 email/password changes use Supabase Auth, with required confirmation and safe errors.
-Preferences controls and full live acceptance are pending. React state
+Preferences save units, time zone and notification/gamification opt-in values;
+reminder delivery and achievements belong to later releases. Theme switching and
+full live acceptance are pending. React state
 is the default; TanStack Query and Zustand require demonstrated needs.
 See [mobile stack decision](docs/decisions/001-mobile-stack.md).
 
@@ -258,7 +299,8 @@ Copy `.env.example` to `.env` and supply your project API URL and public
 publishable key before launching the app. The client validates these values;
 restart Expo after changes. Actual `.env` variants are ignored. Public Expo variables are bundled app content: never use
 these for service-role keys, database passwords, signing secrets, or AI provider
-credentials. Production domains, bundle IDs, and EAS project IDs are undecided.
+credentials. The user approved `com.actaro.app` for Android/iOS development;
+production identifiers and domains still require release review.
 
 Run `npm run check:supabase` with Node 24 for the read-only live connection check.
 The probe requires anonymous permission denial for the private profile/preferences tables.

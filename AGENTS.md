@@ -12,6 +12,11 @@ This is an Expo/React Native mobile application. Prioritize mobile-first pattern
 - Figma reference: https://www.figma.com/design/7u3UDAzE64TiTUzGjA22XW.
   Read only relevant nodes when visual work is authorized. Never edit Figma
   without explicit authorization. Starter visuals are not Actaro design evidence.
+- User-approved Figma fallback: when MCP calls are exhausted, consult the local
+  `docs/Actaro Design.pdf` export if present. Inspect only relevant release
+  screens; flag conflicts with the canonical product decisions or newer fetched
+  nodes. The export does not authorize future-release implementation or guessed
+  themes/assets. Preserve the supplied file unless instructed otherwise.
 - One task = one focused, independently verifiable change. Make surgical
   changes only; no unsolicited refactoring, renames, reorganizations, cleanup,
   dependency replacement, or unrelated design changes.

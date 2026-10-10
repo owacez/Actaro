@@ -15,10 +15,13 @@ No new environment variable, schema migration or API credential is required.
 
 The user authorized existing verified components after Figma MCP hit its Starter
 call limit. This functional editor does not establish exact Profile visual parity.
-Preferences controls are a separate task. Browser automation could not initialize,
+Preferences now save units, time zone and notification/gamification preference
+values through the same private service; theme switching remains pending.
+Browser automation could not initialize,
 so no agent interactive visual or live authenticated persistence pass is claimed.
 The user reports the name editor works on iPhone Expo Go; this is not evidence
-for email/password updates or the new tab bar.
+for email/password updates. The latest iPhone report confirms five-tab switching,
+sign-in and sign-out; Android is unavailable.
 
 ## Manual acceptance — web and Expo Go
 
@@ -57,3 +60,17 @@ share a password, session token, confirmation code or private profile data in ch
 
 Record the tested platform and individual outcomes. A bundle export, mocked
 service response or SQL ownership test is not proof of live app save/reopen.
+
+## Preferences acceptance
+
+1. Open **More → Preferences**. Confirm saved units/time zone load before editing.
+2. Change each unit, time zone and opt-in value; save once. Reopen the screen
+   and restart the app to confirm the database values persist.
+3. Discard a draft or toggle a value back; unchanged values must not be saved.
+   An invalid time zone must fail before a request.
+4. Test a failed save offline: retain the draft, show no success and allow retry.
+5. Repeat with another account: neither account's values may appear or change
+   in the other. Signed-out and password-recovery access must be prevented.
+6. Check tap targets, scrolling/keyboard and snackbar placement on iPhone/web;
+   repeat on Android when available. Notification/gamification controls save
+   preferences only; they do not enable reminder delivery or achievements.
