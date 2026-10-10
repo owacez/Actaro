@@ -5,9 +5,9 @@ Updated: 2026-10-09 (America/Los_Angeles).
 ## Overall
 
 - Current Release: **v0.1 — Foundation**
-- Release Completion: **34.125% (13.65 / 40 weight)**
-- Current Phase: **Phase 0 — authentication**
-- Current Focus: Record user-reported authentication/sign-out testing and reconcile the remaining live/device acceptance checks. Next proposed module is Profile / Preferences: schema and ownership verification first, typed access second, persisted UI third. Your Account remains the current destination; Home/Today and product navigation are unimplemented.
+- Release Completion: **36.625% (14.65 / 40 weight)**
+- Current Phase: **Phase 0 — profile/preferences database foundation**
+- Current Focus: User verified sign-in/sign-out on web and Expo Go. Complete the authorized profile/preferences schema and ownership verification before typed access and UI. Your Account remains the current destination; Home/Today and product navigation are unimplemented.
 - Status: **IN_PROGRESS**
 - Blockers: Git is installed; Node.js/npm use temporary portable tools.
   Live email callbacks and native session persistence remain unverified; browser automation failed to start. Expo Doctor config-schema check has an external API blocker; dependency advisories remain open.
@@ -31,143 +31,143 @@ fractions, not subjective estimates. CI remains unimplemented and counted until
 its applicability is decided. v1.0 has no plan weight: track its nine explicit
 release gates separately, without inventing a numeric weight.
 
-Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 4/5 + 2 × 2/2 + 3 × 3/4 + 6 × 6/12 = 13.65`.
-Release completion: `13.65 / 40 × 100 = 34.125%`. Rounded table percentages never
+Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 4/5 + 2 × 2/2 + 3 × 3/4 + 6 × 8/12 = 14.65`.
+Release completion: `14.65 / 40 × 100 = 36.625%`. Rounded table percentages never
 replace these exact fractions. This is verified foundation progress, not a completed v0.1 release.
 
 ## Feature Table
 
-| Area             | Feature                                | Release | Weight | Status      | Completion | Notes                                                                                                |
-| ---------------- | -------------------------------------- | ------- | -----: | ----------- | ---------: | ---------------------------------------------------------------------------------------------------- |
-| Phase 0 / 0.1    | Repository                             | v0.1    |      2 | DONE        |       100% | Git, ignores, README, env template verified (4/4).                                                   |
-| Phase 0 / 0.2    | React Native / Expo                    | v0.1    |      3 | IN_PROGRESS |     66.67% | Config/exports and TypeScript verified (2/3); native build pending.                                  |
-| Phase 0 / 0.3    | Quality Baseline                       | v0.1    |      3 | IN_PROGRESS |        80% | Typecheck, lint, formatting, test runner verified (4/5); CI pending.                                 |
-| Phase 0 / 0.4    | App Structure                          | v0.1    |      2 | DONE        |       100% | Router scaffold and current architecture boundaries verified (2/2).                                  |
-| Phase 0 / 0.5    | Design System                          | v0.1    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §0.5.                                                                   |
-| Phase 0 / 0.6    | Navigation                             | v0.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §0.6.                                                                   |
-| Phase 0 / 0.7    | Supabase Integration                   | v0.1    |      3 | IN_PROGRESS |        75% | Configuration, client/lifecycle contracts and live API probes verified (3/4); native checks pending. |
-| Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | IN_PROGRESS |        50% | Six implemented/contract-tested flows; six live/device validations pending (6/12).                   |
-| Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §0.9.                                                                   |
-| Phase 0 / 0.10   | RLS / Security Foundation              | v0.1    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §0.10.                                                                  |
-| Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §0.11.                                                                  |
-| Phase 1 / 1.1    | Muscle & Equipment Schema              | v0.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §1.1.                                                                   |
-| Phase 1 / 1.2    | Exercise Schema                        | v0.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §1.2.                                                                   |
-| Phase 1 / 1.3    | Exercise Media Schema                  | v0.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §1.3.                                                                   |
-| Phase 1 / 1.4    | RepDB Import Script                    | v0.2    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §1.4.                                                                   |
-| Phase 1 / 1.5    | RepDB Media Import                     | v0.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §1.5.                                                                   |
-| Phase 1 / 1.6    | Exercise Library UI                    | v0.2    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §1.6.                                                                   |
-| Phase 1 / 1.7    | Exercise Detail                        | v0.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §1.7.                                                                   |
-| Phase 1 / 1.8    | Equipment Profile                      | v0.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §1.8.                                                                   |
-| Phase 2 / 2.1    | Workout Schema                         | v0.3    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §2.1.                                                                   |
-| Phase 2 / 2.2    | Custom Workout Builder                 | v0.3    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §2.2.                                                                   |
-| Phase 2 / 2.3    | Predefined Training Plans              | v0.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §2.3.                                                                   |
-| Phase 2 / 2.4    | Workout Pre-Start                      | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.4.                                                                   |
-| Phase 2 / 2.5    | Session Mode Chooser                   | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.5.                                                                   |
-| Phase 2 / 2.6    | Dedicated Active Workout               | v0.3    |     10 | NOT_STARTED |         0% | Requirements: canonical plan §2.6.                                                                   |
-| Phase 2 / 2.7    | Timed Session                          | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.7.                                                                   |
-| Phase 2 / 2.8    | Log Only                               | v0.3    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §2.8.                                                                   |
-| Phase 2 / 2.9    | Rest Timer                             | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.9.                                                                   |
-| Phase 2 / 2.10   | Workout Summary                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.10.                                                                  |
-| Phase 2 / 2.11   | Workout History                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.11.                                                                  |
-| Phase 2 / 2.12   | PR Detection                           | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.12.                                                                  |
-| Phase 2 / 2.13   | Training Volume                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.13.                                                                  |
-| Phase 2 / 2.14   | Training Status                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.14.                                                                  |
-| Phase 2 / 2.15   | Recovery Check                         | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.15.                                                                  |
-| Phase 2 / 2.16   | Active Workout Resilience              | v0.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §2.16.                                                                  |
-| Phase 3 / 3.1    | Nutrition Schema                       | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.1.                                                                   |
-| Phase 3 / 3.2    | Nutrition Targets                      | v0.4    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §3.2.                                                                   |
-| Phase 3 / 3.3    | Food Database/Search                   | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.3.                                                                   |
-| Phase 3 / 3.4    | Serving Units / Conversion             | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.4.                                                                   |
-| Phase 3 / 3.5    | Portion Editor                         | v0.4    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §3.5.                                                                   |
-| Phase 3 / 3.6    | Nutrition Calculation Engine           | v0.4    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §3.6.                                                                   |
-| Phase 3 / 3.7    | Food Diary                             | v0.4    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §3.7.                                                                   |
-| Phase 3 / 3.8    | Custom Foods                           | v0.4    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §3.8.                                                                   |
-| Phase 3 / 3.9    | Favorites / Recent / Frequent          | v0.4    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §3.9.                                                                   |
-| Phase 3 / 3.10   | Saved Meals / Copy Meal / Copy Day     | v0.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §3.10.                                                                  |
-| Phase 3 / 3.11   | Recipes                                | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.11.                                                                  |
-| Phase 3 / 3.12   | Recipe-by-Weight                       | v0.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §3.12.                                                                  |
-| Phase 3 / 3.13   | Hydration                              | v0.4    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §3.13.                                                                  |
-| Phase 4 / 4.1    | Habit Schema                           | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.1.                                                                   |
-| Phase 4 / 4.2    | Habit Creation                         | v0.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §4.2.                                                                   |
-| Phase 4 / 4.3    | Habit Logging                          | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.3.                                                                   |
-| Phase 4 / 4.4    | Habit History / Consistency            | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.4.                                                                   |
-| Phase 4 / 4.5    | Motivation Mode                        | v0.5    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §4.5.                                                                   |
-| Phase 4 / 4.6    | Goal Schema                            | v0.5    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §4.6.                                                                   |
-| Phase 4 / 4.7    | Goal Creation                          | v0.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §4.7.                                                                   |
-| Phase 4 / 4.8    | Goal Progress                          | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.8.                                                                   |
-| Phase 4 / 4.9    | Bodyweight Logging                     | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.9.                                                                   |
-| Phase 4 / 4.10   | Steps Foundation                       | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.10.                                                                  |
-| Phase 4 / 4.11   | Today Dashboard                        | v0.5    |      8 | NOT_STARTED |         0% | Requirements: canonical plan §4.11.                                                                  |
-| Phase 5 / 5.1    | Weight Progress                        | v0.6    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §5.1.                                                                   |
-| Phase 5 / 5.2    | Nutrition Progress                     | v0.6    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §5.2.                                                                   |
-| Phase 5 / 5.3    | Workout Frequency                      | v0.6    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §5.3.                                                                   |
-| Phase 5 / 5.4    | Strength Progress                      | v0.6    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §5.4.                                                                   |
-| Phase 5 / 5.5    | Training Volume                        | v0.6    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §5.5.                                                                   |
-| Phase 5 / 5.6    | Steps Progress                         | v0.6    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §5.6.                                                                   |
-| Phase 5 / 5.7    | Habit Progress                         | v0.6    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §5.7.                                                                   |
-| Phase 5 / 5.8    | Time Filters                           | v0.6    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §5.8.                                                                   |
-| Phase 5 / 5.9    | Weekly / Monthly Summary               | v0.6    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §5.9.                                                                   |
-| Phase 6 / 6.1    | Accessibility                          | v0.9    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §6.1.                                                                   |
-| Phase 6 / 6.2    | Performance                            | v0.9    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §6.2.                                                                   |
-| Phase 6 / 6.3    | Security Review                        | v0.9    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §6.3.                                                                   |
-| Phase 6 / 6.4    | Error / Crash Handling                 | v0.9    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §6.4.                                                                   |
-| Phase 6 / 6.5    | Notifications                          | v0.9    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §6.5.                                                                   |
-| Phase 6 / 6.6    | Personal Beta                          | v0.9    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §6.6.                                                                   |
-| Phase 6 / 6.7    | Bug Fix / Polish                       | v0.9    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §6.7.                                                                   |
-| Phase 6 / 6.8    | Documentation Review                   | v0.9    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §6.8.                                                                   |
-| Phase 7          | Core release gate (nine prerequisites) | v1.0    |      — | NOT_STARTED |        0/9 | Release gate, no new weighted feature scope.                                                         |
-| Phase 8 / 8.1    | Motion / Activity Source Evaluation    | v1.1    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §8.1.                                                                   |
-| Phase 8 / 8.2    | Active Minutes Calculation             | v1.1    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §8.2.                                                                   |
-| Phase 8 / 8.3    | Today Integration                      | v1.1    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §8.3.                                                                   |
-| Phase 8 / 8.4    | Progress Integration                   | v1.1    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §8.4.                                                                   |
-| Phase 8 / 8.5    | Accuracy / Messaging Review            | v1.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §8.5.                                                                   |
-| Phase 9 / 9.1    | Location Permission Flow               | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.1.                                                                   |
-| Phase 9 / 9.2    | Run Session Schema                     | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.2.                                                                   |
-| Phase 9 / 9.3    | Run Start                              | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.3.                                                                   |
-| Phase 9 / 9.4    | GPS Route Recording                    | v1.2    |      8 | NOT_STARTED |         0% | Requirements: canonical plan §9.4.                                                                   |
-| Phase 9 / 9.5    | Active Run                             | v1.2    |      7 | NOT_STARTED |         0% | Requirements: canonical plan §9.5.                                                                   |
-| Phase 9 / 9.6    | Distance / Pace Calculation            | v1.2    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §9.6.                                                                   |
-| Phase 9 / 9.7    | Run Summary                            | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.7.                                                                   |
-| Phase 9 / 9.8    | Route Thumbnail                        | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.8.                                                                   |
-| Phase 9 / 9.9    | Run History                            | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.9.                                                                   |
-| Phase 9 / 9.10   | Run Detail                             | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.10.                                                                  |
-| Phase 9 / 9.11   | Today Recent-Run Card                  | v1.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §9.11.                                                                  |
-| Phase 9 / 9.12   | Progress Running Card                  | v1.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §9.12.                                                                  |
-| Phase 10 / 10.1  | Performance Dashboard                  | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.1.                                                                  |
-| Phase 10 / 10.2  | Training Block Comparison              | v1.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §10.2.                                                                  |
-| Phase 10 / 10.3  | Unified Timeline                       | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.3.                                                                  |
-| Phase 10 / 10.4  | Advanced Cross-Metric Analytics        | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.4.                                                                  |
-| Phase 10 / 10.5  | Badge Rules Engine                     | v1.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §10.5.                                                                  |
-| Phase 10 / 10.6  | Achievement UI                         | v1.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §10.6.                                                                  |
-| Phase 11 / 11.1  | Image Capture                          | v1.4    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §11.1.                                                                  |
-| Phase 11 / 11.2  | Secure Vision Provider Integration     | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.2.                                                                  |
-| Phase 11 / 11.3  | Food Identification                    | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.3.                                                                  |
-| Phase 11 / 11.4  | Portion Estimation                     | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.4.                                                                  |
-| Phase 11 / 11.5  | Nutrition Matching                     | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.5.                                                                  |
-| Phase 11 / 11.6  | Editable Review                        | v1.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §11.6.                                                                  |
-| Phase 11 / 11.7  | Confirmed Logging                      | v1.4    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §11.7.                                                                  |
-| Phase 12 / 12.1  | Local Data Strategy                    | v1.5    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §12.1.                                                                  |
-| Phase 12 / 12.2  | Sync Queue                             | v1.5    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §12.2.                                                                  |
-| Phase 12 / 12.3  | Idempotency                            | v1.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §12.3.                                                                  |
-| Phase 12 / 12.4  | Conflict Handling                      | v1.5    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §12.4.                                                                  |
-| Phase 12 / 12.5  | Reconciliation                         | v1.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §12.5.                                                                  |
-| Phase 12 / 12.6  | Offline Coverage Expansion             | v1.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §12.6.                                                                  |
-| Phase 13 / 13.1  | Apple Health                           | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.1.                                                                  |
-| Phase 13 / 13.2  | Android Health Connect                 | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.2.                                                                  |
-| Phase 13 / 13.3  | Imported Activities                    | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.3.                                                                  |
-| Phase 13 / 13.4  | Sleep                                  | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.4.                                                                  |
-| Phase 13 / 13.5  | Heart Rate                             | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.5.                                                                  |
-| Phase 13 / 13.6  | HRV                                    | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.6.                                                                  |
-| Phase 13 / 13.7  | Sensor-Enhanced Recovery               | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.7.                                                                  |
-| Phase 13 / 13.8  | Physiological Training Load            | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.8.                                                                  |
-| Phase 13 / 13.9  | Daily Suggested Workout                | v2.0    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §13.9.                                                                  |
-| Phase 13 / 13.10 | Advanced Running Analytics             | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.10.                                                                 |
+| Area             | Feature                                | Release | Weight | Status      | Completion | Notes                                                                                                   |
+| ---------------- | -------------------------------------- | ------- | -----: | ----------- | ---------: | ------------------------------------------------------------------------------------------------------- |
+| Phase 0 / 0.1    | Repository                             | v0.1    |      2 | DONE        |       100% | Git, ignores, README, env template verified (4/4).                                                      |
+| Phase 0 / 0.2    | React Native / Expo                    | v0.1    |      3 | IN_PROGRESS |     66.67% | Config/exports and TypeScript verified (2/3); native build pending.                                     |
+| Phase 0 / 0.3    | Quality Baseline                       | v0.1    |      3 | IN_PROGRESS |        80% | Typecheck, lint, formatting, test runner verified (4/5); CI pending.                                    |
+| Phase 0 / 0.4    | App Structure                          | v0.1    |      2 | DONE        |       100% | Router scaffold and current architecture boundaries verified (2/2).                                     |
+| Phase 0 / 0.5    | Design System                          | v0.1    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §0.5.                                                                      |
+| Phase 0 / 0.6    | Navigation                             | v0.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §0.6.                                                                      |
+| Phase 0 / 0.7    | Supabase Integration                   | v0.1    |      3 | IN_PROGRESS |        75% | Configuration, client/lifecycle contracts and live API probes verified (3/4); native checks pending.    |
+| Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | IN_PROGRESS |     66.67% | Six implementation contracts plus user-verified live sign-in/sign-out (8/12); four live groups pending. |
+| Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §0.9.                                                                      |
+| Phase 0 / 0.10   | RLS / Security Foundation              | v0.1    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §0.10.                                                                     |
+| Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §0.11.                                                                     |
+| Phase 1 / 1.1    | Muscle & Equipment Schema              | v0.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §1.1.                                                                      |
+| Phase 1 / 1.2    | Exercise Schema                        | v0.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §1.2.                                                                      |
+| Phase 1 / 1.3    | Exercise Media Schema                  | v0.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §1.3.                                                                      |
+| Phase 1 / 1.4    | RepDB Import Script                    | v0.2    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §1.4.                                                                      |
+| Phase 1 / 1.5    | RepDB Media Import                     | v0.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §1.5.                                                                      |
+| Phase 1 / 1.6    | Exercise Library UI                    | v0.2    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §1.6.                                                                      |
+| Phase 1 / 1.7    | Exercise Detail                        | v0.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §1.7.                                                                      |
+| Phase 1 / 1.8    | Equipment Profile                      | v0.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §1.8.                                                                      |
+| Phase 2 / 2.1    | Workout Schema                         | v0.3    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §2.1.                                                                      |
+| Phase 2 / 2.2    | Custom Workout Builder                 | v0.3    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §2.2.                                                                      |
+| Phase 2 / 2.3    | Predefined Training Plans              | v0.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §2.3.                                                                      |
+| Phase 2 / 2.4    | Workout Pre-Start                      | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.4.                                                                      |
+| Phase 2 / 2.5    | Session Mode Chooser                   | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.5.                                                                      |
+| Phase 2 / 2.6    | Dedicated Active Workout               | v0.3    |     10 | NOT_STARTED |         0% | Requirements: canonical plan §2.6.                                                                      |
+| Phase 2 / 2.7    | Timed Session                          | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.7.                                                                      |
+| Phase 2 / 2.8    | Log Only                               | v0.3    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §2.8.                                                                      |
+| Phase 2 / 2.9    | Rest Timer                             | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.9.                                                                      |
+| Phase 2 / 2.10   | Workout Summary                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.10.                                                                     |
+| Phase 2 / 2.11   | Workout History                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.11.                                                                     |
+| Phase 2 / 2.12   | PR Detection                           | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.12.                                                                     |
+| Phase 2 / 2.13   | Training Volume                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.13.                                                                     |
+| Phase 2 / 2.14   | Training Status                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.14.                                                                     |
+| Phase 2 / 2.15   | Recovery Check                         | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.15.                                                                     |
+| Phase 2 / 2.16   | Active Workout Resilience              | v0.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §2.16.                                                                     |
+| Phase 3 / 3.1    | Nutrition Schema                       | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.1.                                                                      |
+| Phase 3 / 3.2    | Nutrition Targets                      | v0.4    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §3.2.                                                                      |
+| Phase 3 / 3.3    | Food Database/Search                   | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.3.                                                                      |
+| Phase 3 / 3.4    | Serving Units / Conversion             | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.4.                                                                      |
+| Phase 3 / 3.5    | Portion Editor                         | v0.4    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §3.5.                                                                      |
+| Phase 3 / 3.6    | Nutrition Calculation Engine           | v0.4    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §3.6.                                                                      |
+| Phase 3 / 3.7    | Food Diary                             | v0.4    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §3.7.                                                                      |
+| Phase 3 / 3.8    | Custom Foods                           | v0.4    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §3.8.                                                                      |
+| Phase 3 / 3.9    | Favorites / Recent / Frequent          | v0.4    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §3.9.                                                                      |
+| Phase 3 / 3.10   | Saved Meals / Copy Meal / Copy Day     | v0.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §3.10.                                                                     |
+| Phase 3 / 3.11   | Recipes                                | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.11.                                                                     |
+| Phase 3 / 3.12   | Recipe-by-Weight                       | v0.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §3.12.                                                                     |
+| Phase 3 / 3.13   | Hydration                              | v0.4    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §3.13.                                                                     |
+| Phase 4 / 4.1    | Habit Schema                           | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.1.                                                                      |
+| Phase 4 / 4.2    | Habit Creation                         | v0.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §4.2.                                                                      |
+| Phase 4 / 4.3    | Habit Logging                          | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.3.                                                                      |
+| Phase 4 / 4.4    | Habit History / Consistency            | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.4.                                                                      |
+| Phase 4 / 4.5    | Motivation Mode                        | v0.5    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §4.5.                                                                      |
+| Phase 4 / 4.6    | Goal Schema                            | v0.5    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §4.6.                                                                      |
+| Phase 4 / 4.7    | Goal Creation                          | v0.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §4.7.                                                                      |
+| Phase 4 / 4.8    | Goal Progress                          | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.8.                                                                      |
+| Phase 4 / 4.9    | Bodyweight Logging                     | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.9.                                                                      |
+| Phase 4 / 4.10   | Steps Foundation                       | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.10.                                                                     |
+| Phase 4 / 4.11   | Today Dashboard                        | v0.5    |      8 | NOT_STARTED |         0% | Requirements: canonical plan §4.11.                                                                     |
+| Phase 5 / 5.1    | Weight Progress                        | v0.6    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §5.1.                                                                      |
+| Phase 5 / 5.2    | Nutrition Progress                     | v0.6    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §5.2.                                                                      |
+| Phase 5 / 5.3    | Workout Frequency                      | v0.6    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §5.3.                                                                      |
+| Phase 5 / 5.4    | Strength Progress                      | v0.6    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §5.4.                                                                      |
+| Phase 5 / 5.5    | Training Volume                        | v0.6    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §5.5.                                                                      |
+| Phase 5 / 5.6    | Steps Progress                         | v0.6    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §5.6.                                                                      |
+| Phase 5 / 5.7    | Habit Progress                         | v0.6    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §5.7.                                                                      |
+| Phase 5 / 5.8    | Time Filters                           | v0.6    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §5.8.                                                                      |
+| Phase 5 / 5.9    | Weekly / Monthly Summary               | v0.6    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §5.9.                                                                      |
+| Phase 6 / 6.1    | Accessibility                          | v0.9    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §6.1.                                                                      |
+| Phase 6 / 6.2    | Performance                            | v0.9    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §6.2.                                                                      |
+| Phase 6 / 6.3    | Security Review                        | v0.9    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §6.3.                                                                      |
+| Phase 6 / 6.4    | Error / Crash Handling                 | v0.9    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §6.4.                                                                      |
+| Phase 6 / 6.5    | Notifications                          | v0.9    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §6.5.                                                                      |
+| Phase 6 / 6.6    | Personal Beta                          | v0.9    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §6.6.                                                                      |
+| Phase 6 / 6.7    | Bug Fix / Polish                       | v0.9    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §6.7.                                                                      |
+| Phase 6 / 6.8    | Documentation Review                   | v0.9    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §6.8.                                                                      |
+| Phase 7          | Core release gate (nine prerequisites) | v1.0    |      — | NOT_STARTED |        0/9 | Release gate, no new weighted feature scope.                                                            |
+| Phase 8 / 8.1    | Motion / Activity Source Evaluation    | v1.1    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §8.1.                                                                      |
+| Phase 8 / 8.2    | Active Minutes Calculation             | v1.1    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §8.2.                                                                      |
+| Phase 8 / 8.3    | Today Integration                      | v1.1    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §8.3.                                                                      |
+| Phase 8 / 8.4    | Progress Integration                   | v1.1    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §8.4.                                                                      |
+| Phase 8 / 8.5    | Accuracy / Messaging Review            | v1.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §8.5.                                                                      |
+| Phase 9 / 9.1    | Location Permission Flow               | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.1.                                                                      |
+| Phase 9 / 9.2    | Run Session Schema                     | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.2.                                                                      |
+| Phase 9 / 9.3    | Run Start                              | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.3.                                                                      |
+| Phase 9 / 9.4    | GPS Route Recording                    | v1.2    |      8 | NOT_STARTED |         0% | Requirements: canonical plan §9.4.                                                                      |
+| Phase 9 / 9.5    | Active Run                             | v1.2    |      7 | NOT_STARTED |         0% | Requirements: canonical plan §9.5.                                                                      |
+| Phase 9 / 9.6    | Distance / Pace Calculation            | v1.2    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §9.6.                                                                      |
+| Phase 9 / 9.7    | Run Summary                            | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.7.                                                                      |
+| Phase 9 / 9.8    | Route Thumbnail                        | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.8.                                                                      |
+| Phase 9 / 9.9    | Run History                            | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.9.                                                                      |
+| Phase 9 / 9.10   | Run Detail                             | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.10.                                                                     |
+| Phase 9 / 9.11   | Today Recent-Run Card                  | v1.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §9.11.                                                                     |
+| Phase 9 / 9.12   | Progress Running Card                  | v1.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §9.12.                                                                     |
+| Phase 10 / 10.1  | Performance Dashboard                  | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.1.                                                                     |
+| Phase 10 / 10.2  | Training Block Comparison              | v1.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §10.2.                                                                     |
+| Phase 10 / 10.3  | Unified Timeline                       | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.3.                                                                     |
+| Phase 10 / 10.4  | Advanced Cross-Metric Analytics        | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.4.                                                                     |
+| Phase 10 / 10.5  | Badge Rules Engine                     | v1.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §10.5.                                                                     |
+| Phase 10 / 10.6  | Achievement UI                         | v1.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §10.6.                                                                     |
+| Phase 11 / 11.1  | Image Capture                          | v1.4    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §11.1.                                                                     |
+| Phase 11 / 11.2  | Secure Vision Provider Integration     | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.2.                                                                     |
+| Phase 11 / 11.3  | Food Identification                    | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.3.                                                                     |
+| Phase 11 / 11.4  | Portion Estimation                     | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.4.                                                                     |
+| Phase 11 / 11.5  | Nutrition Matching                     | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.5.                                                                     |
+| Phase 11 / 11.6  | Editable Review                        | v1.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §11.6.                                                                     |
+| Phase 11 / 11.7  | Confirmed Logging                      | v1.4    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §11.7.                                                                     |
+| Phase 12 / 12.1  | Local Data Strategy                    | v1.5    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §12.1.                                                                     |
+| Phase 12 / 12.2  | Sync Queue                             | v1.5    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §12.2.                                                                     |
+| Phase 12 / 12.3  | Idempotency                            | v1.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §12.3.                                                                     |
+| Phase 12 / 12.4  | Conflict Handling                      | v1.5    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §12.4.                                                                     |
+| Phase 12 / 12.5  | Reconciliation                         | v1.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §12.5.                                                                     |
+| Phase 12 / 12.6  | Offline Coverage Expansion             | v1.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §12.6.                                                                     |
+| Phase 13 / 13.1  | Apple Health                           | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.1.                                                                     |
+| Phase 13 / 13.2  | Android Health Connect                 | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.2.                                                                     |
+| Phase 13 / 13.3  | Imported Activities                    | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.3.                                                                     |
+| Phase 13 / 13.4  | Sleep                                  | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.4.                                                                     |
+| Phase 13 / 13.5  | Heart Rate                             | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.5.                                                                     |
+| Phase 13 / 13.6  | HRV                                    | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.6.                                                                     |
+| Phase 13 / 13.7  | Sensor-Enhanced Recovery               | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.7.                                                                     |
+| Phase 13 / 13.8  | Physiological Training Load            | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.8.                                                                     |
+| Phase 13 / 13.9  | Daily Suggested Workout                | v2.0    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §13.9.                                                                     |
+| Phase 13 / 13.10 | Advanced Running Analytics             | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.10.                                                                    |
 
 ## Phase Summary
 
 | Phase    | Release | Purpose                           | Planned weight | Completion | Status      |
 | -------- | ------- | --------------------------------- | -------------: | ---------: | ----------- |
-| Phase 0  | v0.1    | Foundation                        |             40 |    34.125% | IN_PROGRESS |
+| Phase 0  | v0.1    | Foundation                        |             40 |    36.625% | IN_PROGRESS |
 | Phase 1  | v0.2    | Exercise Library                  |             28 |         0% | NOT_STARTED |
 | Phase 2  | v0.3    | Strength Workout System           |             70 |         0% | NOT_STARTED |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |         0% | NOT_STARTED |
@@ -200,7 +200,7 @@ specific implementation and validation evidence listed in Last Completed.
   non-route code outside routes; feature/UI/business/data boundaries documented
   and applied to the current minimal scaffold. Verified: 2/2.
 - **0.7 Supabase Integration (4 subtasks):** validated environment; shared client/storage/lifecycle configuration; read-only live Auth/database probes; native integration smoke tests on Android and iOS. Verified: 3/4. Native boundary mocks and exports do not count as device tests.
-- **0.8 Authentication (12 subtasks):** each of the six canonical flows has an implementation/contract-test subtask and a live acceptance subtask: signup, sign-in, sign-out, password reset, session persistence and verification. Verified: 6/12. App/SDK contracts are tested; live email flows and device persistence remain unverified. Figma screenshot parity is also pending and does not earn weight.
+- **0.8 Authentication (12 subtasks):** each of the six canonical flows has an implementation/contract-test subtask and a live acceptance subtask: signup, sign-in, sign-out, password reset, session persistence and verification. Verified: 8/12. Six implementation contracts pass; the user reports working sign-in/sign-out on web and Expo Go. The phone OS was not specified, so this is not evidence of both Android and iOS. Live signup/confirmation, password reset and session persistence remain pending. Figma screenshot parity is pending and does not earn weight.
 - **0.5–0.6, 0.9–0.11:** no subtasks implemented. Their criteria remain in the canonical plan.
 
 ## v1.0 release gate
@@ -332,11 +332,11 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-Client connection and Supabase MCP authorization are verified. Application auth flows are implemented with contract tests. The user reports web authentication testing, explicitly including sign-out. Confirmation, password reset and persistence coverage are not specified. Native testing is pending; the supplied terminal output shows npx offering a temporary Expo install from C:\Windows\System32 rather than the project root. Record this evidence without inferring additional flows or either native platform. The next proposed implementation module is Profile / Preferences, beginning with the existing first-migration specification. No application tables or migrations exist yet.
+Client connection and Supabase MCP authorization are verified. The user now reports working sign-in/sign-out in Expo Go, in addition to web testing; the earlier CLI working-directory issue no longer prevents that test. Confirmation, password reset and persistence coverage remain unspecified. The user authorized the next module sequentially: begin with profile/preferences schema and RLS, then typed access and persisted UI as separate tasks. No application tables or migrations exist yet.
 
 ## Next 3 Actions
 
-1. Profile/preferences schema task: inspect the current database, apply only the two-table foundation migration, verify initial row creation/backfill, validation, timestamps and anonymous/two-user ownership restrictions, and generate types. This is the next proposed focused work order, not applied schema.
+1. Profile/preferences schema task: inspect the current database, apply only the two-table foundation migration, verify initial row creation/backfill, validation, timestamps and anonymous/two-user ownership restrictions, and generate types. This is the current authorized focused work order; no schema has been applied yet.
 2. Profile/preferences data-access task: add typed feature-local reads/updates and verify successful saves, invalid writes and auth/network failures; preserve UI/data separation.
 3. Profile/preferences UI task: implement the relevant verified Figma screen with real persistence, loading/error states and reload verification. Close the module only after its acceptance criteria pass.
 
@@ -461,3 +461,12 @@ Confirm the remaining auth test matrix alongside these tasks; do not mark task 0
 - Added README troubleshooting for running login from the project root and using `--no-install`; Command Prompt uses `cd /d` to switch directories/drives. No dependencies or app configuration changed, and no interactive Expo account login was performed by the agent.
 - Web auth/sign-out tests are user-reported; Android/iOS launch, confirmation/reset and persistence acceptance remain pending. Foundation completion stays 34.125%.
 - `npm.cmd run check` PASS (exit 0): typecheck, lint, formatting and 46 tests across nine suites. No native launch or Expo account authentication is inferred from these checks.
+
+## Expo Go testing and snackbar clearance (2026-10-09)
+
+**DONE — Raise mobile snackbar; authentication remains IN_PROGRESS.**
+
+- User reports successful sign-in and sign-out in Expo Go, following earlier web testing. Credit these two live acceptance groups; do not infer signup/email confirmation, password reset, reopen persistence or both native platforms.
+- Raised mobile snackbar clearance from safe-area inset plus 16 points to inset plus 40 points, a 24-point increase. Web positioning is unchanged. The user's device must still confirm the adjusted position visually.
+- `npm.cmd run check` PASS (exit 0): typecheck, lint, formatting and all 46 tests across nine suites. `git diff --check` required before commit. No dependencies changed.
+- Auth earns 8/12 subtasks; foundation earns 14.65/40 (36.625%). The next authorized task is the profile/preferences database foundation.
