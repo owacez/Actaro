@@ -225,6 +225,7 @@ The scaffold follows Expo's default template and supported SDK versions:
 ```text
 src/app/          Expo Router route entry points and auth layout
 src/features/auth/ Auth UI, business/service logic and session context
+src/features/profile/ Typed profile/preferences services and input validation
 src/components/   Existing Expo starter components
 src/hooks/        Existing starter presentation hooks
 src/constants/    Existing starter theme (not Actaro tokens)
@@ -242,7 +243,9 @@ unrelated cleanup.
 
 Backend: Supabase PostgreSQL, Auth, RLS and Storage. The shared client is
 configured; auth screens and service flows exist. The profile/preferences schema
-and ownership policies are applied and database-tested; profile editing is pending. React state
+and ownership policies are applied and database-tested; typed profile/preferences
+services have SDK request tests. Profile editing and live save/reopen acceptance
+are pending. React state
 is the default; TanStack Query and Zustand require demonstrated needs.
 See [mobile stack decision](docs/decisions/001-mobile-stack.md).
 

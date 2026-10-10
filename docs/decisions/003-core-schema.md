@@ -2,7 +2,7 @@
 
 Date: 2026-10-09
 
-Status: first profile/preferences migration applied and database ownership tests passed; application data access and UI remain pending.
+Status: first profile/preferences migration and typed services implemented; database ownership and SDK request tests passed. Profile UI and live authenticated application persistence remain pending.
 
 ## Scope and authority
 
@@ -139,7 +139,11 @@ defined in those releases. Retained/deferred requirements stay in Development St
   uses definer privileges. No signup emails were sent by SQL tests.
 - Generated `src/lib/supabase/database.types.ts` from the applied database and
   wired it into the shared client. Generated Update types reflect columns, not
-  grants; feature services must restrict updates to permitted editable fields.
+  grants; feature services now restrict updates to permitted editable fields.
+- `src/features/profile/` provides typed Auth-derived reads/updates, field/value
+  validation and safe errors. Its 36 SDK transport/validation tests use simulated
+  responses; the rerun live SQL ownership suite passes with rollback. UI and
+  live authenticated service integration remain separate acceptance tasks.
 - Performance advisor: no findings. Security advisor: no table/RLS findings;
   existing [leaked-password protection warning](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)
   remains. No paid service or Auth setting was enabled.

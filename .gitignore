@@ -55,3 +55,4 @@ coverage/
 *.ipa
 .actaro-tools/
 supabase/.temp/
+docs/.obsidian/

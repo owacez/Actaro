@@ -5,9 +5,9 @@ Updated: 2026-10-09 (America/Los_Angeles).
 ## Overall
 
 - Current Release: **v0.1 — Foundation**
-- Release Completion: **52.25% (20.9 / 40 weight)**
-- Current Phase: **Phase 0 — profile/preferences database foundation**
-- Current Focus: Profile/preferences database foundation and ownership tests are complete. Next: feature-local typed reads/updates, then persisted Profile UI. User verified sign-in/sign-out on web and Expo Go; full email/reopen acceptance remains pending. Your Account remains the destination; Home/Today and product navigation are unimplemented.
+- Release Completion: **59.125% (23.65 / 40 weight)**
+- Current Phase: **Phase 0 — profile/preferences data access**
+- Current Focus: Profile/preferences schema and typed read/update services are verified at the database and SDK request boundaries. Next: persisted Profile UI, then authenticated application acceptance. User verified sign-in/sign-out on web and Expo Go; full email/reopen acceptance remains pending. Your Account remains the destination; Home/Today and product navigation are unimplemented.
 - Status: **IN_PROGRESS**
 - Blockers: Git is installed; Node.js/npm use temporary portable tools.
   Live email callbacks and native session persistence remain unverified; browser automation failed to start. Expo Doctor config-schema check has an external API blocker; dependency advisories remain open.
@@ -31,8 +31,8 @@ fractions, not subjective estimates. CI remains unimplemented and counted until
 its applicability is decided. v1.0 has no plan weight: track its nine explicit
 release gates separately, without inventing a numeric weight.
 
-Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 4/5 + 2 × 2/2 + 3 × 3/4 + 6 × 8/12 + 3 × 1/4 + 6 × 3/4 + 4 × 1/4 = 20.9`.
-Release completion: `20.9 / 40 × 100 = 52.25%`. Rounded table percentages never
+Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 4/5 + 2 × 2/2 + 3 × 3/4 + 6 × 8/12 + 3 × 2/4 + 6 × 3/4 + 4 × 3/4 = 23.65`.
+Release completion: `23.65 / 40 × 100 = 59.125%`. Rounded table percentages never
 replace these exact fractions. This is verified foundation progress, not a completed v0.1 release.
 
 ## Feature Table
@@ -47,9 +47,9 @@ replace these exact fractions. This is verified foundation progress, not a compl
 | Phase 0 / 0.6    | Navigation                             | v0.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §0.6.                                                                           |
 | Phase 0 / 0.7    | Supabase Integration                   | v0.1    |      3 | IN_PROGRESS |        75% | Configuration, client/lifecycle contracts and live API probes verified (3/4); native checks pending.         |
 | Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | IN_PROGRESS |     66.67% | Six implementation contracts plus user-verified live sign-in/sign-out (8/12); four live groups pending.      |
-| Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | IN_PROGRESS |        25% | Schema/default records tested (1/4); typed feature access, UI and application persistence pending.           |
+| Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | IN_PROGRESS |        50% | Schema/defaults and typed feature access tested (2/4); UI and authenticated application persistence pending. |
 | Phase 0 / 0.10   | RLS / Security Foundation              | v0.1    |      6 | IN_PROGRESS |        75% | Grants/policies, database isolation/constraints and lifecycle tested (3/4); application integration pending. |
-| Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | IN_PROGRESS |        25% | Generated database types wired into shared client (1/4); profile services/validation/integration pending.    |
+| Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | IN_PROGRESS |        75% | Types, owned services and validation/error mapping verified (3/4); live application integration pending.     |
 | Phase 1 / 1.1    | Muscle & Equipment Schema              | v0.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §1.1.                                                                           |
 | Phase 1 / 1.2    | Exercise Schema                        | v0.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §1.2.                                                                           |
 | Phase 1 / 1.3    | Exercise Media Schema                  | v0.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §1.3.                                                                           |
@@ -167,7 +167,7 @@ replace these exact fractions. This is verified foundation progress, not a compl
 
 | Phase    | Release | Purpose                           | Planned weight | Completion | Status      |
 | -------- | ------- | --------------------------------- | -------------: | ---------: | ----------- |
-| Phase 0  | v0.1    | Foundation                        |             40 |     52.25% | IN_PROGRESS |
+| Phase 0  | v0.1    | Foundation                        |             40 |     59.13% | IN_PROGRESS |
 | Phase 1  | v0.2    | Exercise Library                  |             28 |         0% | NOT_STARTED |
 | Phase 2  | v0.3    | Strength Workout System           |             70 |         0% | NOT_STARTED |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |         0% | NOT_STARTED |
@@ -201,9 +201,9 @@ specific implementation and validation evidence listed in Last Completed.
   and applied to the current minimal scaffold. Verified: 2/2.
 - **0.7 Supabase Integration (4 subtasks):** validated environment; shared client/storage/lifecycle configuration; read-only live Auth/database probes; native integration smoke tests on Android and iOS. Verified: 3/4. Native boundary mocks and exports do not count as device tests.
 - **0.8 Authentication (12 subtasks):** each of the six canonical flows has an implementation/contract-test subtask and a live acceptance subtask: signup, sign-in, sign-out, password reset, session persistence and verification. Verified: 8/12. Six implementation contracts pass; the user reports working sign-in/sign-out on web and Expo Go. The phone OS was not specified, so this is not evidence of both Android and iOS. Live signup/confirmation, password reset and session persistence remain pending. Figma screenshot parity is pending and does not earn weight.
-- **0.9 Profile / Preferences (4 subtasks):** schema/default record creation; typed feature reads/updates; Profile/preferences UI and states; authenticated application save/reopen acceptance. Verified: 1/4 (database only).
+- **0.9 Profile / Preferences (4 subtasks):** schema/default record creation; typed feature reads/updates; Profile/preferences UI and states; authenticated application save/reopen acceptance. Verified: 2/4 (database and SDK request contracts; UI/persistence acceptance pending).
 - **0.10 RLS / Security Foundation (4 subtasks):** least-privilege grants and ownership policies; real database anonymous/two-user/protected-write/constraint tests; secure initialization/backfill/timestamps/deletion cascades and private-function privileges; authenticated application integration and foundation security acceptance. Verified: 3/4. Real SQL roles and anonymous SDK probes pass; application integration and the observed Auth security warning remain tracked.
-- **0.11 Data Access Layer (4 subtasks):** actual generated database types in shared client; feature-local owned queries/mutations; permitted-field validation and safe error mapping; meaningful feature request/integration tests. Verified: 1/4.
+- **0.11 Data Access Layer (4 subtasks):** actual generated database types in shared client; feature-local owned queries/mutations; permitted-field validation and safe error mapping; meaningful feature request/integration tests. Verified: 3/4. The 36 SDK transport/validation tests pass; the fourth subtask remains pending live authenticated application integration.
 - **0.5–0.6:** no subtasks implemented. Their criteria remain in the canonical plan.
 
 ## v1.0 release gate
@@ -237,7 +237,7 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 | Barcode and nutrition-label scanning                                       | Later nutrition enhancement; release unassigned              | DEFERRED    | Source §11.11.                                                         |
 | What-If Nutrition and deterministic meal substitutions                     | Later nutrition enhancement; release unassigned              | DEFERRED    | Source §11.11.                                                         |
 | Dashboard customization/layout preferences                                 | Later enhancement; release unassigned                        | DEFERRED    | Source §§6, 7.                                                         |
-| Units, theme, notifications, privacy, gamification preferences             | v0.1 preferences; notifications also v0.9                    | NOT_STARTED | Source §6; plan §§0.9, 6.5.                                            |
+| Units, theme, notifications, privacy, gamification preferences             | v0.1 preferences; notifications also v0.9                    | IN_PROGRESS | Private schema/services tested; UI and behavior integration pending.   |
 | Initial training plan families and equipment/goal/experience/day filters   | v0.3 plan task                                               | NOT_STARTED | Source §8.5; plan §2.3. Beginner Running does not authorize early GPS. |
 | Plateau detection, muscle balance, goal/step/running trends, What changed? | Analytics phases; exact subtask placement to be reviewed     | NOT_STARTED | Source §14.7; basic/advanced boundaries must be respected.             |
 | Running goals/events, elevation, splits, start/end markers, cadence and HR | Running / later advanced running; exact placement unassigned | DEFERRED    | Source §§13, 16; supported data and later release approval required.   |
@@ -251,6 +251,10 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 | Early microservices, Kubernetes/GKE, unnecessary custom backend            | Explicitly excluded for early versions                       | DROPPED     | Source §§19, 23; real future backend triggers remain documented.       |
 
 ## Last Completed
+
+**DONE — Profile/preferences data-access service task (2026-10-09); the module remains IN_PROGRESS.**
+
+- Added typed, Auth-derived owned reads/updates and runtime validation restricted to permitted fields, with safe errors and no cached account data. Tested the installed SDK with simulated transport responses; reran live SQL ownership checks with rollback. The Profile screen and authenticated SDK save/reopen acceptance remain pending.
 
 **DONE — Profile/preferences database foundation (2026-10-09).**
 
@@ -340,13 +344,13 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-The first profile/preferences migration is applied and database-tested. One confirmed existing account was backfilled; disposable test accounts were rolled back. Real SQL ownership checks and anonymous SDK permission probes pass. Actual generated types are used by the shared client. The next task is feature-local profile/preferences data access, followed by the Figma-aligned persisted UI. Authentication remains partially verified: the user tested sign-in/sign-out on web and Expo Go, while confirmation, reset and reopen persistence still need acceptance evidence.
+The profile/preferences migration and feature-local services are implemented. Database ownership checks pass; 36 new tests exercise the actual installed SDK with simulated request responses and input validation. Live authenticated service saves and Profile UI are not yet verified. The next task is the Figma-aligned persisted UI. Authentication remains partially verified: the user tested sign-in/sign-out on web and Expo Go, while confirmation, reset and reopen persistence still need acceptance evidence.
 
 ## Next 3 Actions
 
-1. Profile/preferences data-access task: add typed feature-local reads/updates restricted to editable fields and verify successful saves, invalid writes and auth/network failures.
-2. Profile/preferences UI task: implement the relevant verified Figma screen with real persistence and loading/error states, using the tested data-access layer.
-3. Profile/preferences acceptance task: verify own-account save/reload and access isolation through the application on the test platforms; close the module only after its acceptance criteria pass.
+1. Profile UI task: fetch only its relevant Figma node and implement display-name loading/editing/saving with the tested service and loading/error states.
+2. Initial preferences UI task: implement the relevant verified Figma controls and persist allowed preferences; stored theme/notification choices do not prove theme rendering or notification delivery.
+3. Profile/preferences acceptance task: verify own-account save/reload/reopen and account-switch isolation through the application on web and Expo Go; close the module only after its acceptance criteria pass.
 
 Confirm the remaining auth test matrix alongside these tasks; do not mark task 0.8 DONE until its six live acceptance groups are verified. Then finish the broader design system, five-tab navigation, CI/native build checks and v0.1 release gate before starting v0.2. Keeping this headless schema/data work ahead of visual foundation work follows the previously documented Supabase/auth sequencing exception and prevents implementing a profile form before secure persistence exists.
 
@@ -503,3 +507,17 @@ Confirm the remaining auth test matrix alongside these tasks; do not mark task 0
 - Inspected tracked application code, scripts, tests and configuration: no personal filesystem paths, fixed LAN addresses or live project identifiers in runtime code. Supabase configuration already comes from environment variables; callback URLs use Linking.createURL; script/config paths use relative roots. Dummy test URLs, the actual repository clone URL and product/design references remain intentional portable references.
 - No runtime code, environment values, schema, dependencies or release weights changed. Foundation completion remains 52.25%. The next tasks remain profile/preferences data access, persisted UI and application acceptance.
 - `npm.cmd run check` PASS (exit 0): typecheck, lint, formatting and all 46 tests across nine suites. Tracked-file portability audit found no personal checkout paths, temporary tool paths or fixed development-project references; architecture-specific lockfile package names remain intentional. `git diff --check` PASS.
+
+## Profile/preferences data access (2026-10-09)
+
+**DONE — Typed service and validation task; roadmap items 0.9–0.11 remain IN_PROGRESS.**
+
+- Re-read both canonical documents and confirmed the recorded headless persistence sequence. No visual work, database migration, Auth setting, credential or dependency change.
+- Added `src/features/profile/profile-model.ts`: generated row types, restricted update types and runtime permitted-field/value validation. Display names are trimmed; blank/null clears the optional name, and the 80-character limit counts Unicode code points. Preferences validate unit/theme choices, actual booleans and runtime-supported IANA timezone names/UTC. Database constraints remain authoritative.
+- Added `src/features/profile/profile-service.ts`: four read/update methods derive identity from Auth `getUser`, filter explicitly by that owner and return actual server records. No owner/timestamp input, insert/upsert fallback, optimistic save, logging or private-record cache. Missing rows and failures are explicit safe errors.
+- Added `__tests__/profile-service.test.ts`: 36 passing tests using the actual installed Supabase SDK with simulated transport responses. Covers owned request paths, partial PATCH payloads/server timestamps, name clearing, mass-assignment rejection, auth/network failures, empty/multiple results, account changes and invalid inputs. These are request contracts, not live authenticated service acceptance.
+- Re-executed the full `supabase/tests/profile_preferences.sql` via authorized MCP: PASS for initialization, defaults, anonymous/missing-JWT denial, two-user RLS, own updates, protected writes, constraints, timestamps and deletion cascades. All fixtures rolled back. Both tables still have RLS enabled.
+- Initial typecheck exposed generic literal widening and a Jest cleanup return type; corrected both. A test incorrectly expected older SDK zero-row mutation semantics; inspected the installed SDK and corrected the response fixture to an empty array. No checks are bypassed.
+- The full check initially stopped at formatting after a new untracked `docs/.obsidian/` folder appeared. Added only that local editor configuration path to Git/Prettier ignores; preserved its contents. Post-SQL counts remain one Auth account, one profile and one preferences record.
+- Final `npm.cmd run check` PASS (exit 0): typecheck, lint, formatting and all 82 tests across ten suites. Focused `npm.cmd test -- --runTestsByPath __tests__/profile-service.test.ts` PASS (36 tests). `git diff --check` PASS. No UI/device persistence completion is inferred from these tests.
+- Profile/preferences earns 2/4; data access earns 3/4, with live application integration still pending; RLS stays 3/4. Foundation totals 23.65/40 (59.125%). No new input/key is needed for the next UI task; relevant Figma access and manual acceptance remain required.
