@@ -162,7 +162,7 @@ repeating requests. No additional app key or paid SMTP service was configured.
 
 ### Current screens
 
-These auth views exist in code and have automated logic/contract tests; full
+These views exist in code and have automated logic/contract tests; full
 live email and Android/iOS verification remain pending.
 
 Auth errors appear as plain text beside the form. On mobile, successful actions
@@ -170,16 +170,17 @@ and email instructions use a bottom snackbar. On web, errors and successful
 actions also use a dismissible notification at the upper right. Notifications
 expire automatically; hovering or focusing the web notification pauses dismissal.
 
-| Screen / state              | Present behavior                                                           |
-| --------------------------- | -------------------------------------------------------------------------- |
-| Sign In                     | Validated email/password sign-in.                                          |
-| Sign Up                     | Email, password and confirmation; creates a Supabase account.              |
-| Check Your Email            | Confirmation instructions and resend.                                      |
-| Reset Password              | Requests a recovery link without revealing account existence.              |
-| Set a New Password          | Updates the password after the SDK recovery event.                         |
-| Callback processing / error | Exchanges a one-use code or displays a safe link error.                    |
-| Email Confirmed             | Shows verified status from the Supabase session, then Continue to Account. |
-| Your Account                | Real signed-in email and local sign-out; current sign-in destination.      |
+| Screen / state              | Present behavior                                                                         |
+| --------------------------- | ---------------------------------------------------------------------------------------- |
+| Sign In                     | Validated email/password sign-in.                                                        |
+| Sign Up                     | Email, password and confirmation; creates a Supabase account.                            |
+| Check Your Email            | Confirmation instructions and resend.                                                    |
+| Reset Password              | Requests a recovery link without revealing account existence.                            |
+| Set a New Password          | Updates the password after the SDK recovery event.                                       |
+| Callback processing / error | Exchanges a one-use code or displays a safe link error.                                  |
+| Email Confirmed             | Shows verified status from the Supabase session, then Continue to Account.               |
+| Your Account                | Real signed-in email and local sign-out; current sign-in destination.                    |
+| Profile                     | Edit/clear display name, save/discard, validation and retry. Reach it from Your Account. |
 
 The remaining `/explore` route is an Expo starter example, not an Actaro feature.
 Home/Today and the main product tabs are not implemented. The navigation shell
@@ -244,8 +245,8 @@ unrelated cleanup.
 Backend: Supabase PostgreSQL, Auth, RLS and Storage. The shared client is
 configured; auth screens and service flows exist. The profile/preferences schema
 and ownership policies are applied and database-tested; typed profile/preferences
-services have SDK request tests. Profile editing and live save/reopen acceptance
-are pending. React state
+services have SDK request tests. The display-name editor is wired to these services;
+preferences controls and live save/reopen acceptance are pending. React state
 is the default; TanStack Query and Zustand require demonstrated needs.
 See [mobile stack decision](docs/decisions/001-mobile-stack.md).
 
@@ -278,3 +279,4 @@ Initialization stops at review. Feature development requires explicit approval
 of the next small, independently verifiable task.
 
 For signup, verification and reset testing, see [authentication testing](docs/AUTH_TESTING.md). The app currently opens the auth screens, then a minimal account screen with the real signed-in email and sign-out. Product dashboards are not implemented.
+For display-name save/reopen and account-isolation checks, see [profile testing](docs/PROFILE_TESTING.md).

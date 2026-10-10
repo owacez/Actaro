@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Platform, View } from 'react-native';
 
@@ -256,6 +257,12 @@ export function AccountScreen() {
       <AuthNotice>
         Training, nutrition and progress features are coming in later releases.
       </AuthNotice>
+      <AuthButton
+        title="Edit profile"
+        outlined
+        disabled={busy}
+        onPress={() => router.push('/profile')}
+      />
       {error && (
         <AuthNotice error announce={Platform.OS !== 'web'}>
           {error}

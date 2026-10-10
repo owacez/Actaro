@@ -130,6 +130,17 @@ test('does not query or update records without a session', async () => {
   expect(mockFetch).not.toHaveBeenCalled();
 });
 
+test('an editor opened by another account cannot read or overwrite the current account', async () => {
+  const priorOwner = '00000000-0000-4000-8000-000000000002';
+  await expect(profileService.getProfile(priorOwner)).rejects.toMatchObject({
+    code: 'AUTH_REQUIRED',
+  });
+  await expect(
+    profileService.updateProfile({ display_name: 'Old account draft' }, priorOwner),
+  ).rejects.toMatchObject({ code: 'AUTH_REQUIRED' });
+  expect(mockFetch).not.toHaveBeenCalled();
+});
+
 test('authentication verification network errors stay safe and block data requests', async () => {
   jest.spyOn(mockClient.auth, 'getUser').mockRejectedValue(new Error('private diagnostic'));
   await expect(profileService.getProfile()).rejects.toMatchObject({

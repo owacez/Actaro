@@ -10,7 +10,9 @@ import {
 
 // Never accept an owner ID from a form. RLS is the authorization boundary;
 // the explicit filter also prevents accidentally requesting unrelated rows.
-async function currentUserId() {
+// Expected identity comes from the mounted editor's session, never from a form;
+// it rejects account changes and cannot override the authenticated owner.
+async function currentUserId(expectedUserId?: string) {
   const { data, error } = await getSupabase().auth.getUser();
   if (error || !data.user) {
     if (
@@ -20,6 +22,9 @@ async function currentUserId() {
       throw new ProfileError('AUTH_REQUIRED', 'Sign in to manage your profile.');
     }
     throw new ProfileError('REQUEST_FAILED', 'Unable to verify your account. Try again.');
+  }
+  if (expectedUserId !== undefined && data.user.id !== expectedUserId) {
+    throw new ProfileError('AUTH_REQUIRED', 'Your account changed. Reopen your profile.');
   }
   return data.user.id;
 }
@@ -44,9 +49,9 @@ function requireRecord<T>(data: T | null, error: unknown): T {
 }
 
 export const profileService = {
-  getProfile() {
+  getProfile(expectedUserId?: string) {
     return safely(async () => {
-      const id = await currentUserId();
+      const id = await currentUserId(expectedUserId);
       const { data, error } = await getSupabase()
         .from('profiles')
         .select('*')
@@ -66,10 +71,10 @@ export const profileService = {
       return requireRecord(data, error);
     });
   },
-  updateProfile(patch: ProfileUpdate) {
+  updateProfile(patch: ProfileUpdate, expectedUserId?: string) {
     return safely(async () => {
       const values = validateProfileUpdate(patch);
-      const id = await currentUserId();
+      const id = await currentUserId(expectedUserId);
       const { data, error } = await getSupabase()
         .from('profiles')
         .update(values)

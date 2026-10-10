@@ -1,13 +1,13 @@
 # Actaro — Development Status
 
-Updated: 2026-10-09 (America/Los_Angeles).
+Updated: 2026-10-10 (America/Los_Angeles).
 
 ## Overall
 
 - Current Release: **v0.1 — Foundation**
 - Release Completion: **59.125% (23.65 / 40 weight)**
-- Current Phase: **Phase 0 — profile/preferences data access**
-- Current Focus: Profile/preferences schema and typed read/update services are verified at the database and SDK request boundaries. Next: persisted Profile UI, then authenticated application acceptance. User verified sign-in/sign-out on web and Expo Go; full email/reopen acceptance remains pending. Your Account remains the destination; Home/Today and product navigation are unimplemented.
+- Current Phase: **Phase 0 — Profile editor**
+- Current Focus: Display-name editing is wired to the existing service and reachable from Your Account. Preferences UI and authenticated save/reopen acceptance remain pending. User authorized existing verified components after the Figma call limit blocked Profile design access; exact Profile matching is pending. Home/Today and product navigation remain unimplemented.
 - Status: **IN_PROGRESS**
 - Blockers: Git is installed; Node.js/npm use temporary portable tools.
   Live email callbacks and native session persistence remain unverified; browser automation failed to start. Expo Doctor config-schema check has an external API blocker; dependency advisories remain open.
@@ -47,7 +47,7 @@ replace these exact fractions. This is verified foundation progress, not a compl
 | Phase 0 / 0.6    | Navigation                             | v0.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §0.6.                                                                           |
 | Phase 0 / 0.7    | Supabase Integration                   | v0.1    |      3 | IN_PROGRESS |        75% | Configuration, client/lifecycle contracts and live API probes verified (3/4); native checks pending.         |
 | Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | IN_PROGRESS |     66.67% | Six implementation contracts plus user-verified live sign-in/sign-out (8/12); four live groups pending.      |
-| Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | IN_PROGRESS |        50% | Schema/defaults and typed feature access tested (2/4); UI and authenticated application persistence pending. |
+| Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | IN_PROGRESS |        50% | Schema/access verified (2/4); Profile editor implemented, preferences UI and live acceptance pending.        |
 | Phase 0 / 0.10   | RLS / Security Foundation              | v0.1    |      6 | IN_PROGRESS |        75% | Grants/policies, database isolation/constraints and lifecycle tested (3/4); application integration pending. |
 | Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | IN_PROGRESS |        75% | Types, owned services and validation/error mapping verified (3/4); live application integration pending.     |
 | Phase 1 / 1.1    | Muscle & Equipment Schema              | v0.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §1.1.                                                                           |
@@ -252,6 +252,10 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 
 ## Last Completed
 
+**IN_PROGRESS — Profile editor (2026-10-10).**
+
+- Added protected routing, display-name loading/editing/validation/save/discard/retry and existing snackbar/toast feedback. Saves bind to the account that opened the editor; stale results after account remount/unmount are ignored. Exact Figma matching and live web/native save/reopen checks remain pending; see [profile testing](PROFILE_TESTING.md).
+
 **DONE — Profile/preferences data-access service task (2026-10-09); the module remains IN_PROGRESS.**
 
 - Added typed, Auth-derived owned reads/updates and runtime validation restricted to permitted fields, with safe errors and no cached account data. Tested the installed SDK with simulated transport responses; reran live SQL ownership checks with rollback. The Profile screen and authenticated SDK save/reopen acceptance remain pending.
@@ -344,13 +348,13 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-The profile/preferences migration and feature-local services are implemented. Database ownership checks pass; 36 new tests exercise the actual installed SDK with simulated request responses and input validation. Live authenticated service saves and Profile UI are not yet verified. The next task is the Figma-aligned persisted UI. Authentication remains partially verified: the user tested sign-in/sign-out on web and Expo Go, while confirmation, reset and reopen persistence still need acceptance evidence.
+The display-name editor uses the tested profile service and is reached from Your Account. Its route requires a normal signed-in session and remounts for a different account. Profile design access is blocked by the Figma Starter call limit; the user authorized composing existing verified components. Live authenticated saves and exact visual matching remain pending. Next: initial preferences controls. Authentication still needs live confirmation/reset/reopen evidence.
 
 ## Next 3 Actions
 
-1. Profile UI task: fetch only its relevant Figma node and implement display-name loading/editing/saving with the tested service and loading/error states.
-2. Initial preferences UI task: implement the relevant verified Figma controls and persist allowed preferences; stored theme/notification choices do not prove theme rendering or notification delivery.
-3. Profile/preferences acceptance task: verify own-account save/reload/reopen and account-switch isolation through the application on web and Expo Go; close the module only after its acceptance criteria pass.
+1. Initial preferences UI task: implement and persist unit/timezone controls, with loading/save/error states; resolve visual fallback if its Figma design is still inaccessible.
+2. Profile/preferences acceptance task: verify own-account save/reload/reopen and account-switch isolation through the application on web and Expo Go using [the test checklist](PROFILE_TESTING.md).
+3. Broader foundation task: verify relevant Figma design tokens/primitives and then build the five-tab navigation shell in separately testable changes. Do not start v0.2 before the v0.1 gate passes.
 
 Confirm the remaining auth test matrix alongside these tasks; do not mark task 0.8 DONE until its six live acceptance groups are verified. Then finish the broader design system, five-tab navigation, CI/native build checks and v0.1 release gate before starting v0.2. Keeping this headless schema/data work ahead of visual foundation work follows the previously documented Supabase/auth sequencing exception and prevents implementing a profile form before secure persistence exists.
 
@@ -520,4 +524,18 @@ Confirm the remaining auth test matrix alongside these tasks; do not mark task 0
 - Initial typecheck exposed generic literal widening and a Jest cleanup return type; corrected both. A test incorrectly expected older SDK zero-row mutation semantics; inspected the installed SDK and corrected the response fixture to an empty array. No checks are bypassed.
 - The full check initially stopped at formatting after a new untracked `docs/.obsidian/` folder appeared. Added only that local editor configuration path to Git/Prettier ignores; preserved its contents. Post-SQL counts remain one Auth account, one profile and one preferences record.
 - Final `npm.cmd run check` PASS (exit 0): typecheck, lint, formatting and all 82 tests across ten suites. Focused `npm.cmd test -- --runTestsByPath __tests__/profile-service.test.ts` PASS (36 tests). `git diff --check` PASS. No UI/device persistence completion is inferred from these tests.
+
+## Profile editor implementation (2026-10-10)
+
+**IN_PROGRESS — Profile / Preferences UI subtask; display-name editor implementation and automated checks verified.**
+
+- Figma metadata fetch was blocked by the Starter-plan tool limit. User explicitly authorized existing verified components. No Figma file changes or claimed Profile screenshot parity. Broader design-system completion is not inferred.
+- Added `/profile`, guarded by a normal signed-in session, and Edit profile on Your Account. The route keys the editor by session user ID. Recovery sessions return to the auth entry; product navigation remains pending.
+- Added feature-local `use-profile-editor.ts` and `profile-screen.tsx`: load/optional empty name, validation, save, discard, retry, safe errors, disabled controls during save and existing snackbar/web toast success feedback. Saves return actual server values; failures preserve the draft. Stale load/save results after unmount/account remount are ignored.
+- Added expected-session identity checks to profile reads/updates. This is a rejection guard, never an owner override. The new SDK test verifies that an editor from another account cannot issue a read or mutation for the current account.
+- Nine screen tests cover loading/unnamed records, unchanged values, discard, validation, duplicate save prevention, server-confirmed success, failed-save retry, clearing and stale account-remount feedback. These mock the feature service; live authenticated UI persistence is still pending.
+- Initial typecheck used stale generated route types. Ran `npx.cmd --no-install expo start --offline --go --port 8082` to regenerate the ignored types through Expo CLI, then stopped that server. No generated file was edited or committed. Corrected the hook cleanup lint warning without suppressing checks.
+- First full check had a single 5-second test timeout while bundle exports were running; the focused rerun passed. Final `npm.cmd run check` PASS (exit 0): typecheck, lint without warnings, formatting and all 92 tests in eleven suites. `npx.cmd --no-install expo export --platform all` PASS: Android/iOS Hermes bundles, web bundle and eight static routes including `/profile`. `git diff --check` PASS.
+- Browser automation initialization failed twice. No interactive browser visual check or phone runtime claim. [Profile testing](PROFILE_TESTING.md) records the live save/reopen, failure/retry and account-isolation checklist; no additional credentials are required.
+- Preferences UI and live module acceptance remain pending, so task 0.9 stays 2/4, data access 3/4 and RLS 3/4. Foundation remains 23.65/40 (59.125%). No migration, environment value, dependency or privileged credential change.
 - Profile/preferences earns 2/4; data access earns 3/4, with live application integration still pending; RLS stays 3/4. Foundation totals 23.65/40 (59.125%). No new input/key is needed for the next UI task; relevant Figma access and manual acceptance remain required.

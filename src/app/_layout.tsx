@@ -15,7 +15,7 @@ import { AuthFeedbackProvider } from '@/features/auth/auth-feedback';
 void SplashScreen.preventAutoHideAsync();
 
 function AuthRoutes() {
-  const { session, initializing, error, retry } = useAuth();
+  const { session, initializing, error, retry, recovery } = useAuth();
   if (initializing)
     return (
       <AuthFrame>
@@ -40,6 +40,9 @@ function AuthRoutes() {
       <Stack.Screen name="auth/callback" />
       <Stack.Screen name="auth/confirmed" />
       <Stack.Screen name="auth/recovery" />
+      <Stack.Protected guard={!!session && !recovery}>
+        <Stack.Screen name="profile" />
+      </Stack.Protected>
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="explore" />
       </Stack.Protected>
