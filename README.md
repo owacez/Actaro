@@ -45,13 +45,11 @@ References: [SDK requirements](https://docs.expo.dev/versions/v57.0.0/),
 
 ### First-time setup
 
-Open a terminal in the existing Actaro folder, where `package.json` lives. On this computer:
+Run all commands from your checkout's root directory, which contains
+`package.json`. In VS Code, open the Actaro folder and select **Terminal > New
+Terminal**. The checkout can live anywhere on your computer.
 
-```powershell
-cd C:\Users\Owais\VSCodeProjects\Actaro
-```
-
-On a fresh computer, clone first instead:
+If you have not cloned the repository yet:
 
 ```bash
 git clone https://github.com/owacez/Actaro.git
@@ -69,8 +67,8 @@ checkout so it uses the committed lockfile. You only need to install again after
 pulling dependency changes or when `node_modules` is missing.
 
 Create `.env` from `.env.example` **only if `.env` does not already exist**.
-This workspace already has its Supabase public configuration; keep that file.
-For a fresh Windows PowerShell checkout:
+Keep an existing configured `.env`; it is local to your checkout and is not
+included when cloning the repository. In Windows PowerShell:
 
 ```powershell
 if (!(Test-Path -LiteralPath .env)) { Copy-Item -LiteralPath .env.example -Destination .env }
@@ -124,15 +122,16 @@ repeating requests. No additional app key or paid SMTP service was configured.
 ### Troubleshooting
 
 - **`npx expo login` asks to install Expo:** run it from the Actaro folder,
-  where `package.json` and the installed dependencies live. Running from
-  `C:\Windows\System32` makes npx offer a temporary Expo download. In Command
-  Prompt, run `cd /d C:\Users\Owais\VSCodeProjects\Actaro`, then
-  `npx.cmd --no-install expo login`. The `--no-install` flag prevents a temporary
-  download. If dependencies are genuinely missing, run `npm.cmd ci` in the
-  project root first. Pressing `Ctrl+C` cancels the current command; it does not
+  where `package.json` and the installed dependencies live. Running outside
+  your checkout can make npx offer a temporary Expo download. Open a terminal
+  in the project root, then run `npx --no-install expo login` (or
+  `npx.cmd --no-install expo login` on Windows). The `--no-install` flag prevents a temporary
+  download. If dependencies are genuinely missing, run `npm ci` (`npm.cmd ci`
+  on Windows) in the project root first. Pressing `Ctrl+C` cancels the current command; it does not
   establish an Expo login.
 - **`npm` or `node` is not recognized:** install Node 24 LTS and reopen the
-  terminal. The temporary PATH workaround for this machine is below.
+  terminal. Confirm that `node --version` and `npm --version` work before
+  continuing. Use the installer for your operating system and processor.
 - **PowerShell blocks `npm.ps1`:** use `npm.cmd ci` and
   `npm.cmd start -- --go --lan`; use `npx.cmd` for direct CLI commands.
 - **QR code will not connect:** check Wi-Fi, VPN and guest-network isolation.
@@ -189,22 +188,11 @@ nutrition, habits/goals and progress screens remain in their scheduled releases.
 
 Tunnel setup and flags follow the [Expo CLI documentation](https://docs.expo.dev/more/expo-cli/).
 
-### Temporary tools on this Windows checkout
-
-Git is installed system-wide. Earlier setup used portable Node.js/npm because
-they were unavailable on PATH. Until Node is installed normally, these existing
-temporary tools can be used in the current terminal, provided they still exist:
-
-```powershell
-$actaroToolRoot = Join-Path $env:TEMP 'actaro-init-tools-20261008'
-$env:Path = (Join-Path $actaroToolRoot 'node-v24.21.0-win-arm64') + ';' + (Join-Path $actaroToolRoot 'git/cmd') + ';' + $env:Path
-```
-
 ### Other commands
 
 For web testing, run `npm run web`. For an installed Android emulator, use
 `npm run android`; `npm run ios` requires an iOS Simulator on a Mac. A physical
-iPhone can connect to the Windows-hosted Expo Go server through the QR code.
+iPhone can connect to your computer's Expo Go server through the QR code.
 
 ```bash
 npm run typecheck

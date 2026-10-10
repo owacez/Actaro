@@ -4,12 +4,15 @@ Updated: 2026-10-09. Release item 0.8 remains IN_PROGRESS until live and native 
 
 ## Configuration
 
-The existing ignored `.env` needs only the Supabase API URL and public publishable
+The ignored root `.env` needs only the Supabase API URL and public publishable
 key listed in `.env.example`. No new API key, administrative secret, paid service,
 or SMTP setup is required for this implementation.
 
-Supabase MCP access is verified: project `teqqepzihflflnvhacze` is ACTIVE_HEALTHY.
-The first private profile/preferences tables and RLS migration are applied.
+Use the Supabase project matching `EXPO_PUBLIC_SUPABASE_URL` in your local `.env`.
+The project's dashboard shows its project reference for administrative tooling;
+the app does not need a separate reference variable. Apply the committed migrations
+when using a new project. In the current development project, the first private
+profile/preferences tables and RLS migration are applied.
 Authentication uses Supabase's existing Auth service; profile editing in the app
 is a separate foundation task. SQL trigger/ownership tests passed without sending emails.
 
@@ -32,6 +35,11 @@ configuration editing; the allowlist has not been inspected or changed.
 - Expo Go uses its development `exp://.../--/auth/callback` and recovery URLs,
   derived by `Linking.createURL`. Allow the actual URL for your running server;
   do not substitute a guessed address. A development build gives stable scheme URLs.
+
+The localhost URLs above are examples for port 8081, not fixed application
+configuration. If Expo uses another port or web origin, use that exact origin
+with `/auth/callback` and `/auth/recovery`. The application derives callback URLs
+from the running environment rather than storing a machine address in code.
 
 Keep Supabase's default confirmation/reset templates using the confirmation URL.
 Callbacks forward a PKCE flow ID when present; automatic flow-ID appending is

@@ -4,8 +4,9 @@ Updated: 2026-10-09
 
 ## Already supplied
 
-- Supabase project reference: `teqqepzihflflnvhacze`; initially empty, per the user.
-- API URL and public publishable key are stored in the ignored root `.env`.
+- Supabase development project and administrative connection are configured.
+- Each checkout supplies its project's API URL and public publishable key in the
+  ignored root `.env`; use `.env.example` for a fresh checkout.
 - Android and iOS are both test targets.
 - Git author and GitHub repository are configured.
 - Canonical product/plan documents and the read-only Figma reference are available.
@@ -20,6 +21,10 @@ EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 Use `.env.example` on another checkout. Public configuration is embedded in the
 app. Never put database passwords, access tokens, service-role/secret keys, SMTP
 credentials, or signing credentials in these variables or send them in chat.
+
+For a different Supabase project, apply the committed migrations and configure
+Auth callback URLs for that runtime. Authenticate the development tools against
+that project before administrative tasks; the public key cannot apply migrations.
 
 ## Needed for upcoming foundation tasks
 

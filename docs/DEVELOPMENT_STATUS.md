@@ -312,7 +312,7 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 - Final typecheck/lint/format checks pass. Android/iOS/web export and four static
   routes pass. These are bundle checks, not evidence of a native device launch.
 - Focused local change set: `chore: initialize Actaro development foundation`.
-  The commit accompanies the handoff (see Git log); the user published this commit to `origin/main` on GitHub (`owacez/Actaro`).
+  The commit accompanies the handoff (see Git log); the user published this commit to `origin/main` on GitHub.
 
 ## Validation evidence
 
@@ -353,10 +353,10 @@ Confirm the remaining auth test matrix alongside these tasks; do not mark task 0
 ## Blockers / Decisions
 
 - Git is installed; system-wide Node.js/npm are unavailable on PATH. Temporary portable tools
-  allow this session; standard development requires installation or the README's
-  temporary PATH setup.
-- Git identity is configured locally as `owacez <devowais@outlook.com>` using
-  the user's supplied values. A focused local initialization commit follows the reviewed checks.
+  allow this session; standard development requires installing Node.js/npm as
+  described in the README.
+- Git identity is configured locally using the user's supplied values.
+  Each developer configures their own repository identity; it is not shared app configuration.
 - A compatible phone/simulator is required for native launch verification; no
   native development build or device smoke test has been run.
 - Canonical filename mismatch is documented; original content is preserved.
@@ -457,7 +457,7 @@ Confirm the remaining auth test matrix alongside these tasks; do not mark task 0
 
 ## User testing and next module (2026-10-09)
 
-- User reports web authentication testing, explicitly including sign-out. Confirmation/reset coverage and persistence after reopening are not specified. The follow-up confirms that native testing is pending: `npx expo login` was launched from `C:\Windows\System32`, offered a temporary Expo install and was cancelled once with Ctrl+C. This is CLI setup evidence, not a captured Expo Go app runtime error.
+- User reports web authentication testing, explicitly including sign-out. Confirmation/reset coverage and persistence after reopening are not specified. The follow-up confirms that native testing is pending: `npx expo login` was launched outside the project root, offered a temporary Expo install and was cancelled once with Ctrl+C. This is CLI setup evidence, not a captured Expo Go app runtime error.
 - Authentication remains IN_PROGRESS. Weighted foundation completion remains 34.125% until the live acceptance groups can be reconciled with specific evidence; the user report is preserved rather than treated as a complete Android/iOS test matrix.
 - Next proposed module: v0.1 Profile / Preferences, split into independently verifiable schema/RLS, typed data-access and persisted UI tasks. The existing schema design is the starting specification; no migration or feature code is implemented by this planning update.
 - No new API key is required for those tasks; the existing authorized Supabase connection and public application configuration suffice. Figma access is needed for exact profile UI matching.
@@ -493,3 +493,13 @@ Confirm the remaining auth test matrix alongside these tasks; do not mark task 0
 - Profile/preferences earns 1/4, RLS/security 3/4, data access 1/4; foundation totals 20.9/40 (52.25%). SQL verification is not proof of Profile UI or authenticated SDK persistence.
 - `npm.cmd run check` PASS (exit 0): typecheck, lint, formatting and all 46 tests across nine suites after generated types were wired into the client. `git diff --check` and `git check-ignore .env` PASS. No privileged key or private user fields are committed.
 - Ignored the CLI-generated `supabase/.temp/` cache; migration/test SQL stays tracked. Verified its cache file and `.env` are ignored. The migration and snackbar commits were pushed without rewriting history.
+
+## Portable setup documentation (2026-10-09)
+
+**DONE — Remove machine-specific setup assumptions, unweighted maintenance task.**
+
+- README now starts from any checkout's root (`package.json`), with a relative clone workflow and generic terminal/Node setup. Removed personal absolute paths, dated temporary-tool PATH commands and the assumption that a newly cloned checkout already has configured `.env` values.
+- Generalized project references in development/auth testing guides. Callback addresses are explicitly runtime-dependent; localhost:8081 remains a labelled example. Removed personal Git identity and system-directory details from status prose while preserving the underlying test/commit evidence.
+- Inspected tracked application code, scripts, tests and configuration: no personal filesystem paths, fixed LAN addresses or live project identifiers in runtime code. Supabase configuration already comes from environment variables; callback URLs use Linking.createURL; script/config paths use relative roots. Dummy test URLs, the actual repository clone URL and product/design references remain intentional portable references.
+- No runtime code, environment values, schema, dependencies or release weights changed. Foundation completion remains 52.25%. The next tasks remain profile/preferences data access, persisted UI and application acceptance.
+- `npm.cmd run check` PASS (exit 0): typecheck, lint, formatting and all 46 tests across nine suites. Tracked-file portability audit found no personal checkout paths, temporary tool paths or fixed development-project references; architecture-specific lockfile package names remain intentional. `git diff --check` PASS.
