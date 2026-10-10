@@ -99,7 +99,7 @@ Expo Go explicitly. Leave the terminal running while you test.
 1. Android: open Expo Go and use its QR scanner to scan the terminal QR code.
 2. iPhone: scan the QR code with Camera and open the link in Expo Go. Use the
    same Expo account in CLI and Expo Go as described above.
-3. The app should show Sign In, or Your Account if a session was previously
+3. The app should show Sign In, or Today if a session was previously
    saved. Create Account and Forgot Password are available from Sign In.
 4. Press `r` in the terminal to reload; press `Ctrl+C` to stop the server.
 
@@ -170,21 +170,22 @@ and email instructions use a bottom snackbar. On web, errors and successful
 actions also use a dismissible notification at the upper right. Notifications
 expire automatically; hovering or focusing the web notification pauses dismissal.
 
-| Screen / state              | Present behavior                                                                         |
-| --------------------------- | ---------------------------------------------------------------------------------------- |
-| Sign In                     | Validated email/password sign-in.                                                        |
-| Sign Up                     | Email, password and confirmation; creates a Supabase account.                            |
-| Check Your Email            | Confirmation instructions and resend.                                                    |
-| Reset Password              | Requests a recovery link without revealing account existence.                            |
-| Set a New Password          | Updates the password after the SDK recovery event.                                       |
-| Callback processing / error | Exchanges a one-use code or displays a safe link error.                                  |
-| Email Confirmed             | Shows verified status from the Supabase session, then Continue to Account.               |
-| Your Account                | Real signed-in email and local sign-out; current sign-in destination.                    |
-| Profile                     | Edit/clear display name, save/discard, validation and retry. Reach it from Your Account. |
+| Screen / state                         | Present behavior                                                                        |
+| -------------------------------------- | --------------------------------------------------------------------------------------- |
+| Sign In                                | Validated email/password sign-in.                                                       |
+| Sign Up                                | Email, password and confirmation; creates a Supabase account.                           |
+| Check Your Email                       | Confirmation instructions and resend.                                                   |
+| Reset Password                         | Requests a recovery link without revealing account existence.                           |
+| Set a New Password                     | Updates the password after the SDK recovery event.                                      |
+| Callback processing / error            | Exchanges a one-use code or displays a safe link error.                                 |
+| Email Confirmed                        | Shows verified status from the Supabase session, then Continue to Account.              |
+| Today / Fitness / Nutrition / Progress | Signed-in tab destinations showing planned release scope; no tracking data yet.         |
+| More                                   | Real signed-in email, Profile management and local sign-out.                            |
+| Profile                                | Edit/clear name, view/change email and change password. Open More → Profile management. |
 
 The remaining `/explore` route is an Expo starter example, not an Actaro feature.
-Home/Today and the main product tabs are not implemented. The navigation shell
-belongs to v0.1; the populated Today dashboard belongs to v0.5. Exercise, workout,
+The five-tab navigation shell is implemented; sign-in opens Today. The populated
+Today dashboard belongs to v0.5. Exercise, workout,
 nutrition, habits/goals and progress screens remain in their scheduled releases.
 
 Tunnel setup and flags follow the [Expo CLI documentation](https://docs.expo.dev/more/expo-cli/).
@@ -245,8 +246,9 @@ unrelated cleanup.
 Backend: Supabase PostgreSQL, Auth, RLS and Storage. The shared client is
 configured; auth screens and service flows exist. The profile/preferences schema
 and ownership policies are applied and database-tested; typed profile/preferences
-services have SDK request tests. The display-name editor is wired to these services;
-preferences controls and live save/reopen acceptance are pending. React state
+services have SDK request tests. Profile edits names through the database service;
+email/password changes use Supabase Auth, with required confirmation and safe errors.
+Preferences controls and full live acceptance are pending. React state
 is the default; TanStack Query and Zustand require demonstrated needs.
 See [mobile stack decision](docs/decisions/001-mobile-stack.md).
 
@@ -278,5 +280,5 @@ Future order: v1.1 Active Minutes → v1.2 Running & GPS → v1.3 Advanced Analy
 Initialization stops at review. Feature development requires explicit approval
 of the next small, independently verifiable task.
 
-For signup, verification and reset testing, see [authentication testing](docs/AUTH_TESTING.md). The app currently opens the auth screens, then a minimal account screen with the real signed-in email and sign-out. Product dashboards are not implemented.
-For display-name save/reopen and account-isolation checks, see [profile testing](docs/PROFILE_TESTING.md).
+For signup, verification and reset testing, see [authentication testing](docs/AUTH_TESTING.md). After sign-in, Today opens within the five-tab shell; More contains account management and sign-out. Product dashboards are not implemented.
+For name/email/password and account-isolation checks, see [profile testing](docs/PROFILE_TESTING.md).

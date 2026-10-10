@@ -5,9 +5,9 @@ Updated: 2026-10-10 (America/Los_Angeles).
 ## Overall
 
 - Current Release: **v0.1 — Foundation**
-- Release Completion: **59.125% (23.65 / 40 weight)**
-- Current Phase: **Phase 0 — Profile editor**
-- Current Focus: Display-name editing is wired to the existing service and reachable from Your Account. Preferences UI and authenticated save/reopen acceptance remain pending. User authorized existing verified components after the Figma call limit blocked Profile design access; exact Profile matching is pending. Home/Today and product navigation remain unimplemented.
+- Release Completion: **64.125% (25.65 / 40 weight)**
+- Current Phase: **Phase 0 — Account management and navigation**
+- Current Focus: Profile now includes name, email and password controls under More; sign-in opens Today within five tabs. Mobile snackbar clearance is raised. User reports the name editor works on iPhone Expo Go. Preferences, live account-update/navigation acceptance and exact Figma matching remain pending.
 - Status: **IN_PROGRESS**
 - Blockers: Git is installed; Node.js/npm use temporary portable tools.
   Live email callbacks and native session persistence remain unverified; browser automation failed to start. Expo Doctor config-schema check has an external API blocker; dependency advisories remain open.
@@ -31,8 +31,8 @@ fractions, not subjective estimates. CI remains unimplemented and counted until
 its applicability is decided. v1.0 has no plan weight: track its nine explicit
 release gates separately, without inventing a numeric weight.
 
-Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 4/5 + 2 × 2/2 + 3 × 3/4 + 6 × 8/12 + 3 × 2/4 + 6 × 3/4 + 4 × 3/4 = 23.65`.
-Release completion: `23.65 / 40 × 100 = 59.125%`. Rounded table percentages never
+Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 4/5 + 2 × 2/2 + 3 × 2/3 + 3 × 3/4 + 6 × 8/12 + 3 × 2/4 + 6 × 3/4 + 4 × 3/4 = 25.65`.
+Release completion: `25.65 / 40 × 100 = 64.125%`. Rounded table percentages never
 replace these exact fractions. This is verified foundation progress, not a completed v0.1 release.
 
 ## Feature Table
@@ -44,7 +44,7 @@ replace these exact fractions. This is verified foundation progress, not a compl
 | Phase 0 / 0.3    | Quality Baseline                       | v0.1    |      3 | IN_PROGRESS |        80% | Typecheck, lint, formatting, test runner verified (4/5); CI pending.                                         |
 | Phase 0 / 0.4    | App Structure                          | v0.1    |      2 | DONE        |       100% | Router scaffold and current architecture boundaries verified (2/2).                                          |
 | Phase 0 / 0.5    | Design System                          | v0.1    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §0.5.                                                                           |
-| Phase 0 / 0.6    | Navigation                             | v0.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §0.6.                                                                           |
+| Phase 0 / 0.6    | Navigation                             | v0.1    |      3 | IN_PROGRESS |     66.67% | Five routes and authenticated/recovery routing contracts verified (2/3); live tab acceptance pending.        |
 | Phase 0 / 0.7    | Supabase Integration                   | v0.1    |      3 | IN_PROGRESS |        75% | Configuration, client/lifecycle contracts and live API probes verified (3/4); native checks pending.         |
 | Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | IN_PROGRESS |     66.67% | Six implementation contracts plus user-verified live sign-in/sign-out (8/12); four live groups pending.      |
 | Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | IN_PROGRESS |        50% | Schema/access verified (2/4); Profile editor implemented, preferences UI and live acceptance pending.        |
@@ -167,7 +167,7 @@ replace these exact fractions. This is verified foundation progress, not a compl
 
 | Phase    | Release | Purpose                           | Planned weight | Completion | Status      |
 | -------- | ------- | --------------------------------- | -------------: | ---------: | ----------- |
-| Phase 0  | v0.1    | Foundation                        |             40 |     59.13% | IN_PROGRESS |
+| Phase 0  | v0.1    | Foundation                        |             40 |     64.13% | IN_PROGRESS |
 | Phase 1  | v0.2    | Exercise Library                  |             28 |         0% | NOT_STARTED |
 | Phase 2  | v0.3    | Strength Workout System           |             70 |         0% | NOT_STARTED |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |         0% | NOT_STARTED |
@@ -204,7 +204,8 @@ specific implementation and validation evidence listed in Last Completed.
 - **0.9 Profile / Preferences (4 subtasks):** schema/default record creation; typed feature reads/updates; Profile/preferences UI and states; authenticated application save/reopen acceptance. Verified: 2/4 (database and SDK request contracts; UI/persistence acceptance pending).
 - **0.10 RLS / Security Foundation (4 subtasks):** least-privilege grants and ownership policies; real database anonymous/two-user/protected-write/constraint tests; secure initialization/backfill/timestamps/deletion cascades and private-function privileges; authenticated application integration and foundation security acceptance. Verified: 3/4. Real SQL roles and anonymous SDK probes pass; application integration and the observed Auth security warning remain tracked.
 - **0.11 Data Access Layer (4 subtasks):** actual generated database types in shared client; feature-local owned queries/mutations; permitted-field validation and safe error mapping; meaningful feature request/integration tests. Verified: 3/4. The 36 SDK transport/validation tests pass; the fourth subtask remains pending live authenticated application integration.
-- **0.5–0.6:** no subtasks implemented. Their criteria remain in the canonical plan.
+- **0.5 Design System:** no subtasks implemented. Criteria remain in the canonical plan; approved component reuse is not design-system completion.
+- **0.6 Navigation (3 subtasks):** five-tab composition and bundle validation; signed-in landing/signed-out/recovery routing contracts; live switching/back/sign-out acceptance on web and native. Verified: 2/3. Tests mock navigator rendering and do not establish real interactive switching. Exact Figma parity remains pending.
 
 ## v1.0 release gate
 
@@ -251,6 +252,12 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 | Early microservices, Kubernetes/GKE, unnecessary custom backend            | Explicitly excluded for early versions                       | DROPPED     | Source §§19, 23; real future backend triggers remain documented.       |
 
 ## Last Completed
+
+**IN_PROGRESS — Account management and five-tab navigation (2026-10-10).**
+
+Name/email/password UI, tab composition and routing contracts are implemented;
+live email/password, navigation and visual acceptance remain pending. User reports
+working name editing on iPhone Expo Go. See the verification entry below.
 
 **IN_PROGRESS — Profile editor (2026-10-10).**
 
@@ -348,13 +355,13 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-The display-name editor uses the tested profile service and is reached from Your Account. Its route requires a normal signed-in session and remounts for a different account. Profile design access is blocked by the Figma Starter call limit; the user authorized composing existing verified components. Live authenticated saves and exact visual matching remain pending. Next: initial preferences controls. Authentication still needs live confirmation/reset/reopen evidence.
+Profile management is reached from More and offers name, current email, email-change confirmation and authenticated password updates. The five-tab shell opens Today after sign-in; four module views explicitly show future release scope. Profile remains guarded and keyed to the signed-in user. The user reports working name editing on iPhone; email/password changes, tab interaction and raised snackbar still need live checks. Preferences and exact visual matching remain pending. Authentication still needs live confirmation/reset/reopen evidence.
 
 ## Next 3 Actions
 
-1. Initial preferences UI task: implement and persist unit/timezone controls, with loading/save/error states; resolve visual fallback if its Figma design is still inaccessible.
-2. Profile/preferences acceptance task: verify own-account save/reload/reopen and account-switch isolation through the application on web and Expo Go using [the test checklist](PROFILE_TESTING.md).
-3. Broader foundation task: verify relevant Figma design tokens/primitives and then build the five-tab navigation shell in separately testable changes. Do not start v0.2 before the v0.1 gate passes.
+1. Verify email change, password change, five-tab switching/back/sign-out and snackbar placement on web/iPhone using [the checklist](PROFILE_TESTING.md).
+2. Implement and persist unit/timezone preferences with loading/save/error states using the approved visual workflow.
+3. Verify profile/preferences save/reopen and two-account isolation, then close remaining foundation design/CI/native-build gates before v0.2.
 
 Confirm the remaining auth test matrix alongside these tasks; do not mark task 0.8 DONE until its six live acceptance groups are verified. Then finish the broader design system, five-tab navigation, CI/native build checks and v0.1 release gate before starting v0.2. Keeping this headless schema/data work ahead of visual foundation work follows the previously documented Supabase/auth sequencing exception and prevents implementing a profile form before secure persistence exists.
 
@@ -369,7 +376,7 @@ Confirm the remaining auth test matrix alongside these tasks; do not mark task 0
   native development build or device smoke test has been run.
 - Canonical filename mismatch is documented; original content is preserved.
   It does not block initialization using the supplied plan.
-- Supabase public configuration and MCP authorization are established. The profile/preferences migration is applied and database-tested. Both Android and iOS remain test targets; the user's successful Expo Go sign-in/sign-out test did not specify the phone OS.
+- Supabase public configuration and MCP authorization are established. The profile/preferences migration is applied and database-tested. Both Android and iOS remain test targets; the latest user report identifies iPhone Expo Go and confirms the name editor works. Android and new account-update flows remain unverified.
 - `npm audit --json` reports 29 affected packages (18 high, 11 moderate), rooted
   in advisories for braces, decode-uri-component, node-forge, uuid, and their
   dependency chains. Review runtime/tooling exposure before release; no safety
@@ -539,3 +546,16 @@ Confirm the remaining auth test matrix alongside these tasks; do not mark task 0
 - Browser automation initialization failed twice. No interactive browser visual check or phone runtime claim. [Profile testing](PROFILE_TESTING.md) records the live save/reopen, failure/retry and account-isolation checklist; no additional credentials are required.
 - Preferences UI and live module acceptance remain pending, so task 0.9 stays 2/4, data access 3/4 and RLS 3/4. Foundation remains 23.65/40 (59.125%). No migration, environment value, dependency or privileged credential change.
 - Profile/preferences earns 2/4; data access earns 3/4, with live application integration still pending; RLS stays 3/4. Foundation totals 23.65/40 (59.125%). No new input/key is needed for the next UI task; relevant Figma access and manual acceptance remain required.
+
+## Account management, navigation and snackbar (2026-10-10)
+
+**IN_PROGRESS — Foundation account/navigation acceptance; implementation and automated checks verified.**
+
+- Expanded Profile to show the session email, request a confirmed email change and update the authenticated account password. Services validate inputs, reject a stale account identity and surface safe errors. Passwords clear after requests; duplicate submissions and concurrent name/security saves are blocked. Email requests distinguish pending confirmation from an immediate server-confirmed update. Supabase remains responsible for confirmation and reauthentication policies; no current-password verification or bypass is claimed.
+- Added Today, Fitness, Nutrition, Progress and More tabs with existing verified colors/components. Normal sign-in opens Today; signed-out/recovery sessions cannot enter tabs or Profile. More retains real email/sign-out and opens Profile; Back returns to More. Four module views describe scheduled work without invented tracking data. Exact Profile/navigation Figma parity remains pending under the approved fallback.
+- Raised mobile notification clearance from safe-area plus 40 to plus 112 points, leaving web upper-right positioning intact. User reports working name editing and identifies iPhone Expo Go; new account updates/tab interactions/snackbar placement still require live checks.
+- Added seven account-security service/UI tests and three routing contract tests. Tests cover validation, expected-user checks, confirmation messaging, safe failures, password clearing, duplicate submission and signed-out/recovery destinations. Navigator/service mocks are not live Supabase or interactive navigation proof.
+- Initial checks caught an unsupported SDK 57 tab option and a Jest callback return type. Corrected both. The first test run exposed two test-boundary setup issues (mock hoisting and native storage import); corrected those fixtures without disabling checks.
+- Final `npm.cmd run check`: PASS (exit 0), strict typecheck, lint, formatting and all 102 tests across 14 suites. `npx.cmd --no-install expo export --platform all`: PASS (exit 0), Android/iOS Hermes bundles, web bundle and 18 static route entries. Exports are not device launches.
+- Expo CLI regenerated ignored route types via `npx.cmd --no-install expo start --offline --go --port 8082`; stopped after startup. No generated types, environment values, migrations or dependencies changed. `git diff --check` and `git check-ignore .env`: PASS.
+- Navigation earns 2/3 of weight 3; foundation is 25.65/40 (64.125%). Profile/preferences remains 2/4 while preferences and full acceptance are pending. No later-release feature is marked complete. README and Profile testing describe the real current screens and remaining checks.

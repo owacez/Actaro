@@ -4,15 +4,21 @@ Updated: 2026-10-10. v0.1 Profile / Preferences remains IN_PROGRESS.
 
 ## Current scope
 
-Sign in, select **Edit profile** from Your Account, and edit the optional display
+Sign in, select **More → Profile management**, and edit the optional display
 name. Leave it blank to clear it. Save uses the existing authenticated Supabase
-service; only `display_name` is updated. Email/password remain managed by Auth.
+service; only `display_name` is updated. The same screen displays your current
+email and offers email/password changes through Supabase Auth. Email changes
+remain pending until Supabase's required confirmations are completed. Password
+changes use the signed-in session; a server reauthentication requirement is
+reported without bypassing it. No current-password verification is claimed.
 No new environment variable, schema migration or API credential is required.
 
 The user authorized existing verified components after Figma MCP hit its Starter
 call limit. This functional editor does not establish exact Profile visual parity.
 Preferences controls are a separate task. Browser automation could not initialize,
-so no interactive visual or live authenticated persistence pass is claimed.
+so no agent interactive visual or live authenticated persistence pass is claimed.
+The user reports the name editor works on iPhone Expo Go; this is not evidence
+for email/password updates or the new tab bar.
 
 ## Manual acceptance — web and Expo Go
 
@@ -37,6 +43,17 @@ share a password, session token, confirmation code or private profile data in ch
    sessions must finish their recovery flow before opening Profile.
 8. On a phone, verify keyboard access, safe-area spacing and the raised snackbar.
    On web, verify successful-save toast placement and readable inline errors.
+9. Open Change email, enter a different email and submit once. The current email
+   must remain until confirmed; check both inboxes as required by project settings.
+   Open links in the originating browser/app using its allowed callback URL.
+   Reopen Profile after confirmation and sign in using the replacement email.
+10. Change password with matching passwords of at least eight characters. If
+    reauthentication is required, sign out/in and retry. On success, sign out and
+    confirm only the new password works. Failure must clear password fields and
+    show no success notification. Do not share passwords in chat.
+11. Verify Today opens after sign-in, each of the five tabs responds, More opens
+    Profile, Back returns to More, and sign-out prevents access to tabs/Profile.
+    Repeat on web and iPhone; confirm the snackbar sits above the tab bar.
 
 Record the tested platform and individual outcomes. A bundle export, mocked
 service response or SQL ownership test is not proof of live app save/reopen.
