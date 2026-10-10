@@ -24,6 +24,18 @@ This is an Expo/React Native mobile application. Prioritize mobile-first pattern
 
 ## Architecture and implementation standards
 
+- Standing user preference: use the `engineering-suite-ponytail` plugin in
+  `full` mode for every coding task. Read its entry and Ponytail skills on first
+  use in a session; apply its simplicity ladder before each implementation change
+  and command: establish the current need, reuse existing code, prefer standard
+  library/native features and installed dependencies, then make the smallest
+  correct change. This is a reasoning check, not a separate tool call for every
+  command. Do not remove validation, security, accessibility, persistence or
+  required checks to shorten code. Use the existing test tools; add no test
+  framework for this workflow. Scope audits and fixes to the user's request.
+  If the plugin is unavailable, report that and apply these recorded principles.
+  This preference persists until the user says "stop ponytail" or "normal mode".
+
 - Approved stack: React Native, Expo, TypeScript, Expo Router; Supabase later
   for PostgreSQL, Auth, Row Level Security, and Storage. Do not connect Supabase
   during initialization or add an independent backend or speculative infrastructure.

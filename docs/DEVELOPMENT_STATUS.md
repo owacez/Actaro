@@ -559,3 +559,13 @@ Confirm the remaining auth test matrix alongside these tasks; do not mark task 0
 - Final `npm.cmd run check`: PASS (exit 0), strict typecheck, lint, formatting and all 102 tests across 14 suites. `npx.cmd --no-install expo export --platform all`: PASS (exit 0), Android/iOS Hermes bundles, web bundle and 18 static route entries. Exports are not device launches.
 - Expo CLI regenerated ignored route types via `npx.cmd --no-install expo start --offline --go --port 8082`; stopped after startup. No generated types, environment values, migrations or dependencies changed. `git diff --check` and `git check-ignore .env`: PASS.
 - Navigation earns 2/3 of weight 3; foundation is 25.65/40 (64.125%). Profile/preferences remains 2/4 while preferences and full acceptance are pending. No later-release feature is marked complete. README and Profile testing describe the real current screens and remaining checks.
+
+## Ponytail review and standing development preference (2026-10-10)
+
+**DONE — Focused simplification and instruction update; unweighted maintenance.**
+
+- Confirmed the installed `engineering-suite-ponytail` entry, audit, simplification and full-mode skills are readable. Reviewed the implemented auth/session/client, profile validation/services/editor, feedback and navigation flows plus dependency declarations. Their security validation, stale-request guards and feature service boundaries serve current requirements; no new framework, generic data layer or state library is justified.
+- Removed unused `src/components/app-tabs.tsx` and `app-tabs.web.tsx`: 149 lines of obsolete Expo starter navigation. Repository reference searches found no external callers; the active five-tab layout remains in `src/app/(tabs)/_layout.tsx`. Existing dependencies, schema, credentials and test expectations were preserved.
+- Added the user's standing Ponytail full-mode preference to `AGENTS.md`: apply the simplicity ladder before each coding change/command, reuse existing/native solutions and keep required security/accessibility/verification. This is a reasoning check rather than an invented per-command plugin tool. If unavailable, disclose that and use the recorded principles. The user can override it with "stop ponytail" or "normal mode".
+- `npm.cmd run check`: PASS (exit 0), typecheck, lint, formatting and all 102 existing tests in 14 suites without test changes. `npx.cmd --no-install expo export --platform all`: PASS (exit 0), Android/iOS/web bundles and 18 static route entries. No live device flow is inferred from these checks. `git diff --check` and `git check-ignore .env`: PASS.
+- Foundation remains 64.125%; this cleanup earns no feature weight. Existing Figma/live acceptance blockers and the Next 3 Actions remain unchanged.
