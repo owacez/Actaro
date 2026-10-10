@@ -61,6 +61,7 @@ describe('Supabase client lifecycle', () => {
         {
           auth: {
             storage,
+            flowType: 'pkce',
             autoRefreshToken: true,
             persistSession: true,
             detectSessionInUrl: false,
@@ -92,7 +93,12 @@ describe('Supabase client lifecycle', () => {
     expect(startSupabaseSessionRefresh()).toBeUndefined();
     expect(listen).not.toHaveBeenCalled();
     expect(createClient).toHaveBeenCalledWith(expect.any(String), expect.any(String), {
-      auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: false },
+      auth: {
+        flowType: 'pkce',
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false,
+      },
     });
   });
 });

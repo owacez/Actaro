@@ -23,16 +23,11 @@ credentials, or signing credentials in these variables or send them in chat.
 
 ## Needed for upcoming foundation tasks
 
-1. Supabase database tools must become available for project inspection and
-   reviewed migrations. The user selected this route; installation is confirmed and the user authorized connection, but database
-   tools are not yet exposed to this session. No administrative credential is needed in the app's environment.
+1. Supabase MCP authorization is established; the project is ACTIVE_HEALTHY and public tables are empty. No additional database credential is needed for reviewed migrations.
 2. Android and iPhone device access for launch/session tests. Native build setup
    will need a locally authenticated Expo account and user-approved application
    identifiers. Do not invent signing identities or bundle IDs.
-3. Authentication email configuration when implementing verification and password
-   reset: confirm intended test recipients, configure the supported email provider
-   in Supabase, and allow the exact callback URLs defined by that task. Keep SMTP
-   credentials in Supabase, not in mobile code. No production domain is assumed.
+3. For free authentication testing, use a Supabase team email and allow the exact runtime callback URLs. Email confirmation stays enabled; no custom SMTP or paid resource was configured. See [auth testing](AUTH_TESTING.md). The default sender is limited; public production email delivery is a later release requirement.
 
 ## Later core-release inputs
 
@@ -52,5 +47,4 @@ when its corresponding task needs it.
 `npm run check` runs typecheck, lint, formatting and real Jest tests without
 administrative Supabase access. `npm run check:supabase` checks the supplied live
 public configuration without creating users, tables or reading user rows.
-`npm start` launches the starter app; it does not yet offer sign-in or fitness
-features. Exports and mocked native contract tests do not replace device testing.
+`npm start` launches the auth entry screens; fitness features remain unimplemented. Exports and mocked native contract tests do not replace device testing.

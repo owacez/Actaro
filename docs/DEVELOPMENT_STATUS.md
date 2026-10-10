@@ -5,12 +5,12 @@ Updated: 2026-10-09 (America/Los_Angeles).
 ## Overall
 
 - Current Release: **v0.1 — Foundation**
-- Release Completion: **26.625% (10.65 / 40 weight)**
-- Current Phase: **Phase 0 — foundation schema design**
-- Current Focus: Client task and schema design recorded. Next: inspect the live database and implement the first profile/preferences migration with ownership tests. Native integration verification remains pending.
+- Release Completion: **34.125% (13.65 / 40 weight)**
+- Current Phase: **Phase 0 — authentication**
+- Current Focus: Email/password auth flows implemented and contract-tested. Verify live email callbacks and Android/iOS persistence before completing task 0.8.
 - Status: **IN_PROGRESS**
 - Blockers: Git is installed; Node.js/npm use temporary portable tools.
-  Supabase database tools are not yet exposed after plugin authorization. Expo Doctor config-schema check has an external API blocker; dependency advisories remain open.
+  Live email callbacks and native session persistence remain unverified; browser automation failed to start. Expo Doctor config-schema check has an external API blocker; dependency advisories remain open.
 - Approval boundary: User authorized resuming v0.1 sequentially on 2026-10-09; complete and verify one task before the next. Later releases remain outside scope.
 
 The supplied canonical plan is `docs/ACTARO_DECELOPMENT_PLAN.md`; the requested
@@ -31,8 +31,8 @@ fractions, not subjective estimates. CI remains unimplemented and counted until
 its applicability is decided. v1.0 has no plan weight: track its nine explicit
 release gates separately, without inventing a numeric weight.
 
-Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 4/5 + 2 × 2/2 + 3 × 3/4 = 10.65`.
-Release completion: `10.65 / 40 × 100 = 26.625%`. Rounded table percentages never
+Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 4/5 + 2 × 2/2 + 3 × 3/4 + 6 × 6/12 = 13.65`.
+Release completion: `13.65 / 40 × 100 = 34.125%`. Rounded table percentages never
 replace these exact fractions. This is verified foundation progress, not a completed v0.1 release.
 
 ## Feature Table
@@ -46,7 +46,7 @@ replace these exact fractions. This is verified foundation progress, not a compl
 | Phase 0 / 0.5    | Design System                          | v0.1    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §0.5.                                                                   |
 | Phase 0 / 0.6    | Navigation                             | v0.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §0.6.                                                                   |
 | Phase 0 / 0.7    | Supabase Integration                   | v0.1    |      3 | IN_PROGRESS |        75% | Configuration, client/lifecycle contracts and live API probes verified (3/4); native checks pending. |
-| Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §0.8.                                                                   |
+| Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | IN_PROGRESS |        50% | Six implemented/contract-tested flows; six live/device validations pending (6/12).                   |
 | Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §0.9.                                                                   |
 | Phase 0 / 0.10   | RLS / Security Foundation              | v0.1    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §0.10.                                                                  |
 | Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §0.11.                                                                  |
@@ -167,7 +167,7 @@ replace these exact fractions. This is verified foundation progress, not a compl
 
 | Phase    | Release | Purpose                           | Planned weight | Completion | Status      |
 | -------- | ------- | --------------------------------- | -------------: | ---------: | ----------- |
-| Phase 0  | v0.1    | Foundation                        |             40 |    26.625% | IN_PROGRESS |
+| Phase 0  | v0.1    | Foundation                        |             40 |    34.125% | IN_PROGRESS |
 | Phase 1  | v0.2    | Exercise Library                  |             28 |         0% | NOT_STARTED |
 | Phase 2  | v0.3    | Strength Workout System           |             70 |         0% | NOT_STARTED |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |         0% | NOT_STARTED |
@@ -200,7 +200,8 @@ specific implementation and validation evidence listed in Last Completed.
   non-route code outside routes; feature/UI/business/data boundaries documented
   and applied to the current minimal scaffold. Verified: 2/2.
 - **0.7 Supabase Integration (4 subtasks):** validated environment; shared client/storage/lifecycle configuration; read-only live Auth/database probes; native integration smoke tests on Android and iOS. Verified: 3/4. Native boundary mocks and exports do not count as device tests.
-- **0.5–0.6, 0.8–0.11:** no subtasks implemented. Their criteria remain in the canonical plan.
+- **0.8 Authentication (12 subtasks):** each of the six canonical flows has an implementation/contract-test subtask and a live acceptance subtask: signup, sign-in, sign-out, password reset, session persistence and verification. Verified: 6/12. App/SDK contracts are tested; live email flows and device persistence remain unverified. Figma screenshot parity is also pending and does not earn weight.
+- **0.5–0.6, 0.9–0.11:** no subtasks implemented. Their criteria remain in the canonical plan.
 
 ## v1.0 release gate
 
@@ -248,12 +249,20 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 
 ## Last Completed
 
+**IN_PROGRESS — Email/password authentication (2026-10-09), task 0.8.**
+
+- Added feature-local UI, service calls and an auth context; routes compose those features. Signup, sign-in, local sign-out, reset/update, verification/resend and session restoration have contract tests. PKCE callbacks forward the SDK flow ID and reject ambiguous/expired links.
+- Added only the current Inter font package through Expo. Replaced the starter root/index with the authorized auth entry and a minimal real-session account screen; remaining starter files were preserved. This does not complete product navigation or the broader design system.
+- Supabase MCP access is verified, project ACTIVE_HEALTHY, public tables empty. No migration, Auth security-setting change, paid resource or SMTP configuration was performed.
+- Sign In/Reset Figma references were fetched. User approved composing the other auth states from those components after the Figma limit blocked Sign Up. Exact Sign Up visual matching remains pending. Browser preview tooling failed twice; no interactive visual verification is claimed.
+- See [auth testing](AUTH_TESTING.md) for callback allowlists, free team-email testing and the live/device checklist. No additional application credentials are required.
+
 **DONE — Analytics-aware schema design document (2026-10-09), unweighted planning work.**
 
 - `docs/decisions/003-core-schema.md` specifies the first two private foundation tables, identity/foreign keys, constraints, default decisions, least-privilege grants and ownership acceptance tests.
 - Documents historical facts/snapshots, canonical units, local dates/timezones, ownership-preserving relationships, query-driven indexes and reproducible deterministic reports. Later domain entities stay in their approved releases.
 - Design is not applied SQL, generated database types, working profile persistence, or verified RLS. Items 0.9/0.10/0.11 earn no implementation weight from this document.
-- Supabase installation is confirmed and user-authorized; no project/database tools are callable in this session yet. No request for repeat authorization.
+- At the earlier schema-design handoff, Supabase project/database tools were unavailable. Access is now verified; see Authentication verification.
 
 ### Client integration history
 
@@ -323,13 +332,13 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-Sequential foundation development is authorized. Supabase client task is verified. The user selected and authorized the Supabase plugin; installation is confirmed, but its project/database tools are not yet exposed to this session. The first schema design is recorded in ADR 003. Inspect the live database before applying migrations.
+Authentication is the user's authorized current task. Client connection and Supabase MCP authorization are verified. Application auth flows are implemented with contract tests; live email/callback and Android/iOS persistence checks remain. Supabase's existing Auth service does not require the forthcoming profile schema. No application tables or migrations exist yet.
 
 ## Next 3 Actions
 
-1. Inspect the empty Supabase project through the authorized plugin and apply only the first profile/preferences migration with RLS, constraints and ownership tests.
-2. Add GitHub CI running the existing meaningful `npm run check`.
-3. Read relevant Figma foundation nodes and implement only verified design tokens before UI/auth screens.
+1. Verify exact callback allowlists and run live signup/confirmation/sign-in/sign-out/reset using a Supabase team email with the default free sender.
+2. Validate persistence and sign-out cleanup on Android and iOS, then close task 0.8 only when its acceptance checks pass.
+3. Apply only the first profile/preferences migration with constraints, least-privilege grants and two-user RLS tests, then generate types from the real schema.
 
 ## Blockers / Decisions
 
@@ -342,7 +351,7 @@ Sequential foundation development is authorized. Supabase client task is verifie
   native development build or device smoke test has been run.
 - Canonical filename mismatch is documented; original content is preserved.
   It does not block initialization using the supplied plan.
-- Supabase public configuration is supplied for the empty project. Both Android and iOS are test targets. Supabase installation is confirmed and the user authorized its connection; database tools are not yet exposed to this session. No migration was applied.
+- Supabase public configuration is supplied for the empty project. Both Android and iOS are test targets. Supabase installation is confirmed and the user authorized its connection; database tools are now authorized and callable. No migration was applied.
 - `npm audit --json` reports 29 affected packages (18 high, 11 moderate), rooted
   in advisories for braces, decode-uri-component, node-forge, uuid, and their
   dependency chains. Review runtime/tooling exposure before release; no safety
@@ -385,3 +394,16 @@ Sequential foundation development is authorized. Supabase client task is verifie
 - Design scope is a first v0.1 migration specification plus later-domain data rules, not early implementation of future features. No schema was applied.
 - `npm run check`: PASS (exit 0), including typecheck, lint, formatting and 19 tests. Blueprint review and passing application checks do not constitute database security verification.
 - Client commit: `31849bd` (`feat: configure validated Supabase client integration`). Test baseline commit: `f5e2cc6` (`test: establish Expo foundation regression checks`). Neither was pushed.
+
+## Authentication verification (2026-10-09)
+
+- Supabase MCP get_project: PASS, ACTIVE_HEALTHY; list_tables(public): PASS, empty. Authorization is established. Earlier records of unavailable tools describe the previous session state.
+- Auth settings previously returned HTTP 200, email signup enabled and confirmation required. This setting is preserved.
+- Automated auth tests use mocked SDK boundaries. They establish app logic/contracts, not live signup or native persistence.
+- Initial check failed on synchronous effect state; corrected initialization and reran. An initial callback test fixture captured an uninitialized mock; corrected the fixture. One cold-render timeout passed on rerun.
+- `npm run check`: PASS (exit 0), typecheck, lint, formatting and 37 tests across seven suites.
+- `npx expo export --platform all`: PASS (exit 0), final Android/iOS Hermes bundles, web bundle and six static routes. Exports do not prove native launch.
+- `npm run check:supabase`: PASS (exit 0) outside the network sandbox after the restricted attempt failed. Auth settings accept public configuration; profiles still absent. No users or tables created.
+- `npx expo install @expo-google-fonts/inter`: PASS; only current auth font dependency added. Existing dependencies preserved.
+- Browser preview: BLOCKED, automation runtime failed to start twice. Live emails, callbacks and native runtime tests remain NOT_STARTED.
+- `git diff --check`: PASS. Ignored `.env` remains outside the change set.

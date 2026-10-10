@@ -51,3 +51,9 @@ References:
 - [Supabase React Native authentication setup](https://supabase.com/docs/guides/auth/quickstarts/react-native)
 - [Supabase public API keys and RLS](https://supabase.com/docs/guides/getting-started/api-keys)
 - [Expo SDK 57](https://docs.expo.dev/versions/v57.0.0/)
+
+## Auth flow implementation (2026-10-09)
+
+The authorized authentication task now uses PKCE, an AuthProvider for session restoration/events and feature-local Supabase calls. The provider owns the native refresh subscription and cleans it up. Callback routes exchange a one-use code with its SDK `sb_flow_id`, replace the URL on success, and never log tokens or provider responses. Only the SDK PASSWORD_RECOVERY event opens password update. Sign-out uses local scope to clear this device. AsyncStorage remains the SDK session store; live Android/iOS persistence is unverified.
+
+Email confirmation is enabled on the project and was preserved. The user requested no custom SMTP or paid resources. Exact callback allowlists and live email delivery still require verification. See [auth testing](../AUTH_TESTING.md). No profile tables, health-data policies, or schema migrations were added by the auth task.

@@ -15,6 +15,7 @@ function createSupabaseClient() {
 
   return createClient(config.url, config.publishableKey, {
     auth: {
+      flowType: 'pkce',
       ...(Platform.OS !== 'web' ? { storage: AsyncStorage } : {}),
       autoRefreshToken: true,
       persistSession: true,

@@ -1,7 +1,7 @@
 # Actaro
 
 Premium personal fitness and wellness mobile application, developed incrementally.
-Current implementation: official Expo starter, repository initialization and a verified test baseline.
+Current implementation: Expo foundation, Supabase client and email/password auth flows with contract tests. Live email/device verification is pending.
 The starter screens, colors, icons, and assets are Expo examples, not the approved
 Actaro design system or implemented product features. Version `0.1.0` is project
 metadata; v0.1's release gate has not passed.
@@ -55,7 +55,7 @@ npm run test:watch
 
 `npm run format` applies Prettier. Canonical documents and binary assets are
 excluded from formatting. Jest uses the SDK 57 Expo preset and React Native Testing Library. Tests cover
-server/client hydration and preference updates. `npm run check` includes tests
+server/client hydration, Supabase configuration, auth forms/services, callback handling and session transitions. `npm run check` includes tests
 and fails if any check fails. CI remains a separate task.
 
 ## Structure and architecture
@@ -65,7 +65,8 @@ The scaffold follows Expo's default template and supported SDK versions:
 [SDK 57 reference](https://docs.expo.dev/versions/v57.0.0/).
 
 ```text
-src/app/          Expo Router route entry points and layout
+src/app/          Expo Router route entry points and auth layout
+src/features/auth/ Auth UI, business/service logic and session context
 src/components/   Existing Expo starter components
 src/hooks/        Existing starter presentation hooks
 src/constants/    Existing starter theme (not Actaro tokens)
@@ -82,7 +83,7 @@ services. The generator's `reset-project` moves starter code; do not run it as
 unrelated cleanup.
 
 Backend: Supabase PostgreSQL, Auth, RLS and Storage. The shared client is
-configured; auth screens, schema and RLS policies are not implemented. React state
+configured; auth screens and service flows exist. Schema and RLS policies are not implemented. React state
 is the default; TanStack Query and Zustand require demonstrated needs.
 See [mobile stack decision](docs/decisions/001-mobile-stack.md).
 
@@ -113,3 +114,5 @@ Future order: v1.1 Active Minutes → v1.2 Running & GPS → v1.3 Advanced Analy
 
 Initialization stops at review. Feature development requires explicit approval
 of the next small, independently verifiable task.
+
+For signup, verification and reset testing, see [authentication testing](docs/AUTH_TESTING.md). The app currently opens the auth screens, then a minimal account screen with the real signed-in email and sign-out. Product dashboards are not implemented.
