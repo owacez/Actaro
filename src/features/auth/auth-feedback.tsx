@@ -72,7 +72,7 @@ function FeedbackNotification({
         web ? styles.web : styles.mobile,
         {
           paddingTop: insets.top + 16,
-          paddingBottom: insets.bottom + (web ? 16 : 40),
+          paddingBottom: insets.bottom + (web ? 16 : 112),
           paddingLeft: insets.left + 16,
           paddingRight: insets.right + 16,
         },
