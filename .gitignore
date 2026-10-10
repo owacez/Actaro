@@ -54,3 +54,4 @@ coverage/
 *.aab
 *.ipa
 .actaro-tools/
+supabase/.temp/
