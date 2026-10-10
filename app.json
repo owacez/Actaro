@@ -8,9 +8,11 @@
     "scheme": "actaro",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "com.actaro.app",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.actaro.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -37,6 +39,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a4ba1469-cb68-4ce0-973a-627524e2dbc8"
+      }
+    },
+    "owner": "chmuhammadowais"
   }
 }
