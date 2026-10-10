@@ -9,6 +9,10 @@ import { FeedbackTestRoot } from './helpers/feedback-root';
 jest.mock('@/features/profile/profile-service', () => ({
   profileService: { getProfile: jest.fn(), updateProfile: jest.fn() },
 }));
+jest.mock('@/features/profile/account-security-service', () => ({
+  accountSecurityService: { changeEmail: jest.fn(), changePassword: jest.fn() },
+  accountSecurityError: () => 'Unable to update your account. Try again.',
+}));
 const service = jest.mocked(profileService);
 const profile: Profile = {
   id: 'test-user-a',
