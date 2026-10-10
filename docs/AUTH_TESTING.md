@@ -33,10 +33,39 @@ configuration editing; the allowlist has not been inspected or changed.
   do not substitute a guessed address. A development build gives stable scheme URLs.
 
 Keep Supabase's default confirmation/reset templates using the confirmation URL.
-The SDK adds the PKCE flow ID to the redirect. Open the email link on the same
+Callbacks forward a PKCE flow ID when present; automatic flow-ID appending is
+an SDK experiment and is not enabled by this client. Open the email link on the same
 device/browser where signup or recovery started: that runtime holds the verifier.
 Only the SDK's PASSWORD_RECOVERY event enables password update; a route name does
 not grant access. Callback codes are exchanged once and removed through route replacement.
+
+## Desktop web confirmation and localhost errors
+
+For a signup started at `http://localhost:8081` on your computer:
+
+1. Keep `npm run web -- --port 8081` running.
+2. In Supabase Authentication > URL Configuration, verify that Redirect URLs
+   includes `http://localhost:8081/auth/callback` and
+   `http://localhost:8081/auth/recovery`. These settings have not been inspected
+   through the connected tools. Retain the default confirmation URL email template.
+3. Open the email link in the same computer browser/profile and origin used for
+   signup. That browser holds the PKCE verifier. Do not open the desktop-localhost
+   link on your phone: localhost there points to the phone, not the computer.
+4. After successful exchange, `/auth/confirmed` shows Email confirmed only if
+   Supabase's session reports `email_confirmed_at`. Continue opens Your Account.
+   Recovery links return to the separate password-update flow.
+
+Email verification can finish at Supabase before a browser redirect fails, so
+later password sign-in may work despite an unreachable redirect. A redirect to
+`/` rather than `/auth/callback` may indicate Site URL fallback or a template
+configuration issue; inspect the allowlist/template before treating that as proven.
+Do not reuse consumed links. If the account is already confirmed, sign in normally.
+To test phone confirmation, start signup in Expo Go and allow its actual callback,
+then open the email on that same phone.
+
+These are diagnosis and testing instructions, not a claim that remote Auth
+configuration or cross-device confirmation has been fixed. See
+[Supabase redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls).
 
 ## Verification steps
 

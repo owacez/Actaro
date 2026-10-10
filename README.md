@@ -148,6 +148,31 @@ repeating requests. No additional app key or paid SMTP service was configured.
   to Expo Go with that same account.
 - **Authentication unavailable:** check both `.env` values, restart Expo, and
   optionally run the read-only `npm run check:supabase` probe.
+- **Confirmation opens localhost on your phone:** a desktop web signup must be
+  completed in that same computer browser, with the web server running. Localhost
+  on the phone targets the phone. Verify the callback allowlist using the
+  [web confirmation checklist](docs/AUTH_TESTING.md#desktop-web-confirmation-and-localhost-errors).
+
+### Current screens
+
+These auth views exist in code and have automated logic/contract tests; full
+live email and Android/iOS verification remain pending.
+
+| Screen / state              | Present behavior                                                           |
+| --------------------------- | -------------------------------------------------------------------------- |
+| Sign In                     | Validated email/password sign-in.                                          |
+| Sign Up                     | Email, password and confirmation; creates a Supabase account.              |
+| Check Your Email            | Confirmation instructions and resend.                                      |
+| Reset Password              | Requests a recovery link without revealing account existence.              |
+| Set a New Password          | Updates the password after the SDK recovery event.                         |
+| Callback processing / error | Exchanges a one-use code or displays a safe link error.                    |
+| Email Confirmed             | Shows verified status from the Supabase session, then Continue to Account. |
+| Your Account                | Real signed-in email and local sign-out; current sign-in destination.      |
+
+The remaining `/explore` route is an Expo starter example, not an Actaro feature.
+Home/Today and the main product tabs are not implemented. The navigation shell
+belongs to v0.1; the populated Today dashboard belongs to v0.5. Exercise, workout,
+nutrition, habits/goals and progress screens remain in their scheduled releases.
 
 Tunnel setup and flags follow the [Expo CLI documentation](https://docs.expo.dev/more/expo-cli/).
 

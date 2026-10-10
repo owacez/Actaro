@@ -37,6 +37,7 @@ function AuthRoutes() {
     >
       <Stack.Screen name="index" />
       <Stack.Screen name="auth/callback" />
+      <Stack.Screen name="auth/confirmed" />
       <Stack.Screen name="auth/recovery" />
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="explore" />

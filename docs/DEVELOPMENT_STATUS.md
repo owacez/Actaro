@@ -7,7 +7,7 @@ Updated: 2026-10-09 (America/Los_Angeles).
 - Current Release: **v0.1 — Foundation**
 - Release Completion: **34.125% (13.65 / 40 weight)**
 - Current Phase: **Phase 0 — authentication**
-- Current Focus: Email/password auth flows implemented and contract-tested. Verify live email callbacks and Android/iOS persistence before completing task 0.8.
+- Current Focus: Fix and verify confirmation feedback/redirects, then finish live auth and Android/iOS persistence checks. Your Account is the current destination; Home/Today and product navigation remain unimplemented.
 - Status: **IN_PROGRESS**
 - Blockers: Git is installed; Node.js/npm use temporary portable tools.
   Live email callbacks and native session persistence remain unverified; browser automation failed to start. Expo Doctor config-schema check has an external API blocker; dependency advisories remain open.
@@ -336,7 +336,7 @@ Authentication is the user's authorized current task. Client connection and Supa
 
 ## Next 3 Actions
 
-1. Verify exact callback allowlists and run live signup/confirmation/sign-in/sign-out/reset using a Supabase team email with the default free sender.
+1. Verify web callback allowlists and complete confirmation in the initiating browser with the server running; test the new Email Confirmed view and reset flow using a Supabase team email.
 2. Validate persistence and sign-out cleanup on Android and iOS, then close task 0.8 only when its acceptance checks pass.
 3. Apply only the first profile/preferences migration with constraints, least-privilege grants and two-user RLS tests, then generate types from the real schema.
 
@@ -417,3 +417,16 @@ Authentication is the user's authorized current task. Client connection and Supa
 - Verified flags against the installed CLI with `npx expo start --help`; inspected SDK 57 bundled native dependencies and current versioned/start/CLI docs. No dependencies or application code changed.
 - `npm run check`: PASS (exit 0), typecheck, lint, formatting and 37 tests. Documentation does not prove a phone launch, live email callbacks or session persistence. Foundation completion remains 34.125%.
 - Previous four development commits were pushed to `origin/main`, through `4481f8c`, with explicit user authorization. The user also authorized pushing future verified changes when ready.
+
+## Confirmation feedback fix (2026-10-09)
+
+**DONE — Confirmation success feedback and screen inventory; auth task 0.8 remains IN_PROGRESS.**
+
+- User reported web signup, opening the confirmation email on a phone, an unreachable localhost redirect, then a successful password sign-in. Record this as user-reported evidence; it does not verify the full callback or native flow.
+- Added `/auth/confirmed` using approved auth components. Successful signup callback exchange replaces the code URL with that route. The view shows success only when the SDK session has Supabase-owned `email_confirmed_at`; anonymous sessions and user-editable metadata cannot trigger the success state.
+- Recovery callbacks retain the root destination and the existing SDK PASSWORD_RECOVERY state gate. Sign-in still opens Your Account. Home/Today and product tab navigation are not implemented: the shell is v0.1 work, the populated Today dashboard is v0.5 work.
+- README lists all present auth states. AUTH_TESTING documents same-browser web confirmation, localhost on a phone, exact callback allowlists and the distinction between backend confirmation and a failed browser redirect. Remote Auth settings were not changed or inspected; no production hostname was invented.
+- Corrected documentation about optional SDK PKCE flow-ID appending: the current client does not enable that experimental setting; callback forwarding remains supported when a flow ID is present.
+- `npm run check`: PASS (exit 0), typecheck, lint, formatting and 41 tests across eight suites. Tests cover confirmation proof, one-use callback success/error and recovery routing.
+- `npx expo export --platform all`: PASS (exit 0), Android/iOS/web bundles and seven static routes including `/auth/confirmed`. Exports are not phone launches or live email verification.
+- Weighted completion remains 34.125%; this bug fix adds no new plan weight. Callback configuration/live confirmation, reset, sign-out and native persistence acceptance remain pending.

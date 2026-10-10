@@ -28,7 +28,14 @@ test('exchanges the native flow id and replaces the URL after success', async ()
   exchange.mockResolvedValue(undefined);
   await render(<AuthCallbackScreen />);
   expect(exchange).toHaveBeenCalledWith('test-code', 'native-test-flow-id');
+  await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/auth/confirmed'));
+});
+test('recovery callbacks return to the SDK-controlled password recovery flow', async () => {
+  mockParams = { code: 'recovery-code' };
+  exchange.mockResolvedValue(undefined);
+  await render(<AuthCallbackScreen recovery />);
   await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/'));
+  expect(mockReplace).not.toHaveBeenCalledWith('/auth/confirmed');
 });
 test('expired links never navigate or expose the provider response', async () => {
   mockParams = { code: 'expired-code' };

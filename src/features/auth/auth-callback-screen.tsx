@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { AuthButton, AuthFrame, AuthNotice, AuthText } from './auth-components';
 import { exchangeAuthCode } from './auth-service';
 
-export function AuthCallbackScreen() {
+export function AuthCallbackScreen({ recovery = false }: { recovery?: boolean }) {
   const { code, error, error_code, sb_flow_id } = useLocalSearchParams<{
     code?: string | string[];
     error?: string | string[];
@@ -20,7 +20,7 @@ export function AuthCallbackScreen() {
     if (typeof code !== 'string' || invalid) return;
     void exchangeAuthCode(code, typeof sb_flow_id === 'string' ? sb_flow_id : undefined)
       .then(() => {
-        if (active) router.replace('/');
+        if (active) router.replace(recovery ? '/' : '/auth/confirmed');
       })
       .catch(() => {
         if (active) setFailedCode(code);
@@ -28,7 +28,7 @@ export function AuthCallbackScreen() {
     return () => {
       active = false;
     };
-  }, [code, invalid, sb_flow_id]);
+  }, [code, invalid, sb_flow_id, recovery]);
   return (
     <AuthFrame>
       <AuthText kind="heading">
