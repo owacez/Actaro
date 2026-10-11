@@ -1,6 +1,6 @@
 # Profile testing
 
-Updated: 2026-10-11. v0.1 Profile / Preferences remains IN_PROGRESS.
+Updated: 2026-10-11. v0.1 Profile / Preferences is DONE; separate Auth/security/visual acceptance remains open.
 
 ## Current scope
 
@@ -21,12 +21,13 @@ Theme drafts apply only after a successful save. System follows the device;
 signed-out screens also use System. On sign-in, the owned preference is fetched;
 loading/failure uses System until Preferences successfully loads or saves.
 The user approved a functional dark palette while Figma MCP is limited;
-exact dark-mode visual matching and live theme persistence remain pending.
-Browser automation could not initialize,
-so no agent interactive visual or live authenticated persistence pass is claimed.
-The user reports the name editor works on iPhone Expo Go; this is not evidence
-for email/password updates. The latest iPhone report confirms five-tab switching,
-sign-in and sign-out; Android is unavailable.
+exact dark-mode visual matching remains pending. The user verified name/preferences
+save/reopen, theme switching, session restoration and reset/new-password sign-in
+on web and iPhone. Web email change also passed; mobile email change remains open.
+The user previously confirmed iPhone five-tab switching and sign-in/sign-out.
+Android is unavailable. Isolated agent browser smoke checks covered signed-out
+auth/callback screens; authenticated acceptance here is user-reported. Two-account
+application isolation remains a separate security check.
 
 ## Manual acceptance — web and Expo Go
 

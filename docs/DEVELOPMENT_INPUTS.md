@@ -1,6 +1,6 @@
 # Development inputs
 
-Updated: 2026-10-10
+Updated: 2026-10-11
 
 ## Already supplied
 
@@ -33,7 +33,9 @@ that project before administrative tasks; the public key cannot apply migrations
    `com.actaro.app` for Android/iOS development. Internal development profiles
    and Expo's compatible development client are configured. Native compilation
    and launch remain pending; Android is currently unavailable. A physical iPhone
-   cloud build needs Apple signing/account access. Do not send signing secrets.
+   cloud build needs Apple signing/account access. The user has no Apple Developer
+   membership and explicitly deferred all native/cloud builds until the app is
+   ready. Do not submit builds or configure signing now. Do not send signing secrets.
 3. For free authentication testing, use a Supabase team email and allow the exact runtime callback URLs. Email confirmation stays enabled; no custom SMTP or paid resource was configured. See [auth testing](AUTH_TESTING.md). The default sender is limited; public production email delivery is a later release requirement.
 
 ## Later core-release inputs
@@ -51,16 +53,19 @@ when its corresponding task needs it.
 
 ## Outstanding v0.1 evidence and access
 
-- Figma's Starter call limit blocks the remaining component/theme reads. The
-  verified light values and approved existing components are used; exact visual
-  matching and theme switching remain open.
+- Figma's Starter call limit blocks the remaining design reads. The approved PDF
+  fallback and functional dark palette are in use. Current shared controls and
+  theme switching are implemented; full visual acceptance remains open.
 - Complete the [auth](AUTH_TESTING.md) and [profile/preferences](PROFILE_TESTING.md)
   checklists. iPhone sign-in/out, tabs and name editing are user-confirmed;
-  confirmation/reset/reopening, account updates and preference save/reopen still
-  need individual results. No extra application API key is needed.
-- Before a cloud development build, set the two public variables in the linked
-  EAS project's development environment and confirm available free build quota.
-  No paid service was enabled.
+  web email change with both inbox confirmations and an updated account email is
+  also user-confirmed. Session restoration, profile/preferences save/reopen, themes
+  and password reset/new-password sign-in passed on web/iPhone. Native email change,
+  post-crypto device acceptance, individually identified signup/verification and
+  two-account application isolation remain open. No extra application API key is needed.
+- Cloud builds are user-deferred. When separately authorized later, configure the
+  two public build variables and check quota/signing requirements. No build or
+  paid service was enabled during foundation verification.
 
 ## Current testing
 

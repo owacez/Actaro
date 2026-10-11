@@ -123,6 +123,12 @@ links require a development build. Follow the
 [Expo Go email-change checklist](docs/AUTH_TESTING.md#email-changes-started-in-expo-go)
 before repeating requests. No additional app key or paid SMTP service was configured.
 
+Native email-link requests use the SDK-compatible `expo-crypto` module for secure
+randomness and SHA-256 PKCE challenges. It is included in Expo Go; after pulling
+dependency changes, run `npm ci` and restart Metro. Web retains browser crypto
+and needs a secure origin (HTTPS or localhost). This does not change callback
+allowlists or remove the original-device/browser requirement.
+
 ### Troubleshooting
 
 - **`npx expo login` asks to install Expo:** run it from the Actaro folder,

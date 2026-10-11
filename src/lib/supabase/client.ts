@@ -6,8 +6,10 @@ import { AppState, Platform, type AppStateStatus } from 'react-native';
 
 import { readSupabaseConfiguration } from './config';
 import type { Database } from './database.types';
+import { installNativePkceCrypto } from './pkce-crypto';
 
 function createSupabaseClient() {
+  installNativePkceCrypto();
   // Expo inlines public variables only when accessed with static dot notation.
   const config = readSupabaseConfiguration(
     process.env.EXPO_PUBLIC_SUPABASE_URL,

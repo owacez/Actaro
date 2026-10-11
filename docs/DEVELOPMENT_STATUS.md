@@ -5,12 +5,12 @@ Updated: 2026-10-11 (America/Los_Angeles).
 ## Overall
 
 - Current Release: **v0.1 — Foundation**
-- Release Completion: **77.5% (31 / 40 weight)**
+- Release Completion: **84.375% (33.75 / 40 weight)**
 - Current Phase: **Phase 0 — Foundation verification**
-- Current Focus: Complete v0.1 sequentially. PDF-verified navigation and shared component states are implemented. Callback errors now distinguish missing/mismatched PKCE verification data from expired links. The user must retest the second web email-change link; remaining live acceptance and full design checks are open. Custom native builds are explicitly deferred by the user until the application is ready.
+- Current Focus: Complete v0.1 sequentially. The user verified web/iPhone session restoration, profile/preferences persistence, theme switching and password reset/new-password sign-in, plus web email change. Native PKCE crypto correction passes SDK tests and all-platform export; native email change and remaining acceptance/full design checks are open. Custom native builds are explicitly deferred by the user until the application is ready.
 - Status: **IN_PROGRESS**
 - Blockers: Git and system Node.js/npm are installed. Windows ARM64 tunnel tooling has a locally verified x64 workaround; actual tunnel connectivity remains unverified.
-  Figma subtree reads hit the Starter limit; live email callbacks and session persistence remain unverified. Browser automation failed to start; Android is unavailable. Expo Doctor now passes 21/21 checks. Dependency advisories remain open.
+  Figma subtree reads hit the Starter limit; native email-change callbacks and remaining acceptance are unverified. The default browser runtime failed, but isolated headless Edge smoke checks passed. Android is unavailable. Expo Doctor's last run passed 21/21 checks. Dependency advisories remain open.
 - Approval boundary: User authorized completing all remaining v0.1 work on 2026-10-11, one verified task at a time. Custom native builds are now explicitly deferred until the application is ready; no build was submitted. Later feature releases remain outside scope.
 
 Latest design access: the user supplied a local Figma PDF export and authorized
@@ -40,8 +40,8 @@ fractions, not subjective estimates. CI is implemented and its remote run passed
 v1.0 has no plan weight: track its nine explicit
 release gates separately, without inventing a numeric weight.
 
-Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 5/5 + 2 × 2/2 + 5 × 4/5 + 3 × 2/3 + 3 × 3/4 + 6 × 8/12 + 3 × 3/4 + 6 × 3/4 + 4 × 3/4 = 31`.
-Release completion: `31 / 40 × 100 = 77.5%`. Rounded table percentages never
+Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 5/5 + 2 × 2/2 + 5 × 4/5 + 3 × 2/3 + 3 × 3/4 + 6 × 10/12 + 3 × 4/4 + 6 × 3/4 + 4 × 4/4 = 33.75`.
+Release completion: `33.75 / 40 × 100 = 84.375%`. Rounded table percentages never
 replace these exact fractions. This is verified foundation progress, not a completed v0.1 release.
 
 ## Feature Table
@@ -55,10 +55,10 @@ replace these exact fractions. This is verified foundation progress, not a compl
 | Phase 0 / 0.5    | Design System                          | v0.1    |      5 | IN_PROGRESS |        80% | Palette, typography, layout and current component/state catalog verified (4/5); exact visual/theme acceptance pending.                          |
 | Phase 0 / 0.6    | Navigation                             | v0.1    |      3 | IN_PROGRESS |     66.67% | Five routes and authenticated/recovery routing contracts verified (2/3); iPhone switching user-confirmed; complete live tab acceptance pending. |
 | Phase 0 / 0.7    | Supabase Integration                   | v0.1    |      3 | IN_PROGRESS |        75% | Configuration, client/lifecycle contracts and live API probes verified (3/4); native checks pending.                                            |
-| Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | IN_PROGRESS |     66.67% | Six implementation contracts plus user-verified live sign-in/sign-out (8/12); four live groups pending.                                         |
-| Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | IN_PROGRESS |        75% | Schema/access and functional UI/states including themes verified (3/4); live save/reopen acceptance pending.                                    |
+| Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | IN_PROGRESS |     83.33% | Six implementation contracts plus sign-in/out, reset and session persistence user-verified (10/12); signup/verification acceptance open.        |
+| Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | DONE        |       100% | Schema/services/UI and web/iPhone profile/preferences save/reopen user-verified (4/4); separate native email-change follow-up remains.          |
 | Phase 0 / 0.10   | RLS / Security Foundation              | v0.1    |      6 | IN_PROGRESS |        75% | Grants/policies, database isolation/constraints and lifecycle tested (3/4); application integration pending.                                    |
-| Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | IN_PROGRESS |        75% | Types, owned services and validation/error mapping verified (3/4); live application integration pending.                                        |
+| Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | DONE        |       100% | Types, owned services, validation/error mapping and live profile/preferences reads/writes verified (4/4).                                       |
 | Phase 1 / 1.1    | Muscle & Equipment Schema              | v0.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §1.1.                                                                                                              |
 | Phase 1 / 1.2    | Exercise Schema                        | v0.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §1.2.                                                                                                              |
 | Phase 1 / 1.3    | Exercise Media Schema                  | v0.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §1.3.                                                                                                              |
@@ -176,7 +176,7 @@ replace these exact fractions. This is verified foundation progress, not a compl
 
 | Phase    | Release | Purpose                           | Planned weight | Completion | Status      |
 | -------- | ------- | --------------------------------- | -------------: | ---------: | ----------- |
-| Phase 0  | v0.1    | Foundation                        |             40 |      77.5% | IN_PROGRESS |
+| Phase 0  | v0.1    | Foundation                        |             40 |    84.375% | IN_PROGRESS |
 | Phase 1  | v0.2    | Exercise Library                  |             28 |         0% | NOT_STARTED |
 | Phase 2  | v0.3    | Strength Workout System           |             70 |         0% | NOT_STARTED |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |         0% | NOT_STARTED |
@@ -209,10 +209,10 @@ specific implementation and validation evidence listed in Last Completed.
   non-route code outside routes; feature/UI/business/data boundaries documented
   and applied to the current minimal scaffold. Verified: 2/2.
 - **0.7 Supabase Integration (4 subtasks):** validated environment; shared client/storage/lifecycle configuration; read-only live Auth/database probes; native integration smoke tests on Android and iOS. Verified: 3/4. Native boundary mocks and exports do not count as device tests.
-- **0.8 Authentication (12 subtasks):** each of the six canonical flows has an implementation/contract-test subtask and a live acceptance subtask: signup, sign-in, sign-out, password reset, session persistence and verification. Verified: 8/12. Six implementation contracts pass; the user reports working sign-in/sign-out on web and iPhone Expo Go. Android is unavailable. Live signup/confirmation, password reset and session persistence remain pending. Figma screenshot parity is pending and does not earn weight.
-- **0.9 Profile / Preferences (4 subtasks):** schema/default record creation; typed feature reads/updates; complete Profile/preferences UI and states; authenticated application save/reopen acceptance. Verified: 3/4. Profile and units/timezone/notification/gamification/theme UI contracts pass, with private-by-default ownership and explicit future-feature limits. Theme uses the user-approved functional palette. Live persistence, account updates and account isolation still require acceptance; exact Figma parity remains a separate design-system gate.
+- **0.8 Authentication (12 subtasks):** each of the six canonical flows has an implementation/contract-test subtask and a live acceptance subtask: signup, sign-in, sign-out, password reset, session persistence and verification. Verified: 10/12. Six implementation contracts pass; the user verified sign-in/sign-out, password reset/new-password sign-in and session persistence on web/iPhone. The broad report says mobile features work except email change; signup/email verification have not been individually identified, so those two live groups remain open. Web email change passed; native email change and post-crypto device acceptance remain open. Android is unavailable.
+- **0.9 Profile / Preferences (4 subtasks):** schema/default record creation; typed feature reads/updates; complete Profile/preferences UI and states; authenticated application save/reopen acceptance. Verified: 4/4. UI/validation/save contracts pass, and the user verified name/preferences save/reopen and themes on web/iPhone. Native email change remains a separately tracked Auth follow-up; two-account application isolation is tracked under security. Exact Figma parity remains a separate design-system gate.
 - **0.10 RLS / Security Foundation (4 subtasks):** least-privilege grants and ownership policies; real database anonymous/two-user/protected-write/constraint tests; secure initialization/backfill/timestamps/deletion cascades and private-function privileges; authenticated application integration and foundation security acceptance. Verified: 3/4. Real SQL roles and anonymous SDK probes pass; application integration and the observed Auth security warning remain tracked.
-- **0.11 Data Access Layer (4 subtasks):** actual generated database types in shared client; feature-local owned queries/mutations; permitted-field validation and safe error mapping; meaningful feature request/integration tests. Verified: 3/4. The 36 SDK transport/validation tests pass; the fourth subtask remains pending live authenticated application integration.
+- **0.11 Data Access Layer (4 subtasks):** actual generated database types in shared client; feature-local owned queries/mutations; permitted-field validation and safe error mapping; meaningful feature request/integration tests. Verified: 4/4. The 36 SDK transport/validation tests pass; user-verified live profile/preferences persistence now establishes the current authenticated read/write integration. Two-account application isolation remains the security gate, not inferred from these saves.
 - **0.5 Design System (5 subtasks):** shared verified palette; shared typography; shared layout/radius/touch-target values; complete current component catalog and screen states; full Figma matching including themes. Verified: 4/5. Shared controls now cover buttons, inputs, account cards, preference chips, selected tabs and real loading/empty/error states. Theme-aware styling uses verified light values and the user-approved functional dark palette; explicit preference selection/save contracts pass. Full visual/theme acceptance remains pending. No unused future performance component or guessed lime color was added.
 - **0.6 Navigation (3 subtasks):** five-tab composition and bundle validation; signed-in landing/signed-out/recovery routing contracts; live switching/back/sign-out acceptance on web and native. Verified: 2/3. Tests mock navigator rendering and do not establish real interactive switching. Exact Figma parity remains pending.
 
@@ -381,9 +381,9 @@ Profile management is reached from More and offers name, current email, email-ch
 
 ## Next 3 Actions
 
-1. Diagnose one fresh web email-change request in the initiating browser profile; keep the same origin/session and open both inbox links once. Verify the server-reported email afterward. Do not open web localhost links on a phone.
-2. Verify profile/preferences save/reopen, System/Light/Dark restoration and two-account isolation using [the preferences checklist](PROFILE_TESTING.md#preferences-acceptance).
-3. Complete signup/confirmation, password reset and session-reopen acceptance on web/iPhone. Record unavailable Android and user-deferred native builds separately; do not submit builds now.
+1. Retest native email-link requests after the PKCE crypto correction; use the initiating phone's actual allowed callback and verify the plain-challenge warning is absent. Do not open web localhost links on a phone.
+2. Verify two-account application isolation using [the preferences checklist](PROFILE_TESTING.md#preferences-acceptance); ordinary profile/preferences persistence and themes are now user-confirmed.
+3. Close the individually identified signup/verification and full visual acceptance checks. Record unavailable Android and user-deferred native builds separately; do not submit builds now.
 
 Do not mark task 0.8 DONE until its six live acceptance groups are verified. Full visual acceptance and the v0.1 release gate remain open. Native builds are explicitly deferred by the user until the application is ready; no completion credit is claimed for that unverified subtask. v0.2 remains outside the current work order.
 
@@ -762,3 +762,51 @@ Do not mark task 0.8 DONE until its six live acceptance groups are verified. Ful
 - `AUTH_TESTING.md` documents same-origin/profile testing, one request/both inbox
   links and safe-message-only reporting. Native builds remain user-deferred;
   v0.1 remains **77.5%**, with no further acceptance credit from this diagnosis.
+
+### User retest result
+
+- Both fresh web email-change confirmation links worked in the original browser;
+  the account email updated. This web flow is verified by the user. Replacement
+  email sign-in and phone callback acceptance have not been separately reported.
+- The user reports 1–2 minutes on the provider confirmation step, then an instant
+  app redirect. No app-side artificial wait or repeated session exchange was
+  found. Provider/browser latency has not been independently measured; no remote
+  setting, speculative timeout/retry or confirmation bypass was added.
+
+## Native PKCE crypto and live persistence evidence (2026-10-11)
+
+**DONE — Crypto correction/SDK verification and current profile/data acceptance; native callback retest remains open.**
+
+- Installed only `expo-crypto` **~57.0.3** using
+  `npx.cmd --no-install expo install expo-crypto`: PASS. It supplies the missing
+  secure RNG and SHA-256 digest used by the existing Supabase PKCE flow. The
+  small native-only initializer preserves available crypto functions and leaves
+  browser crypto untouched. No handwritten hashing, implicit-flow downgrade,
+  native build, private key, redirect override or database change was added.
+- This adapter supplies PKCE operations, not full WebCrypto. Unsupported digests
+  fail closed. Current owned services validate identity through server-side
+  `getUser`; local JWT verification via `getClaims` is not introduced or claimed.
+  Expo SDK 57 includes TextEncoder in Hermes and
+  [Expo Crypto is included in Expo Go](https://docs.expo.dev/versions/v57.0.0/sdk/crypto/).
+- Four meaningful regressions exercise the real Supabase SDK with mocked native
+  crypto/network boundaries: S256 request equals the hash of its stored verifier;
+  RFC 7636 Appendix-B vector; unsupported/failed digest sends no plain request;
+  browser/complete existing crypto preservation. No real signup or email was sent.
+- `npm.cmd run check`: **PASS**, strict TypeScript, lint, formatting and
+  **132 tests / 18 suites**. Initial test iterations exposed BufferSource typing
+  differences and the SDK's rejection contract; corrected fixtures/expectations,
+  without assertions, ignored errors or disabled checks.
+- `npx.cmd --no-install expo install --check`: **PASS**, dependencies up to date.
+  `npx.cmd --no-install expo export --platform all`: **PASS**, Android/iOS Hermes
+  bundles, web bundle and 19 static routes. Exports and native mocks are not a
+  device retest or compiled development build.
+- User separately confirms session reopening, name/preferences save/reopen,
+  System/Light/Dark switching and password reset/new-password sign-in on web
+  and iPhone. Those results complete the profile/data integration groups and
+  auth reset/persistence live groups. Broad mobile assurance excludes email
+  change; signup/verification have not been individually identified in that
+  reply. Two-account app isolation remains open despite passing real SQL RLS tests.
+- Foundation earns **33.75/40 = 84.375%**. Current Profile/Preferences and Data
+  Access are DONE. Native email change, post-crypto device checks, remaining
+  Auth/security/navigation/visual acceptance and deferred native builds prevent
+  claiming the full foundation release complete. No v0.2 work was started.
