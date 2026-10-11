@@ -1,6 +1,6 @@
 # Profile testing
 
-Updated: 2026-10-10. v0.1 Profile / Preferences remains IN_PROGRESS.
+Updated: 2026-10-11. v0.1 Profile / Preferences remains IN_PROGRESS.
 
 ## Current scope
 
@@ -49,6 +49,9 @@ share a password, session token, confirmation code or private profile data in ch
 9. Open Change email, enter a different email and submit once. The current email
    must remain until confirmed; check both inboxes as required by project settings.
    Open links in the originating browser/app using its allowed callback URL.
+   For Expo Go, follow the [email-change callback checklist](AUTH_TESTING.md#email-changes-started-in-expo-go).
+   The first link can show **Check your other inbox** without completing the change.
+   A redirect to localhost on a desktop is not evidence of a successful phone callback.
    Reopen Profile after confirmation and sign in using the replacement email.
 10. Change password with matching passwords of at least eight characters. If
     reauthentication is required, sign out/in and retry. On success, sign out and

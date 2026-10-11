@@ -1,13 +1,13 @@
 # Actaro — Development Status
 
-Updated: 2026-10-10 (America/Los_Angeles).
+Updated: 2026-10-11 (America/Los_Angeles).
 
 ## Overall
 
 - Current Release: **v0.1 — Foundation**
 - Release Completion: **73.125% (29.25 / 40 weight)**
 - Current Phase: **Phase 0 — Foundation verification**
-- Current Focus: Preferences now save units, time zone and notification/gamification opt-in values. Verified light tokens are shared by current components/navigation. CI and EAS development configuration are implemented; remote CI passed; native build launch remains pending. User confirms iPhone tabs, sign-in/out and name editing. Theme switching, remaining live acceptance and exact Figma matching are open.
+- Current Focus: Fix and verify email-change callbacks from Expo Go. The first secure confirmation now has an other-inbox instruction state; runtime redirect configuration and final live confirmation remain pending. Preferences, light tokens, CI and EAS configuration are implemented. Theme switching, native build launch, remaining live acceptance and exact Figma matching are open.
 - Status: **IN_PROGRESS**
 - Blockers: Git is installed; Node.js/npm use temporary portable tools.
   Figma subtree reads hit the Starter limit; live email callbacks and session persistence remain unverified. Browser automation failed to start; Android is unavailable. Expo Doctor now passes 21/21 checks. Dependency advisories remain open.
@@ -380,7 +380,7 @@ Profile management is reached from More and offers name, current email, email-ch
 
 ## Next 3 Actions
 
-1. Verify preference/profile save/reopen, email/password updates and account isolation on web/iPhone using [the checklist](PROFILE_TESTING.md), alongside the remaining auth flows.
+1. Configure the actual Expo Go tunnel callbacks in Supabase and verify a fresh two-inbox email change on the initiating iPhone using [the callback checklist](AUTH_TESTING.md#email-changes-started-in-expo-go). Then finish preference/profile save/reopen, password updates and account isolation using [the checklist](PROFILE_TESTING.md), alongside the remaining auth flows.
 2. Use the user-approved local Figma PDF fallback for relevant remaining components when MCP is limited; resolve conflicting/stale palette values, obtain missing theme states, implement theme switching and verify visual parity.
 3. Complete a native development build and launch with the approved identifiers; repeat the native acceptance checks on Android when a device/emulator is available. Keep the passing CI baseline before closing v0.1.
 
@@ -606,3 +606,36 @@ Confirm the remaining auth test matrix alongside these tasks; do not mark task 0
 - Live security advisor: no database ownership/RLS findings; leaked-password protection is disabled. [Supabase documents this protection as Pro-plan and above](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection); no paid setting was enabled. `npm.cmd audit --json`: FAIL (exit 1), 66 affected packages, 50 high/16 moderate; proposed fixes include incompatible Expo/RN/test major changes, so no force fix was applied. Release security review remains open.
 - README, development inputs and Profile testing now include real preference behavior, native-build instructions, environment requirements and remaining acceptance. `git diff --check` and secret/build ignores: PASS. User-supplied PDF remains unchanged and untracked; no temporary PDF tooling is committed.
 - User evidence: iPhone Expo Go sign-in/out, tabs and name editing work. Android unavailable; confirmation/reset/session reopen, email/password changes, preference save/reopen/two-account app integration, complete visual foundation and custom native-build launch remain pending. **v0.1 is IN_PROGRESS (29.25/40 = 73.125%); v0.2 was not started.**
+
+## Expo Go email-change callback correction (2026-10-11)
+
+**IN_PROGRESS — Callback implementation verified; remote configuration and live acceptance pending.**
+
+- User reports starting the email change in Expo Go, then opening a confirmation
+  on the desktop and reaching an unreachable `localhost:3000` address. The
+  provider message indicates the first link was accepted and another inbox must
+  confirm; it does not prove the email change or app callback completed.
+- The account service already sends `emailRedirectTo: authRedirectUrl()`, derived
+  from the running app through Expo Linking. No fixed localhost address, new
+  credential, schema change, dependency or confirmation-policy bypass was added.
+- `auth-callback-screen.tsx` previously rejected the legitimate message-only
+  first confirmation because it had no code. It now shows **Check your other
+  inbox** and a return action. Only a valid code can enter the existing session
+  exchange; URL message text never authorizes or claims an account update.
+- Added eight regression cases for the first step, malformed/duplicate/error
+  parameters, recovery isolation and the final code exchange. `npm.cmd run check`:
+  **PASS (exit 0)**, TypeScript, lint, formatting and **116 tests in 15 suites**.
+  Mocked callback tests do not establish live email delivery or native launch.
+- Read-only Auth health probe: **HTTP 200**, version **v2.197.0**. Its tagged
+  redirect validator rejects non-loopback literal IP destinations before the
+  allowlist unless Site URL matches. This is a possible explanation for LAN Expo
+  Go fallback, not proof of the project's uninspected configuration. See
+  [the tagged source](https://github.com/supabase/auth/blob/v2.197.0/internal/utilities/request.go).
+- Connected MCP tools cannot inspect/edit Auth URL settings or templates; browser
+  automation failed to initialize. No remote setting was changed and no new
+  confirmation email was sent. README/Auth/Profile testing now document an actual
+  hostname-based tunnel callback allowlist, same-phone PKCE verification, fresh
+  links and stable development-build alternatives. No personal LAN address is stored.
+- Foundation completion remains **73.125% (29.25/40)**. Email-change confirmation,
+  server-reported updated email and replacement-email sign-in still require live
+  acceptance. No further release work was started.

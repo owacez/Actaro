@@ -5,13 +5,24 @@ import { AuthButton, AuthFrame, AuthNotice, AuthText } from './auth-components';
 import { exchangeAuthCode } from './auth-service';
 
 export function AuthCallbackScreen({ recovery = false }: { recovery?: boolean }) {
-  const { code, error, error_code, sb_flow_id } = useLocalSearchParams<{
+  const { code, error, error_code, sb_flow_id, message } = useLocalSearchParams<{
     code?: string | string[];
     error?: string | string[];
     error_code?: string | string[];
     sb_flow_id?: string | string[];
+    message?: string | string[];
   }>();
   const [failedCode, setFailedCode] = useState<string | null>(null);
+  // The first secure email-change link has no session code. This is an
+  // instruction state only; URL text never authorizes or completes an update.
+  const pendingEmailChange =
+    !recovery &&
+    code === undefined &&
+    !error &&
+    !error_code &&
+    !Array.isArray(sb_flow_id) &&
+    message ===
+      'Confirmation link accepted. Please proceed to confirm link sent to the other email';
   const invalid =
     typeof code !== 'string' || !code || !!error || !!error_code || Array.isArray(sb_flow_id);
   const failed = invalid || failedCode === code;
@@ -32,9 +43,22 @@ export function AuthCallbackScreen({ recovery = false }: { recovery?: boolean })
   return (
     <AuthFrame>
       <AuthText kind="heading">
-        {failed ? 'Unable to open this link' : 'Confirming your account'}
+        {pendingEmailChange
+          ? 'Check your other inbox'
+          : failed
+            ? 'Unable to open this link'
+            : 'Confirming your account'}
       </AuthText>
-      {failed ? (
+      {pendingEmailChange ? (
+        <>
+          <AuthNotice>
+            Your email change needs confirmation from both addresses. Open the other confirmation
+            email on the same phone or browser where you started. Your email changes only after all
+            required confirmations are complete.
+          </AuthNotice>
+          <AuthButton title="Return to app" onPress={() => router.replace('/')} />
+        </>
+      ) : failed ? (
         <>
           <AuthNotice error>
             Request a new link and open it on the device where you started. Links expire and can

@@ -116,9 +116,12 @@ are in [authentication testing](docs/AUTH_TESTING.md).
 
 Expo Go uses the running server's `exp://.../--/auth/callback` and recovery URLs,
 not `actaro://...`. Use your actual server address when configuring callbacks;
-LAN IPs and tunnel addresses can change. Stable `actaro://` links require a
-development build. If a link fails, inspect the callback allowlist before
-repeating requests. No additional app key or paid SMTP service was configured.
+LAN IPs and tunnel addresses can change. The current Supabase Auth version can
+reject LAN IP redirects even when allowlisted; use `npm start -- --go --tunnel`
+and allow the actual tunnel callbacks for email-link testing. Stable `actaro://`
+links require a development build. Follow the
+[Expo Go email-change checklist](docs/AUTH_TESTING.md#email-changes-started-in-expo-go)
+before repeating requests. No additional app key or paid SMTP service was configured.
 
 ### Troubleshooting
 

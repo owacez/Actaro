@@ -1,6 +1,6 @@
 # Authentication testing
 
-Updated: 2026-10-09. Release item 0.8 remains IN_PROGRESS until live and native checks pass.
+Updated: 2026-10-11. Release item 0.8 remains IN_PROGRESS until live and native checks pass.
 
 ## Configuration
 
@@ -77,6 +77,50 @@ configuration or cross-device confirmation has been fixed. See
 [Supabase redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls).
 
 ## Verification steps
+
+### Email changes started in Expo Go
+
+Supabase's secure email-change flow requires confirmation from both the current
+and replacement inboxes. The first accepted link can return only a message,
+without a session code. The callback now shows **Check your other inbox** for
+that response; it does not grant a session or claim that the email has changed.
+The final link follows the existing PKCE code-exchange flow.
+
+A redirect to `localhost:3000` is not an Expo Go callback. It is consistent with
+Supabase falling back to Site URL after rejecting/missing a requested redirect,
+or an overridden email template. The project's allowlist/templates have not
+been inspected or changed; MCP cannot edit these settings and browser automation
+failed to initialize.
+
+The project's Auth health endpoint reports v2.197.0. That version's
+[redirect validation](https://github.com/supabase/auth/blob/v2.197.0/internal/utilities/request.go)
+rejects non-loopback literal IP destinations before checking the allowlist,
+unless the destination matches the configured Site URL. A LAN Expo Go URL can
+therefore fall back even when listed. Use a hostname-based tunnel for this test
+instead of changing Site URL to a personal LAN address:
+
+1. Stop the existing Expo server and run `npm start -- --go --tunnel` from the
+   project root. If Expo needs its tunnel helper, follow the README's tunnel setup.
+2. In Supabase **Authentication > URL Configuration**, add the actual tunnel
+   URL shown by Expo with `/--/auth/callback` and `/--/auth/recovery` appended.
+   For example, the structure is `exp://<actual tunnel host>/--/auth/callback`;
+   replace the placeholder with the running server's complete host/port. Do not
+   paste the placeholder, guess an IP or allow every destination. Update the
+   entries if the tunnel changes. Keep the default confirmation URL templates.
+3. Scan the new QR code on iPhone, start a new email-change request there, and
+   open both fresh confirmation emails on that same phone. Keep Metro running.
+   The desktop browser does not have the phone's PKCE verifier. Previously
+   issued links do not pick up changed redirect settings.
+4. The first link should show the other-inbox instruction. After the final
+   confirmation, reopen Profile and verify the server-reported email, then sign
+   out and sign in with the replacement email. Record each result separately.
+
+For stable native callbacks, use the configured development build and its
+`actaro://auth/callback` and `actaro://auth/recovery` allowlist entries instead.
+No additional environment variable or API key is needed. See
+[Expo callback URL behavior](https://docs.expo.dev/versions/v57.0.0/sdk/linking/).
+
+### General auth acceptance
 
 1. Run `npm start` for native, or `npm run web -- --port 8081` for web. Restart
    after environment changes. Check keyboard usability and error/loading states.
