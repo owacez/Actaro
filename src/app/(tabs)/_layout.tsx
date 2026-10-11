@@ -2,8 +2,9 @@ import { Redirect, Tabs } from 'expo-router';
 
 import { useAuth } from '@/features/auth/auth-provider';
 import { useAppTheme } from '@/features/profile/theme-context';
+import { NavigationTabLabel } from '@/components/navigation-tab-label';
 
-// Functional navigation using approved existing styling; Figma parity is pending.
+// PDF-verified navigation treatment; product screens remain scoped to their releases.
 export default function MainTabs() {
   const { session, recovery } = useAuth();
   const { colors } = useAppTheme();
@@ -13,10 +14,12 @@ export default function MainTabs() {
       initialRouteName="today"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.accent,
+        tabBarActiveTintColor: colors.text,
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
-        tabBarLabelStyle: { fontFamily: 'Inter_500Medium', fontSize: 12 },
+        tabBarLabel: ({ children, focused }) => (
+          <NavigationTabLabel title={children} focused={focused} />
+        ),
         tabBarIcon: () => null,
         tabBarIconStyle: { display: 'none' },
         tabBarHideOnKeyboard: true,

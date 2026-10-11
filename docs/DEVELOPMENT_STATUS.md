@@ -7,19 +7,20 @@ Updated: 2026-10-11 (America/Los_Angeles).
 - Current Release: **v0.1 — Foundation**
 - Release Completion: **75% (30 / 40 weight)**
 - Current Phase: **Phase 0 — Foundation verification**
-- Current Focus: Verify persisted System/Light/Dark preferences on web and iPhone. Functional theme switching and its account/save-state contracts are implemented using the user-approved palette. Email-change callbacks, native build launch, remaining live acceptance and exact Figma matching are still open; the user postponed live email tests until Supabase limits reset.
+- Current Focus: Complete v0.1 sequentially. PDF-verified navigation markers/selected states are implemented. The user is retesting email-change confirmation on web after Safari failed; remaining live acceptance and design checks are open. Custom native builds are explicitly deferred by the user until the application is ready.
 - Status: **IN_PROGRESS**
 - Blockers: Git and system Node.js/npm are installed. Windows ARM64 tunnel tooling has a locally verified x64 workaround; actual tunnel connectivity remains unverified.
   Figma subtree reads hit the Starter limit; live email callbacks and session persistence remain unverified. Browser automation failed to start; Android is unavailable. Expo Doctor now passes 21/21 checks. Dependency advisories remain open.
-- Approval boundary: User authorized resuming v0.1 sequentially on 2026-10-09; complete and verify one task before the next. Later releases remain outside scope.
+- Approval boundary: User authorized completing all remaining v0.1 work on 2026-10-11, one verified task at a time. Custom native builds are now explicitly deferred until the application is ready; no build was submitted. Later feature releases remain outside scope.
 
 Latest design access: the user supplied a local Figma PDF export and authorized
 it as fallback when MCP calls are exhausted. Its first foundation page retains
 an older green accent, conflicting with the canonical orange-coral decision and
 previously fetched auth nodes; those verified orange values remain in use.
 Pages 1–2 were rendered and inspected. The oversized third page's text was
-extracted, including Profile/Settings, but its renderer failed twice; exact
-screen geometry and unshown dark states are not claimed as verified.
+extracted; relevant auth and Profile/Settings regions were subsequently rendered
+successfully using bounded PDF viewports. The export supplies no dark palette;
+exact unshown dark design matching remains pending.
 
 The supplied canonical plan is `docs/ACTARO_DECELOPMENT_PLAN.md`; the requested
 `docs/ACTARO_DEVELOPMENT_PLAN_FINAL.md` is absent. Both canonical files are preserved.
@@ -679,3 +680,32 @@ Confirm the remaining auth test matrix alongside these tasks; do not mark task 0
   Foundation becomes **30/40 = 75%**. Design stays 3/5; all later releases remain
   NOT_STARTED. Live Supabase/email tests were postponed at the user's request;
   no confirmation emails or backend setting changes were made during this task.
+
+## Navigation design foundation (2026-10-11)
+
+**DONE — PDF-verified navigation treatment; release acceptance remains IN_PROGRESS.**
+
+- Rendered and inspected PDF pages 1–2 and bounded page-3 auth/Profile/Settings
+  regions. Page 2 shows dot markers, compact labels and rounded selected
+  backgrounds for all five tab states. Implemented that treatment in
+  `navigation-tab-label.tsx` and the existing Expo Router tab configuration,
+  using current approved light/dark tokens. The fallback's stale green accent
+  does not replace canonical orange or newer verified auth values.
+- Preserved native safe-area/tab interaction, signed-out/recovery guards,
+  keyboard hiding and release boundaries. No icon library, dependency, route
+  restructuring or future product behavior was added.
+- `npm.cmd run check`: PASS, TypeScript/lint/formatting and **125 tests / 17 suites**.
+  Navigation label regression covers readable selected/inactive dark states;
+  existing five-route and auth/recovery contracts still pass. Real visual/device
+  switching remains separate, so no additional completion weight is claimed.
+- `npm.cmd run check:supabase`: initial restricted-network attempt failed;
+  authorized network-enabled rerun PASS, Auth settings and anonymous denial
+  for both private tables. Supabase MCP reports ACTIVE_HEALTHY.
+- Browser automation again failed during runtime initialization. An EAS
+  environment-list operation was rejected by automatic approval review because
+  it could expose variables beyond the public settings; no environment values
+  were read or changed. Build history is empty. The user explicitly deferred
+  cloud/native builds and has no Apple Developer membership; no build was submitted.
+- The supplied PDF and all local rendering tools remain untracked/ignored.
+  Next focused work: resolve current confirmation redirect diagnosis, finish
+  current component states, then remaining live foundation acceptance.
