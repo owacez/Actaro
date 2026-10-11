@@ -7,10 +7,10 @@ Updated: 2026-10-11 (America/Los_Angeles).
 - Current Release: **v0.1 — Foundation**
 - Release Completion: **84.375% (33.75 / 40 weight)**
 - Current Phase: **Phase 0 — Foundation verification**
-- Current Focus: Complete v0.1 sequentially. The user verified web/iPhone session restoration, profile/preferences persistence, theme switching and password reset/new-password sign-in, plus web email change. Native PKCE crypto correction passes SDK tests and all-platform export; native email change and remaining acceptance/full design checks are open. Custom native builds are explicitly deferred by the user until the application is ready.
+- Current Focus: Complete v0.1 sequentially with local checks while the user reports exhausted Supabase limits. User-requested bottom tab icons are implemented and verified in offline browser previews; native icon acceptance remains pending. Web/iPhone persistence, themes and password reset, plus web email change, are user-verified. Remaining auth/security/design acceptance is open; custom native builds are user-deferred until the application is ready.
 - Status: **IN_PROGRESS**
 - Blockers: Git and system Node.js/npm are installed. Windows ARM64 tunnel tooling has a locally verified x64 workaround; actual tunnel connectivity remains unverified.
-  Figma subtree reads hit the Starter limit; native email-change callbacks and remaining acceptance are unverified. The default browser runtime failed, but isolated headless Edge smoke checks passed. Android is unavailable. Expo Doctor's last run passed 21/21 checks. Dependency advisories remain open.
+  Supabase limits are exhausted according to the user; the exact quota was not probed and live checks are paused. Figma subtree reads hit the Starter limit; native email-change callbacks and remaining acceptance are unverified. The default browser runtime failed, but isolated headless Edge smoke checks passed. Android is unavailable. Expo Doctor's last run passed 21/21 checks. Dependency advisories remain open.
 - Approval boundary: User authorized completing all remaining v0.1 work on 2026-10-11, one verified task at a time. Custom native builds are now explicitly deferred until the application is ready; no build was submitted. Later feature releases remain outside scope.
 
 Latest design access: the user supplied a local Figma PDF export and authorized
@@ -377,13 +377,13 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-Profile management is reached from More and offers name, current email, email-change confirmation and authenticated password updates. The five-tab shell opens Today after sign-in; future module views state their release scope. Preferences save units, time zone, opt-in values and System/Light/Dark appearance through the existing owned service. Theme drafts stay unapplied until server success; signed-out/account-switch states use System while loading. The user confirms iPhone sign-in/out, tabs and name editing. Remaining email/password, preferences save/reopen, two-account and visual acceptance checks are pending.
+Profile management is reached from More and offers name, current email, email-change confirmation and authenticated password updates. The five-tab shell opens Today after sign-in and now has calendar, strength, nutrition, chart and more icons; future module views state their release scope. Preferences save units, time zone, opt-in values and System/Light/Dark appearance through the existing owned service. Theme drafts stay unapplied until server success; signed-out/account-switch states use System while loading. The user confirms web/iPhone persistence, themes and password reset, plus web email change. Native email change, individually identified signup/verification, two-account and full visual acceptance remain pending. Backend verification is paused during the reported quota exhaustion.
 
 ## Next 3 Actions
 
-1. Retest native email-link requests after the PKCE crypto correction; use the initiating phone's actual allowed callback and verify the plain-challenge warning is absent. Do not open web localhost links on a phone.
-2. Verify two-account application isolation using [the preferences checklist](PROFILE_TESTING.md#preferences-acceptance); ordinary profile/preferences persistence and themes are now user-confirmed.
-3. Close the individually identified signup/verification and full visual acceptance checks. Record unavailable Android and user-deferred native builds separately; do not submit builds now.
+1. Finish local visual/accessibility review of current foundation screens against the approved PDF and user-approved differences; keep live Supabase calls disabled during quota exhaustion.
+2. Verify the new icons on iPhone and close native email-link/signup acceptance after limits recover, using the initiating phone's allowed callback and checking that the plain-challenge warning is absent.
+3. Verify two-account application isolation using [the preferences checklist](PROFILE_TESTING.md#preferences-acceptance), then reconcile the remaining foundation gates. Record unavailable Android and user-deferred native builds separately; do not submit builds now.
 
 Do not mark task 0.8 DONE until its six live acceptance groups are verified. Full visual acceptance and the v0.1 release gate remain open. Native builds are explicitly deferred by the user until the application is ready; no completion credit is claimed for that unverified subtask. v0.2 remains outside the current work order.
 
@@ -401,6 +401,7 @@ Do not mark task 0.8 DONE until its six live acceptance groups are verified. Ful
 - Canonical filename mismatch is documented; original content is preserved.
   It does not block initialization using the supplied plan.
 - Supabase public configuration and MCP authorization are established. The profile/preferences migration is applied and database-tested. Both Android and iOS remain test targets; the latest user report identifies iPhone Expo Go and confirms the name editor works. Android and new account-update flows remain unverified.
+- The user reports exhausted Supabase limits after testing. No quota diagnosis, backend probe, confirmation email or Supabase MCP request was made for the tab-icon task. The specific exhausted limit remains unverified; live acceptance is paused rather than credited as complete.
 - Latest `npm audit --json` reports 66 affected packages (50 high, 16 moderate).
   Review runtime/tooling exposure and dependency chains before release; no safety
   claim is made. Automated suggestions include incompatible SDK changes, so
@@ -810,3 +811,36 @@ Do not mark task 0.8 DONE until its six live acceptance groups are verified. Ful
   Access are DONE. Native email change, post-crypto device checks, remaining
   Auth/security/navigation/visual acceptance and deferred native builds prevent
   claiming the full foundation release complete. No v0.2 work was started.
+
+## User-requested bottom tab icons (2026-10-11)
+
+**DONE — Icon implementation and local checks; native/live navigation acceptance remains open.**
+
+- Applied Ponytail full: reused installed `expo-symbols` (~57.0.3), the existing
+  tab-label component, Expo Router and current light/dark colors. Added no
+  dependency, environment setting, database change or future-release feature.
+- The approved PDF shows dots. The user's explicit request replaces them with
+  calendar, dumbbell, utensils, chart and more icons while preserving labels,
+  selected pills, route guards, safe areas and keyboard behavior. iOS uses SF
+  Symbols; Android/web use the package's bundled Material Symbols. Decorative
+  icon wrappers are hidden from accessibility announcements; labels remain.
+- Changed `src/app/(tabs)/_layout.tsx` and
+  `src/components/navigation-tab-label.tsx`; adapted the existing theme
+  regression in `__tests__/navigation-tab-label.test.tsx` for its required icon
+  prop and mocked native renderer. No new test framework or production mock.
+- `npm.cmd run check`: **PASS (exit 0)**, TypeScript, lint, formatting and
+  **132 tests / 18 suites**. `npx.cmd --no-install expo export --platform all`:
+  **PASS (exit 0)**, iOS/Android bundles and 19 static web routes.
+- Isolated headless Edge checks: **PASS** at 390×844 light/dark, 320×568 light
+  and 1280×720 light. All five glyphs rendered, every tab selected successfully
+  and measured tab targets were at least 44 CSS pixels. All four screenshots
+  were inspected. This was responsive web verification, not an iPhone/Android
+  device run or full assistive-technology acceptance.
+- The ignored local preview used fake configuration and an isolated stored
+  session fixture, with all Supabase fetches intercepted locally (one blocked
+  request). The real project was not used; auth guards were not modified. No
+  Supabase MCP/probe or email request was made. Fixture rendering earns no live
+  authentication, RLS or persistence credit. Temporary preview processes stopped.
+- Foundation remains **33.75/40 = 84.375%**, IN_PROGRESS. User-reported quota
+  exhaustion pauses live tests; exact quota, remaining acceptance and deferred
+  builds are not claimed complete. All later releases remain NOT_STARTED.

@@ -4,7 +4,31 @@ import { useAuth } from '@/features/auth/auth-provider';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { NavigationTabLabel } from '@/components/navigation-tab-label';
 
-// PDF-verified navigation treatment; product screens remain scoped to their releases.
+const tabs = [
+  { name: 'today', title: 'Today', icon: { ios: 'calendar', android: 'today', web: 'today' } },
+  {
+    name: 'fitness',
+    title: 'Fitness',
+    icon: { ios: 'dumbbell', android: 'fitness_center', web: 'fitness_center' },
+  },
+  {
+    name: 'nutrition',
+    title: 'Nutrition',
+    icon: { ios: 'fork.knife', android: 'restaurant', web: 'restaurant' },
+  },
+  {
+    name: 'progress',
+    title: 'Progress',
+    icon: { ios: 'chart.xyaxis.line', android: 'show_chart', web: 'show_chart' },
+  },
+  {
+    name: 'more',
+    title: 'More',
+    icon: { ios: 'ellipsis', android: 'more_horiz', web: 'more_horiz' },
+  },
+] as const;
+
+// User-requested tab icons; product screens remain scoped to their releases.
 export default function MainTabs() {
   const { session, recovery } = useAuth();
   const { colors } = useAppTheme();
@@ -17,20 +41,25 @@ export default function MainTabs() {
         tabBarActiveTintColor: colors.text,
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
-        tabBarLabel: ({ children, focused }) => (
-          <NavigationTabLabel title={children} focused={focused} />
-        ),
+        // The combined label owns icon/label spacing and the selected pill.
         tabBarIcon: () => null,
         tabBarIconStyle: { display: 'none' },
         tabBarHideOnKeyboard: true,
         sceneStyle: { backgroundColor: colors.background },
       }}
     >
-      <Tabs.Screen name="today" options={{ title: 'Today' }} />
-      <Tabs.Screen name="fitness" options={{ title: 'Fitness' }} />
-      <Tabs.Screen name="nutrition" options={{ title: 'Nutrition' }} />
-      <Tabs.Screen name="progress" options={{ title: 'Progress' }} />
-      <Tabs.Screen name="more" options={{ title: 'More' }} />
+      {tabs.map(({ name, title, icon }) => (
+        <Tabs.Screen
+          key={name}
+          name={name}
+          options={{
+            title,
+            tabBarLabel: ({ focused }) => (
+              <NavigationTabLabel title={title} focused={focused} icon={icon} />
+            ),
+          }}
+        />
+      ))}
     </Tabs>
   );
 }
