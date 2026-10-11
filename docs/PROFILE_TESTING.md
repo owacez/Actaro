@@ -16,7 +16,12 @@ No new environment variable, schema migration or API credential is required.
 The user authorized existing verified components after Figma MCP hit its Starter
 call limit. This functional editor does not establish exact Profile visual parity.
 Preferences now save units, time zone and notification/gamification preference
-values through the same private service; theme switching remains pending.
+values and System/Light/Dark appearance through the same private service.
+Theme drafts apply only after a successful save. System follows the device;
+signed-out screens also use System. On sign-in, the owned preference is fetched;
+loading/failure uses System until Preferences successfully loads or saves.
+The user approved a functional dark palette while Figma MCP is limited;
+exact dark-mode visual matching and live theme persistence remain pending.
 Browser automation could not initialize,
 so no agent interactive visual or live authenticated persistence pass is claimed.
 The user reports the name editor works on iPhone Expo Go; this is not evidence
@@ -77,3 +82,11 @@ service response or SQL ownership test is not proof of live app save/reopen.
 6. Check tap targets, scrolling/keyboard and snackbar placement on iPhone/web;
    repeat on Android when available. Notification/gamification controls save
    preferences only; they do not enable reminder delivery or achievements.
+7. Select Dark and confirm nothing changes until **Save preferences** succeeds.
+   Check inputs, notices, all tabs, Profile and Preferences, then reopen/restart
+   and confirm Dark restores. Repeat Light. Select System and change the device
+   appearance; screens should follow it. Check status-bar and iPhone keyboard contrast.
+8. Discard an appearance draft, then try a failed save offline: the applied theme
+   must stay unchanged. Retry online. Sign out and sign in as another account;
+   the prior account's theme must not appear as the new account's preference.
+   System is the loading/failure fallback; a successful owned load restores the choice.

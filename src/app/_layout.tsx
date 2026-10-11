@@ -8,14 +8,17 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 
-import { AuthButton, AuthFrame, AuthNotice, authColors } from '@/features/auth/auth-components';
+import { AuthButton, AuthFrame, AuthNotice } from '@/features/auth/auth-components';
 import { AuthProvider, useAuth } from '@/features/auth/auth-provider';
 import { AuthFeedbackProvider } from '@/features/auth/auth-feedback';
+import { AppThemeProvider } from '@/features/profile/theme-provider';
+import { useAppTheme } from '@/features/profile/theme-context';
 
 void SplashScreen.preventAutoHideAsync();
 
 function AuthRoutes() {
   const { session, initializing, error, retry, recovery } = useAuth();
+  const { colors } = useAppTheme();
   if (initializing)
     return (
       <AuthFrame>
@@ -33,7 +36,7 @@ function AuthRoutes() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: authColors.background },
+        contentStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Screen name="index" />
@@ -52,6 +55,17 @@ function AuthRoutes() {
   );
 }
 
+function AccountTheme() {
+  const { session, recovery } = useAuth();
+  return (
+    <AppThemeProvider userId={recovery ? undefined : session?.user.id}>
+      <AuthFeedbackProvider>
+        <AuthRoutes />
+      </AuthFeedbackProvider>
+    </AppThemeProvider>
+  );
+}
+
 export default function RootLayout() {
   const [loaded, error] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold });
   useEffect(() => {
@@ -65,10 +79,8 @@ export default function RootLayout() {
     );
   if (!loaded) return null;
   return (
-    <AuthFeedbackProvider>
-      <AuthProvider>
-        <AuthRoutes />
-      </AuthProvider>
-    </AuthFeedbackProvider>
+    <AuthProvider>
+      <AccountTheme />
+    </AuthProvider>
   );
 }

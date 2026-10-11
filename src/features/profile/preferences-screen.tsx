@@ -18,6 +18,7 @@ import {
   type PreferencesUpdate,
 } from './profile-model';
 import { profileService } from './profile-service';
+import { useAppTheme } from './theme-context';
 
 // Uses approved existing components while the Preferences Figma read is blocked.
 const unitChoices = [
@@ -43,6 +44,7 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
   const generation = useRef(0);
   const pending = useRef(false);
   const { clear, notify } = useAuthFeedback();
+  const { applySavedPreferences } = useAppTheme();
 
   useEffect(() => {
     const request = ++generation.current;
@@ -50,6 +52,7 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
       .getPreferences(userId)
       .then((record) => {
         if (request !== generation.current) return;
+        applySavedPreferences(record);
         setSaved(record);
         setDraft({});
         setLoading(false);
@@ -62,7 +65,7 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
     return () => {
       generation.current = request + 1;
     };
-  }, [userId, attempt]);
+  }, [userId, attempt, applySavedPreferences]);
 
   function edit(patch: PreferencesUpdate) {
     if (pending.current) return;
@@ -87,6 +90,7 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
       setSaving(true);
       const record = await profileService.updatePreferences(patch, userId);
       if (request !== generation.current) return;
+      applySavedPreferences(record);
       setSaved(record);
       setDraft({});
       notify('Preferences saved.', 'success');
@@ -183,10 +187,18 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
             These preferences are saved for future reminders and achievements. They do not request
             device permissions or enable features that have not been released.
           </AuthText>
-          <AuthText>
-            Theme switching is pending the approved theme designs. Current screens use the verified
-            light appearance.
-          </AuthText>
+          <AuthText kind="heading">Appearance</AuthText>
+          {(['system', 'light', 'dark'] as const).map((theme) => (
+            <AuthButton
+              key={theme}
+              title={`Theme: ${theme[0].toUpperCase()}${theme.slice(1)}`}
+              selected={(draft.theme ?? saved.theme) === theme}
+              outlined={(draft.theme ?? saved.theme) !== theme}
+              disabled={saving}
+              onPress={() => edit({ theme })}
+            />
+          ))}
+          <AuthText>Save to apply your appearance. System follows your device setting.</AuthText>
           {error && (
             <AuthNotice error announce={Platform.OS !== 'web'}>
               {error}

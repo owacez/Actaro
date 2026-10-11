@@ -9,6 +9,16 @@ export const actaroColors = {
   border: '#ddd5c8',
 };
 
+// User-approved functional dark palette; exact Figma dark-mode matching is pending.
+export const actaroDarkColors: typeof actaroColors = {
+  background: actaroColors.text,
+  surface: actaroColors.text,
+  text: actaroColors.surface,
+  muted: actaroColors.border,
+  accent: actaroColors.accent,
+  border: actaroColors.muted,
+};
+
 export const actaroTypography = {
   body: { fontSize: 12, lineHeight: 18, color: actaroColors.muted },
   title: { fontFamily: 'Inter_600SemiBold', fontSize: 30, lineHeight: 36 },

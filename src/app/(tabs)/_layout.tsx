@@ -1,25 +1,26 @@
 import { Redirect, Tabs } from 'expo-router';
 
-import { actaroColors } from '@/constants/actaro-theme';
 import { useAuth } from '@/features/auth/auth-provider';
+import { useAppTheme } from '@/features/profile/theme-context';
 
 // Functional navigation using approved existing styling; Figma parity is pending.
 export default function MainTabs() {
   const { session, recovery } = useAuth();
+  const { colors } = useAppTheme();
   if (!session || recovery) return <Redirect href="/" />;
   return (
     <Tabs
       initialRouteName="today"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: actaroColors.accent,
-        tabBarInactiveTintColor: actaroColors.muted,
-        tabBarStyle: { backgroundColor: actaroColors.surface, borderTopColor: actaroColors.border },
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.muted,
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
         tabBarLabelStyle: { fontFamily: 'Inter_500Medium', fontSize: 12 },
         tabBarIcon: () => null,
         tabBarIconStyle: { display: 'none' },
         tabBarHideOnKeyboard: true,
-        sceneStyle: { backgroundColor: actaroColors.background },
+        sceneStyle: { backgroundColor: colors.background },
       }}
     >
       <Tabs.Screen name="today" options={{ title: 'Today' }} />

@@ -174,19 +174,19 @@ and email instructions use a bottom snackbar. On web, errors and successful
 actions also use a dismissible notification at the upper right. Notifications
 expire automatically; hovering or focusing the web notification pauses dismissal.
 
-| Screen / state                         | Present behavior                                                                                                            |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Sign In                                | Validated email/password sign-in.                                                                                           |
-| Sign Up                                | Email, password and confirmation; creates a Supabase account.                                                               |
-| Check Your Email                       | Confirmation instructions and resend.                                                                                       |
-| Reset Password                         | Requests a recovery link without revealing account existence.                                                               |
-| Set a New Password                     | Updates the password after the SDK recovery event.                                                                          |
-| Callback processing / error            | Exchanges a one-use code or displays a safe link error.                                                                     |
-| Email Confirmed                        | Shows verified status from the Supabase session, then Continue to Account.                                                  |
-| Today / Fitness / Nutrition / Progress | Signed-in tab destinations showing planned release scope; no tracking data yet.                                             |
-| More                                   | Real signed-in email, Profile management and local sign-out.                                                                |
-| Profile                                | Edit/clear name, view/change email and change password. Open More → Profile management.                                     |
-| Preferences                            | Save units, time zone, notification and gamification preferences. Open More → Preferences. Theme switching remains pending. |
+| Screen / state                         | Present behavior                                                                                                        |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Sign In                                | Validated email/password sign-in.                                                                                       |
+| Sign Up                                | Email, password and confirmation; creates a Supabase account.                                                           |
+| Check Your Email                       | Confirmation instructions and resend.                                                                                   |
+| Reset Password                         | Requests a recovery link without revealing account existence.                                                           |
+| Set a New Password                     | Updates the password after the SDK recovery event.                                                                      |
+| Callback processing / error            | Exchanges a one-use code or displays a safe link error.                                                                 |
+| Email Confirmed                        | Shows verified status from the Supabase session, then Continue to Account.                                              |
+| Today / Fitness / Nutrition / Progress | Signed-in tab destinations showing planned release scope; no tracking data yet.                                         |
+| More                                   | Real signed-in email, Profile management and local sign-out.                                                            |
+| Profile                                | Edit/clear name, view/change email and change password. Open More → Profile management.                                 |
+| Preferences                            | Save units, time zone, notification/gamification preferences and System/Light/Dark appearance. Open More → Preferences. |
 
 The remaining `/explore` route is an Expo starter example, not an Actaro feature.
 The five-tab navigation shell is implemented; sign-in opens Today. The populated
@@ -272,7 +272,7 @@ src/features/auth/ Auth UI, business/service logic and session context
 src/features/profile/ Typed profile/preferences services and input validation
 src/components/   Existing Expo starter components
 src/hooks/        Existing starter presentation hooks
-src/constants/    Verified Actaro light tokens plus the preserved starter theme
+src/constants/    Actaro light/approved functional dark tokens and preserved starter theme
 src/expo.d.ts     Expo global typings for checks before generated files exist
 assets/           Expo starter media and icons
 scripts/          Generator-provided reset script
@@ -290,9 +290,13 @@ configured; auth screens and service flows exist. The profile/preferences schema
 and ownership policies are applied and database-tested; typed profile/preferences
 services have SDK request tests. Profile edits names through the database service;
 email/password changes use Supabase Auth, with required confirmation and safe errors.
-Preferences save units, time zone and notification/gamification opt-in values;
-reminder delivery and achievements belong to later releases. Theme switching and
-full live acceptance are pending. React state
+Preferences save units, time zone, notification/gamification opt-in values and
+System/Light/Dark appearance. Save applies the server-confirmed theme across the
+current product screens and tabs; drafts remain unapplied. Owned preferences load
+on sign-in, with System as the loading/failure and signed-out fallback.
+Reminder delivery and achievements belong to later releases. Exact Figma dark
+matching and full live acceptance are pending; follow [the checklist](docs/PROFILE_TESTING.md#preferences-acceptance).
+React state
 is the default; TanStack Query and Zustand require demonstrated needs.
 See [mobile stack decision](docs/decisions/001-mobile-stack.md).
 

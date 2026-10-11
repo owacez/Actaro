@@ -1,6 +1,9 @@
 import { beforeEach, expect, jest, test } from '@jest/globals';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import type { PropsWithChildren } from 'react';
 
+import { actaroColors } from '@/constants/actaro-theme';
+import { ThemeContext } from '@/features/profile/theme-context';
 import { ProfileError, type Preferences } from '@/features/profile/profile-model';
 import { PreferencesScreen } from '@/features/profile/preferences-screen';
 import { profileService } from '@/features/profile/profile-service';
@@ -24,13 +27,21 @@ const preferences: Preferences = {
   updated_at: '2026-01-01T00:00:00Z',
 };
 const onBack = jest.fn();
+const applySavedPreferences = jest.fn();
+function PreferencesTestRoot({ children }: PropsWithChildren) {
+  return (
+    <ThemeContext.Provider value={{ colors: actaroColors, scheme: 'light', applySavedPreferences }}>
+      <FeedbackTestRoot>{children}</FeedbackTestRoot>
+    </ThemeContext.Provider>
+  );
+}
 beforeEach(() => {
   jest.resetAllMocks();
   service.getPreferences.mockResolvedValue(preferences);
 });
 async function open() {
   await render(<PreferencesScreen userId={preferences.user_id} onBack={onBack} />, {
-    wrapper: FeedbackTestRoot,
+    wrapper: PreferencesTestRoot,
   });
   await screen.findByLabelText('Time zone');
 }
@@ -139,4 +150,42 @@ test('account remount ignores old data and late success notifications', async ()
   await act(() => resolveSave({ ...preferences, weight_unit: 'lb' }));
   expect(screen.queryByText('Preferences saved.')).toBeNull();
   expect(screen.getByRole('button', { name: 'Weight: kg' })).toBeTruthy();
+});
+
+test('theme drafts and discards do not apply; a failed save retains the selection', async () => {
+  service.updatePreferences.mockRejectedValueOnce(
+    new ProfileError('REQUEST_FAILED', 'Unable to save. Try again.'),
+  );
+  await open();
+  expect(applySavedPreferences).toHaveBeenCalledTimes(1);
+  await press('Theme: Dark');
+  expect(screen.getByRole('button', { name: 'Theme: Dark', selected: true })).toBeTruthy();
+  await press('Discard changes');
+  expect(screen.getByRole('button', { name: 'Theme: System', selected: true })).toBeTruthy();
+  await press('Theme: Light');
+  await press('Save preferences');
+  expect(await screen.findByText('Unable to save. Try again.')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Theme: Light', selected: true })).toBeTruthy();
+  expect(applySavedPreferences).toHaveBeenCalledTimes(1);
+  expect(service.updatePreferences).toHaveBeenCalledWith({ theme: 'light' }, preferences.user_id);
+});
+
+test('only the confirmed server theme applies, once the save succeeds', async () => {
+  let resolveSave: (record: Preferences) => void = () => {};
+  service.updatePreferences.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        resolveSave = resolve;
+      }),
+  );
+  await open();
+  await press('Theme: Dark');
+  await press('Save preferences');
+  expect(applySavedPreferences).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole('button', { name: 'Theme: System' })).toBeDisabled();
+  const record = { ...preferences, theme: 'dark' };
+  await act(() => resolveSave(record));
+  expect(applySavedPreferences).toHaveBeenLastCalledWith(record);
+  expect(applySavedPreferences).toHaveBeenCalledTimes(2);
+  expect(screen.getByRole('button', { name: 'Save preferences' })).toBeDisabled();
 });

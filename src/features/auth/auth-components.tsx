@@ -13,15 +13,18 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { actaroColors, actaroLayout, actaroTypography } from '@/constants/actaro-theme';
+import { useAppTheme } from '@/features/profile/theme-context';
 
 // Preserve current consumers while sharing the verified foundation with navigation.
 export const authColors = actaroColors;
 
 export function AuthFrame({ children }: PropsWithChildren) {
+  const { colors } = useAppTheme();
+  const screenStyle = [styles.screen, { backgroundColor: colors.background }];
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={screenStyle}>
       <KeyboardAvoidingView
-        style={styles.screen}
+        style={screenStyle}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
@@ -36,18 +39,34 @@ export function AuthText({
   children,
   kind = 'body',
 }: PropsWithChildren<{ kind?: 'body' | 'title' | 'heading' | 'eyebrow' | 'muted' }>) {
-  return <Text style={[styles.text, styles[kind]]}>{children}</Text>;
+  const { colors } = useAppTheme();
+  const color =
+    kind === 'eyebrow'
+      ? colors.accent
+      : kind === 'body' || kind === 'muted'
+        ? colors.muted
+        : colors.text;
+  return <Text style={[styles.text, styles[kind], { color }]}>{children}</Text>;
 }
 
 export function AuthInput({ label, ...props }: TextInputProps & { label: string }) {
+  const { colors, scheme } = useAppTheme();
   return (
     <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
       <TextInput
         {...props}
         accessibilityLabel={label}
-        placeholderTextColor={authColors.muted}
-        style={styles.input}
+        keyboardAppearance={props.keyboardAppearance ?? scheme}
+        placeholderTextColor={colors.muted}
+        style={[
+          styles.input,
+          {
+            color: colors.text,
+            borderColor: colors.border,
+            backgroundColor: colors.surface,
+          },
+        ]}
       />
     </View>
   );
@@ -59,29 +78,41 @@ export function AuthButton({
   busy = false,
   disabled = false,
   outlined = false,
+  selected,
 }: {
   title: string;
   onPress: () => void;
   busy?: boolean;
   disabled?: boolean;
   outlined?: boolean;
+  selected?: boolean;
 }) {
+  const { colors, scheme } = useAppTheme();
+  const foreground = outlined
+    ? colors.text
+    : scheme === 'dark'
+      ? actaroColors.text
+      : authColors.background;
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled: disabled || busy, busy }}
+      accessibilityState={{ disabled: disabled || busy, busy, selected }}
       disabled={disabled || busy}
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
         outlined && styles.outlined,
+        {
+          backgroundColor: outlined ? 'transparent' : colors.accent,
+          borderColor: outlined ? colors.border : colors.text,
+        },
         (pressed || disabled || busy) && styles.dimmed,
       ]}
     >
       {busy ? (
-        <ActivityIndicator color={authColors.text} accessibilityLabel="Please wait" />
+        <ActivityIndicator color={foreground} accessibilityLabel="Please wait" />
       ) : (
-        <Text style={[styles.buttonText, outlined && styles.outlinedText]}>{title}</Text>
+        <Text style={[styles.buttonText, { color: foreground }]}>{title}</Text>
       )}
     </Pressable>
   );
@@ -96,6 +127,7 @@ export function AuthLink({
   onPress: () => void;
   disabled?: boolean;
 }) {
+  const { colors } = useAppTheme();
   return (
     <Pressable
       accessibilityRole="button"
@@ -104,7 +136,7 @@ export function AuthLink({
       onPress={onPress}
       style={styles.link}
     >
-      <Text style={styles.linkText}>{title}</Text>
+      <Text style={[styles.linkText, { color: colors.text }]}>{title}</Text>
     </Pressable>
   );
 }
@@ -114,22 +146,23 @@ export function AuthNotice({
   error = false,
   announce = true,
 }: PropsWithChildren<{ error?: boolean; announce?: boolean }>) {
+  const { colors } = useAppTheme();
   if (error)
     return (
       <Text
         accessibilityRole={announce ? 'alert' : undefined}
         accessibilityLiveRegion={announce ? 'polite' : undefined}
-        style={styles.errorText}
+        style={[styles.errorText, { color: colors.text }]}
       >
         {children}
       </Text>
     );
   return (
-    <View style={styles.notice}>
+    <View style={[styles.notice, { borderColor: colors.border, backgroundColor: colors.surface }]}>
       <Text
         accessibilityRole={error ? 'alert' : undefined}
         accessibilityLiveRegion="polite"
-        style={styles.noticeText}
+        style={[styles.noticeText, { color: colors.muted }]}
       >
         {children}
       </Text>

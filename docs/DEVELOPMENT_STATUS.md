@@ -5,11 +5,11 @@ Updated: 2026-10-11 (America/Los_Angeles).
 ## Overall
 
 - Current Release: **v0.1 — Foundation**
-- Release Completion: **73.125% (29.25 / 40 weight)**
+- Release Completion: **75% (30 / 40 weight)**
 - Current Phase: **Phase 0 — Foundation verification**
-- Current Focus: Fix and verify email-change callbacks from Expo Go. The first secure confirmation now has an other-inbox instruction state; runtime redirect configuration and final live confirmation remain pending. Preferences, light tokens, CI and EAS configuration are implemented. Theme switching, native build launch, remaining live acceptance and exact Figma matching are open.
+- Current Focus: Verify persisted System/Light/Dark preferences on web and iPhone. Functional theme switching and its account/save-state contracts are implemented using the user-approved palette. Email-change callbacks, native build launch, remaining live acceptance and exact Figma matching are still open; the user postponed live email tests until Supabase limits reset.
 - Status: **IN_PROGRESS**
-- Blockers: Git is installed; Node.js/npm use temporary portable tools.
+- Blockers: Git and system Node.js/npm are installed. Windows ARM64 tunnel tooling has a locally verified x64 workaround; actual tunnel connectivity remains unverified.
   Figma subtree reads hit the Starter limit; live email callbacks and session persistence remain unverified. Browser automation failed to start; Android is unavailable. Expo Doctor now passes 21/21 checks. Dependency advisories remain open.
 - Approval boundary: User authorized resuming v0.1 sequentially on 2026-10-09; complete and verify one task before the next. Later releases remain outside scope.
 
@@ -39,8 +39,8 @@ fractions, not subjective estimates. CI is implemented and its remote run passed
 v1.0 has no plan weight: track its nine explicit
 release gates separately, without inventing a numeric weight.
 
-Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 5/5 + 2 × 2/2 + 5 × 3/5 + 3 × 2/3 + 3 × 3/4 + 6 × 8/12 + 3 × 2/4 + 6 × 3/4 + 4 × 3/4 = 29.25`.
-Release completion: `29.25 / 40 × 100 = 73.125%`. Rounded table percentages never
+Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 5/5 + 2 × 2/2 + 5 × 3/5 + 3 × 2/3 + 3 × 3/4 + 6 × 8/12 + 3 × 3/4 + 6 × 3/4 + 4 × 3/4 = 30`.
+Release completion: `30 / 40 × 100 = 75%`. Rounded table percentages never
 replace these exact fractions. This is verified foundation progress, not a completed v0.1 release.
 
 ## Feature Table
@@ -51,11 +51,11 @@ replace these exact fractions. This is verified foundation progress, not a compl
 | Phase 0 / 0.2    | React Native / Expo                    | v0.1    |      3 | IN_PROGRESS |     66.67% | Config/exports, TypeScript and EAS setup verified; native compilation/launch pending (2/3).                                                     |
 | Phase 0 / 0.3    | Quality Baseline                       | v0.1    |      3 | DONE        |       100% | Typecheck, lint, format, tests and remote CI passed (5/5).                                                                                      |
 | Phase 0 / 0.4    | App Structure                          | v0.1    |      2 | DONE        |       100% | Router scaffold and current architecture boundaries verified (2/2).                                                                             |
-| Phase 0 / 0.5    | Design System                          | v0.1    |      5 | IN_PROGRESS |        60% | Shared verified light palette, typography and layout values (3/5); full components/theme/Figma parity pending.                                  |
+| Phase 0 / 0.5    | Design System                          | v0.1    |      5 | IN_PROGRESS |        60% | Shared palette, typography and layout values (3/5); functional themes implemented; full catalog/Figma parity pending.                           |
 | Phase 0 / 0.6    | Navigation                             | v0.1    |      3 | IN_PROGRESS |     66.67% | Five routes and authenticated/recovery routing contracts verified (2/3); iPhone switching user-confirmed; complete live tab acceptance pending. |
 | Phase 0 / 0.7    | Supabase Integration                   | v0.1    |      3 | IN_PROGRESS |        75% | Configuration, client/lifecycle contracts and live API probes verified (3/4); native checks pending.                                            |
 | Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | IN_PROGRESS |     66.67% | Six implementation contracts plus user-verified live sign-in/sign-out (8/12); four live groups pending.                                         |
-| Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | IN_PROGRESS |        50% | Schema/access verified (2/4); Profile and preferences UI tested; theme/live acceptance pending.                                                 |
+| Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | IN_PROGRESS |        75% | Schema/access and functional UI/states including themes verified (3/4); live save/reopen acceptance pending.                                    |
 | Phase 0 / 0.10   | RLS / Security Foundation              | v0.1    |      6 | IN_PROGRESS |        75% | Grants/policies, database isolation/constraints and lifecycle tested (3/4); application integration pending.                                    |
 | Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | IN_PROGRESS |        75% | Types, owned services and validation/error mapping verified (3/4); live application integration pending.                                        |
 | Phase 1 / 1.1    | Muscle & Equipment Schema              | v0.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §1.1.                                                                                                              |
@@ -175,7 +175,7 @@ replace these exact fractions. This is verified foundation progress, not a compl
 
 | Phase    | Release | Purpose                           | Planned weight | Completion | Status      |
 | -------- | ------- | --------------------------------- | -------------: | ---------: | ----------- |
-| Phase 0  | v0.1    | Foundation                        |             40 |     73.13% | IN_PROGRESS |
+| Phase 0  | v0.1    | Foundation                        |             40 |        75% | IN_PROGRESS |
 | Phase 1  | v0.2    | Exercise Library                  |             28 |         0% | NOT_STARTED |
 | Phase 2  | v0.3    | Strength Workout System           |             70 |         0% | NOT_STARTED |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |         0% | NOT_STARTED |
@@ -209,10 +209,10 @@ specific implementation and validation evidence listed in Last Completed.
   and applied to the current minimal scaffold. Verified: 2/2.
 - **0.7 Supabase Integration (4 subtasks):** validated environment; shared client/storage/lifecycle configuration; read-only live Auth/database probes; native integration smoke tests on Android and iOS. Verified: 3/4. Native boundary mocks and exports do not count as device tests.
 - **0.8 Authentication (12 subtasks):** each of the six canonical flows has an implementation/contract-test subtask and a live acceptance subtask: signup, sign-in, sign-out, password reset, session persistence and verification. Verified: 8/12. Six implementation contracts pass; the user reports working sign-in/sign-out on web and iPhone Expo Go. Android is unavailable. Live signup/confirmation, password reset and session persistence remain pending. Figma screenshot parity is pending and does not earn weight.
-- **0.9 Profile / Preferences (4 subtasks):** schema/default record creation; typed feature reads/updates; complete Profile/preferences UI and states; authenticated application save/reopen acceptance. Verified: 2/4. Profile and units/timezone/notification/gamification UI contracts pass; theme switching and full live acceptance remain pending, so partial UI work does not earn the third group yet.
+- **0.9 Profile / Preferences (4 subtasks):** schema/default record creation; typed feature reads/updates; complete Profile/preferences UI and states; authenticated application save/reopen acceptance. Verified: 3/4. Profile and units/timezone/notification/gamification/theme UI contracts pass, with private-by-default ownership and explicit future-feature limits. Theme uses the user-approved functional palette. Live persistence, account updates and account isolation still require acceptance; exact Figma parity remains a separate design-system gate.
 - **0.10 RLS / Security Foundation (4 subtasks):** least-privilege grants and ownership policies; real database anonymous/two-user/protected-write/constraint tests; secure initialization/backfill/timestamps/deletion cascades and private-function privileges; authenticated application integration and foundation security acceptance. Verified: 3/4. Real SQL roles and anonymous SDK probes pass; application integration and the observed Auth security warning remain tracked.
 - **0.11 Data Access Layer (4 subtasks):** actual generated database types in shared client; feature-local owned queries/mutations; permitted-field validation and safe error mapping; meaningful feature request/integration tests. Verified: 3/4. The 36 SDK transport/validation tests pass; the fourth subtask remains pending live authenticated application integration.
-- **0.5 Design System (5 subtasks):** shared verified palette; shared typography; shared layout/radius/touch-target values; complete current component catalog and screen states; full Figma matching including themes. Verified: 3/5. `actaro-theme.ts` shares existing verified light values with actual components/navigation; it adds no guessed dark/lime values. Existing auth controls are reused, but the complete catalog and visual acceptance remain pending. This is partial foundation implementation, not full design-system completion.
+- **0.5 Design System (5 subtasks):** shared verified palette; shared typography; shared layout/radius/touch-target values; complete current component catalog and screen states; full Figma matching including themes. Verified: 3/5. `actaro-theme.ts` shares verified light values and the user-approved functional dark palette with current components/navigation. The full catalog and exact visual/theme acceptance remain pending. Functional dark mode adds no design-system completion weight.
 - **0.6 Navigation (3 subtasks):** five-tab composition and bundle validation; signed-in landing/signed-out/recovery routing contracts; live switching/back/sign-out acceptance on web and native. Verified: 2/3. Tests mock navigator rendering and do not establish real interactive switching. Exact Figma parity remains pending.
 
 ## v1.0 release gate
@@ -376,21 +376,22 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-Profile management is reached from More and offers name, current email, email-change confirmation and authenticated password updates. The five-tab shell opens Today after sign-in; four module views explicitly show future release scope. Profile remains guarded and keyed to the signed-in user. The user reports working name editing on iPhone; email/password changes, tab interaction and raised snackbar still need live checks. Preferences and exact visual matching remain pending. Authentication still needs live confirmation/reset/reopen evidence.
+Profile management is reached from More and offers name, current email, email-change confirmation and authenticated password updates. The five-tab shell opens Today after sign-in; future module views state their release scope. Preferences save units, time zone, opt-in values and System/Light/Dark appearance through the existing owned service. Theme drafts stay unapplied until server success; signed-out/account-switch states use System while loading. The user confirms iPhone sign-in/out, tabs and name editing. Remaining email/password, preferences save/reopen, two-account and visual acceptance checks are pending.
 
 ## Next 3 Actions
 
-1. Configure the actual Expo Go tunnel callbacks in Supabase and verify a fresh two-inbox email change on the initiating iPhone using [the callback checklist](AUTH_TESTING.md#email-changes-started-in-expo-go). Then finish preference/profile save/reopen, password updates and account isolation using [the checklist](PROFILE_TESTING.md), alongside the remaining auth flows.
-2. Use the user-approved local Figma PDF fallback for relevant remaining components when MCP is limited; resolve conflicting/stale palette values, obtain missing theme states, implement theme switching and verify visual parity.
-3. Complete a native development build and launch with the approved identifiers; repeat the native acceptance checks on Android when a device/emulator is available. Keep the passing CI baseline before closing v0.1.
+1. Verify System/Light/Dark save/reopen and two-account isolation on web/iPhone using [the preferences checklist](PROFILE_TESTING.md#preferences-acceptance). No email is required for an existing signed-in test account; defer if database requests are also limited.
+2. Review the remaining v0.1 navigation/component states against the relevant PDF/Figma evidence. Keep exact dark-mode matching pending until an approved dark design is available.
+3. When Supabase limits reset, configure and verify one fresh Expo Go email change using [the callback checklist](AUTH_TESTING.md#email-changes-started-in-expo-go). Complete the remaining auth checks and native development-build launch before closing v0.1; repeat on Android when available.
 
 Confirm the remaining auth test matrix alongside these tasks; do not mark task 0.8 DONE until its six live acceptance groups are verified. Then finish the broader design system, five-tab navigation, CI/native build checks and v0.1 release gate before starting v0.2. Keeping this headless schema/data work ahead of visual foundation work follows the previously documented Supabase/auth sequencing exception and prevents implementing a profile form before secure persistence exists.
 
 ## Blockers / Decisions
 
-- Git is installed; system-wide Node.js/npm are unavailable on PATH. Temporary portable tools
-  allow this session; standard development requires installing Node.js/npm as
-  described in the README.
+- Git and system Node.js/npm are installed. The ARM64 ngrok binary lookup failed;
+  ignored portable x64 tools resolve the executable in the configured terminal
+  session. They are not application code or deployment configuration. Actual
+  tunnel connectivity and native compilation/launch remain pending.
 - Git identity is configured locally using the user's supplied values.
   Each developer configures their own repository identity; it is not shared app configuration.
 - EAS authorization, project linkage, development profiles and a credential-free
@@ -639,3 +640,42 @@ Confirm the remaining auth test matrix alongside these tasks; do not mark task 0
 - Foundation completion remains **73.125% (29.25/40)**. Email-change confirmation,
   server-reported updated email and replacement-email sign-in still require live
   acceptance. No further release work was started.
+
+## Functional appearance preferences (2026-10-11)
+
+**DONE — Theme implementation/contract verification; v0.1 remains IN_PROGRESS.**
+
+- Read both canonical documents, current status and relevant code before editing.
+  Applied Ponytail full: existing React context/state, installed Expo status bar,
+  existing preference validation/service and shared controls; no new dependency,
+  environment value, migration, credential or raw UI database query.
+- Figma metadata access again returned the Starter MCP limit. The approved PDF
+  export supplies a System-theme setting but no dark palette, and retains stale
+  green foundation values. The user explicitly approved functional dark colors:
+  `#121211` background/surface, `#fffdf8` text, `#ddd5c8` secondary text,
+  `#6d6961` borders and `#ff681e` accent. Existing light visuals remain;
+  dark orange buttons use charcoal text for contrast. Exact Figma matching stays pending.
+- Preferences offers accessible System/Light/Dark choices. Draft/discard/failed
+  save does not change the applied appearance; a confirmed server record does.
+  Account-owned preferences restore on sign-in. System follows device changes
+  and is the signed-out/loading/failure fallback; opening Preferences can retry
+  the owned read. Stale requests/records cannot apply another account's theme.
+- Shared auth/Profile/Preferences/tab-shell screens, inputs, notices, links,
+  navigation surfaces and status-bar contrast consume the resolved palette.
+  The feedback provider remains mounted across account changes, preserving
+  sign-in feedback. The preserved `/explore` starter is outside Actaro theme parity.
+- Added eight meaningful tests: provider restoration/system/explicit modes,
+  account isolation and stale loads, safe fallback, feedback retention, deferred
+  application, discard/failed save and confirmed saves. `npm.cmd run check`:
+  **PASS (exit 0)**, strict TypeScript, lint, formatting and **124 tests / 16 suites**.
+  Initial lint exposed render-ref/effect-state violations and a test used an
+  unavailable matcher; corrected without disabling checks, then the full check passed.
+- `npx.cmd --no-install expo export --platform all`: **PASS (exit 0)**,
+  iOS/Android bundles and 19 static web routes. Exports are not native build or
+  interactive device acceptance. README and Profile testing describe real behavior
+  and the remaining manual checklist. The supplied PDF and ignored local tooling
+  remain uncommitted.
+- Profile/Preferences UI/state group earns 3/4; live acceptance remains pending.
+  Foundation becomes **30/40 = 75%**. Design stays 3/5; all later releases remain
+  NOT_STARTED. Live Supabase/email tests were postponed at the user's request;
+  no confirmation emails or backend setting changes were made during this task.

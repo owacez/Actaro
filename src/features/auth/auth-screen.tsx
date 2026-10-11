@@ -14,6 +14,7 @@ import {
 import { useAuth } from './auth-provider';
 import { useAuthFeedback } from './auth-feedback';
 import { authErrorMessage, authService, validateAuthForm, type AuthMode } from './auth-service';
+import { useAppTheme } from '@/features/profile/theme-context';
 
 const headings: Record<AuthMode, string> = {
   'sign-in': 'Welcome back',
@@ -41,6 +42,7 @@ const buttons: Record<AuthMode, string> = {
 export function AuthScreen({ recovery = false }: { recovery?: boolean }) {
   const { finishRecovery } = useAuth();
   const { notify, clear } = useAuthFeedback();
+  const { colors } = useAppTheme();
   const [mode, setMode] = useState<AuthMode>(recovery ? 'update-password' : 'sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -197,7 +199,7 @@ export function AuthScreen({ recovery = false }: { recovery?: boolean }) {
       <AuthButton title={buttons[mode]} busy={busy} onPress={() => void submit()} />
       {mode === 'sign-in' && (
         <>
-          <View style={authStyles.divider} />
+          <View style={[authStyles.divider, { backgroundColor: colors.border }]} />
           <AuthButton
             title="Create account"
             outlined
