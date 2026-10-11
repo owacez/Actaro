@@ -7,7 +7,7 @@ Updated: 2026-10-11 (America/Los_Angeles).
 - Current Release: **v0.1 — Foundation**
 - Release Completion: **84.375% (33.75 / 40 weight)**
 - Current Phase: **Phase 0 — Foundation verification**
-- Current Focus: Complete v0.1 sequentially with local checks while the user reports exhausted Supabase limits. User-requested bottom tab icons are implemented and verified in offline browser previews; native icon acceptance remains pending. Web/iPhone persistence, themes and password reset, plus web email change, are user-verified. Remaining auth/security/design acceptance is open; custom native builds are user-deferred until the application is ready.
+- Current Focus: Complete independent v0.1 visual/interaction checks while the user reports exhausted Supabase limits; do not wait for backend recovery to do local work. The user confirms the new tab icons load correctly. Web/iPhone persistence, themes and password reset, plus web email change, are user-verified. The dependency inventory below separates remaining local checks, live acceptance and deferred builds; no new approval is needed for authorized v0.1 work.
 - Status: **IN_PROGRESS**
 - Blockers: Git and system Node.js/npm are installed. Windows ARM64 tunnel tooling has a locally verified x64 workaround; actual tunnel connectivity remains unverified.
   Supabase limits are exhausted according to the user; the exact quota was not probed and live checks are paused. Figma subtree reads hit the Starter limit; native email-change callbacks and remaining acceptance are unverified. The default browser runtime failed, but isolated headless Edge smoke checks passed. Android is unavailable. Expo Doctor's last run passed 21/21 checks. Dependency advisories remain open.
@@ -214,7 +214,63 @@ specific implementation and validation evidence listed in Last Completed.
 - **0.10 RLS / Security Foundation (4 subtasks):** least-privilege grants and ownership policies; real database anonymous/two-user/protected-write/constraint tests; secure initialization/backfill/timestamps/deletion cascades and private-function privileges; authenticated application integration and foundation security acceptance. Verified: 3/4. Real SQL roles and anonymous SDK probes pass; application integration and the observed Auth security warning remain tracked.
 - **0.11 Data Access Layer (4 subtasks):** actual generated database types in shared client; feature-local owned queries/mutations; permitted-field validation and safe error mapping; meaningful feature request/integration tests. Verified: 4/4. The 36 SDK transport/validation tests pass; user-verified live profile/preferences persistence now establishes the current authenticated read/write integration. Two-account application isolation remains the security gate, not inferred from these saves.
 - **0.5 Design System (5 subtasks):** shared verified palette; shared typography; shared layout/radius/touch-target values; complete current component catalog and screen states; full Figma matching including themes. Verified: 4/5. Shared controls now cover buttons, inputs, account cards, preference chips, selected tabs and real loading/empty/error states. Theme-aware styling uses verified light values and the user-approved functional dark palette; explicit preference selection/save contracts pass. Full visual/theme acceptance remains pending. No unused future performance component or guessed lime color was added.
-- **0.6 Navigation (3 subtasks):** five-tab composition and bundle validation; signed-in landing/signed-out/recovery routing contracts; live switching/back/sign-out acceptance on web and native. Verified: 2/3. Tests mock navigator rendering and do not establish real interactive switching. Exact Figma parity remains pending.
+- **0.6 Navigation (3 subtasks):** five-tab composition and bundle validation; signed-in landing/signed-out/recovery routing contracts; live switching/back/sign-out acceptance on web and native. Verified: 2/3. Navigator contract tests mock rendering; separate isolated browser checks exercise actual tab selection with a local session fixture. The user confirms tab switching and the new icon rendering. Complete live back/sign-out/recovery acceptance remains open; the icon request intentionally replaces the PDF's dots.
+
+## v0.1 dependencies and remaining acceptance (2026-10-11)
+
+The user confirms that the new icons load correctly. That closes the reported
+icon-rendering follow-up; it does not by itself verify every back/sign-out/recovery
+transition or the unavailable Android target. Release completion remains
+**84.375%**, with **6.25 / 40** weight still unearned. A focused task ending is not
+an approval boundary for the already authorized remainder of v0.1.
+
+| Plan item                 | Included features                                                                                                                                                  | Dependency                                                                                                                                        | Current evidence / remaining work                                                                                                                                                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.1 Repository            | Git, ignores, README, env template                                                                                                                                 | Local filesystem/Git only                                                                                                                         | DONE, 100%. No new credentials needed.                                                                                                                                                                                                                            |
+| 0.2 React Native / Expo   | App configuration, TypeScript, development-build setup/launch                                                                                                      | Local checks; custom launch needs build service/toolchain, signing and target device                                                              | 2/3 verified. Expo Go launches and exports pass; custom native launch is user-deferred. Android is unavailable.                                                                                                                                                   |
+| 0.3 Quality Baseline      | Typecheck, lint, formatting, tests, CI                                                                                                                             | Installed tooling; remote CI needs GitHub                                                                                                         | DONE, 100%. Current tests run without live Supabase. Remote CI previously passed.                                                                                                                                                                                 |
+| 0.4 App Structure         | Expo Router layouts and feature/UI/business/data boundaries                                                                                                        | Local code only                                                                                                                                   | DONE, 100%. No infrastructure or additional state framework needed.                                                                                                                                                                                               |
+| 0.5 Design System         | Palette, type, spacing/radii/borders, buttons, inputs, cards, choices, loading/empty/error states, approved themes                                                 | Local components and approved Figma/PDF/user decisions                                                                                            | 4/5 verified. Current controls exist; complete visual/interaction review and any evidenced fixes can proceed without Supabase. PDF fallback is available; unavailable exact designs must stay disclosed rather than guessed.                                      |
+| 0.6 Navigation            | Today, Fitness, Nutrition, Progress, More; Profile/Preferences back paths; signed-out/recovery guards; icons                                                       | Local rendering/route checks; full live session transitions need functioning Auth                                                                 | 2/3 verified. Five tabs, guards, offline browser selection and user-reported icons/switching pass. Local back/guard review can continue; finish the remaining live transition checklist when backend access recovers.                                             |
+| 0.7 Supabase Integration  | Environment validation, shared client, session storage/lifecycle, live connectivity, platform integration                                                          | Existing public URL/key and Supabase availability; remaining target-platform checks need devices                                                  | 3/4 verified. Connected and previously probed; further live probes are paused. No replacement keys are required.                                                                                                                                                  |
+| 0.8 Authentication        | Signup, sign-in, sign-out, password reset, session persistence, email verification; email/password account updates                                                 | Local validation/contracts are independent; live signup/verification needs Supabase Auth, email delivery and a working initiating-device callback | 10/12 verified. All six implementation contracts pass; sign-in/out, reset and session persistence are user-confirmed. Individually identified signup/verification live groups, native email change and post-crypto device checks remain. Web email change passed. |
+| 0.9 Profile / Preferences | Name, current email/change email, password update, four unit families, time zone, notification/gamification opt-ins, System/Light/Dark; account-private defaults   | Existing Auth, profile/preferences services and private tables for actual saves; draft/UI checks are local                                        | DONE, 100% of its four groups. User verified persistence/themes. Native email change is tracked under Auth; account isolation under Security; visual parity under Design. Opt-ins do not implement later reminders/achievements.                                  |
+| 0.10 RLS / Security       | Ownership policies/grants, anonymous/two-user SQL isolation, protected fields/constraints, initialization/cascades, safe validation/logging, app account isolation | Local review/contracts are independent; real two-account application isolation needs working Auth/database and two test accounts                  | 3/4 verified. Real SQL RLS tests already passed. Remaining app-level isolation and native crypto/device acceptance cannot be replaced by mocks. No service-role key belongs in the mobile app.                                                                    |
+| 0.11 Data Access Layer    | Generated types, feature-owned reads/writes, identity/field validation, safe errors and integration contracts                                                      | Existing integration/schema; contract tests are local                                                                                             | DONE, 100%. Current live profile/preferences reads/writes are user-verified; no generic backend framework needed.                                                                                                                                                 |
+
+### Exact remaining weighted groups
+
+- Expo native-build launch: **1.00 weight**, user-deferred; do not submit a build.
+- Design visual/theme acceptance: **1.00 weight**, local review can proceed with
+  available approved references. Exact unprovided Figma states remain disclosed.
+- Navigation live acceptance: **1.00 weight**, mixed local interaction work and
+  live session-transition checks; the icons themselves are user-confirmed.
+- Supabase platform integration acceptance: **0.75 weight**, remaining device
+  checks depend on available targets/backend. Repeating health probes earns nothing.
+- Signup and verification live groups: **1.00 weight total**, depend on Auth/email
+  availability and valid callbacks. Existing sign-in/out/reset/session evidence
+  must not be re-requested merely to repeat completed testing.
+- Security application integration: **1.50 weight**, two-account app isolation
+  and relevant device acceptance remain; SQL security evidence is already recorded.
+
+Backend quotas are user-reported; their exact type/reset time has not been probed.
+No paid SMTP, new API key, new backend, additional schema or approval is required
+to continue the independent work. No later module should be implemented just to
+fill this verification gap. Full account deletion/data export remain retained
+Source-of-Truth requirements with no separately assigned plan task/weight; their
+placement is unresolved, not silently declared complete. Privacy currently means
+account ownership/RLS and an explanatory Preferences section, not a sharing feature.
+
+**Work order:** finish available local visual/interaction review first; resume only
+the missing live checks after backend recovery; preserve the explicit native-build
+deferral. Do not claim full release acceptance while those gates remain unverified.
+
+Inventory verification: reread both canonical documents, the weighted ledger,
+Auth/Profile acceptance checklists and current shared controls/preferences code.
+`npm.cmd run check`: PASS (132 tests / 18 suites, TypeScript, lint, formatting).
+The final documentation formatting check and `git diff --check` also pass. This
+reconciliation changes documentation only, adds no completion weight and sends
+no Supabase request. Reuse the existing local preview for the next visual task.
 
 ## v1.0 release gate
 
@@ -261,6 +317,18 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 | Early microservices, Kubernetes/GKE, unnecessary custom backend            | Explicitly excluded for early versions                       | DROPPED     | Source §§19, 23; real future backend triggers remain documented.       |
 
 ## Last Completed
+
+**DONE — Bottom tab icons; user confirms rendering (2026-10-11).**
+
+- Five cross-platform icons reuse installed Expo Symbols and the existing labels,
+  selected states and approved colors. Commit `fc067ed` is pushed to `main`.
+- Offline browser selection/rendering checks and all-platform export passed;
+  `npm.cmd run check` passed 132 tests in 18 suites plus typecheck/lint/format.
+- Profile/preferences persistence, theme switching and password-reset/session
+  acceptance on web/iPhone are user-confirmed. Those existing results remain
+  credited; unavailable live checks are distinct from missing implementation.
+- The dependency inventory above is the current remaining-work explanation.
+  Older dated entries below preserve history and do not override current status.
 
 **IN_PROGRESS — v0.1 closing tasks (2026-10-10).**
 
