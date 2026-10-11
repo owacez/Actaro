@@ -8,7 +8,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 
-import { AuthButton, AuthFrame, AuthNotice } from '@/features/auth/auth-components';
+import { AuthButton, AuthFrame, AuthNotice, AuthLoading } from '@/features/auth/auth-components';
 import { AuthProvider, useAuth } from '@/features/auth/auth-provider';
 import { AuthFeedbackProvider } from '@/features/auth/auth-feedback';
 import { AppThemeProvider } from '@/features/profile/theme-provider';
@@ -22,7 +22,7 @@ function AuthRoutes() {
   if (initializing)
     return (
       <AuthFrame>
-        <AuthNotice>Restoring your session…</AuthNotice>
+        <AuthLoading>Restoring your session…</AuthLoading>
       </AuthFrame>
     );
   if (error)

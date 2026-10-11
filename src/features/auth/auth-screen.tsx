@@ -4,6 +4,7 @@ import { Platform, View } from 'react-native';
 
 import {
   AuthButton,
+  AuthCard,
   AuthFrame,
   AuthInput,
   AuthLink,
@@ -255,7 +256,10 @@ export function AccountScreen() {
     <AuthFrame>
       <AuthText kind="eyebrow">ACTARO</AuthText>
       <AuthText kind="title">More</AuthText>
-      <AuthText>{session?.user.email}</AuthText>
+      <AuthCard>
+        <AuthText kind="muted">Signed in as</AuthText>
+        <AuthText>{session?.user.email}</AuthText>
+      </AuthCard>
       <AuthNotice>
         Training, nutrition and progress features are coming in later releases.
       </AuthNotice>

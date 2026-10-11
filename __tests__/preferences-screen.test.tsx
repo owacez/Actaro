@@ -53,8 +53,8 @@ test('loads saved values, removes reverted changes and discards without a write'
   await open();
   expect(service.getPreferences).toHaveBeenCalledWith(preferences.user_id);
   expect(screen.getByRole('button', { name: 'Save preferences' })).toBeDisabled();
-  await press('Weight: kg');
   await press('Weight: lb');
+  await press('Weight: kg');
   expect(screen.getByRole('button', { name: 'Save preferences' })).toBeDisabled();
   await fireEvent.changeText(screen.getByLabelText('Time zone'), 'Europe/London');
   await press('Discard changes');
@@ -82,6 +82,20 @@ test('rejects invalid time zones before a mutation', async () => {
   expect(service.updatePreferences).not.toHaveBeenCalled();
 });
 
+test('explicit unit choices save all four selected values and restore unchanged state', async () => {
+  const units = { weight_unit: 'lb', length_unit: 'in', distance_unit: 'mi', energy_unit: 'kJ' };
+  service.updatePreferences.mockResolvedValue({ ...preferences, ...units });
+  await open();
+  for (const name of ['Weight: lb', 'Length: in', 'Distance: mi', 'Energy: kJ']) {
+    await press(name);
+    expect(screen.getByRole('button', { name, selected: true })).toBeTruthy();
+  }
+  await press('Save preferences');
+  expect(service.updatePreferences).toHaveBeenCalledWith(units, preferences.user_id);
+  expect(screen.getByRole('button', { name: 'Save preferences' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Weight: kg', selected: false })).toBeTruthy();
+});
+
 test('sends only changed fields, blocks duplicate saves and awaits server success', async () => {
   let resolveSave: (record: Preferences) => void = () => {};
   service.updatePreferences.mockImplementation(
@@ -91,7 +105,7 @@ test('sends only changed fields, blocks duplicate saves and awaits server succes
       }),
   );
   await open();
-  await press('Weight: kg');
+  await press('Weight: lb');
   await press('Notifications preference: Off');
   const submit = screen.getByRole('button', { name: 'Save preferences' });
   await fireEvent.press(submit);
@@ -138,7 +152,7 @@ test('account remount ignores old data and late success notifications', async ()
     },
   );
   await screen.findByLabelText('Time zone');
-  await press('Weight: kg');
+  await press('Weight: lb');
   await press('Save preferences');
   service.getPreferences.mockResolvedValue({
     ...preferences,

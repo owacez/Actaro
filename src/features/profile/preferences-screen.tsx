@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import {
   AuthButton,
+  AuthChoice,
   AuthFrame,
   AuthInput,
   AuthLink,
   AuthNotice,
   AuthText,
+  AuthLoading,
+  authStyles,
 } from '@/features/auth/auth-components';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
 
@@ -110,7 +113,7 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
       <AuthLink title="← More" disabled={saving} onPress={onBack} />
       <AuthText kind="heading">Preferences</AuthText>
       {loading ? (
-        <AuthText>Loading preferences…</AuthText>
+        <AuthLoading>Loading preferences…</AuthLoading>
       ) : !saved ? (
         <>
           <AuthNotice error>{error}</AuthNotice>
@@ -126,17 +129,17 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
       ) : (
         <>
           {unitChoices.map(({ field, label, values }) => (
-            <AuthButton
-              key={field}
-              title={`${label}: ${draft[field] ?? saved[field]}`}
-              outlined
-              disabled={saving}
-              onPress={() =>
-                edit({
-                  [field]: (draft[field] ?? saved[field]) === values[0] ? values[1] : values[0],
-                })
-              }
-            />
+            <View key={field} style={authStyles.choices}>
+              {values.map((unit) => (
+                <AuthChoice
+                  key={unit}
+                  title={`${label}: ${unit}`}
+                  selected={(draft[field] ?? saved[field]) === unit}
+                  disabled={saving}
+                  onPress={() => edit({ [field]: unit })}
+                />
+              ))}
+            </View>
           ))}
           <AuthInput
             label="Time zone"
@@ -188,16 +191,17 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
             device permissions or enable features that have not been released.
           </AuthText>
           <AuthText kind="heading">Appearance</AuthText>
-          {(['system', 'light', 'dark'] as const).map((theme) => (
-            <AuthButton
-              key={theme}
-              title={`Theme: ${theme[0].toUpperCase()}${theme.slice(1)}`}
-              selected={(draft.theme ?? saved.theme) === theme}
-              outlined={(draft.theme ?? saved.theme) !== theme}
-              disabled={saving}
-              onPress={() => edit({ theme })}
-            />
-          ))}
+          <View style={authStyles.choices}>
+            {(['system', 'light', 'dark'] as const).map((theme) => (
+              <AuthChoice
+                key={theme}
+                title={`Theme: ${theme[0].toUpperCase()}${theme.slice(1)}`}
+                selected={(draft.theme ?? saved.theme) === theme}
+                disabled={saving}
+                onPress={() => edit({ theme })}
+              />
+            ))}
+          </View>
           <AuthText>Save to apply your appearance. System follows your device setting.</AuthText>
           {error && (
             <AuthNotice error announce={Platform.OS !== 'web'}>

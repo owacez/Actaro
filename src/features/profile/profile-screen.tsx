@@ -8,6 +8,7 @@ import {
   AuthLink,
   AuthNotice,
   AuthText,
+  AuthLoading,
 } from '@/features/auth/auth-components';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
 
@@ -42,7 +43,7 @@ export function ProfileScreen({
       <AuthLink title="← More" disabled={editor.saving || securityBusy} onPress={onBack} />
       <AuthText kind="heading">Profile</AuthText>
       {editor.loading ? (
-        <AuthText>Loading your profile…</AuthText>
+        <AuthLoading>Loading your profile…</AuthLoading>
       ) : editor.loadError ? (
         <>
           <AuthNotice error>{editor.loadError}</AuthNotice>

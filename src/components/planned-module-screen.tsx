@@ -1,4 +1,4 @@
-import { AuthFrame, AuthText } from '@/features/auth/auth-components';
+import { AuthFrame, AuthNotice, AuthText } from '@/features/auth/auth-components';
 
 export function PlannedModuleScreen({
   title,
@@ -11,7 +11,7 @@ export function PlannedModuleScreen({
     <AuthFrame>
       <AuthText kind="eyebrow">ACTARO</AuthText>
       <AuthText kind="title">{title}</AuthText>
-      <AuthText>{description}</AuthText>
+      <AuthNotice>{description}</AuthNotice>
     </AuthFrame>
   );
 }

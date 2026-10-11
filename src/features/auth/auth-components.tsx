@@ -141,6 +141,66 @@ export function AuthLink({
   );
 }
 
+export function AuthChoice({
+  title,
+  selected,
+  disabled = false,
+  onPress,
+}: {
+  title: string;
+  selected: boolean;
+  disabled?: boolean;
+  onPress: () => void;
+}) {
+  const { colors } = useAppTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected, disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [styles.choiceTarget, (disabled || pressed) && styles.dimmed]}
+    >
+      <View
+        style={[
+          styles.choice,
+          {
+            backgroundColor: selected ? colors.accent : 'transparent',
+            borderColor: selected ? colors.accent : colors.border,
+          },
+        ]}
+      >
+        <Text style={[styles.choiceText, { color: selected ? actaroColors.text : colors.text }]}>
+          {title}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
+export function AuthLoading({ children }: PropsWithChildren) {
+  const { colors } = useAppTheme();
+  return (
+    <View
+      style={[authStyles.row, { justifyContent: 'flex-start' }]}
+      accessibilityLiveRegion="polite"
+      accessibilityState={{ busy: true }}
+    >
+      <ActivityIndicator color={colors.accent} />
+      <AuthText>{children}</AuthText>
+    </View>
+  );
+}
+
+export function AuthCard({ children }: PropsWithChildren) {
+  const { colors } = useAppTheme();
+  return (
+    <View style={[styles.notice, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+      {children}
+    </View>
+  );
+}
+
 export function AuthNotice({
   children,
   error = false,
@@ -158,7 +218,7 @@ export function AuthNotice({
       </Text>
     );
   return (
-    <View style={[styles.notice, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+    <AuthCard>
       <Text
         accessibilityRole={error ? 'alert' : undefined}
         accessibilityLiveRegion="polite"
@@ -166,13 +226,14 @@ export function AuthNotice({
       >
         {children}
       </Text>
-    </View>
+    </AuthCard>
   );
 }
 
 export const authStyles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   divider: { height: 1, backgroundColor: authColors.border },
+  choices: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
 });
 
 const styles = StyleSheet.create({
@@ -213,6 +274,9 @@ const styles = StyleSheet.create({
   },
   outlined: { borderColor: authColors.border, backgroundColor: 'transparent' },
   dimmed: { opacity: 0.65 },
+  choiceTarget: { minHeight: actaroLayout.minimumTouchHeight, justifyContent: 'center' },
+  choice: { borderWidth: 1, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 7 },
+  choiceText: { fontFamily: 'Inter_500Medium', fontSize: 11 },
   buttonText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: authColors.background },
   outlinedText: { color: authColors.text },
   link: { minHeight: actaroLayout.minimumTouchHeight, justifyContent: 'center' },
