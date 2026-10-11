@@ -120,7 +120,26 @@ For stable native callbacks, use the configured development build and its
 No additional environment variable or API key is needed. See
 [Expo callback URL behavior](https://docs.expo.dev/versions/v57.0.0/sdk/linking/).
 
-### General auth acceptance
+### Email changes started on web
+
+1. Keep the web server running. Begin the request in the browser profile where
+   you are signed in. Use the same origin throughout: `localhost` and
+   `127.0.0.1`, different ports, private windows and separate browser profiles
+   do not share the required local verification data.
+2. Make one request, then open both current/replacement inbox links once in that
+   original browser profile. Do not sign out, clear browser storage, or start
+   another signup/reset/email-change request between those confirmations.
+3. The first accepted link can show **Check your other inbox**. The final link
+   must exchange its code and show the confirmed state. Reopen Profile to
+   verify the actual account email, then test replacement-email sign-in.
+4. A `localhost` redirect opened on a phone addresses the phone, not the
+   development machine. Start a separate phone test in Expo Go using its actual
+   allowed callback; do not reuse a link from the web request.
+5. If confirmation fails, report only the screen's safe error message. Missing
+   browser verification data, mismatched requests and expired/used links now
+   have separate messages. Never share confirmation URLs, tokens or codes.
+
+### Remaining auth acceptance
 
 1. Run `npm start` for native, or `npm run web -- --port 8081` for web. Restart
    after environment changes. Check keyboard usability and error/loading states.

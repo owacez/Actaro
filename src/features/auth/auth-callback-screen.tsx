@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 
 import { AuthButton, AuthFrame, AuthNotice, AuthText } from './auth-components';
-import { exchangeAuthCode } from './auth-service';
+import { authErrorMessage, exchangeAuthCode } from './auth-service';
 
 export function AuthCallbackScreen({ recovery = false }: { recovery?: boolean }) {
   const { code, error, error_code, sb_flow_id, message } = useLocalSearchParams<{
@@ -12,7 +12,7 @@ export function AuthCallbackScreen({ recovery = false }: { recovery?: boolean })
     sb_flow_id?: string | string[];
     message?: string | string[];
   }>();
-  const [failedCode, setFailedCode] = useState<string | null>(null);
+  const [failure, setFailure] = useState<{ code: string; message: string } | null>(null);
   // The first secure email-change link has no session code. This is an
   // instruction state only; URL text never authorizes or completes an update.
   const pendingEmailChange =
@@ -25,7 +25,7 @@ export function AuthCallbackScreen({ recovery = false }: { recovery?: boolean })
       'Confirmation link accepted. Please proceed to confirm link sent to the other email';
   const invalid =
     typeof code !== 'string' || !code || !!error || !!error_code || Array.isArray(sb_flow_id);
-  const failed = invalid || failedCode === code;
+  const failed = invalid || failure?.code === code;
   useEffect(() => {
     let active = true;
     if (typeof code !== 'string' || invalid) return;
@@ -33,8 +33,12 @@ export function AuthCallbackScreen({ recovery = false }: { recovery?: boolean })
       .then(() => {
         if (active) router.replace(recovery ? '/' : '/auth/confirmed');
       })
-      .catch(() => {
-        if (active) setFailedCode(code);
+      .catch((error: unknown) => {
+        if (!active) return;
+        const message = authErrorMessage(error);
+        setFailure({ code, message });
+        // Safe mapped text only: never log the callback URL, code or provider response.
+        if (__DEV__) console.warn('Auth confirmation could not finish:', message);
       });
     return () => {
       active = false;
@@ -61,8 +65,11 @@ export function AuthCallbackScreen({ recovery = false }: { recovery?: boolean })
       ) : failed ? (
         <>
           <AuthNotice error>
-            Request a new link and open it on the device where you started. Links expire and can
-            only be used once.
+            {failure && failure.code === code
+              ? failure.message
+              : typeof error_code === 'string'
+                ? authErrorMessage({ code: error_code })
+                : 'Open the link in the browser or app where you started. If it expired or was already used, request one new link.'}
           </AuthNotice>
           <AuthButton title="Return to sign in" onPress={() => router.replace('/')} />
         </>

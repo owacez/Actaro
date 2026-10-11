@@ -7,7 +7,7 @@ Updated: 2026-10-11 (America/Los_Angeles).
 - Current Release: **v0.1 — Foundation**
 - Release Completion: **77.5% (31 / 40 weight)**
 - Current Phase: **Phase 0 — Foundation verification**
-- Current Focus: Complete v0.1 sequentially. PDF-verified navigation markers/selected states are implemented. The user is retesting email-change confirmation on web after Safari failed; remaining live acceptance and design checks are open. Custom native builds are explicitly deferred by the user until the application is ready.
+- Current Focus: Complete v0.1 sequentially. PDF-verified navigation and shared component states are implemented. Callback errors now distinguish missing/mismatched PKCE verification data from expired links. The user must retest the second web email-change link; remaining live acceptance and full design checks are open. Custom native builds are explicitly deferred by the user until the application is ready.
 - Status: **IN_PROGRESS**
 - Blockers: Git and system Node.js/npm are installed. Windows ARM64 tunnel tooling has a locally verified x64 workaround; actual tunnel connectivity remains unverified.
   Figma subtree reads hit the Starter limit; live email callbacks and session persistence remain unverified. Browser automation failed to start; Android is unavailable. Expo Doctor now passes 21/21 checks. Dependency advisories remain open.
@@ -728,3 +728,37 @@ Do not mark task 0.8 DONE until its six live acceptance groups are verified. Ful
 - Design's current component/state group now earns 4/5. Foundation is
   **31/40 = 77.5%**. This does not establish full Figma parity, email delivery,
   native build completion or remaining live authenticated acceptance.
+
+## Web confirmation diagnosis (2026-10-11)
+
+**IN_PROGRESS — Safe callback diagnostic correction verified; live final confirmation pending.**
+
+- User-provided redirects point to `http://localhost:8081/auth/callback`, proving
+  the web request's requested destination. The first secure email-change link
+  correctly asks for the other inbox; the second failed. A phone opening this
+  web localhost destination cannot reach the desktop app. Same-machine use
+  alone does not prove the same browser profile/origin or retained PKCE storage.
+  No supplied one-use token was opened, logged or stored in the repository.
+- Replaced the callback's unconditional retry-email instruction with safe mapped
+  messages for missing local PKCE verification data, a mismatched verifier,
+  expired/used links and generic failures. Development diagnostics contain only
+  mapped text, never URLs/codes/provider responses. Existing code-only session
+  exchange, duplicate-exchange guard and recovery isolation remain unchanged.
+- Added two callback regressions and a safe-log assertion. Final
+  `npm.cmd run check`: PASS, **128 tests / 17 suites** plus typecheck/lint/format.
+  The first rerun caught a test cleanup callback's unintended return type;
+  corrected it without disabling checks. This is an error-reporting fix, not proof of a
+  successful real email change or a change to Supabase confirmation policy.
+- Read-only aggregated Supabase Auth logs did not establish a PKCE or expired
+  flow failure. Missing local verifiers can fail before a server request; the
+  exact second-link cause remains unknown. No Auth setting/template was changed
+  and no extra confirmation email was sent by the agent.
+- Headless Edge with a fresh isolated profile rendered Sign In, first-step
+  email-change instruction and expired-link error at **390 × 844**; all three
+  smoke checks passed and screenshots were inspected. Used an ignored local
+  script and the already available x64 Node fallback after the default browser
+  runtime failed. No normal browser profile, user session or real email link was
+  opened. Browser testing does not establish Expo Go/native acceptance.
+- `AUTH_TESTING.md` documents same-origin/profile testing, one request/both inbox
+  links and safe-message-only reporting. Native builds remain user-deferred;
+  v0.1 remains **77.5%**, with no further acceptance credit from this diagnosis.

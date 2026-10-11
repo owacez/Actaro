@@ -1,4 +1,4 @@
-import { beforeEach, expect, jest, test } from '@jest/globals';
+import { afterEach, beforeEach, expect, jest, test } from '@jest/globals';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import { AuthCallbackScreen } from '@/features/auth/auth-callback-screen';
@@ -18,11 +18,21 @@ jest.mock('expo-router', () => ({
   router: { replace: (path: string) => mockReplace(path) },
   useLocalSearchParams: () => mockParams,
 }));
-jest.mock('@/features/auth/auth-service', () => ({ exchangeAuthCode: jest.fn() }));
+jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
+jest.mock('@/features/auth/auth-service', () => ({
+  ...jest.requireActual<typeof import('@/features/auth/auth-service')>(
+    '@/features/auth/auth-service',
+  ),
+  exchangeAuthCode: jest.fn(),
+}));
 const exchange = jest.mocked(exchangeAuthCode);
 beforeEach(() => {
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
   exchange.mockReset();
   mockParams = {};
+});
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
 test('rejects a missing or ambiguous code without any session exchange', async () => {
@@ -52,6 +62,36 @@ test('expired links never navigate or expose the provider response', async () =>
   expect(await screen.findByText('Unable to open this link')).toBeTruthy();
   expect(mockReplace).not.toHaveBeenCalled();
   expect(screen.queryByText('private provider response')).toBeNull();
+});
+
+test('missing local PKCE storage explains the original-browser requirement without requesting extra emails', async () => {
+  mockParams = { code: 'missing-local-verifier' };
+  exchange.mockRejectedValue({
+    code: 'pkce_code_verifier_not_found',
+    message: 'private diagnostic',
+  });
+  await render(<AuthCallbackScreen />);
+  expect(await screen.findByText(/Open this address in the same browser profile/)).toBeTruthy();
+  expect(screen.queryByText('private diagnostic')).toBeNull();
+  expect(console.warn).toHaveBeenCalledWith(
+    'Auth confirmation could not finish:',
+    expect.stringContaining('same browser profile'),
+  );
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+
+test('server expiry and mismatched verifier errors are distinguished safely', async () => {
+  mockParams = { error_code: 'otp_expired' };
+  const view = await render(<AuthCallbackScreen />);
+  expect(
+    screen.getByText('This link has expired or was already used. Request a new link.'),
+  ).toBeTruthy();
+  mockParams = { code: 'mismatched-verifier' };
+  exchange.mockRejectedValue({ code: 'bad_code_verifier' });
+  await view.rerender(<AuthCallbackScreen />);
+  expect(
+    await screen.findByText(/This link belongs to a different confirmation request/),
+  ).toBeTruthy();
 });
 
 test('first email-change confirmation explains the other inbox without exchanging a session', async () => {

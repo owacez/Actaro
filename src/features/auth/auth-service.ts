@@ -42,6 +42,10 @@ export function authErrorMessage(error: unknown) {
     case 'flow_state_expired':
     case 'flow_state_not_found':
       return 'This link has expired or was already used. Request a new link.';
+    case 'pkce_code_verifier_not_found':
+      return 'Open this address in the same browser profile or Expo Go app where you started. Signing out or clearing storage can interrupt confirmation.';
+    case 'bad_code_verifier':
+      return 'This link belongs to a different confirmation request. Start one new request and open its links in the original browser or app.';
     default:
       return 'Unable to complete this request. Check your connection and try again.';
   }
