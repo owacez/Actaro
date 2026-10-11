@@ -318,6 +318,13 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 
 ## Last Completed
 
+**DONE — Shared foundation heading/button accessibility correction (2026-10-11).**
+
+- Current screen titles expose heading semantics; loading buttons keep their
+  original action name while busy/disabled. Existing validation, pending-request
+  guards and visual styling remain. All 132 tests and local auth browser checks
+  pass; complete authenticated browser/device review remains open.
+
 **DONE — Bottom tab icons; user confirms rendering (2026-10-11).**
 
 - Five cross-platform icons reuse installed Expo Symbols and the existing labels,
@@ -912,3 +919,33 @@ Do not mark task 0.8 DONE until its six live acceptance groups are verified. Ful
 - Foundation remains **33.75/40 = 84.375%**, IN_PROGRESS. User-reported quota
   exhaustion pauses live tests; exact quota, remaining acceptance and deferred
   builds are not claimed complete. All later releases remain NOT_STARTED.
+
+## Independent foundation control review (2026-10-11)
+
+**DONE — Focused accessibility correction; broader visual acceptance remains IN_PROGRESS.**
+
+- Applied Ponytail full; reviewed the approved PDF's auth/Profile/Settings
+  regions, current shared controls and route/preferences code. Reused the
+  installed React Native accessibility properties; no dependency, theme redesign,
+  schema, credentials or backend behavior change.
+- `src/features/auth/auth-components.tsx`: titles/section headings now have
+  header semantics; buttons retain their action label when a spinner replaces
+  visible text. Previously the browser exposed no headings and pending actions
+  lost their action name. Styles, disabled/busy guards and request logic remain.
+- Extended existing auth/Profile tests for heading navigation and named disabled
+  loading actions; no new suite/framework. `npm.cmd run check`: **PASS (exit 0)**,
+  TypeScript/lint/formatting and **132 tests / 18 suites**.
+- `npx.cmd --no-install expo export --platform all`: **PASS (exit 0)**,
+  iOS/Android bundles and 19 static web routes. Exports are not native launches.
+- Isolated browser checks: Sign In, Sign Up, invalid-signup feedback and Reset
+  rendered at **390×844**, with no document horizontal overflow; the corrected
+  titles appear as headings. Four screenshots inspected. The first local fixture
+  run could not load Profile; the subsequent authenticated navigation timed out.
+  Full Profile/Preferences browser review is therefore not claimed complete.
+- Preview used fake configuration with Supabase fetch interception; no request
+  reached the real project, no email was sent and no live persistence/security
+  credit is claimed. Ignored scripts/screenshots are excluded from commits.
+- Own preview/browser processes stopped; no further interactive checks are
+  running. Final documentation formatting and `git diff --check` pass.
+- Foundation remains **84.375%**. Remaining live gates and user-deferred builds
+  are unchanged. No v0.2 implementation and no new approval request.

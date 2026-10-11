@@ -46,7 +46,14 @@ export function AuthText({
       : kind === 'body' || kind === 'muted'
         ? colors.muted
         : colors.text;
-  return <Text style={[styles.text, styles[kind], { color }]}>{children}</Text>;
+  return (
+    <Text
+      accessibilityRole={kind === 'title' || kind === 'heading' ? 'header' : undefined}
+      style={[styles.text, styles[kind], { color }]}
+    >
+      {children}
+    </Text>
+  );
 }
 
 export function AuthInput({ label, ...props }: TextInputProps & { label: string }) {
@@ -96,6 +103,7 @@ export function AuthButton({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={title}
       accessibilityState={{ disabled: disabled || busy, busy, selected }}
       disabled={disabled || busy}
       onPress={onPress}

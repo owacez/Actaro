@@ -39,6 +39,7 @@ async function enterEmailAndPassword(password = 'test-password-123') {
 
 test('rejects invalid input before requesting sign-in', async () => {
   await render(<AuthScreen />, { wrapper: FeedbackTestRoot });
+  expect(screen.getByRole('header', { name: 'Welcome back' })).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Sign in' }));
   expect(screen.getByText('Enter a valid email address.')).toBeTruthy();
   expect(service.signIn).not.toHaveBeenCalled();
@@ -57,6 +58,11 @@ test('guards pending sign-in and renders a safe server error', async () => {
   const button = screen.getByRole('button', { name: 'Sign in' });
   await fireEvent.press(button);
   await fireEvent.press(button);
+  expect(screen.getByRole('button', { name: 'Sign in' })).toHaveProp('accessibilityState', {
+    disabled: true,
+    busy: true,
+    selected: undefined,
+  });
   expect(service.signIn).toHaveBeenCalledTimes(1);
   expect(screen.getByLabelText('Email')).toHaveProp('editable', false);
   await act(() =>
@@ -71,6 +77,7 @@ test('requires matching signup passwords then clears them for verification', asy
   service.signUp.mockResolvedValue({ needsConfirmation: true });
   await render(<AuthScreen />, { wrapper: FeedbackTestRoot });
   await fireEvent.press(screen.getByRole('button', { name: 'Create account' }));
+  expect(screen.getByRole('header', { name: 'Create your account' })).toBeTruthy();
   await enterEmailAndPassword();
   await fireEvent.changeText(screen.getByLabelText('Confirm password'), 'different-password');
   await fireEvent.press(screen.getByRole('button', { name: 'Create account' }));
