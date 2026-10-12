@@ -86,3 +86,21 @@ test('database error text is kept out of UI messages', async () => {
   mockFetch.mockResolvedValue(response({ message: 'private SQL diagnostic' }, 400));
   await expect(workoutService.save(userId, draft, 'kg')).rejects.toThrow('Your draft is kept');
 });
+test('delete filters the authenticated owner and exact template and requires a returned row', async () => {
+  mockFetch.mockResolvedValueOnce(response([{ id }]));
+  await expect(workoutService.remove(userId, id)).resolves.toBeUndefined();
+  const [address, init] = mockFetch.mock.calls[0];
+  const url = new URL(String(address));
+  expect(init?.method).toBe('DELETE');
+  expect(url.searchParams.get('id')).toBe(`eq.${id}`);
+  expect(url.searchParams.get('user_id')).toBe(`eq.${userId}`);
+  mockFetch.mockResolvedValueOnce(response([]));
+  await expect(workoutService.remove(userId, id)).rejects.toThrow('Workout unavailable');
+  mockFetch.mockResolvedValueOnce(response({ message: 'private SQL diagnostic' }, 400));
+  await expect(workoutService.remove(userId, id)).rejects.toThrow('Unable to delete workout');
+});
+test('invalid delete IDs and changed accounts cannot send a deletion', async () => {
+  await expect(workoutService.remove(userId, 'invalid')).rejects.toThrow('Invalid workout');
+  await expect(workoutService.remove(exerciseId, id)).rejects.toThrow('account changed');
+  expect(mockFetch).not.toHaveBeenCalled();
+});

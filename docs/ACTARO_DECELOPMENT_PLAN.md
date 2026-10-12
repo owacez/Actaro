@@ -526,7 +526,17 @@ Include:
 
 ## 2.2 Custom Workout Builder — Weight 6
 
+- Create, reopen, edit and delete owned workout templates.
+- Template deletion preserves performed sessions/sets.
+- Exercise search/detail can add to a new or existing workout; no fake logging action.
+
 ## 2.3 Predefined Training Plans — Weight 5
+
+User clarification (2026-10-12): this planning step also includes user-owned,
+editable seven-day splits with workout assignments and rest days. A user may
+change/delete a split or train outside it without rewriting recorded history.
+Implement split persistence/editor and predefined plan selection as independently
+verifiable subtasks. This clarifies the planning scope; the existing weight is unchanged.
 
 ## 2.4 Workout Pre-Start — Weight 3
 
@@ -568,6 +578,8 @@ Must include:
 
 - No total session timer
 - Full workout persistence remains
+- Direct exercise logging from search/detail without a saved template, using
+  the same dedicated session/set flow and ownership/validation rules.
 
 ## 2.9 Rest Timer — Weight 4
 
@@ -587,6 +599,10 @@ Must include:
 - Optional note
 
 ## 2.11 Workout History — Weight 4
+
+- Reopen, edit and delete performed logs, preserving separation from templates.
+- Recalculate affected volume/PR results after edits/deletion; connect this to
+  tasks 2.12–2.13 before claiming the history flow complete.
 
 ## 2.12 PR Detection — Weight 3
 

@@ -1,4 +1,5 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import {
   AuthButton,
@@ -8,6 +9,7 @@ import {
   AuthNotice,
   AuthText,
 } from '@/features/auth/auth-components';
+import { useAuthFeedback } from '@/features/auth/auth-feedback';
 import { workoutService } from './workout-service';
 type Page = Awaited<ReturnType<typeof workoutService.list>>;
 export function WorkoutsScreen({
@@ -23,6 +25,18 @@ export function WorkoutsScreen({
 }) {
   const [page, setPage] = useState<Page | null>(null);
   const [query, setQuery] = useState({ offset: 0 });
+  const [selected, setSelected] = useState<Page['rows'][number] | null>(null);
+  const [removing, setRemoving] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const pending = useRef(false),
+    alive = useRef(true);
+  const { notify } = useAuthFeedback();
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
   const offset = query.offset;
   const [loading, setLoading] = useState(true),
     [error, setError] = useState(false);
@@ -55,11 +69,32 @@ export function WorkoutsScreen({
     setError(false);
     setQuery({ offset: next });
   }
+  async function remove() {
+    if (!selected || pending.current) return;
+    pending.current = true;
+    setRemoving(true);
+    setDeleteError(null);
+    try {
+      await workoutService.remove(userId, selected.id);
+      if (!alive.current) return;
+      setSelected(null);
+      notify('Workout deleted.', 'success');
+      refresh(page?.rows.length === 1 && offset > 0 ? offset - 10 : offset);
+    } catch (reason) {
+      if (alive.current)
+        setDeleteError(
+          reason instanceof Error ? reason.message : 'Unable to delete workout. Retry.',
+        );
+    } finally {
+      pending.current = false;
+      if (alive.current) setRemoving(false);
+    }
+  }
   return (
     <AuthFrame>
-      <AuthLink title="← Exercise Library" onPress={onBack} />
+      <AuthLink title="← Exercise Library" disabled={removing} onPress={onBack} />
       <AuthText kind="heading">My workouts</AuthText>
-      <AuthButton title="Create workout" onPress={onCreate} />
+      <AuthButton title="Create workout" disabled={removing} onPress={onCreate} />
       {loading ? (
         <AuthLoading>Loading workouts…</AuthLoading>
       ) : error ? (
@@ -73,23 +108,56 @@ export function WorkoutsScreen({
             <AuthText>No saved workouts yet. Create your first workout.</AuthText>
           )}
           {page?.rows.map((row) => (
-            <AuthLink
-              key={row.id}
-              title={`${row.name} · ${row.workout_template_exercises[0]?.count ?? 0} exercises`}
-              onPress={() => onEdit(row.id)}
-            />
+            <View key={row.id} style={{ gap: 8 }}>
+              <AuthLink
+                title={`${row.name} · ${row.workout_template_exercises[0]?.count ?? 0} exercises`}
+                disabled={removing}
+                onPress={() => onEdit(row.id)}
+              />
+              <AuthLink
+                title={`Delete ${row.name}`}
+                disabled={removing}
+                onPress={() => {
+                  setSelected(row);
+                  setDeleteError(null);
+                }}
+              />
+              {selected?.id === row.id && (
+                <>
+                  <AuthText>
+                    Delete “{selected.name}”? Its planned exercises and sets will be removed.
+                    Recorded sessions stay in your history.
+                  </AuthText>
+                  {deleteError && <AuthNotice error>{deleteError}</AuthNotice>}
+                  <AuthButton
+                    title="Keep workout"
+                    outlined
+                    disabled={removing}
+                    onPress={() => {
+                      setSelected(null);
+                      setDeleteError(null);
+                    }}
+                  />
+                  <AuthButton
+                    title="Delete workout"
+                    busy={removing}
+                    onPress={() => void remove()}
+                  />
+                </>
+              )}
+            </View>
           ))}
           <AuthButton
             title="Previous workouts"
             outlined
-            disabled={offset === 0}
+            disabled={removing || offset === 0}
             onPress={() => refresh(Math.max(0, offset - 10))}
           />
           <AuthText>Page {offset / 10 + 1}</AuthText>
           <AuthButton
             title="Next workouts"
             outlined
-            disabled={!page?.more}
+            disabled={removing || !page?.more}
             onPress={() => refresh(offset + 10)}
           />
         </>

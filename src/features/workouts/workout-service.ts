@@ -9,6 +9,19 @@ async function owner(expected: string) {
   return data.user.id;
 }
 export const workoutService = {
+  async remove(userId: string, workoutId: string) {
+    if (!validExerciseId(workoutId)) throw new Error('Invalid workout.');
+    const id = await owner(userId);
+    const { data, error } = await getSupabase()
+      .from('workout_templates')
+      .delete()
+      .eq('id', workoutId)
+      .eq('user_id', id)
+      .select('id');
+    if (error) throw new Error('Unable to delete workout. Check your connection and retry.');
+    if (data?.length !== 1 || data[0].id !== workoutId)
+      throw new Error('Workout unavailable. Reopen My workouts.');
+  },
   async list(userId: string, offset: number) {
     const id = await owner(userId);
     if (!Number.isInteger(offset) || offset < 0) throw new Error('Invalid page.');

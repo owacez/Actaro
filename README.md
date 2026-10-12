@@ -379,6 +379,15 @@ the editor's back action asks before discarding changes. Unsaved builder drafts
 are not persisted across app termination; active-session resilience is a later task.
 Concurrent edits use last-save-wins semantics for the same owned template.
 
+To delete a saved template, open **My workouts → Delete [workout name]**, review
+the confirmation and choose **Delete workout**. This removes planned exercises
+and sets while preserving recorded sessions. **Keep workout** cancels deletion;
+failed requests retain the visible row for retry.
+
+Saving a template does not log training. Seven-day splits with rest days,
+direct exercise logging, and editable/deletable history are tracked in the
+remaining v0.3 planning/session/history tasks. There is no active logging button yet.
+
 ## Release discipline
 
 Core order: v0.1 Foundation → v0.2 Exercise Library → v0.3 Strength Workouts →

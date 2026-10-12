@@ -410,6 +410,22 @@ Later:
 - Drop sets
 - Advanced set types
 
+### Real-world workout management — confirmed 2026-10-12
+
+- Create, reopen, edit and delete reusable workouts. Deleting a workout template
+  removes planned targets but preserves recorded sessions and performed sets.
+- Create an editable seven-day training split, assigning workouts to days and
+  explicitly supporting rest days. Seven calendar days does not mean seven
+  mandatory training days. Users can change or delete their split without
+  rewriting past logs; workouts can also be performed outside the schedule.
+- From exercise search/detail, add an exercise to a new or existing workout,
+  or log it directly without first creating a reusable workout. Direct logging
+  uses the same owned session/set data and validation as workout logging.
+- Reopen, edit and delete recorded logs through workout history; changes must
+  update derived volume/PR calculations consistently.
+- Figma remains the visual reference. Its example screens are not an exhaustive
+  specification of real-world behavior or a substitute for these requirements.
+
 ## 8.5 Predefined Training Plans
 
 Initial families:

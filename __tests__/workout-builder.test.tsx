@@ -15,7 +15,7 @@ const exerciseId = '00000000-0000-4000-8000-000000000003';
 const userId = '00000000-0000-4000-8000-000000000001';
 jest.mock('expo-crypto', () => ({ randomUUID: () => workoutId }));
 jest.mock('@/features/workouts/workout-service', () => ({
-  workoutService: { load: jest.fn(), save: jest.fn(), list: jest.fn() },
+  workoutService: { load: jest.fn(), save: jest.fn(), list: jest.fn(), remove: jest.fn() },
 }));
 jest.mock('@/features/exercises/exercise-image', () => ({ ExerciseImage: () => null }));
 jest.mock('expo-router', () => ({
@@ -162,12 +162,92 @@ test('workout list handles request failure and empty retry', async () => {
     .mockRejectedValueOnce(new Error('offline'))
     .mockResolvedValueOnce({ rows: [], more: false });
   await render(
-    <WorkoutsScreen userId={userId} onBack={() => {}} onCreate={() => {}} onEdit={() => {}} />,
+    <FeedbackTestRoot>
+      <WorkoutsScreen userId={userId} onBack={() => {}} onCreate={() => {}} onEdit={() => {}} />
+    </FeedbackTestRoot>,
   );
   await screen.findByText(/Unable to load workouts/);
   await fireEvent.press(screen.getByRole('button', { name: 'Retry' }));
   await screen.findByText('No saved workouts yet. Create your first workout.');
   expect(mocks.list).toHaveBeenCalledTimes(2);
+});
+test('delete requires confirmation, keeps failed rows and blocks duplicate pending requests', async () => {
+  const row = {
+    id: workoutId,
+    name: 'Upper A',
+    updated_at: '2026-10-12',
+    workout_template_exercises: [{ count: 1 }],
+  };
+  mocks.list.mockResolvedValue({ rows: [row], more: false });
+  mocks.remove.mockRejectedValueOnce(
+    new Error('Unable to delete workout. Check your connection and retry.'),
+  );
+  const back = jest.fn(),
+    create = jest.fn(),
+    edit = jest.fn();
+  await render(
+    <FeedbackTestRoot>
+      <WorkoutsScreen userId={userId} onBack={back} onCreate={create} onEdit={edit} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByText('Upper A · 1 exercises');
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete Upper A' }));
+  expect(mocks.remove).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Keep workout' }));
+  expect(screen.queryByRole('button', { name: 'Delete workout' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete Upper A' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete workout' }));
+  await screen.findByText('Unable to delete workout. Check your connection and retry.');
+  expect(screen.getByText('Upper A · 1 exercises')).toBeTruthy();
+  let finish: (() => void) | undefined;
+  mocks.remove.mockImplementationOnce(
+    () =>
+      new Promise<void>((resolve) => {
+        finish = resolve;
+      }),
+  );
+  mocks.list.mockResolvedValueOnce({ rows: [], more: false });
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Keep workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Create workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Upper A · 1 exercises' }));
+  await fireEvent.press(screen.getByRole('button', { name: '← Exercise Library' }));
+  expect(mocks.remove).toHaveBeenCalledTimes(2);
+  expect(mocks.remove).toHaveBeenLastCalledWith(userId, workoutId);
+  expect(back).not.toHaveBeenCalled();
+  expect(create).not.toHaveBeenCalled();
+  expect(edit).not.toHaveBeenCalled();
+  await act(async () => {
+    finish?.();
+  });
+  await screen.findByText('No saved workouts yet. Create your first workout.');
+  expect(screen.queryByText('Upper A · 1 exercises')).toBeNull();
+});
+test('deleting the last workout on a later page reloads the previous page', async () => {
+  const row = {
+    id: workoutId,
+    name: 'Upper A',
+    updated_at: '2026-10-12',
+    workout_template_exercises: [{ count: 1 }],
+  };
+  mocks.list
+    .mockResolvedValueOnce({ rows: [row], more: true })
+    .mockResolvedValueOnce({ rows: [row], more: false })
+    .mockResolvedValueOnce({ rows: [], more: false });
+  mocks.remove.mockResolvedValue(undefined);
+  await render(
+    <FeedbackTestRoot>
+      <WorkoutsScreen userId={userId} onBack={() => {}} onCreate={() => {}} onEdit={() => {}} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByText('Page 1');
+  await fireEvent.press(screen.getByRole('button', { name: 'Next workouts' }));
+  await screen.findByText('Page 2');
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete Upper A' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete workout' }));
+  await screen.findByText('No saved workouts yet. Create your first workout.');
+  expect(mocks.list.mock.calls.map(([, offset]) => offset)).toEqual([0, 10, 0]);
 });
 test('orders exercises and adds/removes sets and exercises before saving', async () => {
   mocks.load.mockResolvedValue({
