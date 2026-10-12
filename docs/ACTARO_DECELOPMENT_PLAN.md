@@ -436,6 +436,13 @@ Raw Supabase access must not be scattered throughout UI components.
 
 # Phase 1 — v0.2 Exercise Library
 
+Execution exception (2026-10-12): the user explicitly authorized starting the
+next features while the remaining v0.1 acceptance checks are tested later.
+Track those checks as DEFERRED in Development Status; do not mark them passed or
+declare v0.1 release acceptance complete. Resume sequencing with Phase 1, one
+focused task at a time. Hosted Supabase checks remain paused; native builds remain
+user-deferred. The roadmap requirements and weights are unchanged.
+
 ## 1.1 Muscle & Equipment Schema — Weight 2
 
 ## 1.2 Exercise Schema — Weight 4

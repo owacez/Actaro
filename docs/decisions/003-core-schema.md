@@ -150,6 +150,38 @@ defined in those releases. Retained/deferred requirements stay in Development St
 - This is database foundation evidence, not a completed Profile screen or
   verified application profile persistence. Future-domain tables remain absent.
 
+## v0.2 reference catalogs (2026-10-12)
+
+The user authorized advancing to Exercise Library while foundation acceptance is
+tested later. Task 1.1 adds `muscles` and `equipment`, each with a generated UUID,
+unique lowercase hyphenated slug, validated display name and creation timestamp.
+Imports update by slug while preserving UUIDs, so later exercise relationships
+retain stable references. Dataset-specific mapping and seeds belong to task 1.4.
+
+These catalogs are shared reference data, not user-owned health facts. Authenticated
+clients can SELECT only; RLS and table grants deny anonymous reads and client
+mutations. Trusted imports use an administrative context. Owned equipment selections
+belong to task 1.8 and are not introduced here. No analytics infrastructure or extra
+speculative indexes are needed; primary-key and slug constraints provide their indexes.
+
+`supabase/tests/exercise_taxonomy.sql` passes on local PostgreSQL 18.3 via temporary
+PGlite tooling, including constraint/ID checks, role permissions, RLS and rollback.
+This is local SQL evidence, not hosted Supabase runtime verification. Applying the
+CLI-generated migration and regenerating database types remain pending while
+Supabase calls are paused. No privileged key or manual generated-type edit was added.
+
+Dataset review: the user reinforced dataset-driven exercises/images on 2026-10-12.
+The current [RepDB README](https://github.com/RepDB/exercise-dataset/blob/main/README.md)
+lists 643 exercises, localized instructions, anatomical muscle slugs, equipment and
+512px WebP start/peak or main poses. Its
+[data license](https://github.com/RepDB/exercise-dataset/blob/main/LICENSE-DATA.md)
+permits free commercial in-app use with attribution; excludes standalone dataset/API
+redistribution, generative-AI derivatives and production use of paid preview assets.
+Use the free tier; preserve source/license metadata and add visible attribution
+when importing. Follow the canonical plan: import into our schema/Storage, with no
+external dataset hotlinks at runtime or committed repackaged dataset. This review
+does not earn import/media completion credit; those remain tasks 1.4 and 1.5.
+
 References:
 
 - [Supabase Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)

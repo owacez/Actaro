@@ -1,17 +1,18 @@
 # Actaro — Development Status
 
-Updated: 2026-10-11 (America/Los_Angeles).
+Updated: 2026-10-12 (America/Los_Angeles).
 
 ## Overall
 
-- Current Release: **v0.1 — Foundation**
-- Release Completion: **84.375% (33.75 / 40 weight)**
-- Current Phase: **Phase 0 — Foundation verification**
-- Current Focus: Complete independent v0.1 visual/interaction checks while the user reports exhausted Supabase limits; do not wait for backend recovery to do local work. The user confirms the new tab icons load correctly. Web/iPhone persistence, themes and password reset, plus web email change, are user-verified. The dependency inventory below separates remaining local checks, live acceptance and deferred builds; no new approval is needed for authorized v0.1 work.
+- Current Release: **v0.2 — Exercise Library**
+- Release Completion: **5.357143% (1.5 / 28 weight)**
+- Previous Release: **v0.1 — 84.375% verified; remaining acceptance DEFERRED for later testing, not passed**
+- Current Phase: **Phase 1 — Exercise Library; task 1.1**
+- Current Focus: User authorized moving to the next features on 2026-10-12. Muscle/equipment schema and rollback SQL tests pass locally. Hosted application and generated types remain pending while Supabase calls are paused. Existing v0.1 evidence is retained; postponed checks no longer block independent v0.2 implementation.
 - Status: **IN_PROGRESS**
 - Blockers: Git and system Node.js/npm are installed. Windows ARM64 tunnel tooling has a locally verified x64 workaround; actual tunnel connectivity remains unverified.
   Supabase limits are exhausted according to the user; the exact quota was not probed and live checks are paused. Figma subtree reads hit the Starter limit; native email-change callbacks and remaining acceptance are unverified. The default browser runtime failed, but isolated headless Edge smoke checks passed. Android is unavailable. Expo Doctor's last run passed 21/21 checks. Dependency advisories remain open.
-- Approval boundary: User authorized completing all remaining v0.1 work on 2026-10-11, one verified task at a time. Custom native builds are now explicitly deferred until the application is ready; no build was submitted. Later feature releases remain outside scope.
+- Approval boundary: User explicitly authorized advancing to the next features on 2026-10-12 and postponing the remaining v0.1 tests. Execute v0.2 incrementally; later releases retain their order. Custom native builds remain deferred until the application is ready; no build was submitted.
 
 Latest design access: the user supplied a local Figma PDF export and authorized
 it as fallback when MCP calls are exhausted. Its first foundation page retains
@@ -32,7 +33,7 @@ Use the Development Plan's weights exactly. For each active item, earned weight
 is `weight × verified completed subtasks / total subtasks`. DONE earns full weight;
 NOT_STARTED earns zero; BLOCKED earns only completed subtasks. DEFERRED and DROPPED
 items are excluded from their release denominator. Never infer progress from Figma.
-All future weighted tasks remain NOT_STARTED. No roadmap item has been removed.
+Tasks after the current v0.2 schema task remain NOT_STARTED. No roadmap item has been removed.
 
 v0.1 denominator: `2 + 3 + 3 + 2 + 5 + 3 + 3 + 6 + 3 + 6 + 4 = 40`.
 Subtasks below define a reproducible foundation baseline; partial values are
@@ -43,6 +44,12 @@ release gates separately, without inventing a numeric weight.
 Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 5/5 + 2 × 2/2 + 5 × 4/5 + 3 × 2/3 + 3 × 3/4 + 6 × 10/12 + 3 × 4/4 + 6 × 3/4 + 4 × 4/4 = 33.75`.
 Release completion: `33.75 / 40 × 100 = 84.375%`. Rounded table percentages never
 replace these exact fractions. This is verified foundation progress, not a completed v0.1 release.
+
+v0.2 denominator: `2 + 4 + 3 + 5 + 4 + 5 + 3 + 2 = 28`.
+Task 1.1 earns `2 × 3/4 = 1.5`; the other seven tasks earn zero.
+Release completion: `1.5 / 28 × 100 = 5.357142857…%`.
+Deferred unweighted acceptance-check records below do not reweight completed
+foundation work or turn the unchanged 84.375% full-scope baseline into 100%.
 
 ## Feature Table
 
@@ -59,7 +66,7 @@ replace these exact fractions. This is verified foundation progress, not a compl
 | Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | DONE        |       100% | Schema/services/UI and web/iPhone profile/preferences save/reopen user-verified (4/4); separate native email-change follow-up remains.          |
 | Phase 0 / 0.10   | RLS / Security Foundation              | v0.1    |      6 | IN_PROGRESS |        75% | Grants/policies, database isolation/constraints and lifecycle tested (3/4); application integration pending.                                    |
 | Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | DONE        |       100% | Types, owned services, validation/error mapping and live profile/preferences reads/writes verified (4/4).                                       |
-| Phase 1 / 1.1    | Muscle & Equipment Schema              | v0.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §1.1.                                                                                                              |
+| Phase 1 / 1.1    | Muscle & Equipment Schema              | v0.2    |      2 | IN_PROGRESS |        75% | Migration, constraints/stable IDs and grants/RLS verified locally (3/4); hosted deployment and generated types pending.                         |
 | Phase 1 / 1.2    | Exercise Schema                        | v0.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §1.2.                                                                                                              |
 | Phase 1 / 1.3    | Exercise Media Schema                  | v0.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §1.3.                                                                                                              |
 | Phase 1 / 1.4    | RepDB Import Script                    | v0.2    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §1.4.                                                                                                              |
@@ -177,7 +184,7 @@ replace these exact fractions. This is verified foundation progress, not a compl
 | Phase    | Release | Purpose                           | Planned weight | Completion | Status      |
 | -------- | ------- | --------------------------------- | -------------: | ---------: | ----------- |
 | Phase 0  | v0.1    | Foundation                        |             40 |    84.375% | IN_PROGRESS |
-| Phase 1  | v0.2    | Exercise Library                  |             28 |         0% | NOT_STARTED |
+| Phase 1  | v0.2    | Exercise Library                  |             28 |  5.357143% | IN_PROGRESS |
 | Phase 2  | v0.3    | Strength Workout System           |             70 |         0% | NOT_STARTED |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |         0% | NOT_STARTED |
 | Phase 4  | v0.5    | Habits, Goals & Today             |             38 |         0% | NOT_STARTED |
@@ -261,9 +268,9 @@ Source-of-Truth requirements with no separately assigned plan task/weight; their
 placement is unresolved, not silently declared complete. Privacy currently means
 account ownership/RLS and an explanatory Preferences section, not a sharing feature.
 
-**Work order:** finish available local visual/interaction review first; resume only
-the missing live checks after backend recovery; preserve the explicit native-build
-deferral. Do not claim full release acceptance while those gates remain unverified.
+**Historical work order (2026-10-11):** foundation review first. Superseded by the
+user's 2026-10-12 instruction to defer remaining checks and advance to v0.2.
+Full release acceptance still requires the unverified gates; no completion is inferred.
 
 Inventory verification: reread both canonical documents, the weighted ledger,
 Auth/Profile acceptance checklists and current shared controls/preferences code.
@@ -271,6 +278,36 @@ Auth/Profile acceptance checklists and current shared controls/preferences code.
 The final documentation formatting check and `git diff --check` also pass. This
 reconciliation changes documentation only, adds no completion weight and sends
 no Supabase request. Reuse the existing local preview for the next visual task.
+
+## Deferred v0.1 testing (2026-10-12)
+
+The user explicitly requested testing these later. These are unweighted acceptance
+records, not removed roadmap features. Preserve the 84.375% full-scope baseline and
+existing passing evidence; no repeat of accepted sign-in/out, reset, persistence or
+theme checks is required. Every item below is **DEFERRED**, not passed.
+
+| Remaining check                                                                                     | Status   | Resume condition                                                                               |
+| --------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| Individually identified signup/email verification and native email change after the PKCE correction | DEFERRED | Auth/email availability recovers; validate callbacks on the initiating platform.               |
+| Two-account application isolation                                                                   | DEFERRED | Live Auth/data checks resume; keep already-passing SQL RLS evidence.                           |
+| Complete Profile/Preferences visual and theme acceptance                                            | DEFERRED | Next foundation review using approved references and user-approved differences.                |
+| Complete back/sign-out/recovery transitions across tabs                                             | DEFERRED | Next web/native acceptance pass; icon rendering and basic tab switching are already confirmed. |
+| Remaining cross-platform Supabase integration                                                       | DEFERRED | Device/backend availability, including an Android target.                                      |
+| Custom native development-build compilation and launch                                              | DEFERRED | User authorizes builds when the application is ready; no build now.                            |
+
+## Exercise Library subtask ledger
+
+**1.1 Muscle & Equipment Schema (weight 2; 3/4 verified):**
+
+| Verification group                                         | Status      | Evidence                                                                                                                  |
+| ---------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Migration definition                                       | DONE        | CLI-generated `20261012081416_exercise_taxonomy.sql`; two catalogs with UUIDs, stable unique slugs, names and timestamps. |
+| Constraints and stable import IDs                          | DONE        | Real local PostgreSQL execution rejects invalid/duplicate values and preserves UUIDs during slug upserts.                 |
+| Read-only grants and RLS                                   | DONE        | Real role checks allow authenticated reads, deny client mutations/anonymous reads, and roll back all fixtures/grants.     |
+| Hosted deployment, generated types and hosted verification | NOT_STARTED | Supabase calls remain paused; no generated type file was edited by hand.                                                  |
+
+Local PostgreSQL evidence does not establish hosted Supabase integration or a
+populated Exercise Library. Tasks 1.2–1.8 remain NOT_STARTED.
 
 ## v1.0 release gate
 
@@ -317,6 +354,14 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 | Early microservices, Kubernetes/GKE, unnecessary custom backend            | Explicitly excluded for early versions                       | DROPPED     | Source §§19, 23; real future backend triggers remain documented.       |
 
 ## Last Completed
+
+**DONE — Local muscle/equipment schema and SQL verification (2026-10-12).**
+
+- Three of four task 1.1 verification groups pass locally. Hosted deployment/types
+  remain pending; the entire task stays IN_PROGRESS. No live Supabase call, catalog
+  import, application dependency or Exercise Library UI was added.
+- Remaining v0.1 acceptance is explicitly recorded as DEFERRED above, preserving
+  earned weight and user-confirmed results.
 
 **DONE — Shared foundation heading/button accessibility correction (2026-10-11).**
 
@@ -452,15 +497,20 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
+v0.2 task 1.1 now has a locally verified muscle/equipment migration and rollback
+SQL tests. Hosted deployment/types await resumed Supabase access. The next focused
+implementation is task 1.2 Exercise Schema. Deferred foundation acceptance is listed
+above and no longer blocks independent schema work under the user's instruction.
+
 Profile management is reached from More and offers name, current email, email-change confirmation and authenticated password updates. The five-tab shell opens Today after sign-in and now has calendar, strength, nutrition, chart and more icons; future module views state their release scope. Preferences save units, time zone, opt-in values and System/Light/Dark appearance through the existing owned service. Theme drafts stay unapplied until server success; signed-out/account-switch states use System while loading. The user confirms web/iPhone persistence, themes and password reset, plus web email change. Native email change, individually identified signup/verification, two-account and full visual acceptance remain pending. Backend verification is paused during the reported quota exhaustion.
 
 ## Next 3 Actions
 
-1. Finish local visual/accessibility review of current foundation screens against the approved PDF and user-approved differences; keep live Supabase calls disabled during quota exhaustion.
-2. Verify the new icons on iPhone and close native email-link/signup acceptance after limits recover, using the initiating phone's allowed callback and checking that the plain-challenge warning is absent.
-3. Verify two-account application isolation using [the preferences checklist](PROFILE_TESTING.md#preferences-acceptance), then reconcile the remaining foundation gates. Record unavailable Android and user-deferred native builds separately; do not submit builds now.
+1. Implement task 1.2 Exercise Schema: source IDs, instructions and muscle/equipment relationships, with local constraint/security tests.
+2. Implement task 1.3 Exercise Media Schema: storage references, attribution/licensing metadata and relationship validation.
+3. Implement task 1.4 RepDB Import Script: inspect the actual dataset/license, map stable IDs and verify repeatable imports without duplicates.
 
-Do not mark task 0.8 DONE until its six live acceptance groups are verified. Full visual acceptance and the v0.1 release gate remain open. Native builds are explicitly deferred by the user until the application is ready; no completion credit is claimed for that unverified subtask. v0.2 remains outside the current work order.
+Do not mark task 0.8 DONE until its six live acceptance groups are verified. Full visual acceptance and the v0.1 release gate remain open. Native builds are explicitly deferred by the user until the application is ready; no completion credit is claimed for that unverified subtask. The user authorized v0.2 work on 2026-10-12; hosted calls stay paused and deferred checks remain recorded.
 
 ## Blockers / Decisions
 
@@ -949,3 +999,37 @@ Do not mark task 0.8 DONE until its six live acceptance groups are verified. Ful
   running. Final documentation formatting and `git diff --check` pass.
 - Foundation remains **84.375%**. Remaining live gates and user-deferred builds
   are unchanged. No v0.2 implementation and no new approval request.
+
+## First Exercise Library schema (2026-10-12)
+
+**IN_PROGRESS — Task 1.1; three of four local/hosted verification groups completed.**
+
+- Applied Ponytail full and Supabase schema guidance. Added only the current
+  muscle/equipment catalog requirement: stable UUIDs/slugs, validated names,
+  timestamps, authenticated read-only grants and RLS. No hardcoded exercises,
+  images, dataset seed, app dependency, native build or analytics infrastructure.
+- Supabase CLI **2.120.0** generated the local migration using
+  `supabase migration new exercise_taxonomy`: **PASS**. The cached CLI was used;
+  restricted execution initially could not write its local telemetry file, so
+  only local migration generation was retried with authorized escalation. No
+  project connection or hosted migration was performed.
+- `supabase/migrations/20261012081416_exercise_taxonomy.sql` defines both tables.
+  `supabase/tests/exercise_taxonomy.sql` is an administrative, rollback-only SQL
+  suite for invalid/duplicate values, ID-preserving upserts, role permissions and
+  anonymous RLS denial even with a temporary read grant. All fixtures/grants roll back.
+- `npm.cmd install --prefix .actaro-tools/postgres-check --no-audit --no-fund --save-exact @electric-sql/pglite@0.5.8`:
+  **PASS**, temporary ignored tooling only; root dependency files unchanged.
+  `node .actaro-tools/test-taxonomy.mjs`: **PASS**, actual PostgreSQL **18.3**
+  execution via PGlite **0.5.8**, including empty post-rollback catalogs and restored
+  anonymous grants. This runtime does not include the hosted Supabase API/Auth stack.
+- `npm.cmd run check`: **PASS (exit 0)**, strict TypeScript, lint, formatting and
+  **132 tests / 18 suites**. `git diff --check`: **PASS**. No Expo API/UI was changed,
+  so no new export/native build or live authentication test was required.
+- Reviewed the current RepDB README and data license after the user reinforced
+  dataset-driven content. Free dataset import, attribution and own Storage are
+  planned; no paid preview assets or external runtime hotlinks. Source review earns
+  no task 1.4/1.5 completion credit; details are in `decisions/003-core-schema.md`.
+- Hosted application, regenerated database types and hosted verification remain
+  NOT_STARTED while Supabase calls are paused. Task 1.1 is **75%**; v0.2 earns
+  **1.5/28 = 5.357143%**. Remaining v0.1 tests are DEFERRED by the user, with the
+  full-scope baseline unchanged at **84.375%**; no false release completion.
