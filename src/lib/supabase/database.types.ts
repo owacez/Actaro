@@ -8,6 +8,212 @@ export type Database = {
   };
   public: {
     Tables: {
+      equipment: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          slug: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          slug: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          slug?: string;
+        };
+        Relationships: [];
+      };
+      exercise_equipment: {
+        Row: {
+          equipment_id: string;
+          exercise_id: string;
+        };
+        Insert: {
+          equipment_id: string;
+          exercise_id: string;
+        };
+        Update: {
+          equipment_id?: string;
+          exercise_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'exercise_equipment_equipment_id_fkey';
+            columns: ['equipment_id'];
+            isOneToOne: false;
+            referencedRelation: 'equipment';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'exercise_equipment_exercise_id_fkey';
+            columns: ['exercise_id'];
+            isOneToOne: false;
+            referencedRelation: 'exercises';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      exercise_media: {
+        Row: {
+          attribution: string;
+          byte_size: number;
+          created_at: string;
+          exercise_id: string;
+          id: string;
+          license: string;
+          media_type: string;
+          pose: string;
+          sha256: string;
+          source: string;
+          source_external_id: string;
+          storage_path: string;
+        };
+        Insert: {
+          attribution: string;
+          byte_size: number;
+          created_at?: string;
+          exercise_id: string;
+          id?: string;
+          license: string;
+          media_type?: string;
+          pose: string;
+          sha256: string;
+          source: string;
+          source_external_id: string;
+          storage_path: string;
+        };
+        Update: {
+          attribution?: string;
+          byte_size?: number;
+          created_at?: string;
+          exercise_id?: string;
+          id?: string;
+          license?: string;
+          media_type?: string;
+          pose?: string;
+          sha256?: string;
+          source?: string;
+          source_external_id?: string;
+          storage_path?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'exercise_media_exercise_id_fkey';
+            columns: ['exercise_id'];
+            isOneToOne: false;
+            referencedRelation: 'exercises';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      exercise_muscles: {
+        Row: {
+          exercise_id: string;
+          muscle_id: string;
+          role: string;
+        };
+        Insert: {
+          exercise_id: string;
+          muscle_id: string;
+          role: string;
+        };
+        Update: {
+          exercise_id?: string;
+          muscle_id?: string;
+          role?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'exercise_muscles_exercise_id_fkey';
+            columns: ['exercise_id'];
+            isOneToOne: false;
+            referencedRelation: 'exercises';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'exercise_muscles_muscle_id_fkey';
+            columns: ['muscle_id'];
+            isOneToOne: false;
+            referencedRelation: 'muscles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      exercises: {
+        Row: {
+          attribution: string;
+          category: string | null;
+          created_at: string;
+          description: string | null;
+          difficulty: string | null;
+          id: string;
+          instructions: string[];
+          license: string;
+          movement_pattern: string | null;
+          name: string;
+          source: string;
+          source_external_id: string;
+          source_revision: string;
+        };
+        Insert: {
+          attribution: string;
+          category?: string | null;
+          created_at?: string;
+          description?: string | null;
+          difficulty?: string | null;
+          id?: string;
+          instructions: string[];
+          license: string;
+          movement_pattern?: string | null;
+          name: string;
+          source: string;
+          source_external_id: string;
+          source_revision: string;
+        };
+        Update: {
+          attribution?: string;
+          category?: string | null;
+          created_at?: string;
+          description?: string | null;
+          difficulty?: string | null;
+          id?: string;
+          instructions?: string[];
+          license?: string;
+          movement_pattern?: string | null;
+          name?: string;
+          source?: string;
+          source_external_id?: string;
+          source_revision?: string;
+        };
+        Relationships: [];
+      };
+      muscles: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          slug: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          slug: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          slug?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           created_at: string;
@@ -28,6 +234,36 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [];
+      };
+      user_equipment: {
+        Row: {
+          equipment_id: string;
+          user_id: string;
+        };
+        Insert: {
+          equipment_id: string;
+          user_id: string;
+        };
+        Update: {
+          equipment_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_equipment_equipment_id_fkey';
+            columns: ['equipment_id'];
+            isOneToOne: false;
+            referencedRelation: 'equipment';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_equipment_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       user_preferences: {
         Row: {
@@ -84,7 +320,43 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      import_repdb: {
+        Args: { p_exercises: Json; p_revision: string };
+        Returns: number;
+      };
+      save_equipment_profile: {
+        Args: { p_equipment_ids: string[] };
+        Returns: {
+          equipment_id: string;
+          user_id: string;
+        }[];
+        SetofOptions: {
+          from: '*';
+          to: 'user_equipment';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      search_exercises: {
+        Args: {
+          p_available_only?: boolean;
+          p_bodyweight?: boolean;
+          p_equipment_id?: string;
+          p_limit?: number;
+          p_muscle_id?: string;
+          p_offset?: number;
+          p_query?: string;
+        };
+        Returns: {
+          difficulty: string;
+          equipment: string[];
+          id: string;
+          muscles: string[];
+          name: string;
+          thumbnail_path: string;
+          total_count: number;
+        }[];
+      };
     };
     Enums: {
       [_ in never]: never;
