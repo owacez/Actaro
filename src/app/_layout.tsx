@@ -47,6 +47,8 @@ function AuthRoutes() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="profile" />
         <Stack.Screen name="preferences" />
+        <Stack.Screen name="equipment" />
+        <Stack.Screen name="exercises/[id]" />
       </Stack.Protected>
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="explore" />

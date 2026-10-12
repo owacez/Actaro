@@ -440,8 +440,9 @@ Execution exception (2026-10-12): the user explicitly authorized starting the
 next features while the remaining v0.1 acceptance checks are tested later.
 Track those checks as DEFERRED in Development Status; do not mark them passed or
 declare v0.1 release acceptance complete. Resume sequencing with Phase 1, one
-focused task at a time. Hosted Supabase checks remain paused; native builds remain
-user-deferred. The roadmap requirements and weights are unchanged.
+focused task at a time. Supabase access subsequently recovered; the user authorized
+completing v0.2 and its hosted checks/imports. Native builds remain user-deferred.
+The roadmap requirements and weights are unchanged.
 
 ## 1.1 Muscle & Equipment Schema — Weight 2
 

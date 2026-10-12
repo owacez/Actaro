@@ -1,10 +1,10 @@
 # Actaro
 
 Premium personal fitness and wellness mobile application, developed incrementally.
-Current implementation: Expo foundation, Supabase client and email/password auth flows with contract tests. Live email/device verification is pending.
-The starter screens, colors, icons, and assets are Expo examples, not the approved
-Actaro design system or implemented product features. Version `0.1.0` is project
-metadata; v0.1's release gate has not passed.
+Current implementation: Expo/Supabase foundation, account management and preferences,
+plus a dataset-backed Exercise Library with search, filters, technique images and
+saved equipment selections. Remaining foundation acceptance is deferred for later
+testing. Version `0.1.0` is project metadata; v0.1's full release gate has not passed.
 
 ## Project authority
 
@@ -180,24 +180,28 @@ and email instructions use a bottom snackbar. On web, errors and successful
 actions also use a dismissible notification at the upper right. Notifications
 expire automatically; hovering or focusing the web notification pauses dismissal.
 
-| Screen / state                         | Present behavior                                                                                                        |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Sign In                                | Validated email/password sign-in.                                                                                       |
-| Sign Up                                | Email, password and confirmation; creates a Supabase account.                                                           |
-| Check Your Email                       | Confirmation instructions and resend.                                                                                   |
-| Reset Password                         | Requests a recovery link without revealing account existence.                                                           |
-| Set a New Password                     | Updates the password after the SDK recovery event.                                                                      |
-| Callback processing / error            | Exchanges a one-use code or displays a safe link error.                                                                 |
-| Email Confirmed                        | Shows verified status from the Supabase session, then Continue to Account.                                              |
-| Today / Fitness / Nutrition / Progress | Signed-in tab destinations showing planned release scope; no tracking data yet.                                         |
-| More                                   | Real signed-in email, Profile management and local sign-out.                                                            |
-| Profile                                | Edit/clear name, view/change email and change password. Open More → Profile management.                                 |
-| Preferences                            | Save units, time zone, notification/gamification preferences and System/Light/Dark appearance. Open More → Preferences. |
+| Screen / state               | Present behavior                                                                                                                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Sign In                      | Validated email/password sign-in.                                                                                                  |
+| Sign Up                      | Email, password and confirmation; creates a Supabase account.                                                                      |
+| Check Your Email             | Confirmation instructions and resend.                                                                                              |
+| Reset Password               | Requests a recovery link without revealing account existence.                                                                      |
+| Set a New Password           | Updates the password after the SDK recovery event.                                                                                 |
+| Callback processing / error  | Exchanges a one-use code or displays a safe link error.                                                                            |
+| Email Confirmed              | Shows verified status from the Supabase session, then Continue to Account.                                                         |
+| Today / Nutrition / Progress | Signed-in tab destinations showing planned release scope; no tracking data yet.                                                    |
+| Fitness / Exercise Library   | Search 643 imported exercises, filter by muscle/equipment/your saved setup, paginate and open technique details.                   |
+| Exercise Detail              | Start/peak or main poses from private Supabase Storage, instructions, muscles, equipment and source attribution.                   |
+| My equipment                 | Save available equipment, discard drafts or clear the selection; available-equipment filtering always includes no-equipment moves. |
+| More                         | Real signed-in email, Profile management and local sign-out.                                                                       |
+| Profile                      | Edit/clear name, view/change email and change password. Open More → Profile management.                                            |
+| Preferences                  | Save units, time zone, notification/gamification preferences and System/Light/Dark appearance. Open More → Preferences.            |
 
 The remaining `/explore` route is an Expo starter example, not an Actaro feature.
 The five-tab navigation shell is implemented; sign-in opens Today. The populated
-Today dashboard belongs to v0.5. Exercise, workout,
-nutrition, habits/goals and progress screens remain in their scheduled releases.
+Today dashboard belongs to v0.5. Workouts, nutrition, habits/goals and progress
+remain in their scheduled releases. Exercise Detail does not offer a fake Add to
+workout action; workout creation begins in v0.3.
 
 Tunnel setup and flags follow the [Expo CLI documentation](https://docs.expo.dev/more/expo-cli/).
 
@@ -320,7 +324,42 @@ The probe requires anonymous permission denial for the private profile/preferenc
 See [required development inputs](docs/DEVELOPMENT_INPUTS.md) and
 [Supabase client decision](docs/decisions/002-supabase-auth.md).
 The [schema design](docs/decisions/003-core-schema.md) specifies the first
-profile/preferences migration and historical data rules; later module schemas remain pending.
+profile/preferences and Exercise Library schemas plus historical data rules;
+later module schemas remain pending.
+
+## Exercise dataset and import
+
+Exercise data by [RepDB](https://repdb.co). The reviewed free-tier snapshot contains
+643 exercises with 1,138 512px WebP poses. Actaro serves metadata from its own
+PostgreSQL schema and images from private `exercise-media` Supabase Storage through
+signed URLs. No RepDB/GitHub dataset hosting is used by the running app.
+
+The import uses the pinned source revision in `scripts/repdb-data.mjs`. Preserve
+the source license/attribution; do not commit or redistribute the downloaded dataset
+or include paid preview assets. See [the import decision](docs/decisions/004-repdb-import.md)
+and [RepDB's data license](https://github.com/RepDB/exercise-dataset/blob/main/LICENSE-DATA.md).
+
+For a fresh Supabase project, apply the committed migrations in timestamp order
+before importing. A public publishable key cannot administer imports. Add a
+**server-only** project key to ignored `.env` as `SUPABASE_SECRET_KEY`; never prefix
+it with `EXPO_PUBLIC_`, add it to EAS app environments or put it in app code. The
+import script runs locally with Node 24 and the existing installed Supabase SDK.
+Regular installation/start/check commands do not run the importer or need this key.
+
+```bash
+# Download the pinned source and validate it without database writes:
+npm run import:repdb -- --download --dry-run
+
+# Import metadata and images into your project; rerunning preserves IDs/paths:
+npm run import:repdb -- --download --media
+```
+
+Downloads stay under ignored `.actaro-tools/repdb`. Metadata is imported atomically;
+image metadata is saved only after its object uploads successfully. Failed image
+imports can be rerun safely. At runtime, open **Fitness → My equipment** to save
+your setup; use **Filters → Use my available equipment** to apply it. Equipment
+drafts do not affect results until saved. Search submits through the Search action
+or keyboard; Previous/Next load 24 exercises per page. Refresh retries image loading.
 
 ## Release discipline
 

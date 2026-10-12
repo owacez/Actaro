@@ -5,14 +5,13 @@ Updated: 2026-10-12 (America/Los_Angeles).
 ## Overall
 
 - Current Release: **v0.2 — Exercise Library**
-- Release Completion: **5.357143% (1.5 / 28 weight)**
+- Release Completion: **100% (28 / 28 weight; functional v0.2 scope)**
 - Previous Release: **v0.1 — 84.375% verified; remaining acceptance DEFERRED for later testing, not passed**
-- Current Phase: **Phase 1 — Exercise Library; task 1.1**
-- Current Focus: User authorized moving to the next features on 2026-10-12. Muscle/equipment schema and rollback SQL tests pass locally. Hosted application and generated types remain pending while Supabase calls are paused. Existing v0.1 evidence is retained; postponed checks no longer block independent v0.2 implementation.
-- Status: **IN_PROGRESS**
-- Blockers: Git and system Node.js/npm are installed. Windows ARM64 tunnel tooling has a locally verified x64 workaround; actual tunnel connectivity remains unverified.
-  Supabase limits are exhausted according to the user; the exact quota was not probed and live checks are paused. Figma subtree reads hit the Starter limit; native email-change callbacks and remaining acceptance are unverified. The default browser runtime failed, but isolated headless Edge smoke checks passed. Android is unavailable. Expo Doctor's last run passed 21/21 checks. Dependency advisories remain open.
-- Approval boundary: User explicitly authorized advancing to the next features on 2026-10-12 and postponing the remaining v0.1 tests. Execute v0.2 incrementally; later releases retain their order. Custom native builds remain deferred until the application is ready; no build was submitted.
+- Current Phase: **Phase 1 — Exercise Library; tasks 1.1–1.8 verified**
+- Current Focus: v0.2 implementation and its five canonical acceptance criteria pass against the hosted database, real authenticated API and browser. Exercise Library, detail and equipment editing are ready for user testing. Physical-device smoke testing of this new module remains pending; no native build or v0.3 feature was added.
+- Status: **DONE — v0.2 functional scope; device follow-up recorded separately**
+- Blockers: No current v0.2 functional blocker. Supabase access recovered and all five migrations/imports were applied. Figma subtree reads remain Starter-limited; the approved PDF supplied the library/detail references. Android is unavailable; native builds and remaining v0.1 acceptance remain user-deferred. Exact unavailable equipment/dark Figma parity is not claimed. Existing dependency advisories and disabled Auth leaked-password protection remain foundation/security follow-ups.
+- Approval boundary: User explicitly authorized advancing to the next features on 2026-10-12 and postponing the remaining v0.1 tests. User subsequently authorized completing all of v0.2; later releases retain their order. Custom native builds remain deferred until the application is ready; no build was submitted.
 
 Latest design access: the user supplied a local Figma PDF export and authorized
 it as fallback when MCP calls are exhausted. Its first foundation page retains
@@ -33,7 +32,7 @@ Use the Development Plan's weights exactly. For each active item, earned weight
 is `weight × verified completed subtasks / total subtasks`. DONE earns full weight;
 NOT_STARTED earns zero; BLOCKED earns only completed subtasks. DEFERRED and DROPPED
 items are excluded from their release denominator. Never infer progress from Figma.
-Tasks after the current v0.2 schema task remain NOT_STARTED. No roadmap item has been removed.
+All eight v0.2 tasks are verified; v0.3 and later implementation remain NOT_STARTED. No roadmap item has been removed.
 
 v0.1 denominator: `2 + 3 + 3 + 2 + 5 + 3 + 3 + 6 + 3 + 6 + 4 = 40`.
 Subtasks below define a reproducible foundation baseline; partial values are
@@ -46,8 +45,8 @@ Release completion: `33.75 / 40 × 100 = 84.375%`. Rounded table percentages nev
 replace these exact fractions. This is verified foundation progress, not a completed v0.1 release.
 
 v0.2 denominator: `2 + 4 + 3 + 5 + 4 + 5 + 3 + 2 = 28`.
-Task 1.1 earns `2 × 3/4 = 1.5`; the other seven tasks earn zero.
-Release completion: `1.5 / 28 × 100 = 5.357142857…%`.
+Earned weight: `2 + 4 + 3 + 5 + 4 + 5 + 3 + 2 = 28`.
+Release completion: `28 / 28 × 100 = 100%`. Each verification group below has implementation evidence; this does not claim physical-device QA or v0.1 acceptance.
 Deferred unweighted acceptance-check records below do not reweight completed
 foundation work or turn the unchanged 84.375% full-scope baseline into 100%.
 
@@ -66,14 +65,14 @@ foundation work or turn the unchanged 84.375% full-scope baseline into 100%.
 | Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | DONE        |       100% | Schema/services/UI and web/iPhone profile/preferences save/reopen user-verified (4/4); separate native email-change follow-up remains.          |
 | Phase 0 / 0.10   | RLS / Security Foundation              | v0.1    |      6 | IN_PROGRESS |        75% | Grants/policies, database isolation/constraints and lifecycle tested (3/4); application integration pending.                                    |
 | Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | DONE        |       100% | Types, owned services, validation/error mapping and live profile/preferences reads/writes verified (4/4).                                       |
-| Phase 1 / 1.1    | Muscle & Equipment Schema              | v0.2    |      2 | IN_PROGRESS |        75% | Migration, constraints/stable IDs and grants/RLS verified locally (3/4); hosted deployment and generated types pending.                         |
-| Phase 1 / 1.2    | Exercise Schema                        | v0.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §1.2.                                                                                                              |
-| Phase 1 / 1.3    | Exercise Media Schema                  | v0.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §1.3.                                                                                                              |
-| Phase 1 / 1.4    | RepDB Import Script                    | v0.2    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §1.4.                                                                                                              |
-| Phase 1 / 1.5    | RepDB Media Import                     | v0.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §1.5.                                                                                                              |
-| Phase 1 / 1.6    | Exercise Library UI                    | v0.2    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §1.6.                                                                                                              |
-| Phase 1 / 1.7    | Exercise Detail                        | v0.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §1.7.                                                                                                              |
-| Phase 1 / 1.8    | Equipment Profile                      | v0.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §1.8.                                                                                                              |
+| Phase 1 / 1.1    | Muscle & Equipment Schema              | v0.2    |      2 | DONE        |       100% | Hosted catalogs, stable UUIDs/constraints, RLS and generated types verified (4/4).                                                              |
+| Phase 1 / 1.2    | Exercise Schema                        | v0.2    |      4 | DONE        |       100% | Source IDs, instructions, relationships and licenses deployed; repeat import preserves all 643 IDs (4/4).                                       |
+| Phase 1 / 1.3    | Exercise Media Schema                  | v0.2    |      3 | DONE        |       100% | Separate pose metadata, validated paths/checksums, private bucket and signed reads verified (4/4).                                              |
+| Phase 1 / 1.4    | RepDB Import Script                    | v0.2    |      5 | DONE        |       100% | Pinned local parsing, taxonomy mapping, attribution and atomic idempotent hosted import verified (4/4).                                         |
+| Phase 1 / 1.5    | RepDB Media Import                     | v0.2    |      4 | DONE        |       100% | 1,138 WebP objects uploaded; metadata/checksums, signed retrieval and repeat upsert verified (4/4).                                             |
+| Phase 1 / 1.6    | Exercise Library UI                    | v0.2    |      5 | DONE        |       100% | Search, muscle/equipment/setup filters, thumbnails and bounded pagination tested in API/UI/browser (4/4).                                       |
+| Phase 1 / 1.7    | Exercise Detail                        | v0.2    |      3 | DONE        |       100% | Actual poses, instructions, muscles/equipment and attribution; authenticated detail/back browser flow passed (4/4).                             |
+| Phase 1 / 1.8    | Equipment Profile                      | v0.2    |      2 | DONE        |       100% | Owned schema/RLS, atomic save service, editable UI and real browser save/reload passed (4/4).                                                   |
 | Phase 2 / 2.1    | Workout Schema                         | v0.3    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §2.1.                                                                                                              |
 | Phase 2 / 2.2    | Custom Workout Builder                 | v0.3    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §2.2.                                                                                                              |
 | Phase 2 / 2.3    | Predefined Training Plans              | v0.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §2.3.                                                                                                              |
@@ -184,7 +183,7 @@ foundation work or turn the unchanged 84.375% full-scope baseline into 100%.
 | Phase    | Release | Purpose                           | Planned weight | Completion | Status      |
 | -------- | ------- | --------------------------------- | -------------: | ---------: | ----------- |
 | Phase 0  | v0.1    | Foundation                        |             40 |    84.375% | IN_PROGRESS |
-| Phase 1  | v0.2    | Exercise Library                  |             28 |  5.357143% | IN_PROGRESS |
+| Phase 1  | v0.2    | Exercise Library                  |             28 |       100% | DONE        |
 | Phase 2  | v0.3    | Strength Workout System           |             70 |         0% | NOT_STARTED |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |         0% | NOT_STARTED |
 | Phase 4  | v0.5    | Habits, Goals & Today             |             38 |         0% | NOT_STARTED |
@@ -297,31 +296,37 @@ theme checks is required. Every item below is **DEFERRED**, not passed.
 
 ## Exercise Library subtask ledger
 
-**1.1 Muscle & Equipment Schema (weight 2; 3/4 verified):**
+Each task has four independently verified groups and earns its full canonical weight.
 
-| Verification group                                         | Status      | Evidence                                                                                                                  |
-| ---------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Migration definition                                       | DONE        | CLI-generated `20261012081416_exercise_taxonomy.sql`; two catalogs with UUIDs, stable unique slugs, names and timestamps. |
-| Constraints and stable import IDs                          | DONE        | Real local PostgreSQL execution rejects invalid/duplicate values and preserves UUIDs during slug upserts.                 |
-| Read-only grants and RLS                                   | DONE        | Real role checks allow authenticated reads, deny client mutations/anonymous reads, and roll back all fixtures/grants.     |
-| Hosted deployment, generated types and hosted verification | NOT_STARTED | Supabase calls remain paused; no generated type file was edited by hand.                                                  |
+| Task                  | Weight | Status | Verification groups (4/4)                                                                                                       |
+| --------------------- | -----: | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| 1.1 Muscle/equipment  |      2 | DONE   | Migration; constraints/stable IDs; grants/RLS; hosted deployment/generated types.                                               |
+| 1.2 Exercises         |      4 | DONE   | Core/source fields; muscle/equipment relationships; validation/read security; hosted import/reimport.                           |
+| 1.3 Media schema      |      3 | DONE   | Separate pose metadata; paths/size/checksum constraints; private bucket/read policy; signed retrieval.                          |
+| 1.4 Data import       |      5 | DONE   | Pinned local parser; taxonomy/source mapping; license/attribution; idempotent atomic import.                                    |
+| 1.5 Media import      |      4 | DONE   | Validated WebP downloads; storage upload; metadata after upload; checksum/repeat upsert.                                        |
+| 1.6 Library           |      5 | DONE   | Search/filter API; compact real-data rows/images; bounded pagination/error states; authenticated responsive browser flow.       |
+| 1.7 Detail            |      3 | DONE   | Typed detail reads; poses/instructions; muscles/equipment/attribution; detail/back and loading/error contracts.                 |
+| 1.8 Equipment profile |      2 | DONE   | Owned schema/atomic replacement; typed validated service; save/discard/error UI; two-account isolation and browser save/reopen. |
 
-Local PostgreSQL evidence does not establish hosted Supabase integration or a
-populated Exercise Library. Tasks 1.2–1.8 remain NOT_STARTED.
+Physical iPhone/Android smoke tests of the new library module remain NOT_STARTED;
+responsive browser checks and native exports are not device tests. Custom native
+builds remain DEFERRED under the user's instruction. Figma quota fallback and
+design differences are documented in `docs/decisions/004-repdb-import.md`.
 
 ## v1.0 release gate
 
-| Prerequisite                 | Status      | Evidence                         |
-| ---------------------------- | ----------- | -------------------------------- |
-| Foundation stable            | NOT_STARTED | v0.1 release acceptance pending. |
-| Exercise library stable      | NOT_STARTED | v0.2 pending.                    |
-| Strength workout flow stable | NOT_STARTED | v0.3 pending.                    |
-| Manual nutrition stable      | NOT_STARTED | v0.4 pending.                    |
-| Habits/goals stable          | NOT_STARTED | v0.5 pending.                    |
-| Today stable                 | NOT_STARTED | v0.5 pending.                    |
-| Basic Progress stable        | NOT_STARTED | v0.6 pending.                    |
-| Security review complete     | NOT_STARTED | v0.9 pending.                    |
-| Personal beta complete       | NOT_STARTED | v0.9 pending.                    |
+| Prerequisite                 | Status      | Evidence                                                                        |
+| ---------------------------- | ----------- | ------------------------------------------------------------------------------- |
+| Foundation stable            | NOT_STARTED | v0.1 release acceptance pending.                                                |
+| Exercise library stable      | DONE        | v0.2 canonical functional acceptance passed; device follow-up remains recorded. |
+| Strength workout flow stable | NOT_STARTED | v0.3 pending.                                                                   |
+| Manual nutrition stable      | NOT_STARTED | v0.4 pending.                                                                   |
+| Habits/goals stable          | NOT_STARTED | v0.5 pending.                                                                   |
+| Today stable                 | NOT_STARTED | v0.5 pending.                                                                   |
+| Basic Progress stable        | NOT_STARTED | v0.6 pending.                                                                   |
+| Security review complete     | NOT_STARTED | v0.9 pending.                                                                   |
+| Personal beta complete       | NOT_STARTED | v0.9 pending.                                                                   |
 
 ## Retained and deferred scope
 
@@ -354,6 +359,37 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 | Early microservices, Kubernetes/GKE, unnecessary custom backend            | Explicitly excluded for early versions                       | DROPPED     | Source §§19, 23; real future backend triggers remain documented.       |
 
 ## Last Completed
+
+**DONE — v0.2 Exercise Library functional scope (2026-10-12).**
+
+- Hosted migrations `20261012084226`, `20261012084232`, `20261012084240`,
+  `20261012084248` and `20261012084255` applied. The original taxonomy filename
+  was aligned with actual hosted history; SQL was preserved. Database types were
+  generated from the applied schema, not fabricated.
+- Imported pinned RepDB revision `d86f9612bee19db1069557bcac5c957021057eb9`:
+  **643 exercises, 31 muscles, 59 equipment and 1,138 private Storage images**
+  (18,911,630 bytes). License/source IDs/attribution are retained and visible.
+  Running clients read only Supabase; no external dataset hotlink is used.
+- `node .actaro-tools/test-library.mjs`: PASS real local PostgreSQL execution,
+  all migrations, rollback SQL and full repeat import with identical exercise IDs.
+  Hosted `supabase/tests/exercise_library.sql`: PASS constraints, grants/RLS,
+  owner isolation, literal search/filter/pagination and atomic equipment rollback.
+- `node --env-file=.env scripts/import-repdb.mjs .actaro-tools/repdb --download --media`:
+  PASS all catalog/media uploads. `node --env-file=.env .actaro-tools/check-live-library.mjs`:
+  PASS real JWT API search/filter/pagination, 643-ID reimport, two-account isolation,
+  equipment persistence, signed-image SHA-256 retrieval, anonymous/public denial
+  and repeat Storage upsert. Disposable accounts were removed after browser checks;
+  no confirmation emails or real user records were modified.
+- `npm.cmd run check`: PASS strict typecheck, lint (no warnings), formatting,
+  **143 Jest tests in 20 suites plus 4 Node importer tests**.
+  `.\node_modules\.bin\expo.cmd export --platform all`: PASS Android/iOS/web,
+  21 web routes. Privileged import key absent from all 129 exported files.
+- Scoped headless Edge checks: PASS real-session pagination/bodyweight filters,
+  light/dark and 320/390/1280px layouts, equipment save/reload and exercise detail/back.
+  Signed technique images loaded; screenshots inspected. Device QA is still pending.
+- No additional app dependency, state framework, backend, AI feature, native build
+  or v0.3 workout action was introduced. Supabase security advisor found no new RLS
+  issue; existing leaked-password protection warning remains a foundation follow-up.
 
 **DONE — Local muscle/equipment schema and SQL verification (2026-10-12).**
 
@@ -497,20 +533,22 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-v0.2 task 1.1 now has a locally verified muscle/equipment migration and rollback
-SQL tests. Hosted deployment/types await resumed Supabase access. The next focused
-implementation is task 1.2 Exercise Schema. Deferred foundation acceptance is listed
-above and no longer blocks independent schema work under the user's instruction.
-
-Profile management is reached from More and offers name, current email, email-change confirmation and authenticated password updates. The five-tab shell opens Today after sign-in and now has calendar, strength, nutrition, chart and more icons; future module views state their release scope. Preferences save units, time zone, opt-in values and System/Light/Dark appearance through the existing owned service. Theme drafts stay unapplied until server success; signed-out/account-switch states use System while loading. The user confirms web/iPhone persistence, themes and password reset, plus web email change. Native email change, individually identified signup/verification, two-account and full visual acceptance remain pending. Backend verification is paused during the reported quota exhaustion.
+All v0.2 tasks are implemented and verified against the hosted schema/data and real
+web app. Fitness opens the library; detail displays source poses/instructions;
+My equipment persists the user's setup and supports available-equipment filtering.
+The privileged importer is a separate local Node script with its key in ignored
+environment configuration. Foundation acceptance remains deferred at 84.375%.
+No v0.3 implementation has started.
 
 ## Next 3 Actions
 
-1. Implement task 1.2 Exercise Schema: source IDs, instructions and muscle/equipment relationships, with local constraint/security tests.
-2. Implement task 1.3 Exercise Media Schema: storage references, attribution/licensing metadata and relationship validation.
-3. Implement task 1.4 RepDB Import Script: inspect the actual dataset/license, map stable IDs and verify repeatable imports without duplicates.
+1. v0.3 task 2.1: workout template/session/set schema with ownership policies, constraints and rollback SQL tests.
+2. v0.3 task 2.2: custom workout builder using real library selections, with validated persisted templates.
+3. v0.3 task 2.3: predefined training plans with explicit source/selection and independently verified persistence.
 
-Do not mark task 0.8 DONE until its six live acceptance groups are verified. Full visual acceptance and the v0.1 release gate remain open. Native builds are explicitly deferred by the user until the application is ready; no completion credit is claimed for that unverified subtask. The user authorized v0.2 work on 2026-10-12; hosted calls stay paused and deferred checks remain recorded.
+These are recommendations; this task implemented v0.2 only. Test the new module
+on iPhone Expo Go when available. Android/native builds and remaining v0.1
+acceptance stay recorded rather than credited as passed.
 
 ## Blockers / Decisions
 

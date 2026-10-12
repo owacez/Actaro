@@ -1,10 +1,16 @@
-import { PlannedModuleScreen } from '@/components/planned-module-screen';
+import { Redirect, router } from 'expo-router';
+import { useAuth } from '@/features/auth/auth-provider';
+import { LibraryScreen } from '@/features/exercises/library-screen';
 
 export default function FitnessRoute() {
+  const { session, recovery } = useAuth();
+  if (!session || recovery) return <Redirect href="/" />;
   return (
-    <PlannedModuleScreen
-      title="Fitness"
-      description="The exercise library is planned for v0.2, followed by strength workouts in v0.3."
+    <LibraryScreen
+      key={session.user.id}
+      userId={session.user.id}
+      onOpen={(id) => router.push({ pathname: '/exercises/[id]', params: { id } })}
+      onEquipment={() => router.push('/equipment')}
     />
   );
 }
