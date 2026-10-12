@@ -315,6 +315,316 @@ export type Database = {
           },
         ];
       };
+      workout_session_exercises: {
+        Row: {
+          exercise_id: string;
+          exercise_name: string;
+          id: string;
+          notes: string | null;
+          position: number;
+          primary_muscle_ids: string[];
+          session_id: string;
+          user_id: string;
+        };
+        Insert: {
+          exercise_id: string;
+          exercise_name?: string;
+          id?: string;
+          notes?: string | null;
+          position: number;
+          primary_muscle_ids?: string[];
+          session_id: string;
+          user_id: string;
+        };
+        Update: {
+          exercise_id?: string;
+          exercise_name?: string;
+          id?: string;
+          notes?: string | null;
+          position?: number;
+          primary_muscle_ids?: string[];
+          session_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'workout_session_exercises_exercise_id_fkey';
+            columns: ['exercise_id'];
+            isOneToOne: false;
+            referencedRelation: 'exercises';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'workout_session_exercises_session_id_user_id_fkey';
+            columns: ['session_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'workout_sessions';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'workout_session_exercises_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      workout_sessions: {
+        Row: {
+          created_at: string;
+          duration_seconds: number | null;
+          ended_at: string | null;
+          id: string;
+          local_date: string;
+          mode: string;
+          name: string;
+          notes: string | null;
+          started_at: string;
+          status: string;
+          template_id: string | null;
+          time_zone: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          duration_seconds?: number | null;
+          ended_at?: string | null;
+          id?: string;
+          local_date: string;
+          mode: string;
+          name: string;
+          notes?: string | null;
+          started_at?: string;
+          status?: string;
+          template_id?: string | null;
+          time_zone: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          duration_seconds?: number | null;
+          ended_at?: string | null;
+          id?: string;
+          local_date?: string;
+          mode?: string;
+          name?: string;
+          notes?: string | null;
+          started_at?: string;
+          status?: string;
+          template_id?: string | null;
+          time_zone?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'workout_sessions_template_id_user_id_fkey';
+            columns: ['template_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'workout_templates';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'workout_sessions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      workout_sets: {
+        Row: {
+          completed_at: string | null;
+          id: string;
+          notes: string | null;
+          position: number;
+          reps: number | null;
+          rest_seconds: number;
+          rpe: number | null;
+          session_exercise_id: string;
+          user_id: string;
+          weight_kg: number | null;
+        };
+        Insert: {
+          completed_at?: string | null;
+          id?: string;
+          notes?: string | null;
+          position: number;
+          reps?: number | null;
+          rest_seconds?: number;
+          rpe?: number | null;
+          session_exercise_id: string;
+          user_id: string;
+          weight_kg?: number | null;
+        };
+        Update: {
+          completed_at?: string | null;
+          id?: string;
+          notes?: string | null;
+          position?: number;
+          reps?: number | null;
+          rest_seconds?: number;
+          rpe?: number | null;
+          session_exercise_id?: string;
+          user_id?: string;
+          weight_kg?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'workout_sets_session_exercise_id_user_id_fkey';
+            columns: ['session_exercise_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'workout_session_exercises';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'workout_sets_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      workout_template_exercises: {
+        Row: {
+          exercise_id: string;
+          id: string;
+          notes: string | null;
+          position: number;
+          template_id: string;
+          user_id: string;
+        };
+        Insert: {
+          exercise_id: string;
+          id?: string;
+          notes?: string | null;
+          position: number;
+          template_id: string;
+          user_id: string;
+        };
+        Update: {
+          exercise_id?: string;
+          id?: string;
+          notes?: string | null;
+          position?: number;
+          template_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'workout_template_exercises_exercise_id_fkey';
+            columns: ['exercise_id'];
+            isOneToOne: false;
+            referencedRelation: 'exercises';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'workout_template_exercises_template_id_user_id_fkey';
+            columns: ['template_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'workout_templates';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'workout_template_exercises_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      workout_template_sets: {
+        Row: {
+          id: string;
+          notes: string | null;
+          position: number;
+          reps: number | null;
+          rest_seconds: number;
+          rpe: number | null;
+          template_exercise_id: string;
+          user_id: string;
+          weight_kg: number | null;
+        };
+        Insert: {
+          id?: string;
+          notes?: string | null;
+          position: number;
+          reps?: number | null;
+          rest_seconds?: number;
+          rpe?: number | null;
+          template_exercise_id: string;
+          user_id: string;
+          weight_kg?: number | null;
+        };
+        Update: {
+          id?: string;
+          notes?: string | null;
+          position?: number;
+          reps?: number | null;
+          rest_seconds?: number;
+          rpe?: number | null;
+          template_exercise_id?: string;
+          user_id?: string;
+          weight_kg?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'workout_template_sets_template_exercise_id_user_id_fkey';
+            columns: ['template_exercise_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'workout_template_exercises';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'workout_template_sets_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      workout_templates: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          notes: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          notes?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          notes?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'workout_templates_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
