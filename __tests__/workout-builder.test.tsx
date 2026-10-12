@@ -1,0 +1,242 @@
+import { beforeEach, expect, jest, test } from '@jest/globals';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { BuilderScreen } from '@/features/workouts/builder-screen';
+import { WorkoutsScreen } from '@/features/workouts/workouts-screen';
+import { workoutService } from '@/features/workouts/workout-service';
+import {
+  blankSet,
+  displayWeight,
+  workoutPayload,
+  type WorkoutDraft,
+} from '@/features/workouts/workout-model';
+import { FeedbackTestRoot } from './helpers/feedback-root';
+const workoutId = '00000000-0000-4000-8000-000000000002';
+const exerciseId = '00000000-0000-4000-8000-000000000003';
+const userId = '00000000-0000-4000-8000-000000000001';
+jest.mock('expo-crypto', () => ({ randomUUID: () => workoutId }));
+jest.mock('@/features/workouts/workout-service', () => ({
+  workoutService: { load: jest.fn(), save: jest.fn(), list: jest.fn() },
+}));
+jest.mock('@/features/exercises/exercise-image', () => ({ ExerciseImage: () => null }));
+jest.mock('expo-router', () => ({
+  useFocusEffect: (callback: () => () => void) => {
+    const React = jest.requireActual<typeof import('react')>('react');
+    React.useEffect(callback, [callback]);
+  },
+}));
+jest.mock('@/features/exercises/library-screen', () => ({
+  LibraryScreen: ({
+    onOpen,
+  }: {
+    onOpen: (id: string, item: { id: string; name: string; imageUrl: null }) => void;
+  }) => {
+    const { AuthButton } = jest.requireActual<typeof import('@/features/auth/auth-components')>(
+      '@/features/auth/auth-components',
+    );
+    return (
+      <AuthButton
+        title="Select real fixture exercise"
+        onPress={() =>
+          onOpen(exerciseId, { id: exerciseId, name: 'Fixture press', imageUrl: null })
+        }
+      />
+    );
+  },
+}));
+const mocks = jest.mocked(workoutService);
+const draft: WorkoutDraft = {
+  id: workoutId,
+  name: 'Upper A',
+  notes: '',
+  exercises: [
+    {
+      key: 'one',
+      exerciseId,
+      name: 'Fixture press',
+      imageUrl: null,
+      notes: '',
+      sets: [blankSet()],
+    },
+  ],
+};
+beforeEach(() => {
+  jest.clearAllMocks();
+  mocks.load.mockResolvedValue({ unit: 'kg', draft: null });
+  mocks.save.mockResolvedValue(workoutId);
+});
+test('converts pounds to canonical kilograms and preserves unknown versus zero weight', () => {
+  const value = {
+    ...draft,
+    exercises: [
+      {
+        ...draft.exercises[0],
+        sets: [
+          { ...blankSet(), weight: '22.046', rpe: '7.5' },
+          { ...blankSet(), weight: '' },
+          { ...blankSet(), weight: '0' },
+        ],
+      },
+    ],
+  };
+  const payload = workoutPayload(value, 'lb');
+  expect(payload[0].sets.map((item) => item.weight_kg)).toEqual([10, null, 0]);
+  expect(payload[0].sets[0].rpe).toBe(7.5);
+  expect(displayWeight(10, 'lb')).toBe('22.046');
+});
+test('rejects missing exercises, fractional reps, malformed weight and overprecise RPE', () => {
+  expect(() => workoutPayload({ ...draft, exercises: [] }, 'kg')).toThrow('Choose');
+  for (const patch of [{ reps: '1.5' }, { weight: 'NaN' }, { rpe: '7.55' }, { rest: '-1' }])
+    expect(() =>
+      workoutPayload(
+        { ...draft, exercises: [{ ...draft.exercises[0], sets: [{ ...blankSet(), ...patch }] }] },
+        'kg',
+      ),
+    ).toThrow();
+});
+test('new workout selects an exercise, validates and saves the entire draft', async () => {
+  const saved = jest.fn();
+  await render(
+    <FeedbackTestRoot>
+      <BuilderScreen userId={userId} onBack={() => {}} onSaved={saved} onEquipment={() => {}} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByText('Add an exercise from the library to begin.');
+  await fireEvent.changeText(screen.getByLabelText('Workout name'), 'Upper A');
+  await fireEvent.press(screen.getByRole('button', { name: '+ Add exercise' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Select real fixture exercise' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit 1' }));
+  await fireEvent.changeText(screen.getByLabelText('Reps · exercise 1 set 1'), '0');
+  await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
+  await screen.findByText(/enter a whole number/);
+  expect(mocks.save).not.toHaveBeenCalled();
+  await fireEvent.changeText(screen.getByLabelText('Reps · exercise 1 set 1'), '10');
+  await fireEvent.changeText(screen.getByLabelText('Weight (kg) · exercise 1 set 1'), '22.5');
+  await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
+  await waitFor(() => expect(saved).toHaveBeenCalledTimes(1));
+  expect(mocks.save).toHaveBeenCalledWith(
+    userId,
+    expect.objectContaining({
+      id: workoutId,
+      name: 'Upper A',
+      exercises: [
+        expect.objectContaining({
+          exerciseId,
+          sets: [
+            expect.objectContaining({ reps: '10', weight: '22.5' }),
+            expect.anything(),
+            expect.anything(),
+          ],
+        }),
+      ],
+    }),
+    'kg',
+  );
+});
+test('loads saved workout, keeps a failed save draft and confirms discard', async () => {
+  mocks.load.mockResolvedValue({ unit: 'lb', draft });
+  mocks.save.mockRejectedValue(new Error('transport'));
+  const back = jest.fn();
+  await render(
+    <FeedbackTestRoot>
+      <BuilderScreen
+        userId={userId}
+        id={workoutId}
+        onBack={back}
+        onSaved={() => {}}
+        onEquipment={() => {}}
+      />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByDisplayValue('Upper A');
+  await fireEvent.changeText(screen.getByLabelText('Workout name'), 'Revised A');
+  await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
+  await screen.findByText('Unable to save workout. Your draft is kept; retry.');
+  expect(screen.getByLabelText('Workout name').props.value).toBe('Revised A');
+  await fireEvent.press(screen.getByRole('button', { name: '← My workouts' }));
+  expect(back).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Discard and leave' }));
+  expect(back).toHaveBeenCalledTimes(1);
+});
+test('workout list handles request failure and empty retry', async () => {
+  mocks.list
+    .mockRejectedValueOnce(new Error('offline'))
+    .mockResolvedValueOnce({ rows: [], more: false });
+  await render(
+    <WorkoutsScreen userId={userId} onBack={() => {}} onCreate={() => {}} onEdit={() => {}} />,
+  );
+  await screen.findByText(/Unable to load workouts/);
+  await fireEvent.press(screen.getByRole('button', { name: 'Retry' }));
+  await screen.findByText('No saved workouts yet. Create your first workout.');
+  expect(mocks.list).toHaveBeenCalledTimes(2);
+});
+test('orders exercises and adds/removes sets and exercises before saving', async () => {
+  mocks.load.mockResolvedValue({
+    unit: 'kg',
+    draft: {
+      ...draft,
+      exercises: [draft.exercises[0], { ...draft.exercises[0], key: 'two', name: 'Second press' }],
+    },
+  });
+  await render(
+    <FeedbackTestRoot>
+      <BuilderScreen
+        userId={userId}
+        id={workoutId}
+        onBack={() => {}}
+        onSaved={() => {}}
+        onEquipment={() => {}}
+      />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByText('2. Second press');
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit 2' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Move 2 up' }));
+  await screen.findByText('1. Second press');
+  await fireEvent.press(screen.getByRole('button', { name: '+ Add set' }));
+  await screen.findByText('Set 2');
+  await fireEvent.press(screen.getByRole('button', { name: 'Remove set 2' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Remove exercise 1' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
+  await waitFor(() =>
+    expect(mocks.save).toHaveBeenCalledWith(
+      userId,
+      expect.objectContaining({
+        exercises: [expect.objectContaining({ key: 'one', sets: [blankSet()] })],
+      }),
+      'kg',
+    ),
+  );
+});
+test('pending save blocks repeated mutation and leaving through discard', async () => {
+  mocks.load.mockResolvedValue({ unit: 'kg', draft });
+  let finish: ((id: string) => void) | undefined;
+  mocks.save.mockImplementation(
+    () =>
+      new Promise<string>((resolve) => {
+        finish = resolve;
+      }),
+  );
+  const back = jest.fn();
+  await render(
+    <FeedbackTestRoot>
+      <BuilderScreen
+        userId={userId}
+        id={workoutId}
+        onBack={back}
+        onSaved={() => {}}
+        onEquipment={() => {}}
+      />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByDisplayValue('Upper A');
+  await fireEvent.changeText(screen.getByLabelText('Workout name'), 'Revised');
+  await fireEvent.press(screen.getByRole('button', { name: '← My workouts' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Discard and leave' }));
+  expect(mocks.save).toHaveBeenCalledTimes(1);
+  expect(back).not.toHaveBeenCalled();
+  await act(async () => {
+    finish?.(workoutId);
+  });
+});

@@ -5,10 +5,10 @@ Updated: 2026-10-12 (America/Los_Angeles).
 ## Overall
 
 - Current Release: **v0.3 — Strength Workout System**
-- Release Completion: **8.571429% (6 / 70 weight)**
+- Release Completion: **17.142857% (12 / 70 weight)**
 - Previous Releases: **v0.2 functional scope DONE (100%); v0.1 84.375% verified with remaining acceptance DEFERRED**
-- Current Phase: **Phase 2 — Strength Workout System; task 2.1 verified**
-- Current Focus: Workout schema, historical snapshots, validation and ownership rules are deployed and verified. Next is the persisted custom workout builder. No session UI, timer, PR or plan is claimed complete.
+- Current Phase: **Phase 2 — Strength Workout System; tasks 2.1–2.2 verified**
+- Current Focus: The persisted custom workout builder is ready at Fitness → My workouts. It selects real exercises, edits ordered sets/targets/notes, saves atomically and reopens saved templates. Predefined plans are next; active-session logging/timers/PRs remain unimplemented.
 - Status: **IN_PROGRESS**
 - Blockers: No current workout-schema blocker. Figma subtree access remains limited; approved PDF fallback is available. Device/native build and foundation acceptance deferrals remain unchanged. Existing Auth leaked-password protection and dependency advisories remain follow-ups.
 - Approval boundary: User explicitly authorized advancing to the next features on 2026-10-12 and postponing the remaining v0.1 tests. User subsequently authorized completing v0.2, then continuing with the next features on 2026-10-12; implement v0.3 one focused task at a time. Custom native builds remain deferred until the application is ready; no build was submitted.
@@ -32,7 +32,7 @@ Use the Development Plan's weights exactly. For each active item, earned weight
 is `weight × verified completed subtasks / total subtasks`. DONE earns full weight;
 NOT_STARTED earns zero; BLOCKED earns only completed subtasks. DEFERRED and DROPPED
 items are excluded from their release denominator. Never infer progress from Figma.
-All eight v0.2 tasks and v0.3 task 2.1 are verified; subsequent tasks remain NOT_STARTED. No roadmap item has been removed.
+All eight v0.2 tasks and v0.3 tasks 2.1–2.2 are verified; subsequent tasks remain NOT_STARTED. No roadmap item has been removed.
 
 v0.1 denominator: `2 + 3 + 3 + 2 + 5 + 3 + 3 + 6 + 3 + 6 + 4 = 40`.
 Subtasks below define a reproducible foundation baseline; partial values are
@@ -51,7 +51,7 @@ Deferred unweighted acceptance-check records below do not reweight completed
 foundation work or turn the unchanged 84.375% full-scope baseline into 100%.
 
 v0.3 denominator: `6 + 6 + 5 + 3 + 3 + 10 + 4 + 2 + 4 + 4 + 4 + 3 + 4 + 4 + 3 + 5 = 70`.
-Task 2.1 earns `6 × 4/4 = 6`; release completion is `6 / 70 × 100 = 8.571428571…%`.
+Tasks 2.1 and 2.2 each earn `6 × 4/4 = 6`; release completion is `12 / 70 × 100 = 17.142857142…%`.
 
 ## Feature Table
 
@@ -77,7 +77,7 @@ Task 2.1 earns `6 × 4/4 = 6`; release completion is `6 / 70 × 100 = 8.57142857
 | Phase 1 / 1.7    | Exercise Detail                        | v0.2    |      3 | DONE        |       100% | Actual poses, instructions, muscles/equipment and attribution; authenticated detail/back browser flow passed (4/4).                             |
 | Phase 1 / 1.8    | Equipment Profile                      | v0.2    |      2 | DONE        |       100% | Owned schema/RLS, atomic save service, editable UI and real browser save/reload passed (4/4).                                                   |
 | Phase 2 / 2.1    | Workout Schema                         | v0.3    |      6 | DONE        |       100% | Six owned tables, snapshots/constraints, RLS/grants and hosted deployment/types verified (4/4).                                                 |
-| Phase 2 / 2.2    | Custom Workout Builder                 | v0.3    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §2.2.                                                                                                              |
+| Phase 2 / 2.2    | Custom Workout Builder                 | v0.3    |      6 | DONE        |       100% | Atomic save/rollback, owned typed service, functional builder/list and real browser save/reopen/edit verified (4/4).                            |
 | Phase 2 / 2.3    | Predefined Training Plans              | v0.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §2.3.                                                                                                              |
 | Phase 2 / 2.4    | Workout Pre-Start                      | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.4.                                                                                                              |
 | Phase 2 / 2.5    | Session Mode Chooser                   | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.5.                                                                                                              |
@@ -187,7 +187,7 @@ Task 2.1 earns `6 × 4/4 = 6`; release completion is `6 / 70 × 100 = 8.57142857
 | -------- | ------- | --------------------------------- | -------------: | ---------: | ----------- |
 | Phase 0  | v0.1    | Foundation                        |             40 |    84.375% | IN_PROGRESS |
 | Phase 1  | v0.2    | Exercise Library                  |             28 |       100% | DONE        |
-| Phase 2  | v0.3    | Strength Workout System           |             70 |  8.571429% | IN_PROGRESS |
+| Phase 2  | v0.3    | Strength Workout System           |             70 | 17.142857% | IN_PROGRESS |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |         0% | NOT_STARTED |
 | Phase 4  | v0.5    | Habits, Goals & Today             |             38 |         0% | NOT_STARTED |
 | Phase 5  | v0.6    | Basic Progress & Analytics        |             24 |         0% | NOT_STARTED |
@@ -328,8 +328,18 @@ design differences are documented in `docs/decisions/004-repdb-import.md`.
 | Grants/RLS/ownership              | DONE   | All six tables reject anonymous access, cross-account reads/writes, spoofed parents and protected identity/snapshot changes.                               |
 | Hosted deployment/generated types | DONE   | Migrations 20261012114346 and 20261012114520 applied; generated types, hosted rollback suite and npm check pass.                                           |
 
-Tasks 2.2–2.16 remain NOT_STARTED. This schema task introduces no usable workout
-builder or active-session UI and earns no credit for those separate features.
+**2.2 Custom Workout Builder (weight 6; 4/4 verified):**
+
+| Verification group       | Status | Evidence                                                                                                                                           |
+| ------------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Atomic owned persistence | DONE   | Invoker RPC with Auth-derived owner; retries preserve template ID; invalid children roll back; anonymous/cross-owner saves denied in hosted SQL.   |
+| Typed service/validation | DONE   | Account checks, bounded list/load/save, kg/lb conversion, nullable weight/RPE and safe errors; SDK/model tests pass.                               |
+| Functional builder/list  | DONE   | Real searchable exercise picker, thumbnails, reorder/remove, editable sets/reps/weight/rest/RPE/notes, loading/empty/retry/discard/pending states. |
+| Integration/verification | DONE   | Real-session create/save/reload/reopen/edit/save/reopen browser flow; responsive light/dark inspection; all checks/exports pass.                   |
+
+Tasks 2.3–2.16 remain NOT_STARTED. Device smoke testing of the new builder is
+NOT_STARTED; browser responsive layouts and native exports do not count as device
+tests. No workout has been logged by this template-builder implementation.
 
 ## v1.0 release gate
 
@@ -376,6 +386,30 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 | Early microservices, Kubernetes/GKE, unnecessary custom backend            | Explicitly excluded for early versions                       | DROPPED     | Source §§19, 23; real future backend triggers remain documented.       |
 
 ## Last Completed
+
+**DONE — v0.3 task 2.2 custom workout builder (2026-10-12).**
+
+- Applied migration `20261012123044_save_workout_template.sql`; local filename
+  aligned with hosted history and database types regenerated. No new dependency.
+- `node .actaro-tools/test-builder.mjs`: PASS all real local PostgreSQL
+  migrations, library regression/import checks and `supabase/tests/workout_builder.sql`.
+  The same builder rollback suite passed through hosted Supabase execute_sql:
+  create/edit/retry, nullable/zero targets, invalid-child rollback and owner isolation.
+- `npm.cmd run check`: PASS strict typecheck, lint without warnings, formatting,
+  **154 Jest tests in 22 suites plus four Node importer tests**. Added model/SDK/UI
+  checks cover conversion, validation, reorder/removal, failed drafts and pending saves.
+- `.\node_modules\.bin\expo.cmd export --platform all`: PASS Android/iOS/web,
+  **23 static routes**. This is JS/export evidence, not native compilation/launch.
+- `node .actaro-tools/check-builder-browser.mjs`: PASS real JWT create/select/
+  configure/save/reload/reopen/edit/save/reopen. Actual exercise thumbnails and
+  320/390/1280px light/dark layouts were inspected. The disposable fixture account
+  and its owned workout were removed afterward; no confirmation emails were sent.
+- Reused the approved PDF's compact builder structure. Extra fields required by
+  the canonical Source are expandable; native targets/short labels preserve
+  contextual accessibility names. Exact unavailable dark Figma parity is not claimed.
+- Current ceilings: last-save-wins for concurrent edits; unsaved builder drafts
+  are React state and not retained after termination. Active-session persistence,
+  timers, predefined plans and workout logging remain separate tasks.
 
 **DONE — v0.3 task 2.1 workout schema (2026-10-12).**
 
@@ -566,18 +600,18 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-v0.3 task 2.1 is complete. Templates and performed history are separate and owned;
-no workout UI has been added. The next focused task is the custom workout builder.
-v0.2 remains complete in its functional scope; its device smoke follow-up and
-v0.1 acceptance/native build deferrals are retained above.
+v0.3 tasks 2.1–2.2 are complete. Fitness → My workouts lists owned templates,
+creates them using the real library and reopens them for editing. The next focused
+task is predefined training plans; no active-session or PR functionality is claimed.
+v0.2 device smoke follow-up and v0.1 acceptance/native build deferrals remain recorded.
 
 ## Next 3 Actions
 
-1. v0.3 task 2.2: custom workout builder with real exercise selection, sets/reps/weight/rest, validation and persisted templates.
-2. v0.3 task 2.3: predefined training plans and their goal/experience/schedule/equipment selection.
-3. v0.3 task 2.4: real workout pre-start route with exercise/working-set counts and an explained duration estimate.
+1. v0.3 task 2.3: predefined training plans with goal/experience/schedule/equipment selection and sourced exercise mappings.
+2. v0.3 task 2.4: workout pre-start showing persisted exercises, working-set counts and an explained duration estimate.
+3. v0.3 task 2.5: Timed / Log Only chooser leading to the dedicated session route.
 
-These tasks remain separate from device acceptance and user-deferred native builds.
+Device acceptance and custom native builds remain separately recorded.
 
 ## Blockers / Decisions
 

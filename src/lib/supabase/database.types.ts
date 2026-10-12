@@ -647,6 +647,15 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      save_workout_template: {
+        Args: {
+          p_exercises: Json;
+          p_id: string;
+          p_name: string;
+          p_notes: string;
+        };
+        Returns: string;
+      };
       search_exercises: {
         Args: {
           p_available_only?: boolean;

@@ -63,7 +63,7 @@ export function AuthInput({ label, ...props }: TextInputProps & { label: string 
       <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
       <TextInput
         {...props}
-        accessibilityLabel={label}
+        accessibilityLabel={props.accessibilityLabel ?? label}
         keyboardAppearance={props.keyboardAppearance ?? scheme}
         placeholderTextColor={colors.muted}
         style={[

@@ -32,10 +32,12 @@ export function LibraryScreen({
   userId,
   onOpen,
   onEquipment,
+  onWorkouts,
 }: {
   userId: string;
-  onOpen: (id: string) => void;
+  onOpen: (id: string, exercise: ExerciseSummary) => void;
   onEquipment: () => void;
+  onWorkouts?: () => void;
 }) {
   const { colors } = useAppTheme();
   const [query, setQuery] = useState('');
@@ -98,6 +100,7 @@ export function LibraryScreen({
             <AuthText kind="eyebrow">FITNESS</AuthText>
             <AuthText kind="heading">Exercise Library</AuthText>
             <AuthText>Find exercises for your training.</AuthText>
+            {onWorkouts && <AuthLink title="My workouts" onPress={onWorkouts} />}
             <AuthInput
               label="Search exercises"
               value={query}
@@ -184,7 +187,7 @@ export function LibraryScreen({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`View ${item.name}`}
-            onPress={() => onOpen(item.id)}
+            onPress={() => onOpen(item.id, item)}
             style={({ pressed }) => [styles.row, pressed && { opacity: 0.65 }]}
           >
             <ExerciseImage

@@ -38,6 +38,28 @@ uses the combined index with both equality conditions. No duplicate indexes were
 added just to silence that notice. Unused-index INFO notices are expected on new,
 empty tables. The existing Auth leaked-password warning remains unchanged.
 
+## Custom builder (task 2.2)
+
+The approved PDF's compact exercise list is reused, with real thumbnails and
+expandable per-set editing for the canonical targets/rest/RPE/notes. Existing
+shared controls and functional dark colors remain in use; unshown dark Figma parity
+is not claimed. My workouts lists ten templates per page; the exercise picker
+reuses the existing search/filter/pagination screen.
+
+`save_workout_template` is an authenticated invoker RPC with Auth-derived owner,
+bounded validated children and atomic replacement. A stable client UUID makes
+retrying a new workout update its same row. Only this user's template can be
+updated; invalid children roll the transaction back. The service validates inputs
+and account identity, translates kg/lb deterministically and keeps raw database
+errors out of UI messages. Missing load differs from an unavailable edit target.
+
+Three-decimal kilogram storage is retained; display conversion rounds to three
+decimals and RPE entry allows one decimal. Last-save-wins is an explicit current
+ceiling, with version checks deferred until concurrent editing is required.
+Builder drafts stay in React state and survive a failed request, but are not an
+offline queue or persistent active session. Timers, plans and performed logging
+remain separate roadmap tasks. No new dependency was added.
+
 References:
 
 - [Supabase grants and RLS](https://supabase.com/docs/guides/database/postgres/row-level-security)

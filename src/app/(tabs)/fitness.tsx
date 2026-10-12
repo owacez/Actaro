@@ -11,6 +11,7 @@ export default function FitnessRoute() {
       userId={session.user.id}
       onOpen={(id) => router.push({ pathname: '/exercises/[id]', params: { id } })}
       onEquipment={() => router.push('/equipment')}
+      onWorkouts={() => router.push('/workouts')}
     />
   );
 }

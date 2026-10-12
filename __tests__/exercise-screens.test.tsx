@@ -54,7 +54,7 @@ test('library searches, paginates, filters and opens the actual exercise ID', as
   await render(<LibraryScreen userId={owner} onOpen={open} onEquipment={() => {}} />);
   await screen.findByText('Fixture press');
   await fireEvent.press(screen.getByLabelText('View Fixture press'));
-  expect(open).toHaveBeenCalledWith(itemId);
+  expect(open).toHaveBeenCalledWith(itemId, summary);
   await fireEvent.changeText(screen.getByLabelText('Search exercises'), 'press');
   await fireEvent.press(screen.getByText('Search'));
   await waitFor(() =>

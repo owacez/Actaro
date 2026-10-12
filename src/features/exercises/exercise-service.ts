@@ -31,7 +31,7 @@ async function identity(expectedUserId: string) {
   if (error || data.user?.id !== expectedUserId) throw new Error('Account changed');
   return data.user.id;
 }
-async function mediaUrls(paths: string[]) {
+export async function mediaUrls(paths: string[]) {
   const unique = [...new Set(paths.filter(Boolean))];
   if (!unique.length) return new Map<string, string>();
   const { data, error } = await getSupabase()

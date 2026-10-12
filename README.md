@@ -193,15 +193,17 @@ expire automatically; hovering or focusing the web notification pauses dismissal
 | Fitness / Exercise Library   | Search 643 imported exercises, filter by muscle/equipment/your saved setup, paginate and open technique details.                   |
 | Exercise Detail              | Start/peak or main poses from private Supabase Storage, instructions, muscles, equipment and source attribution.                   |
 | My equipment                 | Save available equipment, discard drafts or clear the selection; available-equipment filtering always includes no-equipment moves. |
+| My workouts                  | List and reopen your saved workout templates. Open Fitness → My workouts.                                                          |
+| Build Workout                | Select real exercises, reorder/remove them, configure sets/reps/weight/rest/RPE/notes and save atomically.                         |
 | More                         | Real signed-in email, Profile management and local sign-out.                                                                       |
 | Profile                      | Edit/clear name, view/change email and change password. Open More → Profile management.                                            |
 | Preferences                  | Save units, time zone, notification/gamification preferences and System/Light/Dark appearance. Open More → Preferences.            |
 
 The remaining `/explore` route is an Expo starter example, not an Actaro feature.
 The five-tab navigation shell is implemented; sign-in opens Today. The populated
-Today dashboard belongs to v0.5. Workouts, nutrition, habits/goals and progress
-remain in their scheduled releases. Exercise Detail does not offer a fake Add to
-workout action; workout creation begins in v0.3.
+Today dashboard belongs to v0.5. Workout templates and their builder are implemented;
+plans, pre-start and active-session logging remain subsequent v0.3 tasks. Nutrition,
+habits/goals and progress remain in their scheduled releases.
 
 Tunnel setup and flags follow the [Expo CLI documentation](https://docs.expo.dev/more/expo-cli/).
 
@@ -360,6 +362,22 @@ imports can be rerun safely. At runtime, open **Fitness → My equipment** to sa
 your setup; use **Filters → Use my available equipment** to apply it. Equipment
 drafts do not affect results until saved. Search submits through the Search action
 or keyboard; Previous/Next load 24 exercises per page. Refresh retries image loading.
+
+## Building and editing workouts
+
+Open **Fitness → My workouts → Create workout**. Enter a name, add exercises from
+the searchable library, and use **Edit** on a row to change its sets, targets,
+rest, optional RPE and notes. Exercises can be moved or removed; each exercise
+keeps at least one set in the editor. New selections start with three editable
+sets of eight reps and 90 seconds rest; these are planned targets, not logged results.
+
+Weight entry follows your kg/lb preference and is stored in kilograms. Blank weight
+means unspecified; zero explicitly means bodyweight. **Save workout** writes the
+whole template in one transaction. Reopen it from My workouts to edit it. Failed
+saves keep the current draft; retrying uses the same workout ID. Leaving through
+the editor's back action asks before discarding changes. Unsaved builder drafts
+are not persisted across app termination; active-session resilience is a later task.
+Concurrent edits use last-save-wins semantics for the same owned template.
 
 ## Release discipline
 
