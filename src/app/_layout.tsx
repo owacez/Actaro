@@ -52,6 +52,7 @@ function AuthRoutes() {
         <Stack.Screen name="workouts/index" />
         <Stack.Screen name="workouts/edit" />
         <Stack.Screen name="workouts/splits" />
+        <Stack.Screen name="workouts/plans" />
       </Stack.Protected>
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="explore" />

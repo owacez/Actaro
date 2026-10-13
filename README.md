@@ -399,7 +399,16 @@ Choose a saved workout or rest for every day, and select **Use this as my active
 split** if desired. One split can be active at a time. Save and reopen it to edit;
 deleting a split preserves its workouts and history. If a scheduled workout is
 deleted, its day visibly needs a new assignment. Unsaved split drafts are not
-retained after termination. Predefined plans and performed logging are still pending.
+retained after termination. Performed logging is still pending.
+
+Open **My workouts → Training plans** to filter by goal, experience, days per
+week or your saved available equipment. Preview actual exercise names, set/repetition
+targets, rest and the seven-day schedule. **Use this plan** creates independent,
+editable owned workout templates and an active split; existing plans/workouts stay.
+Loads start unspecified. A failed request can be retried to recover the same copy.
+These seven strength templates are Actaro-authored starting points with general
+programming references, not endorsed prescriptions or logged results. Beginner
+Running remains deferred to the running release, v1.2.
 
 ## Release discipline
 

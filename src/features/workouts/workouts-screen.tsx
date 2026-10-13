@@ -22,6 +22,7 @@ export function WorkoutsScreen({
   selectionDescription = 'Choose a saved workout or create one. The selected exercise is added to its draft; save the workout to keep it.',
   backTitle = '← Exercise Library',
   onSplits,
+  onPlans,
 }: {
   userId: string;
   onBack: () => void;
@@ -32,6 +33,7 @@ export function WorkoutsScreen({
   selectionDescription?: string;
   backTitle?: string;
   onSplits?: () => void;
+  onPlans?: () => void;
 }) {
   const [page, setPage] = useState<Page | null>(null);
   const [query, setQuery] = useState({ offset: 0 });
@@ -108,6 +110,9 @@ export function WorkoutsScreen({
       <AuthButton title="Create workout" disabled={removing} onPress={onCreate} />
       {!selecting && onSplits && (
         <AuthLink title="Training splits" disabled={removing} onPress={onSplits} />
+      )}
+      {!selecting && onPlans && (
+        <AuthLink title="Training plans" disabled={removing} onPress={onPlans} />
       )}
       {loading ? (
         <AuthLoading>Loading workouts…</AuthLoading>

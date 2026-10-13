@@ -235,6 +235,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      training_plans: {
+        Row: {
+          days: Json;
+          days_per_week: number;
+          description: string;
+          experience: string;
+          goal: string;
+          id: string;
+          name: string;
+          slug: string;
+          source_url: string;
+          workouts: Json;
+        };
+        Insert: {
+          days: Json;
+          days_per_week: number;
+          description: string;
+          experience: string;
+          goal: string;
+          id?: string;
+          name: string;
+          slug: string;
+          source_url: string;
+          workouts: Json;
+        };
+        Update: {
+          days?: Json;
+          days_per_week?: number;
+          description?: string;
+          experience?: string;
+          goal?: string;
+          id?: string;
+          name?: string;
+          slug?: string;
+          source_url?: string;
+          workouts?: Json;
+        };
+        Relationships: [];
+      };
       training_split_days: {
         Row: {
           is_rest: boolean;
@@ -287,6 +326,7 @@ export type Database = {
           id: string;
           is_active: boolean;
           name: string;
+          source_plan_id: string | null;
           updated_at: string;
           user_id: string;
         };
@@ -295,6 +335,7 @@ export type Database = {
           id?: string;
           is_active?: boolean;
           name: string;
+          source_plan_id?: string | null;
           updated_at?: string;
           user_id: string;
         };
@@ -303,10 +344,18 @@ export type Database = {
           id?: string;
           is_active?: boolean;
           name?: string;
+          source_plan_id?: string | null;
           updated_at?: string;
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: 'training_splits_source_plan_id_fkey';
+            columns: ['source_plan_id'];
+            isOneToOne: false;
+            referencedRelation: 'training_plans';
+            referencedColumns: ['id'];
+          },
           {
             foreignKeyName: 'training_splits_user_id_fkey';
             columns: ['user_id'];
@@ -711,6 +760,30 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      adopt_training_plan: {
+        Args: { p_plan_id: string; p_split_id: string };
+        Returns: string;
+      };
+      get_training_plans: {
+        Args: {
+          p_available_only?: boolean;
+          p_days?: number;
+          p_experience?: string;
+          p_goal?: string;
+        };
+        Returns: {
+          days_per_week: number;
+          description: string;
+          experience: string;
+          goal: string;
+          id: string;
+          name: string;
+          required_equipment: string[];
+          schedule: string[];
+          source_url: string;
+          workouts: Json;
+        }[];
+      };
       import_repdb: {
         Args: { p_exercises: Json; p_revision: string };
         Returns: number;

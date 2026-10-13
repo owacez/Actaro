@@ -80,5 +80,24 @@ termination. No scheduling daemon or notification service is introduced.
 
 References:
 
+Predefined strength plans (task 2.3, 2026-10-13) are read-only shared recipes
+referencing stable RepDB source IDs. The catalog resolves real exercise names and
+equipment, excludes incomplete recipes, and filters against the owner's saved
+equipment. Seven Actaro-authored starting families cover Beginner Full Body,
+Push/Pull/Legs, Upper/Lower, Strength, Hypertrophy, Home and Bodyweight. General
+programming references are shown without implying endorsement or prescribing loads.
+Beginner Running is retained but deferred to v1.2 because strength set logging
+cannot represent its running sessions correctly.
+
+Adoption is an authenticated invoker transaction: resolve actual catalog IDs,
+clone editable private targets, then create/activate the owner's seven-day split.
+Stable adoption UUIDs make retries recover the same copy. Missing exercises or
+foreign identity collisions roll back all copies and preserve the old active split.
+Shared recipes are not changed by users' edits. No external dataset runtime
+dependency, new package or fabricated progress was introduced.
+
+Programming basis: [ACSM resistance-training progression position stand](https://pubmed.ncbi.nlm.nih.gov/19204579/)
+and [CDC adult activity guidance](https://www.cdc.gov/physical-activity-basics/guidelines/adults.html).
+
 - [Supabase grants and RLS](https://supabase.com/docs/guides/database/postgres/row-level-security)
 - [PostgreSQL composite foreign keys and selective SET NULL](https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-FK)

@@ -31,6 +31,7 @@ export default function WorkoutsRoute() {
       onCreate={() => open()}
       onEdit={open}
       onSplits={() => router.push('/workouts/splits')}
+      onPlans={() => router.push('/workouts/plans')}
     />
   );
 }
