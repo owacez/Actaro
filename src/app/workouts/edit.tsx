@@ -5,9 +5,10 @@ import { validExerciseId } from '@/features/exercises/exercise-service';
 import { BuilderScreen } from '@/features/workouts/builder-screen';
 export default function BuilderRoute() {
   const { session, recovery } = useAuth();
-  const { id, exerciseId } = useLocalSearchParams<{
+  const { id, exerciseId, returnTo } = useLocalSearchParams<{
     id?: string | string[];
     exerciseId?: string | string[];
+    returnTo?: string | string[];
   }>();
   if (!session || recovery) return <Redirect href="/" />;
   if (
@@ -27,9 +28,13 @@ export default function BuilderRoute() {
       exerciseId={exerciseId}
       userId={session.user.id}
       onBack={() =>
-        router.replace({ pathname: '/workouts', params: exerciseId ? { exerciseId } : {} })
+        returnTo === 'split' && router.canGoBack()
+          ? router.back()
+          : router.replace({ pathname: '/workouts', params: exerciseId ? { exerciseId } : {} })
       }
-      onSaved={() => router.replace('/workouts')}
+      onSaved={() =>
+        returnTo === 'split' && router.canGoBack() ? router.back() : router.replace('/workouts')
+      }
       onEquipment={() => router.push('/equipment')}
     />
   );

@@ -30,6 +30,7 @@ export default function WorkoutsRoute() {
       onBack={() => router.replace('/fitness')}
       onCreate={() => open()}
       onEdit={open}
+      onSplits={() => router.push('/workouts/splits')}
     />
   );
 }

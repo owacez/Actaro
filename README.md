@@ -390,9 +390,16 @@ the confirmation and choose **Delete workout**. This removes planned exercises
 and sets while preserving recorded sessions. **Keep workout** cancels deletion;
 failed requests retain the visible row for retry.
 
-Saving a template does not log training. Seven-day splits with rest days,
-direct exercise logging, and editable/deletable history are tracked in the
+Saving a template does not log training. Direct exercise logging and
+editable/deletable history are tracked in the
 remaining v0.3 planning/session/history tasks. There is no active logging button yet.
+
+Open **My workouts → Training splits** to create a recurring Monday–Sunday split.
+Choose a saved workout or rest for every day, and select **Use this as my active
+split** if desired. One split can be active at a time. Save and reopen it to edit;
+deleting a split preserves its workouts and history. If a scheduled workout is
+deleted, its day visibly needs a new assignment. Unsaved split drafts are not
+retained after termination. Predefined plans and performed logging are still pending.
 
 ## Release discipline
 

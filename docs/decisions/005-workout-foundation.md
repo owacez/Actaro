@@ -70,6 +70,14 @@ from being reapplied by normal back navigation. Reloading an unsaved draft still
 uses the unchanged saved template plus one selected exercise. Account/ownership
 checks, atomic save and documented last-save-wins semantics remain unchanged.
 
+Seven-day splits store owned ordered day rows independently from session facts.
+Exactly seven explicit workout/rest selections are required for a save; deleting
+a template may later leave an unassigned day, which the editor exposes. A unique
+partial index and an owner-profile row lock allow one active split without racing
+concurrent selections. Split deletion removes only its schedule. New workout
+creation returns to the open split draft; unsaved planning drafts do not survive
+termination. No scheduling daemon or notification service is introduced.
+
 References:
 
 - [Supabase grants and RLS](https://supabase.com/docs/guides/database/postgres/row-level-security)

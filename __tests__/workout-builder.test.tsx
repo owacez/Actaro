@@ -240,7 +240,7 @@ test('workout chooser opens the selected template and keeps deletion out of the 
   expect(screen.getByRole('header', { name: 'Add to workout' })).toBeTruthy();
   expect(screen.queryByRole('button', { name: 'Delete Upper A' })).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Upper A · 1 exercises' }));
-  expect(choose).toHaveBeenCalledWith(workoutId);
+  expect(choose).toHaveBeenCalledWith(workoutId, 'Upper A');
   await fireEvent.press(screen.getByRole('button', { name: 'Create workout' }));
   expect(create).toHaveBeenCalledTimes(1);
 });

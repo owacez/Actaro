@@ -18,12 +18,20 @@ export function WorkoutsScreen({
   onCreate,
   onEdit,
   selecting = false,
+  selectionTitle = 'Add to workout',
+  selectionDescription = 'Choose a saved workout or create one. The selected exercise is added to its draft; save the workout to keep it.',
+  backTitle = '← Exercise Library',
+  onSplits,
 }: {
   userId: string;
   onBack: () => void;
   onCreate: () => void;
-  onEdit: (id: string) => void;
+  onEdit: (id: string, name: string) => void;
   selecting?: boolean;
+  selectionTitle?: string;
+  selectionDescription?: string;
+  backTitle?: string;
+  onSplits?: () => void;
 }) {
   const [page, setPage] = useState<Page | null>(null);
   const [query, setQuery] = useState({ offset: 0 });
@@ -94,15 +102,13 @@ export function WorkoutsScreen({
   }
   return (
     <AuthFrame>
-      <AuthLink title="← Exercise Library" disabled={removing} onPress={onBack} />
-      <AuthText kind="heading">{selecting ? 'Add to workout' : 'My workouts'}</AuthText>
-      {selecting && (
-        <AuthText>
-          Choose a saved workout or create one. The selected exercise is added to its draft; save
-          the workout to keep it.
-        </AuthText>
-      )}
+      <AuthLink title={backTitle} disabled={removing} onPress={onBack} />
+      <AuthText kind="heading">{selecting ? selectionTitle : 'My workouts'}</AuthText>
+      {selecting && <AuthText>{selectionDescription}</AuthText>}
       <AuthButton title="Create workout" disabled={removing} onPress={onCreate} />
+      {!selecting && onSplits && (
+        <AuthLink title="Training splits" disabled={removing} onPress={onSplits} />
+      )}
       {loading ? (
         <AuthLoading>Loading workouts…</AuthLoading>
       ) : error ? (
@@ -120,7 +126,7 @@ export function WorkoutsScreen({
               <AuthLink
                 title={`${row.name} · ${row.workout_template_exercises[0]?.count ?? 0} exercises`}
                 disabled={removing}
-                onPress={() => onEdit(row.id)}
+                onPress={() => onEdit(row.id, row.name)}
               />
               {!selecting && (
                 <AuthLink

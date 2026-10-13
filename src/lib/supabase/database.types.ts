@@ -235,6 +235,87 @@ export type Database = {
         };
         Relationships: [];
       };
+      training_split_days: {
+        Row: {
+          is_rest: boolean;
+          split_id: string;
+          user_id: string;
+          weekday: number;
+          workout_id: string | null;
+        };
+        Insert: {
+          is_rest: boolean;
+          split_id: string;
+          user_id: string;
+          weekday: number;
+          workout_id?: string | null;
+        };
+        Update: {
+          is_rest?: boolean;
+          split_id?: string;
+          user_id?: string;
+          weekday?: number;
+          workout_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'training_split_days_split_id_user_id_fkey';
+            columns: ['split_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'training_splits';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'training_split_days_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'training_split_days_workout_id_user_id_fkey';
+            columns: ['workout_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'workout_templates';
+            referencedColumns: ['id', 'user_id'];
+          },
+        ];
+      };
+      training_splits: {
+        Row: {
+          created_at: string;
+          id: string;
+          is_active: boolean;
+          name: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'training_splits_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_equipment: {
         Row: {
           equipment_id: string;
@@ -646,6 +727,15 @@ export type Database = {
           isOneToOne: false;
           isSetofReturn: true;
         };
+      };
+      save_training_split: {
+        Args: {
+          p_days: Json;
+          p_id: string;
+          p_is_active: boolean;
+          p_name: string;
+        };
+        Returns: string;
       };
       save_workout_template: {
         Args: {
