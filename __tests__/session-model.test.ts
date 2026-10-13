@@ -80,3 +80,11 @@ test('volume includes completed external load, distinguishes unknown from zero, 
   ).toEqual(['Estimated 1RM', 'Rep PR']);
   expect(personalRecords([{ reps: 50, weightKg: null }], previous)).toHaveLength(0);
 });
+test('an invalid finish clock is rejected before an active draft can become frozen', () => {
+  const session = sessionFixture();
+  session.status = 'pending';
+  session.mutationId = session.id;
+  session.exercises[0].sets[0].completedAt = session.startedAt;
+  session.endedAt = new Date(Date.parse(session.startedAt) - 1000).toISOString();
+  expect(() => sessionPayload(session)).toThrow('device clock');
+});

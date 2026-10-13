@@ -93,12 +93,18 @@ export function sessionPayload(session: SessionDraft) {
     exercises: completed.map((exercise) => ({ ...exercise, key: exercise.id })),
   };
   const values = workoutPayload(draft, session.unit);
+  const wallSeconds = (Date.parse(session.endedAt) - Date.parse(session.startedAt)) / 1000;
+  if (!Number.isFinite(wallSeconds) || wallSeconds < 0)
+    throw new Error('The finish time precedes the start. Check the device clock before finishing.');
   const duration = Math.min(
     Math.floor(elapsed(session.clock, Date.parse(session.endedAt)) / 1000),
     Math.floor((Date.parse(session.endedAt) - Date.parse(session.startedAt)) / 1000),
   );
+  if (session.mode === 'timed' && duration > 604800)
+    throw new Error('The recorded timer exceeds seven days. Review or cancel this device draft.');
   return {
     id: session.id,
+    user_id: session.userId,
     template_id: session.templateId,
     name: session.name.trim(),
     notes: session.notes.trim(),

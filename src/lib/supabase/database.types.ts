@@ -235,6 +235,53 @@ export type Database = {
         };
         Relationships: [];
       };
+      recovery_check_ins: {
+        Row: {
+          created_at: string;
+          energy: number;
+          local_date: string;
+          notes: string | null;
+          sleep_quality: number;
+          soreness: number;
+          stress: number | null;
+          time_zone: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          energy: number;
+          local_date: string;
+          notes?: string | null;
+          sleep_quality: number;
+          soreness: number;
+          stress?: number | null;
+          time_zone: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          energy?: number;
+          local_date?: string;
+          notes?: string | null;
+          sleep_quality?: number;
+          soreness?: number;
+          stress?: number | null;
+          time_zone?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'recovery_check_ins_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       training_plans: {
         Row: {
           days: Json;
@@ -782,6 +829,27 @@ export type Database = {
           previous: Json;
         }[];
       };
+      get_training_history: {
+        Args: { p_mode?: string; p_offset?: number; p_query?: string };
+        Returns: {
+          duration_seconds: number;
+          exercises: number;
+          id: string;
+          local_date: string;
+          mode: string;
+          name: string;
+          reps: number;
+          sets: number;
+          started_at: string;
+          unknown_weight_sets: number;
+          version: number;
+          volume_kg: number;
+        }[];
+      };
+      get_training_overview: {
+        Args: { p_from: string; p_to: string };
+        Returns: Json;
+      };
       get_training_plans: {
         Args: {
           p_available_only?: boolean;
@@ -818,6 +886,19 @@ export type Database = {
           isOneToOne: false;
           isSetofReturn: true;
         };
+      };
+      save_recovery_check: {
+        Args: {
+          p_date: string;
+          p_energy: number;
+          p_notes?: string;
+          p_sleep: number;
+          p_soreness: number;
+          p_stress?: number;
+          p_time_zone: string;
+          p_user_id: string;
+        };
+        Returns: string;
       };
       save_training_split: {
         Args: {

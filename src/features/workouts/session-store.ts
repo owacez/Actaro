@@ -40,4 +40,13 @@ export const sessionStore = {
   discard(userId: string) {
     return serial(userId, (storageKey) => AsyncStorage.removeItem(storageKey));
   },
+  forgetSaved(userId: string, sessionId: string) {
+    return serial(userId, async (storageKey) => {
+      const value = await AsyncStorage.getItem(storageKey);
+      if (!value) return;
+      const draft = restoreSession(value, userId);
+      if (draft.id === sessionId && draft.status === 'saved')
+        await AsyncStorage.removeItem(storageKey);
+    });
+  },
 };

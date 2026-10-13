@@ -47,3 +47,16 @@ export function personalRecords(sets: PerformedSet[], previous: Performance) {
   }
   return records;
 }
+export function exerciseRecords(
+  entries: { exerciseId: string; sets: PerformedSet[]; performance: Performance }[],
+) {
+  const grouped = new Map<string, { sets: PerformedSet[]; performance: Performance }>();
+  for (const entry of entries) {
+    const existing = grouped.get(entry.exerciseId);
+    if (existing) existing.sets.push(...entry.sets);
+    else grouped.set(entry.exerciseId, { sets: [...entry.sets], performance: entry.performance });
+  }
+  return new Map(
+    [...grouped].map(([id, entry]) => [id, personalRecords(entry.sets, entry.performance)]),
+  );
+}

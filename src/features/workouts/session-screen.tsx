@@ -26,7 +26,7 @@ import {
 } from './session-model';
 import { sessionStore } from './session-store';
 import { sessionService } from './session-service';
-import { personalRecords, trainingVolume } from './training-metrics';
+import { exerciseRecords, trainingVolume } from './training-metrics';
 export function SessionScreen({ userId, onBack }: { userId: string; onBack: () => void }) {
   const [draft, setDraft] = useState<SessionDraft | null>(null),
     current = useRef<SessionDraft | null>(null);
@@ -209,6 +209,14 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
         ),
       )
     : null;
+  const recordsByExercise = exerciseRecords(
+    summary?.exercises.map((entry) => ({
+      exerciseId: entry.exercise_id,
+      sets: entry.sets.map((set) => ({ reps: set.reps, weightKg: set.weight_kg })),
+      performance:
+        draft.exercises.find((item) => item.id === entry.id)?.performance ?? exercise.performance,
+    })) ?? [],
+  );
   function setField(
     position: number,
     field: 'weight' | 'reps' | 'rest' | 'rpe' | 'notes',
@@ -310,12 +318,11 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
           )}
           {summary.exercises.map((entry) => {
             const original = draft.exercises.find((item) => item.id === entry.id);
-            const records = original
-              ? personalRecords(
-                  entry.sets.map((set) => ({ reps: set.reps, weightKg: set.weight_kg })),
-                  original.performance,
-                )
-              : [];
+            const records =
+              summary.exercises.find((item) => item.exercise_id === entry.exercise_id)?.id ===
+              entry.id
+                ? (recordsByExercise.get(entry.exercise_id) ?? [])
+                : [];
             return (
               <AuthCard key={entry.id}>
                 <AuthText kind="eyebrow">{original?.name}</AuthText>
@@ -514,6 +521,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
                             ...(entry.sets.at(-1) ?? {}),
                             id: randomUUID(),
                             completedAt: null,
+                            rpe: '',
                           },
                         ],
                       }

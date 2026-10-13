@@ -34,6 +34,8 @@ export default function WorkoutsRoute() {
       onPlans={() => router.push('/workouts/plans')}
       onStart={(id) => router.push({ pathname: '/workouts/start', params: { id } })}
       onResume={() => router.push('/workouts/session')}
+      onHistory={() => router.push('/workouts/history')}
+      onTraining={() => router.push('/workouts/training')}
     />
   );
 }

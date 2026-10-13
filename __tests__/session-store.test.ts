@@ -43,3 +43,14 @@ test('failed storage writes reject; existing/corrupt drafts cannot be silently r
   await expect(sessionStore.read(sessionOwner)).rejects.toThrow('kept');
   await expect(sessionStore.start(session)).rejects.toThrow('Resume');
 });
+test('history invalidates only the matching acknowledged summary and preserves unsaved workouts', async () => {
+  const session = sessionFixture();
+  await sessionStore.start(session);
+  await sessionStore.forgetSaved(sessionOwner, session.id);
+  expect(await sessionStore.read(sessionOwner)).toEqual(session);
+  await sessionStore.write({ ...session, status: 'saved' });
+  await sessionStore.forgetSaved(sessionOwner, '00000000-0000-4000-8000-000000000009');
+  expect(await sessionStore.read(sessionOwner)).not.toBeNull();
+  await sessionStore.forgetSaved(sessionOwner, session.id);
+  expect(await sessionStore.read(sessionOwner)).toBeNull();
+});

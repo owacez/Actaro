@@ -80,6 +80,39 @@ termination. No scheduling daemon or notification service is introduced.
 
 References:
 
+History/training context (2026-10-13): performed logs have a paged name/mode
+filter, snapshot-preserving edits, version-matched deletion and fresh calculated
+results. Failed edits freeze the attempted payload until identical retry or
+explicit discard/reload; history drafts are screen state, unlike durable active
+drafts. Added history sets require actual entered values and use the original end
+instant as their reported completion time. Newly added exercise records are not
+invented in preview; save/reload fetches the actual prior baseline.
+
+Owner-scoped aggregate RPCs derive frequency, completed sets/reps and known
+external volume from saved facts over a bounded date range. Primary snapshot
+muscles split sets/volume equally, with Unassigned preserving missing metadata.
+History/aggregate queries derive fresh PR/volume without a stored result cache.
+An edited/deleted log invalidates its matching acknowledged device summary while
+preserving active/pending workouts. Repeated exercises share one
+heaviest/estimated record calculation. All weight display respects kg/lb.
+
+Status rules describe recorded data: past planned training dates since the
+latest split change, recent seven-date sets versus the preceding 21-date weekly
+average (at least four prior sessions and 14 observed dates), and primary-set
+distribution (three groups, 12 allocated sets, 60% concentration threshold).
+These are transparent heuristics, not physiological measurements or goal-specific
+coaching. Incomplete assignments and insufficient history receive explicit states.
+
+Owned daily recovery reports validate categories/timezone/date and preserve
+identity. Energy/sleep/soreness are required, stress/notes optional. Categories
+use explicit reports plus consecutive-date/relative-volume/planned-rest context.
+Daily updates currently use last-save-wins; advanced concurrent sync is v1.5.
+Both session and recovery saves bind the expected actor server-side so an account
+switch cannot move a pending health draft to a different account.
+
+The Home plan description was corrected to review actual equipment: RepDB labels
+its goblet squat as kettlebell, so it is not described as dumbbell-only.
+
 The performed session flow (2026-10-13) uses one account-scoped AsyncStorage
 draft and serialized writes. Starting another workout requires resolving the
 existing draft. A completed pending payload is frozen with a stable mutation UUID;

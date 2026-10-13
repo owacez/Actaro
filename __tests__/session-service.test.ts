@@ -44,7 +44,7 @@ test('preparation joins real metadata and prior values without marking targets c
           name: exercise.name,
           imageUrl: null,
           notes: '',
-          sets: [{ ...exercise.sets[0], weight: '' }],
+          sets: [{ ...exercise.sets[0], weight: '', rpe: '7.5' }],
         },
       ],
     },
@@ -71,6 +71,7 @@ test('preparation joins real metadata and prior values without marking targets c
   expect(prepared.exercises[0].metadata).toBe('Chest · Barbell');
   expect(prepared.exercises[0].sets[0].weight).toBe('25');
   expect(prepared.exercises[0].sets[0].completedAt).toBeNull();
+  expect(prepared.exercises[0].sets[0].rpe).toBe('');
   expect(sessionService.create(sessionOwner, prepared, 'log_only').clock.runningSince).toBeNull();
 });
 test('save uses canonical actual facts, owned deleted-template fallback and revision acknowledgement', async () => {

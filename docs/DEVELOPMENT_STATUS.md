@@ -5,11 +5,11 @@ Updated: 2026-10-13 (America/Los_Angeles).
 ## Overall
 
 - Current Release: **v0.3 — Strength Workout System**
-- Release Completion: **79.285714% (55.5 / 70 weight)**
+- Release Completion: **100% (70 / 70 weight)**
 - Previous Releases: **v0.2 functional scope DONE (100%); v0.1 84.375% verified with remaining acceptance DEFERRED**
-- Current Phase: **Phase 2 — Strength Workout System; tasks 2.4–2.10 verified; history next**
-- Current Focus: Workout pre-start, both session modes, real set logging, independent timers, saved summaries and minimum resilience are verified. History and richer training context are next. The user authorized completing all of v0.3 without stopping between tasks.
-- Status: **IN_PROGRESS**
+- Current Phase: **Phase 2 — Strength Workout System; Phase 2 functional scope complete**
+- Current Focus: All sixteen v0.3 functional tasks are verified. Device/native acceptance remains separately pending. Next planned release is v0.4; no nutrition implementation has begun.
+- Status: **DONE — v0.3 functional scope; physical-device acceptance remains pending**
 - Blockers: No current workout-schema blocker. Figma subtree access remains limited; approved PDF fallback is available. Device/native build and foundation acceptance deferrals remain unchanged. Existing Auth leaked-password protection and dependency advisories remain follow-ups.
 - Approval boundary: User explicitly authorized advancing to the next features on 2026-10-12 and postponing the remaining v0.1 tests. User subsequently authorized completing v0.2, then continuing with the next features on 2026-10-12; implement v0.3 one focused task at a time. Custom native builds remain deferred until the application is ready; no build was submitted.
 
@@ -32,7 +32,7 @@ Use the Development Plan's weights exactly. For each active item, earned weight
 is `weight × verified completed subtasks / total subtasks`. DONE earns full weight;
 NOT_STARTED earns zero; BLOCKED earns only completed subtasks. DEFERRED and DROPPED
 items are excluded from their release denominator. Never infer progress from Figma.
-All eight v0.2 tasks and v0.3 tasks 2.1–2.2 are verified. Task 2.3 earns all five verified groups for splits and predefined plans. Tasks 2.4–2.10 and 2.16 are now verified. PR detection and basic volume each earn one of two groups; history, frequency/muscle aggregation, training status and recovery remain pending. No roadmap item has been removed.
+All eight v0.2 tasks and all sixteen v0.3 functional tasks are verified. Device acceptance remains an unweighted pending follow-up; native builds are user-deferred. No future-release or retained feature has been silently removed.
 
 v0.1 denominator: `2 + 3 + 3 + 2 + 5 + 3 + 3 + 6 + 3 + 6 + 4 = 40`.
 Subtasks below define a reproducible foundation baseline; partial values are
@@ -51,7 +51,7 @@ Deferred unweighted acceptance-check records below do not reweight completed
 foundation work or turn the unchanged 84.375% full-scope baseline into 100%.
 
 v0.3 denominator: `6 + 6 + 5 + 3 + 3 + 10 + 4 + 2 + 4 + 4 + 4 + 3 + 4 + 4 + 3 + 5 = 70`.
-Earned weight: `6 + 6 + 5 + 3 + 3 + 10 + 4 + 2 + 4 + 4 + 0 + 3 × 1/2 + 4 × 1/2 + 0 + 0 + 5 = 55.5`. Release completion is `55.5 / 70 × 100 = 79.285714285…%`. PR detection and basic volume each have two groups; only the first is verified.
+Earned weight: `6 + 6 + 5 + 3 + 3 + 10 + 4 + 2 + 4 + 4 + 4 + 3 + 4 + 4 + 3 + 5 = 70`. Functional completion is `70 / 70 × 100 = 100%`. The physical-device/native-build follow-ups are not claimed passed.
 
 ## Feature Table
 
@@ -86,11 +86,11 @@ Earned weight: `6 + 6 + 5 + 3 + 3 + 10 + 4 + 2 + 4 + 4 + 0 + 3 × 1/2 + 4 × 1/2
 | Phase 2 / 2.8    | Log Only                               | v0.3    |      2 | DONE        |       100% | No total timer; complete persistence and direct exercise entry verified.                                                                        |
 | Phase 2 / 2.9    | Rest Timer                             | v0.3    |      4 | DONE        |       100% | Auto start, pause/resume, skip and ±15 seconds verified in both modes.                                                                          |
 | Phase 2 / 2.10   | Workout Summary                        | v0.3    |      4 | DONE        |       100% | Actual completed exercises/sets/volume/duration/records and note displayed after acknowledgement.                                               |
-| Phase 2 / 2.11   | Workout History                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.11.                                                                                                             |
-| Phase 2 / 2.12   | PR Detection                           | v0.3    |      3 | IN_PROGRESS |        50% | Deterministic detection/first record/matched load/Epley verified; history recalculation pending (1/2).                                          |
-| Phase 2 / 2.13   | Training Volume                        | v0.3    |      4 | IN_PROGRESS |        50% | Completed working sets/reps/known external volume verified; frequency/muscle aggregation pending (1/2).                                         |
-| Phase 2 / 2.14   | Training Status                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.14.                                                                                                             |
-| Phase 2 / 2.15   | Recovery Check                         | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.15.                                                                                                             |
+| Phase 2 / 2.11   | Workout History                        | v0.3    |      4 | DONE        |       100% | Owned search/mode/pagination, reopen/edit/add/remove, frozen retry, revision-safe delete and recalculated results verified.                     |
+| Phase 2 / 2.12   | PR Detection                           | v0.3    |      3 | DONE        |       100% | Detection plus fresh history edit/delete and subsequent prior/best recalculation verified (2/2); repeated exercises share records.              |
+| Phase 2 / 2.13   | Training Volume                        | v0.3    |      4 | DONE        |       100% | Working sets/reps/known external volume, frequency and snapshot primary-muscle allocation verified (2/2).                                       |
+| Phase 2 / 2.14   | Training Status                        | v0.3    |      4 | DONE        |       100% | Transparent planned-day, relative-volume and allocation rules; insufficient history/unassigned days handled without fake physiology.            |
+| Phase 2 / 2.15   | Recovery Check                         | v0.3    |      3 | DONE        |       100% | Owned daily energy/soreness/sleep and optional stress/notes; categories/context, save/update/reopen and RLS verified.                           |
 | Phase 2 / 2.16   | Active Workout Resilience              | v0.3    |      5 | DONE        |       100% | Owner-scoped queued device save, wall-time clock, restart and offline completion/retry verified; device smoke remains pending.                  |
 | Phase 3 / 3.1    | Nutrition Schema                       | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.1.                                                                                                              |
 | Phase 3 / 3.2    | Nutrition Targets                      | v0.4    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §3.2.                                                                                                              |
@@ -187,7 +187,7 @@ Earned weight: `6 + 6 + 5 + 3 + 3 + 10 + 4 + 2 + 4 + 4 + 0 + 3 × 1/2 + 4 × 1/2
 | -------- | ------- | --------------------------------- | -------------: | ---------: | ----------- |
 | Phase 0  | v0.1    | Foundation                        |             40 |    84.375% | IN_PROGRESS |
 | Phase 1  | v0.2    | Exercise Library                  |             28 |       100% | DONE        |
-| Phase 2  | v0.3    | Strength Workout System           |             70 | 79.285714% | IN_PROGRESS |
+| Phase 2  | v0.3    | Strength Workout System           |             70 |       100% | DONE        |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |         0% | NOT_STARTED |
 | Phase 4  | v0.5    | Habits, Goals & Today             |             38 |         0% | NOT_STARTED |
 | Phase 5  | v0.6    | Basic Progress & Analytics        |             24 |         0% | NOT_STARTED |
@@ -348,7 +348,7 @@ design differences are documented in `docs/decisions/004-repdb-import.md`.
 | Predefined catalog/filter/preview | DONE   | Seven source-referenced editable strength families, actual RepDB exercise/equipment names, weekly preview and all four filters verified.     |
 | Owned plan adoption               | DONE   | Atomic private copy/active split, idempotent retry, rollback/ownership; real browser adopt/edit/save/reload passed.                          |
 
-Tasks 2.4–2.10 and 2.16 are verified; 2.12–2.13 are partial. Tasks 2.11 and 2.14–2.15 remain NOT_STARTED. Device smoke testing is
+All sixteen v0.3 functional tasks are verified. Device smoke testing is
 NOT_STARTED; browser responsive layouts and native exports do not count as device
 tests. Real disposable-account sessions have been logged by the new session flow.
 
@@ -360,21 +360,21 @@ browser logging. Task 2.16 covers durable owner-scoped drafts/serialized storage
 wall-time pause/background/restart math with foreground refresh, and frozen
 offline completion/acknowledged retry (3/3). Native device background smoke remains
 an unweighted pending acceptance check; no EAS/native build was requested or run.
-Task 2.12 has detection/tests DONE and edit/delete recalculation NOT_STARTED (1/2).
-Task 2.13 has completed working-set/repetition/known-load volume DONE and
-frequency/primary-muscle aggregation NOT_STARTED (1/2).
+Task 2.12 has detection/tests and edit/delete recalculation DONE (2/2).
+Task 2.13 has completed working-set/repetition/known-load volume and
+frequency/primary-muscle aggregation DONE (2/2).
 
-| Prerequisite                 | Status      | Evidence                                                                        |
-| ---------------------------- | ----------- | ------------------------------------------------------------------------------- |
-| Foundation stable            | NOT_STARTED | v0.1 release acceptance pending.                                                |
-| Exercise library stable      | DONE        | v0.2 canonical functional acceptance passed; device follow-up remains recorded. |
-| Strength workout flow stable | NOT_STARTED | v0.3 pending.                                                                   |
-| Manual nutrition stable      | NOT_STARTED | v0.4 pending.                                                                   |
-| Habits/goals stable          | NOT_STARTED | v0.5 pending.                                                                   |
-| Today stable                 | NOT_STARTED | v0.5 pending.                                                                   |
-| Basic Progress stable        | NOT_STARTED | v0.6 pending.                                                                   |
-| Security review complete     | NOT_STARTED | v0.9 pending.                                                                   |
-| Personal beta complete       | NOT_STARTED | v0.9 pending.                                                                   |
+| Prerequisite                 | Status      | Evidence                                                                               |
+| ---------------------------- | ----------- | -------------------------------------------------------------------------------------- |
+| Foundation stable            | NOT_STARTED | v0.1 release acceptance pending.                                                       |
+| Exercise library stable      | DONE        | v0.2 canonical functional acceptance passed; device follow-up remains recorded.        |
+| Strength workout flow stable | IN_PROGRESS | v0.3 functional scope passed; device smoke and v0.9 quality acceptance remain pending. |
+| Manual nutrition stable      | NOT_STARTED | v0.4 pending.                                                                          |
+| Habits/goals stable          | NOT_STARTED | v0.5 pending.                                                                          |
+| Today stable                 | NOT_STARTED | v0.5 pending.                                                                          |
+| Basic Progress stable        | NOT_STARTED | v0.6 pending.                                                                          |
+| Security review complete     | NOT_STARTED | v0.9 pending.                                                                          |
+| Personal beta complete       | NOT_STARTED | v0.9 pending.                                                                          |
 
 ## Retained and deferred scope
 
@@ -382,31 +382,74 @@ These source-of-truth requirements have no separate plan weight. Preserve them
 without assigning an invented release/weight; resolve their exact task placement
 before implementation. DEFERRED means intentionally not in this setup's scope.
 
-| Feature or requirement                                                     | Release / placement                                          | Status      | Authority / note                                                                                                                     |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Account deletion and data export                                           | Core security work; exact task not separately numbered       | NOT_STARTED | Source §20; retain ownership/privacy requirements.                                                                                   |
-| Body measurements and measurement history                                  | Body goals/progress; exact task not separately numbered      | NOT_STARTED | Source §§13–14, 21.                                                                                                                  |
-| User-created exercises                                                     | Placement undecided                                          | DEFERRED    | Source §21 ownership/RLS.                                                                                                            |
-| Warm-up sets, supersets, drop sets, advanced set types                     | Later strength enhancement; release unassigned               | DEFERRED    | Source §8.4.                                                                                                                         |
-| Optional RPE and recovery stress input                                     | When corresponding training tasks are approved               | NOT_STARTED | Source §§8.4, 10.2, 10.4; optional, no extra weight.                                                                                 |
-| Fiber, sodium, potassium, micronutrients                                   | Later nutrition enhancement; release unassigned              | DEFERRED    | Source §11.1.                                                                                                                        |
-| Barcode and nutrition-label scanning                                       | Later nutrition enhancement; release unassigned              | DEFERRED    | Source §11.11.                                                                                                                       |
-| What-If Nutrition and deterministic meal substitutions                     | Later nutrition enhancement; release unassigned              | DEFERRED    | Source §11.11.                                                                                                                       |
-| Dashboard customization/layout preferences                                 | Later enhancement; release unassigned                        | DEFERRED    | Source §§6, 7.                                                                                                                       |
-| Units, theme, notifications, privacy, gamification preferences             | v0.1 preferences; notifications also v0.9                    | IN_PROGRESS | Private schema/services tested; UI and behavior integration pending.                                                                 |
-| Initial strength plan families and equipment/goal/experience/day filters   | v0.3 plan task                                               | DONE        | Seven strength families verified. Beginner Running retained DEFERRED until v1.2 running sessions; no early GPS or fake strength log. |
-| Plateau detection, muscle balance, goal/step/running trends, What changed? | Analytics phases; exact subtask placement to be reviewed     | NOT_STARTED | Source §14.7; basic/advanced boundaries must be respected.                                                                           |
-| Running goals/events, elevation, splits, start/end markers, cadence and HR | Running / later advanced running; exact placement unassigned | DEFERRED    | Source §§13, 16; supported data and later release approval required.                                                                 |
-| Activity distance/active days and richer phone activity context            | Activity phases; exact placement to be reviewed              | NOT_STARTED | Source §§13–16; simplest supported steps source first.                                                                               |
-| Semantic search, exercise-form vision, optional AI explanations            | Only if justified; release unassigned                        | DEFERRED    | Source §18.2.                                                                                                                        |
-| Wearable-specific integrations beyond named health platforms               | v2.0 direction; provider decisions pending                   | NOT_STARTED | Source §22; no provider implementation assumed.                                                                                      |
-| Branding/store-name/domain clearance and production bundle IDs             | Before public launch                                         | NOT_STARTED | Source §1.0; no ownership or identity invented.                                                                                      |
-| Generic chatbot, autonomous coach, AI motivational spam                    | Explicitly excluded unless user changes scope                | DROPPED     | Source §§18, 23; documented exclusion, not a new scope decision.                                                                     |
-| Medical/injury diagnosis and accurate-looking AI body-fat estimates        | Explicitly excluded unless scope changes                     | DROPPED     | Source §§18, 23.                                                                                                                     |
-| Fake physiological readiness, Fitness Age, Body Battery imitation          | Explicitly excluded unless scope changes                     | DROPPED     | Source §23.                                                                                                                          |
-| Early microservices, Kubernetes/GKE, unnecessary custom backend            | Explicitly excluded for early versions                       | DROPPED     | Source §§19, 23; real future backend triggers remain documented.                                                                     |
+| Feature or requirement                                                     | Release / placement                                          | Status      | Authority / note                                                                                                                                                                      |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Account deletion and data export                                           | Core security work; exact task not separately numbered       | NOT_STARTED | Source §20; retain ownership/privacy requirements.                                                                                                                                    |
+| Body measurements and measurement history                                  | Body goals/progress; exact task not separately numbered      | NOT_STARTED | Source §§13–14, 21.                                                                                                                                                                   |
+| User-created exercises                                                     | Placement undecided                                          | DEFERRED    | Source §21 ownership/RLS.                                                                                                                                                             |
+| Warm-up sets, supersets, drop sets, advanced set types                     | Later strength enhancement; release unassigned               | DEFERRED    | Source §8.4.                                                                                                                                                                          |
+| Optional RPE and recovery stress input                                     | Strength enhancement / v0.3 recovery                         | IN_PROGRESS | Builder targets/history actual RPE and recovery stress implemented; active actual-RPE input retained DEFERRED to later strength work. Planned RPE is not copied into performed facts. |
+| Fiber, sodium, potassium, micronutrients                                   | Later nutrition enhancement; release unassigned              | DEFERRED    | Source §11.1.                                                                                                                                                                         |
+| Barcode and nutrition-label scanning                                       | Later nutrition enhancement; release unassigned              | DEFERRED    | Source §11.11.                                                                                                                                                                        |
+| What-If Nutrition and deterministic meal substitutions                     | Later nutrition enhancement; release unassigned              | DEFERRED    | Source §11.11.                                                                                                                                                                        |
+| Dashboard customization/layout preferences                                 | Later enhancement; release unassigned                        | DEFERRED    | Source §§6, 7.                                                                                                                                                                        |
+| Units, theme, notifications, privacy, gamification preferences             | v0.1 preferences; notifications also v0.9                    | IN_PROGRESS | Private schema/services tested; UI and behavior integration pending.                                                                                                                  |
+| Initial strength plan families and equipment/goal/experience/day filters   | v0.3 plan task                                               | DONE        | Seven strength families verified. Beginner Running retained DEFERRED until v1.2 running sessions; no early GPS or fake strength log.                                                  |
+| Plateau detection, muscle balance, goal/step/running trends, What changed? | Analytics phases; exact subtask placement to be reviewed     | NOT_STARTED | Source §14.7; basic/advanced boundaries must be respected.                                                                                                                            |
+| Running goals/events, elevation, splits, start/end markers, cadence and HR | Running / later advanced running; exact placement unassigned | DEFERRED    | Source §§13, 16; supported data and later release approval required.                                                                                                                  |
+| Activity distance/active days and richer phone activity context            | Activity phases; exact placement to be reviewed              | NOT_STARTED | Source §§13–16; simplest supported steps source first.                                                                                                                                |
+| Semantic search, exercise-form vision, optional AI explanations            | Only if justified; release unassigned                        | DEFERRED    | Source §18.2.                                                                                                                                                                         |
+| Wearable-specific integrations beyond named health platforms               | v2.0 direction; provider decisions pending                   | NOT_STARTED | Source §22; no provider implementation assumed.                                                                                                                                       |
+| Branding/store-name/domain clearance and production bundle IDs             | Before public launch                                         | NOT_STARTED | Source §1.0; no ownership or identity invented.                                                                                                                                       |
+| Generic chatbot, autonomous coach, AI motivational spam                    | Explicitly excluded unless user changes scope                | DROPPED     | Source §§18, 23; documented exclusion, not a new scope decision.                                                                                                                      |
+| Medical/injury diagnosis and accurate-looking AI body-fat estimates        | Explicitly excluded unless scope changes                     | DROPPED     | Source §§18, 23.                                                                                                                                                                      |
+| Fake physiological readiness, Fitness Age, Body Battery imitation          | Explicitly excluded unless scope changes                     | DROPPED     | Source §23.                                                                                                                                                                           |
+| Early microservices, Kubernetes/GKE, unnecessary custom backend            | Explicitly excluded for early versions                       | DROPPED     | Source §§19, 23; real future backend triggers remain documented.                                                                                                                      |
 
 ## Last Completed
+
+**DONE — Remaining v0.3 history, training context and recovery tasks (2026-10-13).**
+
+- Applied `20261013111751_workout_history_and_volume.sql`,
+  `20261013112910_recovery_check_ins.sql` and
+  `20261013113329_workout_request_identity.sql`; regenerated hosted types.
+- History supports real name/mode filters, bounded pages, snapshot-preserving
+  edit/add/remove, validated values, frozen same-mutation retry, explicit reload
+  and revision-matched confirmed deletion. Reopening recalculates PR/volume;
+  subsequent session previous/best values exclude deleted logs. Matching saved
+  device summaries are invalidated without dropping active/pending workouts.
+- Typed owner-scoped aggregate queries calculate frequency, completed sets/reps,
+  known external volume and equally allocated recorded primary muscles. Missing
+  weights/muscles remain explicit. Repeated exercises share record calculations.
+- Status rules show their thresholds/evidence and handle insufficient history,
+  split changes and unassigned days. Recovery persists owned daily reports with
+  actual save/update/reopen, optional stress/notes and categorical context; no
+  physiological score. Server checks bind the expected actor on health saves.
+- Planned RPE is cleared from new performed drafts; actual RPE can be entered
+  in history. Active RPE input is retained separately as a later optional enhancement.
+  Invalid finish clocks are rejected before freezing an active draft.
+- `node .actaro-tools/test-recovery.mjs`: PASS all migrations, foundation/session
+  regressions, history edit/delete aggregation, two-primary allocation, recovery
+  categories/date/upsert and actor/anonymous/two-owner checks. Final committed
+  session/recovery SQL suites also PASS hosted, rollback only/no emails.
+- `npm.cmd run check`: PASS typecheck/lint/format and 205 Jest + 4 Node tests
+  (209 total; 35 Jest suites). Android/iOS/web export and 30 static routes PASS.
+- `node .actaro-tools/check-history-recovery-browser.mjs`: PASS history
+  edit/save/reload, volume/record recalculation, cancel/confirm delete, remaining
+  aggregate totals, recovery save/update/reload and later-session deleted-PR checks.
+  The test's premature reload was corrected; no app-side artificial wait was added.
+- `node .actaro-tools/check-v03-final-browser.mjs`: PASS final search/empty/reset,
+  summary/recovery readback and Exercise Detail → direct Log Only → persisted
+  summary → confirmed deletion, preserving existing logs. Light/dark layouts inspected.
+- `node --env-file=.env .actaro-tools/check-bundle-privacy.mjs`: PASS privileged
+  import credential absent from exported artifacts. No new app dependencies,
+  paid services, native builds or v0.4 implementation were introduced.
+- Physical iPhone/Android workout smoke and exact unshown design matching remain
+  pending for acceptance/quality follow-up. v0.3 functional weight is 70/70;
+  foundation remains 84.375% and v1.0 is not complete.
+- Acceptance fixture cleanup: the reserved test account was removed after all
+  checks; its owned templates/splits/sessions/check-ins cascade. No real user or
+  email was modified. Ignored harness credentials are cleared from its state file.
 
 **DONE — Dedicated Timed / Log Only workout flow and minimum resilience (2026-10-13).**
 
@@ -751,16 +794,13 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-v0.3 planning and the dedicated session flow are verified. History and training context are next;
-the user authorized continuing through remaining v0.3 tasks without stopping.
-PR detection and basic volume are verified; history recalculation and richer aggregation remain pending.
-v0.2 device smoke follow-up and v0.1 acceptance/native build deferrals remain recorded.
+v0.3 functional scope is DONE at 70/70 weight. All tasks have code, tests and integration evidence. Physical iPhone/Android smoke, foundation acceptance and native builds remain separately recorded. No v0.4 implementation has begun.
 
 ## Next 3 Actions
 
-1. v0.3 task 2.11: reopen/edit/delete performed history with revision-safe saves.
-2. v0.3 tasks 2.12–2.13: history recalculation and frequency/primary-muscle aggregation.
-3. v0.3 tasks 2.14–2.15: transparent rules-based training status and owned recovery check-ins.
+1. v0.4 task 3.1: owned meal/food-log schema with validation, RLS and rollback tests.
+2. v0.4 task 3.2: persisted, validated calorie/macronutrient targets.
+3. v0.4 task 3.3: choose a licensed food dataset and implement paged real food search.
 
 Device acceptance and custom native builds remain separately recorded.
 
@@ -778,7 +818,7 @@ Device acceptance and custom native builds remain separately recorded.
 - Canonical filename mismatch is documented; original content is preserved.
   It does not block initialization using the supplied plan.
 - Supabase public configuration and MCP authorization are established. The profile/preferences migration is applied and database-tested. Both Android and iOS remain test targets; the latest user report identifies iPhone Expo Go and confirms the name editor works. Android and new account-update flows remain unverified.
-- The user reports exhausted Supabase limits after testing. No quota diagnosis, backend probe, confirmation email or Supabase MCP request was made for the tab-icon task. The specific exhausted limit remains unverified; live acceptance is paused rather than credited as complete.
+- Earlier reported Supabase exhaustion remains undiagnosed for the native/email follow-up. Database/API access and v0.2/v0.3 acceptance now pass using bounded disposable fixtures and no test emails; pending foundation email/device acceptance is not credited.
 - Latest `npm audit --json` reports 66 affected packages (50 high, 16 moderate).
   Review runtime/tooling exposure and dependency chains before release; no safety
   claim is made. Automated suggestions include incompatible SDK changes, so

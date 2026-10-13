@@ -105,6 +105,7 @@ export const sessionService = {
         performance: priorPerformance,
         sets: exercise.sets.map((set, index) => ({
           ...set,
+          rpe: '',
           weight:
             set.weight || displayWeight(priorPerformance.previous[index]?.weightKg ?? null, unit),
           id: randomUUID(),

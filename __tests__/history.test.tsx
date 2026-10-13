@@ -1,0 +1,115 @@
+import { beforeEach, expect, jest, test } from '@jest/globals';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { HistoryScreen } from '@/features/workouts/history-screen';
+import { historyService } from '@/features/workouts/history-service';
+import { sessionService } from '@/features/workouts/session-service';
+import { sessionFixture, sessionOwner } from './helpers/session-fixture';
+import { FeedbackTestRoot } from './helpers/feedback-root';
+jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
+jest.mock('@/features/workouts/session-store', () => ({
+  sessionStore: { forgetSaved: jest.fn<() => Promise<void>>().mockResolvedValue(undefined) },
+}));
+jest.mock('expo-crypto', () => ({ randomUUID: () => '00000000-0000-4000-8000-000000000007' }));
+jest.mock('expo-router', () => ({
+  useFocusEffect: (callback: () => void) => {
+    const React = jest.requireActual<typeof import('react')>('react');
+    React.useEffect(callback, [callback]);
+  },
+}));
+jest.mock('@/features/workouts/history-service', () => ({
+  historyService: { list: jest.fn(), load: jest.fn(), remove: jest.fn() },
+}));
+jest.mock('@/features/workouts/session-service', () => ({ sessionService: { save: jest.fn() } }));
+const history = jest.mocked(historyService),
+  service = jest.mocked(sessionService),
+  props = { userId: sessionOwner, onBack: jest.fn(), onOpen: jest.fn(), onEquipment: jest.fn() };
+const recorded = () => {
+  const draft = sessionFixture();
+  draft.status = 'pending';
+  draft.endedAt = draft.startedAt;
+  draft.mutationId = draft.id;
+  draft.version = 1;
+  draft.exercises[0].sets[0].completedAt = draft.startedAt;
+  return draft;
+};
+beforeEach(() => {
+  jest.clearAllMocks();
+  history.load.mockResolvedValue(recorded());
+  history.list.mockResolvedValue({ rows: [], more: false, unit: 'kg' });
+  history.remove.mockResolvedValue(undefined);
+  service.save.mockResolvedValue(2);
+});
+test('history edits recalculate actual volume and freeze failed save payload until identical retry', async () => {
+  const row = recorded();
+  history.load.mockResolvedValueOnce(row).mockResolvedValue({
+    ...row,
+    version: 2,
+    exercises: row.exercises.map((entry) => ({
+      ...entry,
+      sets: entry.sets.map((set) => ({ ...set, reps: '10' })),
+    })),
+  });
+  service.save.mockRejectedValueOnce(new Error('offline'));
+  await render(
+    <FeedbackTestRoot>
+      <HistoryScreen {...props} id={row.id} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByLabelText('Reps · exercise 1 set 1');
+  await fireEvent.changeText(screen.getByLabelText('Reps · exercise 1 set 1'), '10');
+  expect(screen.getByText(/Training Volume: 200/)).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Save recorded workout' }));
+  await screen.findByRole('button', { name: 'Retry history save' });
+  expect(screen.getByLabelText('Reps · exercise 1 set 1').props.editable).toBe(false);
+  await fireEvent.press(screen.getByRole('button', { name: 'Retry history save' }));
+  await waitFor(() => expect(history.load).toHaveBeenCalledTimes(2));
+  expect(service.save.mock.calls[0][0]).toEqual(service.save.mock.calls[1][0]);
+  await screen.findByLabelText('Reps · exercise 1 set 1');
+  expect(screen.getByLabelText('Reps · exercise 1 set 1').props.value).toBe('10');
+});
+test('delete is confirmed and uses the displayed revision; filters are genuine server filters', async () => {
+  const row = recorded();
+  history.list
+    .mockResolvedValueOnce({
+      rows: [
+        {
+          id: row.id,
+          name: row.name,
+          mode: 'timed',
+          local_date: row.localDate,
+          started_at: row.startedAt,
+          duration_seconds: 20,
+          version: 1,
+          exercises: 1,
+          sets: 1,
+          reps: 8,
+          volume_kg: 160,
+          unknown_weight_sets: 0,
+        },
+      ],
+      more: false,
+      unit: 'kg',
+    })
+    .mockResolvedValue({ rows: [], more: false, unit: 'kg' });
+  await render(
+    <FeedbackTestRoot>
+      <HistoryScreen {...props} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByRole('button', { name: 'Delete recorded Test workout' });
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete recorded Test workout' }));
+  expect(history.remove).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Keep recorded workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete recorded Test workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete recorded workout' }));
+  await waitFor(() => expect(history.remove).toHaveBeenCalledWith(sessionOwner, row.id, 1));
+  await screen.findByText(/No recorded workouts match/);
+  await fireEvent.press(screen.getByRole('button', { name: 'Log Only' }));
+  await waitFor(() =>
+    expect(history.list).toHaveBeenLastCalledWith(sessionOwner, {
+      offset: 0,
+      query: '',
+      mode: 'log_only',
+    }),
+  );
+});

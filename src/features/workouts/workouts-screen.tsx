@@ -25,6 +25,8 @@ export function WorkoutsScreen({
   onPlans,
   onStart,
   onResume,
+  onHistory,
+  onTraining,
 }: {
   userId: string;
   onBack: () => void;
@@ -38,6 +40,8 @@ export function WorkoutsScreen({
   onPlans?: () => void;
   onStart?: (id: string) => void;
   onResume?: () => void;
+  onHistory?: () => void;
+  onTraining?: () => void;
 }) {
   const [page, setPage] = useState<Page | null>(null);
   const [query, setQuery] = useState({ offset: 0 });
@@ -120,6 +124,12 @@ export function WorkoutsScreen({
       )}
       {!selecting && onResume && (
         <AuthLink title="Resume saved workout" disabled={removing} onPress={onResume} />
+      )}
+      {!selecting && onHistory && (
+        <AuthLink title="Workout history" disabled={removing} onPress={onHistory} />
+      )}
+      {!selecting && onTraining && (
+        <AuthLink title="Training summary" disabled={removing} onPress={onTraining} />
       )}
       {loading ? (
         <AuthLoading>Loading workouts…</AuthLoading>

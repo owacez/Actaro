@@ -407,7 +407,27 @@ optional note. Failed network saves keep a frozen local copy for the same-ID ret
 they are not reported as saved. **Done** clears the acknowledged device copy.
 Cancel asks before discarding an unfinished draft. Advanced multi-device offline
 sync is v1.5; recovery requires the same signed-in account and intact app storage.
-Editable/deletable performed history and richer training context are still pending.
+Open **My workouts → Workout history** to search by name, filter Timed/Log Only
+and reopen completed logs. Edit actual weights/reps, optional RPE/notes, add/remove
+sets or exercises, then **Save recorded workout**. New history sets use the
+original finish instant as their reported completion time. Mode/start/timezone stay
+fixed. Invalid values block Save; stale edits cannot overwrite a newer revision.
+A failed attempt stays frozen for the same retry, or can be discarded/reloaded.
+History edit drafts stay on that screen and are not retained after termination.
+Delete asks for confirmation and preserves templates/splits. Volume and records
+are recalculated from remaining logs, including subsequent sessions’ prior values.
+
+**My workouts → Training summary** shows the past 28 recorded dates, workout
+frequency, sets/reps, known external volume and primary-muscle allocation. Sets
+and volume are divided equally across recorded primary muscles to avoid double
+counting. Status rules show their evidence, use your own prior-volume baseline,
+and exclude planned days before the latest split change. Insufficient history
+receives no invented judgement. These are log descriptions, not physiology.
+
+**Training summary → Recovery check** saves today’s energy, soreness and sleep,
+with optional stress/notes. Daily entries reopen and can be updated; recent checks
+remain visible. Good/Moderate/Consider Recovery uses explicit reports and recorded
+frequency/volume/rest-day context. No numerical readiness score is produced.
 
 Open **My workouts → Training splits** to create a recurring Monday–Sunday split.
 Choose a saved workout or rest for every day, and select **Use this as my active
