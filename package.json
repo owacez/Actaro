@@ -56,10 +56,11 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "jest --runInBand && node --test scripts/repdb-data.test.mjs",
+    "test": "jest --runInBand && node --test scripts/repdb-data.test.mjs scripts/usda-data.test.mjs",
     "test:watch": "jest --watch",
     "check:supabase": "node --env-file=.env scripts/check-supabase.mjs",
     "import:repdb": "node --env-file=.env scripts/import-repdb.mjs",
+    "import:usda": "node --env-file=.env scripts/import-usda.mjs",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm test"
   },
   "private": true
