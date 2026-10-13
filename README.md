@@ -2,8 +2,8 @@
 
 Premium personal fitness and wellness mobile application, developed incrementally.
 Current implementation: Expo/Supabase foundation, account management and preferences,
-plus a dataset-backed Exercise Library with search, filters, technique images and
-saved equipment selections. Remaining foundation acceptance is deferred for later
+plus a dataset-backed Exercise Library, full strength workout logging, and manual
+nutrition with USDA foods, recipes and hydration. Remaining foundation acceptance is deferred for later
 testing. Version `0.1.0` is project metadata; v0.1's full release gate has not passed.
 
 ## Project authority
@@ -180,30 +180,33 @@ and email instructions use a bottom snackbar. On web, errors and successful
 actions also use a dismissible notification at the upper right. Notifications
 expire automatically; hovering or focusing the web notification pauses dismissal.
 
-| Screen / state               | Present behavior                                                                                                                   |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Sign In                      | Validated email/password sign-in.                                                                                                  |
-| Sign Up                      | Email, password and confirmation; creates a Supabase account.                                                                      |
-| Check Your Email             | Confirmation instructions and resend.                                                                                              |
-| Reset Password               | Requests a recovery link without revealing account existence.                                                                      |
-| Set a New Password           | Updates the password after the SDK recovery event.                                                                                 |
-| Callback processing / error  | Exchanges a one-use code or displays a safe link error.                                                                            |
-| Email Confirmed              | Shows verified status from the Supabase session, then Continue to Account.                                                         |
-| Today / Nutrition / Progress | Signed-in tab destinations showing planned release scope; no tracking data yet.                                                    |
-| Fitness / Exercise Library   | Search 643 imported exercises, filter by muscle/equipment/your saved setup, paginate and open technique details.                   |
-| Exercise Detail              | Start/peak or main poses from private Supabase Storage, instructions, muscles, equipment and source attribution.                   |
-| My equipment                 | Save available equipment, discard drafts or clear the selection; available-equipment filtering always includes no-equipment moves. |
-| My workouts                  | List and reopen your saved workout templates. Open Fitness → My workouts.                                                          |
-| Build Workout                | Select real exercises, reorder/remove them, configure sets/reps/weight/rest/RPE/notes and save atomically.                         |
-| More                         | Real signed-in email, Profile management and local sign-out.                                                                       |
-| Profile                      | Edit/clear name, view/change email and change password. Open More → Profile management.                                            |
-| Preferences                  | Save units, time zone, notification/gamification preferences and System/Light/Dark appearance. Open More → Preferences.            |
+| Screen / state              | Present behavior                                                                                                                   |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Sign In                     | Validated email/password sign-in.                                                                                                  |
+| Sign Up                     | Email, password and confirmation; creates a Supabase account.                                                                      |
+| Check Your Email            | Confirmation instructions and resend.                                                                                              |
+| Reset Password              | Requests a recovery link without revealing account existence.                                                                      |
+| Set a New Password          | Updates the password after the SDK recovery event.                                                                                 |
+| Callback processing / error | Exchanges a one-use code or displays a safe link error.                                                                            |
+| Email Confirmed             | Shows verified status from the Supabase session, then Continue to Account.                                                         |
+| Today / Progress            | Signed-in tab destinations; real dashboards and analytics are scheduled for v0.5/v0.6.                                             |
+| Nutrition                   | Daily targets, food search, portion preview, four meal groups, diary editing/copying and hydration.                                |
+| Custom foods / Recipes      | Private label foods, food-specific portions, ingredient recipes, servings and cooked-weight logging.                               |
+| Saved meals                 | Create from a logged meal, log its snapshot to another meal/date or delete the saved template.                                     |
+| Fitness / Exercise Library  | Search 643 imported exercises, filter by muscle/equipment/your saved setup, paginate and open technique details.                   |
+| Exercise Detail             | Start/peak or main poses from private Supabase Storage, instructions, muscles, equipment and source attribution.                   |
+| My equipment                | Save available equipment, discard drafts or clear the selection; available-equipment filtering always includes no-equipment moves. |
+| My workouts                 | List and reopen your saved workout templates. Open Fitness → My workouts.                                                          |
+| Build Workout               | Select real exercises, reorder/remove them, configure sets/reps/weight/rest/RPE/notes and save atomically.                         |
+| More                        | Real signed-in email, Profile management and local sign-out.                                                                       |
+| Profile                     | Edit/clear name, view/change email and change password. Open More → Profile management.                                            |
+| Preferences                 | Save units, time zone, notification/gamification preferences and System/Light/Dark appearance. Open More → Preferences.            |
 
 The remaining `/explore` route is an Expo starter example, not an Actaro feature.
 The five-tab navigation shell is implemented; sign-in opens Today. The populated
 Today dashboard belongs to v0.5. Workout templates and their builder are implemented;
-plans, pre-start and active-session logging remain subsequent v0.3 tasks. Nutrition,
-habits/goals and progress remain in their scheduled releases.
+plans, pre-start and active-session logging are implemented in v0.3. Manual nutrition
+is implemented in v0.4; habits/goals and progress remain in their scheduled releases.
 
 Tunnel setup and flags follow the [Expo CLI documentation](https://docs.expo.dev/more/expo-cli/).
 
@@ -434,7 +437,7 @@ Choose a saved workout or rest for every day, and select **Use this as my active
 split** if desired. One split can be active at a time. Save and reopen it to edit;
 deleting a split preserves its workouts and history. If a scheduled workout is
 deleted, its day visibly needs a new assignment. Unsaved split drafts are not
-retained after termination. Performed logging is still pending.
+retained after termination. Recorded sessions remain separate from the schedule.
 
 Open **My workouts → Training plans** to filter by goal, experience, days per
 week or your saved available equipment. Preview actual exercise names, set/repetition
@@ -444,6 +447,64 @@ Loads start unspecified. A failed request can be retried to recover the same cop
 These seven strength templates are Actaro-authored starting points with general
 programming references, not endorsed prescriptions or logged results. Beginner
 Running remains deferred to the running release, v1.2.
+
+## Manual nutrition (v0.4)
+
+Open **Nutrition → Daily targets** to save energy, protein, carbohydrates, fat and
+water goals. Energy follows your kcal/kJ preference. Changes take effect from
+today in your saved time zone; previous diary dates retain their earlier goals.
+Logging is available without setting targets.
+
+Choose a diary date and **Add to Breakfast/Lunch/Dinner/Snacks**. Search the imported
+USDA catalog or choose Recent, Frequent, Favorites, Custom or Recipes. Select the
+food, its exact preparation/label and a serving unit. Enter a quantity or use the
+stepper; live calories/macros and the meal's new total appear before **Log**.
+Named servings use that food's known weight. Volume-based custom foods use ml;
+Actaro does not assume ml equals grams for other foods. Source calories are used
+directly rather than reconstructed from macros.
+
+**Custom foods** accepts package-label values for an explicit base amount and unit.
+Add known serving equivalents such as one bottle, slice, cup, tablespoon or piece.
+**Recipes → New recipe** uses actual selected ingredients and quantities. Enter
+servings and optionally total cooked edible weight. Without cooked weight, log by
+servings; with weight, log any gram amount. Recipes are also reachable from More.
+Editing food/recipe nutrition affects new portions; existing diary snapshots stay.
+Library deletion removes a food from search while retaining earlier diary values.
+
+Diary **Edit** changes the recorded quantity using its original portion/nutrition.
+To change its food or unit, delete it and add a replacement. Deletion asks for
+confirmation. **Save [meal] as meal** creates a reusable snapshot. **Saved meals**
+logs it into the selected meal/date. **Repeat [meal]**, **Copy yesterday**, and
+**Copy another meal or day** append entries; whole-day copies retain meal groups.
+Hydration supports ml, liters and explicitly US fluid ounces, with saved entries
+and deletion. The diary shows real meal/daily totals and target remaining/over values.
+
+An uncertain save retains its request ID and locks inputs for **Retry saved
+request**. Known rejected requests allow correction or reload. No success is shown
+before server acknowledgement. These food/recipe forms are not durable offline
+drafts; keep their screen open during retries. Offline sync remains v1.5.
+
+The initial catalog contains **7,793 foods and 14,449 portions** from USDA SR Legacy
+April 2018. It includes some named products but is not a current worldwide branded
+catalog; use a current package label when its formulation differs. The data is
+[public domain/CC0](https://fdc.nal.usda.gov/api-guide/), imported into our Supabase
+database with source IDs and attribution. The app requires **no USDA API key**.
+
+For a new backend, apply the repository's migrations, download/extract the
+[SR Legacy April 2018 JSON](https://fdc.nal.usda.gov/download-datasets/), then run
+from the project root:
+
+```bash
+npm run import:usda -- path/to/extracted-usda.json --dry-run
+npm run import:usda -- path/to/extracted-usda.json
+```
+
+Only the administrator's local import uses `SUPABASE_SECRET_KEY` from ignored
+`.env`; ordinary app users need the public configuration already documented above.
+Never rename the secret to `EXPO_PUBLIC_*`. The parser validates all required
+nutrients and portions, and repeat imports preserve stable source IDs. Do not run
+an import for ordinary app testing. See the [serving/data decision](docs/decisions/006-nutrition-serving-model.md).
+Physical-device acceptance is deferred; exported native bundles are not device tests.
 
 ## Release discipline
 

@@ -1,10 +1,20 @@
-import { PlannedModuleScreen } from '@/components/planned-module-screen';
+import { Redirect, router } from 'expo-router';
+import { useAuth } from '@/features/auth/auth-provider';
+import { DiaryScreen } from '@/features/nutrition/diary-screen';
 
 export default function NutritionRoute() {
+  const { session, recovery } = useAuth();
+  if (!session || recovery) return <Redirect href="/" />;
   return (
-    <PlannedModuleScreen
-      title="Nutrition"
-      description="Food logging and nutrition tracking are planned for v0.4."
+    <DiaryScreen
+      key={session.user.id}
+      userId={session.user.id}
+      onOpen={(view, date, meal, id) =>
+        router.push({
+          pathname: '/nutrition/manage',
+          params: { view, date, meal, ...(id ? { id } : {}) },
+        })
+      }
     />
   );
 }

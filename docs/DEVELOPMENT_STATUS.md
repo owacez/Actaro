@@ -4,14 +4,14 @@ Updated: 2026-10-13 (America/Los_Angeles).
 
 ## Overall
 
-- Current Release: **v0.3 — Strength Workout System**
-- Release Completion: **100% (70 / 70 weight)**
-- Previous Releases: **v0.2 functional scope DONE (100%); v0.1 84.375% verified with remaining acceptance DEFERRED**
-- Current Phase: **Phase 2 — Strength Workout System; Phase 2 functional scope complete**
-- Current Focus: All sixteen v0.3 functional tasks are verified. Device/native acceptance remains separately pending. Next planned release is v0.4; no nutrition implementation has begun.
-- Status: **DONE — v0.3 functional scope; physical-device acceptance remains pending**
-- Blockers: No current workout-schema blocker. Figma subtree access remains limited; approved PDF fallback is available. Device/native build and foundation acceptance deferrals remain unchanged. Existing Auth leaked-password protection and dependency advisories remain follow-ups.
-- Approval boundary: User explicitly authorized advancing to the next features on 2026-10-12 and postponing the remaining v0.1 tests. User subsequently authorized completing v0.2, then continuing with the next features on 2026-10-12; implement v0.3 one focused task at a time. Custom native builds remain deferred until the application is ready; no build was submitted.
+- Current Release: **v0.4 — Manual Nutrition**
+- Release Completion: **100% (57 / 57 weight)**
+- Previous Releases: **v0.2/v0.3 functional scope DONE (100%); v0.1 84.375% verified with remaining acceptance DEFERRED**
+- Current Phase: **Phase 3 — Manual Nutrition; functional scope complete**
+- Current Focus: All thirteen v0.4 tasks are verified. Device/native acceptance remains user-deferred until more of the app is complete. Next planned release is v0.5; no habit/goal/dashboard implementation has begun.
+- Status: **DONE — v0.4 functional scope; physical-device acceptance remains deferred**
+- Blockers: No nutrition implementation blocker. Figma subtree access remains limited; approved PDF fallback is available. Device/native build and foundation acceptance deferrals remain unchanged. Existing Auth leaked-password protection and dependency advisories remain follow-ups.
+- Approval boundary: User explicitly authorized progressing through v0.2/v0.3 and completing v0.4 on 2026-10-13, with device acceptance postponed until most of the app is implemented. Each module is independently verified. Custom native builds remain deferred; no build was submitted. v0.5 has not started.
 
 Latest design access: the user supplied a local Figma PDF export and authorized
 it as fallback when MCP calls are exhausted. Its first foundation page retains
@@ -55,6 +55,11 @@ Earned weight: `6 + 6 + 5 + 3 + 3 + 10 + 4 + 2 + 4 + 4 + 4 + 3 + 4 + 4 + 3 + 5 =
 
 ## Feature Table
 
+v0.4 denominator: `5 + 3 + 5 + 5 + 6 + 6 + 6 + 3 + 3 + 4 + 5 + 4 + 2 = 57`.
+Earned weight: **57**. Functional completion is `57 / 57 × 100 = 100%`.
+All thirteen tasks have implementation, validation and integration evidence below.
+User-deferred device checks are separate, unweighted acceptance records; they are not claimed passed.
+
 | Area             | Feature                                | Release | Weight | Status      | Completion | Notes                                                                                                                                           |
 | ---------------- | -------------------------------------- | ------- | -----: | ----------- | ---------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | Phase 0 / 0.1    | Repository                             | v0.1    |      2 | DONE        |       100% | Git, ignores, README, env template verified (4/4).                                                                                              |
@@ -92,19 +97,19 @@ Earned weight: `6 + 6 + 5 + 3 + 3 + 10 + 4 + 2 + 4 + 4 + 4 + 3 + 4 + 4 + 3 + 5 =
 | Phase 2 / 2.14   | Training Status                        | v0.3    |      4 | DONE        |       100% | Transparent planned-day, relative-volume and allocation rules; insufficient history/unassigned days handled without fake physiology.            |
 | Phase 2 / 2.15   | Recovery Check                         | v0.3    |      3 | DONE        |       100% | Owned daily energy/soreness/sleep and optional stress/notes; categories/context, save/update/reopen and RLS verified.                           |
 | Phase 2 / 2.16   | Active Workout Resilience              | v0.3    |      5 | DONE        |       100% | Owner-scoped queued device save, wall-time clock, restart and offline completion/retry verified; device smoke remains pending.                  |
-| Phase 3 / 3.1    | Nutrition Schema                       | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.1.                                                                                                              |
-| Phase 3 / 3.2    | Nutrition Targets                      | v0.4    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §3.2.                                                                                                              |
-| Phase 3 / 3.3    | Food Database/Search                   | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.3.                                                                                                              |
-| Phase 3 / 3.4    | Serving Units / Conversion             | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.4.                                                                                                              |
-| Phase 3 / 3.5    | Portion Editor                         | v0.4    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §3.5.                                                                                                              |
-| Phase 3 / 3.6    | Nutrition Calculation Engine           | v0.4    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §3.6.                                                                                                              |
-| Phase 3 / 3.7    | Food Diary                             | v0.4    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §3.7.                                                                                                              |
-| Phase 3 / 3.8    | Custom Foods                           | v0.4    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §3.8.                                                                                                              |
-| Phase 3 / 3.9    | Favorites / Recent / Frequent          | v0.4    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §3.9.                                                                                                              |
-| Phase 3 / 3.10   | Saved Meals / Copy Meal / Copy Day     | v0.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §3.10.                                                                                                             |
-| Phase 3 / 3.11   | Recipes                                | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.11.                                                                                                             |
-| Phase 3 / 3.12   | Recipe-by-Weight                       | v0.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §3.12.                                                                                                             |
-| Phase 3 / 3.13   | Hydration                              | v0.4    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §3.13.                                                                                                             |
+| Phase 3 / 3.1    | Nutrition Schema                       | v0.4    |      5 | DONE        |       100% | Eight nutrition tables, FK/constraints, owned RLS, typed hosted deployment and local/hosted rollback checks.                                    |
+| Phase 3 / 3.2    | Nutrition Targets                      | v0.4    |      3 | DONE        |       100% | Owned targets, kcal/kJ validation, date-effective history, UI checks and browser save/reopen.                                                   |
+| Phase 3 / 3.3    | Food Database/Search                   | v0.4    |      5 | DONE        |       100% | 7,793 USDA foods/14,449 portions; stable repeated import, prefix search, detail and pagination.                                                 |
+| Phase 3 / 3.4    | Serving Units / Conversion             | v0.4    |      5 | DONE        |       100% | Explicit food base; g/oz, volume and food-specific servings; no assumed density; tested math.                                                   |
+| Phase 3 / 3.5    | Portion Editor                         | v0.4    |      6 | DONE        |       100% | Unit choices, direct quantity/stepper, base/live nutrition and meal impact; UI/browser retry checks.                                            |
+| Phase 3 / 3.6    | Nutrition Calculation Engine           | v0.4    |      6 | DONE        |       100% | Unrounded scaling, source energy, meal/daily totals and recipe math; Jest plus SQL parity.                                                      |
+| Phase 3 / 3.7    | Food Diary                             | v0.4    |      6 | DONE        |       100% | Four meal groups/date, actual totals/remaining, edit/delete and browser reload verified.                                                        |
+| Phase 3 / 3.8    | Custom Foods                           | v0.4    |      3 | DONE        |       100% | Private label foods, known serving equivalents, create/edit/archive and historical retention.                                                   |
+| Phase 3 / 3.9    | Favorites / Recent / Frequent          | v0.4    |      3 | DONE        |       100% | Authenticated recent/frequency ranking and favorites; API, ownership and browser selection.                                                     |
+| Phase 3 / 3.10   | Saved Meals / Copy Meal / Copy Day     | v0.4    |      4 | DONE        |       100% | Snapshot saved meals, repeat/copy meal/day, stable retry and create/log/delete acceptance.                                                      |
+| Phase 3 / 3.11   | Recipes                                | v0.4    |      5 | DONE        |       100% | Actual ingredient portions, servings/total/per-serving, owned create/edit/delete verified.                                                      |
+| Phase 3 / 3.12   | Recipe-by-Weight                       | v0.4    |      4 | DONE        |       100% | Optional cooked total weight, per-100g and arbitrary grams; serving-only behavior verified.                                                     |
+| Phase 3 / 3.13   | Hydration                              | v0.4    |      2 | DONE        |       100% | Persisted targets and ml/L/US fl oz entries with validation, reopen and delete verified.                                                        |
 | Phase 4 / 4.1    | Habit Schema                           | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.1.                                                                                                              |
 | Phase 4 / 4.2    | Habit Creation                         | v0.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §4.2.                                                                                                              |
 | Phase 4 / 4.3    | Habit Logging                          | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.3.                                                                                                              |
@@ -188,7 +193,7 @@ Earned weight: `6 + 6 + 5 + 3 + 3 + 10 + 4 + 2 + 4 + 4 + 4 + 3 + 4 + 4 + 3 + 5 =
 | Phase 0  | v0.1    | Foundation                        |             40 |    84.375% | IN_PROGRESS |
 | Phase 1  | v0.2    | Exercise Library                  |             28 |       100% | DONE        |
 | Phase 2  | v0.3    | Strength Workout System           |             70 |       100% | DONE        |
-| Phase 3  | v0.4    | Manual Nutrition                  |             57 |         0% | NOT_STARTED |
+| Phase 3  | v0.4    | Manual Nutrition                  |             57 |       100% | DONE        |
 | Phase 4  | v0.5    | Habits, Goals & Today             |             38 |         0% | NOT_STARTED |
 | Phase 5  | v0.6    | Basic Progress & Analytics        |             24 |         0% | NOT_STARTED |
 | Phase 6  | v0.9    | Quality & Personal Beta           |             33 |         0% | NOT_STARTED |
@@ -369,7 +374,7 @@ frequency/primary-muscle aggregation DONE (2/2).
 | Foundation stable            | NOT_STARTED | v0.1 release acceptance pending.                                                       |
 | Exercise library stable      | DONE        | v0.2 canonical functional acceptance passed; device follow-up remains recorded.        |
 | Strength workout flow stable | IN_PROGRESS | v0.3 functional scope passed; device smoke and v0.9 quality acceptance remain pending. |
-| Manual nutrition stable      | NOT_STARTED | v0.4 pending.                                                                          |
+| Manual nutrition stable      | IN_PROGRESS | v0.4 functional acceptance passed; deferred device and v0.9 quality acceptance remain. |
 | Habits/goals stable          | NOT_STARTED | v0.5 pending.                                                                          |
 | Today stable                 | NOT_STARTED | v0.5 pending.                                                                          |
 | Basic Progress stable        | NOT_STARTED | v0.6 pending.                                                                          |
@@ -407,6 +412,80 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 | Early microservices, Kubernetes/GKE, unnecessary custom backend            | Explicitly excluded for early versions                       | DROPPED     | Source §§19, 23; real future backend triggers remain documented.                                                                                                                      |
 
 ## Last Completed
+
+**DONE — v0.4 Manual Nutrition (2026-10-13).**
+
+- Applied four migrations: `20261013165850_nutrition_foundation.sql`,
+  `20261013170346_nutrition_operations.sql`,
+  `20261013172811_nutrition_retry_and_search.sql`, and
+  `20261013174311_nutrition_target_history.sql`; regenerated hosted types.
+- Added shared USDA reference foods and private targets/history, diary logs,
+  favorites, recipes, saved meals, hydration and copy acknowledgements. Constraints,
+  grants/RLS, source ownership, expected-actor checks and invoker RPCs are verified.
+- Imported all **7,793 foods / 14,449 portions** from the reviewed USDA SR Legacy
+  April 2018 JSON. Repeat import kept every stable UUID: catalog fingerprint before
+  and after `8c941d8bd0f630152c6a90e2bc83bb60`. SHA256 and source/license details are
+  recorded in decision 006. No new package, external runtime API or API key.
+- Added `src/features/nutrition/` model/services, load/save feedback, target editor,
+  diary, real food search/detail, portion editor, custom label foods, recipe editor
+  and saved-meal list. Replaced the Nutrition placeholder; More links to Recipes.
+  Routes compose guarded screens and own navigation; raw queries stay in services.
+- Added three Jest suites and two SQL rollback suites, plus USDA parser tests and
+  a shared test-only fixture. README documents normal use, admin import and limits;
+  decision 006 records data provenance, serving math, target dates and snapshot/retry semantics.
+
+Verification:
+
+| Command / check                                                                                                | Result                 | Evidence                                                                                                                                                                                                                                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm.cmd run check`                                                                                            | PASS                   | Strict typecheck, lint, formatting; 220 Jest tests in 38 suites plus 6 Node tests (226 total).                                                                                                                                                                                                                                 |
+| `.\node_modules\.bin\expo.cmd export --platform all`                                                           | PASS                   | Android/iOS/web bundles and 31 static routes, including `/nutrition/manage`.                                                                                                                                                                                                                                                   |
+| `node .actaro-tools/test-nutrition.mjs`                                                                        | PASS                   | All migrations in PostgreSQL/PGlite; existing workout contracts plus nutrition math, ownership, bounds, history, copies and retries.                                                                                                                                                                                           |
+| Both `supabase/tests/nutrition_*.sql` via Supabase MCP                                                         | PASS                   | Hosted rollback checks, two-account/anonymous denial, target history, whole-day meal groups and changed-source retries; no email sends.                                                                                                                                                                                        |
+| `node scripts/import-usda.mjs <extracted-json> --dry-run`                                                      | PASS                   | Validates all required nutrients, source IDs and portion weights without writes.                                                                                                                                                                                                                                               |
+| `node --env-file=.env scripts/import-usda.mjs <extracted-json>` (twice)                                        | PASS                   | 7,793 records; identical count/UUID fingerprint after repeat. Uses ignored local admin key only.                                                                                                                                                                                                                               |
+| `node --env-file=.env .actaro-tools/check-nutrition-live.mjs`                                                  | PASS                   | Real public-client search/paging, log/edit, shortcuts, recipes, saved meals/copy, targets/water and two-account isolation.                                                                                                                                                                                                     |
+| Isolated browser scripts `check-nutrition-browser.mjs`, `check-nutrition-tail.mjs`, `check-nutrition-crud.mjs` | PASS (combined flows)  | 390px/desktop checks: targets, save-failure/exact retry, custom volume/servings/favorites/edit, saved-meal log/copy/delete, recipe cooked-weight/edit/serving-only behavior, hydration reopen/delete and retained historical logs. Harness selector issues were corrected; no passing result is inferred from failed attempts. |
+| `node --env-file=.env .actaro-tools/check-bundle-privacy.mjs`                                                  | PASS                   | Privileged import credential absent from exported artifacts.                                                                                                                                                                                                                                                                   |
+| Supabase security advisor                                                                                      | PASS — no new warnings | Existing Auth leaked-password warning remains unchanged and separately tracked.                                                                                                                                                                                                                                                |
+
+Implementation accounting (all groups verified):
+
+Performance advisor returned INFO items for five existing workout composite FKs
+and unused-index statistics, including the new food search index. No nutrition
+FK lacks an index. These are v0.9 profiling follow-ups, not evidence for deleting
+freshly introduced indexes or refactoring another release. References:
+[FK indexing](https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys),
+[unused index statistics](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index).
+
+| Task                     | Weight | Status | Verified requirements                                                                         |
+| ------------------------ | -----: | ------ | --------------------------------------------------------------------------------------------- |
+| 3.1 Schema               |      5 | DONE   | Tables/types; constraints/FKs; grants/RLS; local/hosted deployment tests (4/4).               |
+| 3.2 Targets              |      3 | DONE   | Persisted goals/history; kcal/kJ validation; editor/states; save/reopen/date checks (4/4).    |
+| 3.3 Food database/search |      5 | DONE   | Licensed import/reimport; real paged prefix search; detail/source; shortcuts/selection (4/4). |
+| 3.4 Units/conversion     |      5 | DONE   | Explicit bases; g/oz; known volume/named portions; tested client/server agreement (4/4).      |
+| 3.5 Portion editor       |      6 | DONE   | Unit choice; direct input/stepper; base/live preview; meal impact and save/retry (4/4).       |
+| 3.6 Calculation engine   |      6 | DONE   | Source nutrient scaling; totals; recipe math; tested precision/invalid values (4/4).          |
+| 3.7 Diary                |      6 | DONE   | Four groups/dates; actual totals/remaining; edit/delete; persistence/states (4/4).            |
+| 3.8 Custom foods         |      3 | DONE   | Label creation; known servings; owned edit/delete; snapshot retention (4/4).                  |
+| 3.9 Shortcuts            |      3 | DONE   | Favorites; recent; frequency ranking; ownership/real selection (4/4).                         |
+| 3.10 Saved meals/copy    |      4 | DONE   | Saved snapshot/create/log/delete; repeat/copy meal; whole-day groups; atomic retry (4/4).     |
+| 3.11 Recipes             |      5 | DONE   | Ingredients/quantities; servings/totals; owned save/reopen/edit/delete; tested math (4/4).    |
+| 3.12 Recipe-by-weight    |      4 | DONE   | Cooked batch weight; per-gram/100g; arbitrary grams; serving-only guard (4/4).                |
+| 3.13 Hydration           |      2 | DONE   | Daily target; ml/L/US fl oz; persisted quantity/reopen; deletion/states (4/4).                |
+
+Device testing is **DEFERRED** by the user. Screens were checked against relevant
+approved fallback/verified components; exact visual polish, accessibility and
+platform lifecycle acceptance remain quality work. No photo AI, barcode scanner,
+meal recommendations, v0.5 module, paid SMTP, native build or durable food-sync queue
+was introduced. Nutrition drafts/retries remain on their current screen, not across
+termination. The dated USDA catalog is not a current worldwide branded catalog.
+
+Cleanup verified: both reserved `actaro-v04-…@example.invalid` Auth accounts and
+their owned test data were removed. Ignored session state is marked cleaned. Task-owned
+preview/Metro/headless processes were stopped (remaining count 0); the user's usual
+development server was excluded. Final export and secret scan passed after the
+small stale-copy correction in More/Sign In. The supplied design PDF remains untracked.
 
 **DONE — Remaining v0.3 history, training context and recovery tasks (2026-10-13).**
 
@@ -794,13 +873,13 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-v0.3 functional scope is DONE at 70/70 weight. All tasks have code, tests and integration evidence. Physical iPhone/Android smoke, foundation acceptance and native builds remain separately recorded. No v0.4 implementation has begun.
+v0.4 functional scope is DONE at 57/57 weight. All tasks have code, tests and integration evidence. Physical iPhone/Android smoke, foundation acceptance and native builds remain separately deferred. No v0.5 implementation has begun. The user requested completing v0.4 and postponing device testing until most of the app is built.
 
 ## Next 3 Actions
 
-1. v0.4 task 3.1: owned meal/food-log schema with validation, RLS and rollback tests.
-2. v0.4 task 3.2: persisted, validated calorie/macronutrient targets.
-3. v0.4 task 3.3: choose a licensed food dataset and implement paged real food search.
+1. v0.5 task 4.1: owned habit definitions/log schema with date/schedule constraints and two-account RLS tests.
+2. v0.5 task 4.2: create a habit with the approved type, goal, unit, frequency and date settings; validate and reopen it.
+3. v0.5 task 4.3: record today's boolean/numeric/duration/frequency/avoidance result and verify persisted history.
 
 Device acceptance and custom native builds remain separately recorded.
 

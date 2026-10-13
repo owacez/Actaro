@@ -208,8 +208,8 @@ export function AuthScreen({ recovery = false }: { recovery?: boolean }) {
             onPress={() => changeMode('sign-up')}
           />
           <AuthNotice>
-            Your account is private. Fitness data storage will be introduced with verified ownership
-            rules.
+            Your account is private. Training and nutrition records are protected by account
+            ownership rules.
           </AuthNotice>
         </>
       )}
@@ -260,9 +260,6 @@ export function AccountScreen() {
         <AuthText kind="muted">Signed in as</AuthText>
         <AuthText>{session?.user.email}</AuthText>
       </AuthCard>
-      <AuthNotice>
-        Training, nutrition and progress features are coming in later releases.
-      </AuthNotice>
       <AuthButton
         title="Profile management"
         outlined
@@ -280,6 +277,11 @@ export function AccountScreen() {
           {error}
         </AuthNotice>
       )}
+      <AuthLink
+        title="Recipes"
+        disabled={busy}
+        onPress={() => router.push({ pathname: '/nutrition/manage', params: { view: 'recipes' } })}
+      />
       <AuthButton title="Sign out" busy={busy} onPress={() => void signOut()} />
     </AuthFrame>
   );
