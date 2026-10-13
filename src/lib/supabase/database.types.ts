@@ -506,6 +506,7 @@ export type Database = {
           duration_seconds: number | null;
           ended_at: string | null;
           id: string;
+          last_mutation_id: string | null;
           local_date: string;
           mode: string;
           name: string;
@@ -516,12 +517,14 @@ export type Database = {
           time_zone: string;
           updated_at: string;
           user_id: string;
+          version: number;
         };
         Insert: {
           created_at?: string;
           duration_seconds?: number | null;
           ended_at?: string | null;
           id?: string;
+          last_mutation_id?: string | null;
           local_date: string;
           mode: string;
           name: string;
@@ -532,12 +535,14 @@ export type Database = {
           time_zone: string;
           updated_at?: string;
           user_id: string;
+          version?: number;
         };
         Update: {
           created_at?: string;
           duration_seconds?: number | null;
           ended_at?: string | null;
           id?: string;
+          last_mutation_id?: string | null;
           local_date?: string;
           mode?: string;
           name?: string;
@@ -548,6 +553,7 @@ export type Database = {
           time_zone?: string;
           updated_at?: string;
           user_id?: string;
+          version?: number;
         };
         Relationships: [
           {
@@ -764,6 +770,18 @@ export type Database = {
         Args: { p_plan_id: string; p_split_id: string };
         Returns: string;
       };
+      get_exercise_performance: {
+        Args: {
+          p_before: string;
+          p_exclude_session?: string;
+          p_exercise_ids: string[];
+        };
+        Returns: {
+          best: Json;
+          exercise_id: string;
+          previous: Json;
+        }[];
+      };
       get_training_plans: {
         Args: {
           p_available_only?: boolean;
@@ -809,6 +827,14 @@ export type Database = {
           p_name: string;
         };
         Returns: string;
+      };
+      save_workout_session: {
+        Args: {
+          p_expected_version: number;
+          p_mutation_id: string;
+          p_session: Json;
+        };
+        Returns: number;
       };
       save_workout_template: {
         Args: {

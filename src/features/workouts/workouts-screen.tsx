@@ -23,6 +23,8 @@ export function WorkoutsScreen({
   backTitle = '← Exercise Library',
   onSplits,
   onPlans,
+  onStart,
+  onResume,
 }: {
   userId: string;
   onBack: () => void;
@@ -34,6 +36,8 @@ export function WorkoutsScreen({
   backTitle?: string;
   onSplits?: () => void;
   onPlans?: () => void;
+  onStart?: (id: string) => void;
+  onResume?: () => void;
 }) {
   const [page, setPage] = useState<Page | null>(null);
   const [query, setQuery] = useState({ offset: 0 });
@@ -114,6 +118,9 @@ export function WorkoutsScreen({
       {!selecting && onPlans && (
         <AuthLink title="Training plans" disabled={removing} onPress={onPlans} />
       )}
+      {!selecting && onResume && (
+        <AuthLink title="Resume saved workout" disabled={removing} onPress={onResume} />
+      )}
       {loading ? (
         <AuthLoading>Loading workouts…</AuthLoading>
       ) : error ? (
@@ -141,6 +148,13 @@ export function WorkoutsScreen({
                     setSelected(row);
                     setDeleteError(null);
                   }}
+                />
+              )}
+              {!selecting && onStart && (
+                <AuthLink
+                  title={`Start ${row.name}`}
+                  disabled={removing}
+                  onPress={() => onStart(row.id)}
                 />
               )}
               {selected?.id === row.id && (

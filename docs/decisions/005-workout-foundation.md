@@ -80,6 +80,30 @@ termination. No scheduling daemon or notification service is introduced.
 
 References:
 
+The performed session flow (2026-10-13) uses one account-scoped AsyncStorage
+draft and serialized writes. Starting another workout requires resolving the
+existing draft. A completed pending payload is frozen with a stable mutation UUID;
+an acknowledgement is required before claiming cloud save or clearing its copy.
+No periodic timer tick writes to Supabase. Timer anchors use wall time rather than
+counted intervals, excluding explicit pauses and recovering elapsed time after
+foreground/restart. The rest clock is independent in both modes. This is minimum
+active-workout resilience, not v1.5 multi-device offline synchronization.
+
+`save_workout_session` is an invoker transaction with owner/profile lock,
+revision checks and lost-response retry acknowledgement. Stable exercise/set IDs
+retain recorded catalog snapshots during edits. Invalid facts roll back; deleted
+versioned sessions cannot be recreated by stale edits. Completed timestamps must
+fall inside the session. A removed owned template becomes an absent optional
+reference; performed facts remain independent. History UI remains the next task.
+
+Previous/best performance comes from completed owned sessions before the start
+instant, with optional current-session exclusion for history recalculation.
+Working-set volume counts known external kilograms times reps; unknown and zero
+loads stay distinct. Rep records compare the same known load. Epley estimates
+cover 2–10 reps with positive load; one rep uses actual load. First measurements
+are labeled separately from improvements. Muscle allocation/frequency and history
+recalculation remain pending; no physiological recovery claim is made.
+
 Predefined strength plans (task 2.3, 2026-10-13) are read-only shared recipes
 referencing stable RepDB source IDs. The catalog resolves real exercise names and
 equipment, excludes incomplete recipes, and filters against the owner's saved

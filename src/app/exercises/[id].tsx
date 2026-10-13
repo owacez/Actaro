@@ -19,6 +19,9 @@ export default function ExerciseRoute() {
     <DetailScreen
       key={`${session.user.id}-${id}`}
       id={id}
+      onLogExercise={(exerciseId) =>
+        router.push({ pathname: '/workouts/start', params: { exerciseId } })
+      }
       onAddToWorkout={(exerciseId) =>
         router.push({ pathname: '/workouts', params: { exerciseId } })
       }

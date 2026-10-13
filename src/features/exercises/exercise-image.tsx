@@ -7,14 +7,16 @@ export function ExerciseImage({
   url,
   label,
   large = false,
+  size: requestedSize,
 }: {
   url: string | null;
   label: string;
   large?: boolean;
+  size?: number;
 }) {
   const [failed, setFailed] = useState(false);
   const { colors } = useAppTheme();
-  const size = large ? 200 : 58;
+  const size = requestedSize ?? (large ? 200 : 58);
   return (
     <View
       style={{

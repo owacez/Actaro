@@ -18,10 +18,12 @@ export function DetailScreen({
   id,
   onBack,
   onAddToWorkout,
+  onLogExercise,
 }: {
   id: string;
   onBack: () => void;
   onAddToWorkout?: (id: string) => void;
+  onLogExercise?: (id: string) => void;
 }) {
   const [record, setRecord] = useState<ExerciseDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -68,6 +70,9 @@ export function DetailScreen({
           <AuthText kind="heading">{record.name}</AuthText>
           {onAddToWorkout && (
             <AuthButton title="Add to workout" onPress={() => onAddToWorkout(record.id)} />
+          )}
+          {onLogExercise && (
+            <AuthButton title="Log exercise" outlined onPress={() => onLogExercise(record.id)} />
           )}
           <AuthText>
             {record.exercise_equipment.map((item) => item.equipment.name).join(', ') ||

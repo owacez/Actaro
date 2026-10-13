@@ -34,12 +34,14 @@ export function LibraryScreen({
   onEquipment,
   onWorkouts,
   onAddToWorkout,
+  onLogExercise,
 }: {
   userId: string;
   onOpen: (id: string, exercise: ExerciseSummary) => void;
   onEquipment: () => void;
   onWorkouts?: () => void;
   onAddToWorkout?: (id: string) => void;
+  onLogExercise?: (id: string) => void;
 }) {
   const { colors } = useAppTheme();
   const [query, setQuery] = useState('');
@@ -212,6 +214,13 @@ export function LibraryScreen({
                 title="Add to workout"
                 accessibilityLabel={`Add ${item.name} to workout`}
                 onPress={() => onAddToWorkout(item.id)}
+              />
+            )}
+            {onLogExercise && (
+              <AuthLink
+                title="Log exercise"
+                accessibilityLabel={`Log ${item.name} directly`}
+                onPress={() => onLogExercise(item.id)}
               />
             )}
           </View>

@@ -5,10 +5,10 @@ Updated: 2026-10-13 (America/Los_Angeles).
 ## Overall
 
 - Current Release: **v0.3 — Strength Workout System**
-- Release Completion: **24.285714% (17 / 70 weight)**
+- Release Completion: **79.285714% (55.5 / 70 weight)**
 - Previous Releases: **v0.2 functional scope DONE (100%); v0.1 84.375% verified with remaining acceptance DEFERRED**
-- Current Phase: **Phase 2 — Strength Workout System; task 2.3 DONE; task 2.4 next**
-- Current Focus: Seven-day splits and predefined plan filtering/preview/owned adoption are verified. Pre-start and the dedicated logging/session flow are next. The user authorized completing all of v0.3 without stopping between tasks.
+- Current Phase: **Phase 2 — Strength Workout System; tasks 2.4–2.10 verified; history next**
+- Current Focus: Workout pre-start, both session modes, real set logging, independent timers, saved summaries and minimum resilience are verified. History and richer training context are next. The user authorized completing all of v0.3 without stopping between tasks.
 - Status: **IN_PROGRESS**
 - Blockers: No current workout-schema blocker. Figma subtree access remains limited; approved PDF fallback is available. Device/native build and foundation acceptance deferrals remain unchanged. Existing Auth leaked-password protection and dependency advisories remain follow-ups.
 - Approval boundary: User explicitly authorized advancing to the next features on 2026-10-12 and postponing the remaining v0.1 tests. User subsequently authorized completing v0.2, then continuing with the next features on 2026-10-12; implement v0.3 one focused task at a time. Custom native builds remain deferred until the application is ready; no build was submitted.
@@ -32,7 +32,7 @@ Use the Development Plan's weights exactly. For each active item, earned weight
 is `weight × verified completed subtasks / total subtasks`. DONE earns full weight;
 NOT_STARTED earns zero; BLOCKED earns only completed subtasks. DEFERRED and DROPPED
 items are excluded from their release denominator. Never infer progress from Figma.
-All eight v0.2 tasks and v0.3 tasks 2.1–2.2 are verified. Task 2.3 earns all five verified groups for splits and predefined plans. Subsequent tasks remain NOT_STARTED. No roadmap item has been removed.
+All eight v0.2 tasks and v0.3 tasks 2.1–2.2 are verified. Task 2.3 earns all five verified groups for splits and predefined plans. Tasks 2.4–2.10 and 2.16 are now verified. PR detection and basic volume each earn one of two groups; history, frequency/muscle aggregation, training status and recovery remain pending. No roadmap item has been removed.
 
 v0.1 denominator: `2 + 3 + 3 + 2 + 5 + 3 + 3 + 6 + 3 + 6 + 4 = 40`.
 Subtasks below define a reproducible foundation baseline; partial values are
@@ -51,7 +51,7 @@ Deferred unweighted acceptance-check records below do not reweight completed
 foundation work or turn the unchanged 84.375% full-scope baseline into 100%.
 
 v0.3 denominator: `6 + 6 + 5 + 3 + 3 + 10 + 4 + 2 + 4 + 4 + 4 + 3 + 4 + 4 + 3 + 5 = 70`.
-Tasks 2.1–2.2 each earn 6. Task 2.3 earns `5 × 5/5 = 5`; release completion is `17 / 70 × 100 = 24.285714285…%`. Subsequent tasks earn zero until verified.
+Earned weight: `6 + 6 + 5 + 3 + 3 + 10 + 4 + 2 + 4 + 4 + 0 + 3 × 1/2 + 4 × 1/2 + 0 + 0 + 5 = 55.5`. Release completion is `55.5 / 70 × 100 = 79.285714285…%`. PR detection and basic volume each have two groups; only the first is verified.
 
 ## Feature Table
 
@@ -79,19 +79,19 @@ Tasks 2.1–2.2 each earn 6. Task 2.3 earns `5 × 5/5 = 5`; release completion i
 | Phase 2 / 2.1    | Workout Schema                         | v0.3    |      6 | DONE        |       100% | Six owned tables, snapshots/constraints, RLS/grants and hosted deployment/types verified (4/4).                                                 |
 | Phase 2 / 2.2    | Custom Workout Builder                 | v0.3    |      6 | DONE        |       100% | Create/edit/delete, atomic owned save and search/detail → new/existing draft → discard/save/reopen verified (5/5).                              |
 | Phase 2 / 2.3    | Splits & Predefined Training Plans     | v0.3    |      5 | DONE        |       100% | Split CRUD/active choice and real catalog/filter/preview/private adoption verified (5/5).                                                       |
-| Phase 2 / 2.4    | Workout Pre-Start                      | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.4.                                                                                                              |
-| Phase 2 / 2.5    | Session Mode Chooser                   | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.5.                                                                                                              |
-| Phase 2 / 2.6    | Dedicated Active Workout               | v0.3    |     10 | NOT_STARTED |         0% | Requirements: canonical plan §2.6.                                                                                                              |
-| Phase 2 / 2.7    | Timed Session                          | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.7.                                                                                                              |
-| Phase 2 / 2.8    | Log Only                               | v0.3    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §2.8.                                                                                                              |
-| Phase 2 / 2.9    | Rest Timer                             | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.9.                                                                                                              |
-| Phase 2 / 2.10   | Workout Summary                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.10.                                                                                                             |
+| Phase 2 / 2.4    | Workout Pre-Start                      | v0.3    |      3 | DONE        |       100% | Actual exercises/sets, explicit estimate and durable Start entry verified.                                                                      |
+| Phase 2 / 2.5    | Session Mode Chooser                   | v0.3    |      3 | DONE        |       100% | Timed Workout / Log Only choices start the dedicated saved draft.                                                                               |
+| Phase 2 / 2.6    | Dedicated Active Workout               | v0.3    |     10 | DONE        |       100% | Compact media/metadata, previous/best, set table/add/remove/next/previous/finish verified.                                                      |
+| Phase 2 / 2.7    | Timed Session                          | v0.3    |      4 | DONE        |       100% | Pause/resume excludes paused time; nonzero duration saves and rest stays independent.                                                           |
+| Phase 2 / 2.8    | Log Only                               | v0.3    |      2 | DONE        |       100% | No total timer; complete persistence and direct exercise entry verified.                                                                        |
+| Phase 2 / 2.9    | Rest Timer                             | v0.3    |      4 | DONE        |       100% | Auto start, pause/resume, skip and ±15 seconds verified in both modes.                                                                          |
+| Phase 2 / 2.10   | Workout Summary                        | v0.3    |      4 | DONE        |       100% | Actual completed exercises/sets/volume/duration/records and note displayed after acknowledgement.                                               |
 | Phase 2 / 2.11   | Workout History                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.11.                                                                                                             |
-| Phase 2 / 2.12   | PR Detection                           | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.12.                                                                                                             |
-| Phase 2 / 2.13   | Training Volume                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.13.                                                                                                             |
+| Phase 2 / 2.12   | PR Detection                           | v0.3    |      3 | IN_PROGRESS |        50% | Deterministic detection/first record/matched load/Epley verified; history recalculation pending (1/2).                                          |
+| Phase 2 / 2.13   | Training Volume                        | v0.3    |      4 | IN_PROGRESS |        50% | Completed working sets/reps/known external volume verified; frequency/muscle aggregation pending (1/2).                                         |
 | Phase 2 / 2.14   | Training Status                        | v0.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §2.14.                                                                                                             |
 | Phase 2 / 2.15   | Recovery Check                         | v0.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §2.15.                                                                                                             |
-| Phase 2 / 2.16   | Active Workout Resilience              | v0.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §2.16.                                                                                                             |
+| Phase 2 / 2.16   | Active Workout Resilience              | v0.3    |      5 | DONE        |       100% | Owner-scoped queued device save, wall-time clock, restart and offline completion/retry verified; device smoke remains pending.                  |
 | Phase 3 / 3.1    | Nutrition Schema                       | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.1.                                                                                                              |
 | Phase 3 / 3.2    | Nutrition Targets                      | v0.4    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §3.2.                                                                                                              |
 | Phase 3 / 3.3    | Food Database/Search                   | v0.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §3.3.                                                                                                              |
@@ -187,7 +187,7 @@ Tasks 2.1–2.2 each earn 6. Task 2.3 earns `5 × 5/5 = 5`; release completion i
 | -------- | ------- | --------------------------------- | -------------: | ---------: | ----------- |
 | Phase 0  | v0.1    | Foundation                        |             40 |    84.375% | IN_PROGRESS |
 | Phase 1  | v0.2    | Exercise Library                  |             28 |       100% | DONE        |
-| Phase 2  | v0.3    | Strength Workout System           |             70 | 24.285714% | IN_PROGRESS |
+| Phase 2  | v0.3    | Strength Workout System           |             70 | 79.285714% | IN_PROGRESS |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |         0% | NOT_STARTED |
 | Phase 4  | v0.5    | Habits, Goals & Today             |             38 |         0% | NOT_STARTED |
 | Phase 5  | v0.6    | Basic Progress & Analytics        |             24 |         0% | NOT_STARTED |
@@ -348,11 +348,21 @@ design differences are documented in `docs/decisions/004-repdb-import.md`.
 | Predefined catalog/filter/preview | DONE   | Seven source-referenced editable strength families, actual RepDB exercise/equipment names, weekly preview and all four filters verified.     |
 | Owned plan adoption               | DONE   | Atomic private copy/active split, idempotent retry, rollback/ownership; real browser adopt/edit/save/reload passed.                          |
 
-Tasks 2.4–2.16 remain NOT_STARTED. Device smoke testing of the new builder is
+Tasks 2.4–2.10 and 2.16 are verified; 2.12–2.13 are partial. Tasks 2.11 and 2.14–2.15 remain NOT_STARTED. Device smoke testing is
 NOT_STARTED; browser responsive layouts and native exports do not count as device
-tests. No workout has been logged by this template-builder implementation.
+tests. Real disposable-account sessions have been logged by the new session flow.
 
 ## v1.0 release gate
+
+**Session verification groups (2026-10-13):** tasks 2.4–2.10 are each verified
+end to end by model/service/UI tests, hosted rollback SQL and real public-client
+browser logging. Task 2.16 covers durable owner-scoped drafts/serialized storage,
+wall-time pause/background/restart math with foreground refresh, and frozen
+offline completion/acknowledged retry (3/3). Native device background smoke remains
+an unweighted pending acceptance check; no EAS/native build was requested or run.
+Task 2.12 has detection/tests DONE and edit/delete recalculation NOT_STARTED (1/2).
+Task 2.13 has completed working-set/repetition/known-load volume DONE and
+frequency/primary-muscle aggregation NOT_STARTED (1/2).
 
 | Prerequisite                 | Status      | Evidence                                                                        |
 | ---------------------------- | ----------- | ------------------------------------------------------------------------------- |
@@ -397,6 +407,37 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 | Early microservices, Kubernetes/GKE, unnecessary custom backend            | Explicitly excluded for early versions                       | DROPPED     | Source §§19, 23; real future backend triggers remain documented.                                                                     |
 
 ## Last Completed
+
+**DONE — Dedicated Timed / Log Only workout flow and minimum resilience (2026-10-13).**
+
+- Applied `20261013103845_persist_workout_sessions.sql` and regenerated types:
+  invoker atomic performed-fact save, revision/mutation acknowledgement, stable
+  historical snapshots, owned previous/best queries and safe rollback.
+- Connected saved workout preview → mode → dedicated logger; direct search/detail
+  entry uses the same flow. Compact technique media and metadata accompany fast
+  editable rows, real previous/best values, add/remove and next/previous controls.
+- Timed uses pause-aware elapsed duration; Log Only persists null duration. Rest
+  auto-start/pause/resume/skip/±15 is independent. Completed sets alone contribute
+  to saved facts and summary. First records are distinguished from improvements.
+- One account-scoped device draft uses queued AsyncStorage writes. Failed local
+  writes are reported. Failed network completion keeps a frozen same-mutation copy;
+  only acknowledgement enables a saved summary and Done clearing the local copy.
+- `node .actaro-tools/test-sessions.mjs`: PASS all migrations, existing foundation
+  constraints and session retry/stale edit/snapshot/invalid-save/ownership tests.
+  `supabase/tests/workout_sessions.sql` also PASS hosted, rollback only/no emails.
+- `npm.cmd run check`: PASS typecheck/lint/format and 192 Jest + 4 Node tests
+  (196 total; 31 Jest suites). `expo.cmd export --platform all`: PASS Android,
+  iOS and web bundles, 27 static routes. No new application package was added.
+- `node .actaro-tools/check-sessions-browser.mjs`: PASS both modes, actual logs,
+  independent rest/session controls, reload, offline finish/frozen retry, saved
+  summaries/previous results and direct exercise cancellation. Browser harness
+  DOM serialization was corrected; no production auth bypass was introduced.
+- `node .actaro-tools/check-session-timer.mjs`: PASS nonzero persisted duration,
+  excluded pause time, four-exercise navigation, completed-only summary and zero
+  external load. 390 light/320 dark session and summary screenshots inspected.
+- Supabase security advisor: no new RLS/function warnings; existing Auth
+  [leaked-password warning](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)
+  remains unchanged. History UI, aggregate context and recovery remain pending.
 
 **DONE — Predefined strength plans; final two task 2.3 groups (2026-10-13).**
 
@@ -710,16 +751,16 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-v0.3 tasks 2.1–2.3 are verified. Pre-start and sessions are next;
+v0.3 planning and the dedicated session flow are verified. History and training context are next;
 the user authorized continuing through remaining v0.3 tasks without stopping.
-No active-session or PR functionality is claimed yet.
+PR detection and basic volume are verified; history recalculation and richer aggregation remain pending.
 v0.2 device smoke follow-up and v0.1 acceptance/native build deferrals remain recorded.
 
 ## Next 3 Actions
 
-1. v0.3 task 2.4: workout pre-start with actual exercises, targets and an explained duration estimate.
-2. v0.3 tasks 2.5–2.6: mode choice and dedicated owned session/set flow.
-3. v0.3 tasks 2.7–2.9: persisted Timed/Log Only behavior and independent rest timer.
+1. v0.3 task 2.11: reopen/edit/delete performed history with revision-safe saves.
+2. v0.3 tasks 2.12–2.13: history recalculation and frequency/primary-muscle aggregation.
+3. v0.3 tasks 2.14–2.15: transparent rules-based training status and owned recovery check-ins.
 
 Device acceptance and custom native builds remain separately recorded.
 

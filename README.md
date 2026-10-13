@@ -390,9 +390,24 @@ the confirmation and choose **Delete workout**. This removes planned exercises
 and sets while preserving recorded sessions. **Keep workout** cancels deletion;
 failed requests retain the visible row for retry.
 
-Saving a template does not log training. Direct exercise logging and
-editable/deletable history are tracked in the
-remaining v0.3 planning/session/history tasks. There is no active logging button yet.
+Saving a template does not log training. **My workouts → Start [name]** opens an
+exercise/working-set preview with an explicit duration estimate. **Start Workout**
+then offers **Timed Workout** or **Log Only**. Both open the dedicated set logger.
+Search results and Exercise Detail also offer **Log exercise** without a template.
+
+Adjust actual weight/reps and mark **Done** for each performed set. Blank weight
+means unknown; zero means no added external load. Add/remove sets and move between
+exercises. The independent rest timer starts after Done; pause/resume, skip and
+±15 seconds work in both modes. Only Timed has a total duration timer.
+
+The active draft is saved under your account on this device. **Resume saved
+workout** recovers it; leaving the screen keeps it. Finish saves only completed
+sets atomically, then shows real volume, duration (Timed only), records and your
+optional note. Failed network saves keep a frozen local copy for the same-ID retry;
+they are not reported as saved. **Done** clears the acknowledged device copy.
+Cancel asks before discarding an unfinished draft. Advanced multi-device offline
+sync is v1.5; recovery requires the same signed-in account and intact app storage.
+Editable/deletable performed history and richer training context are still pending.
 
 Open **My workouts → Training splits** to create a recurring Monday–Sunday split.
 Choose a saved workout or rest for every day, and select **Use this as my active
