@@ -51,10 +51,16 @@ beforeEach(() => {
 });
 test('library searches, paginates, filters and opens the actual exercise ID', async () => {
   const open = jest.fn();
-  await render(<LibraryScreen userId={owner} onOpen={open} onEquipment={() => {}} />);
+  const add = jest.fn();
+  await render(
+    <LibraryScreen userId={owner} onOpen={open} onEquipment={() => {}} onAddToWorkout={add} />,
+  );
   await screen.findByText('Fixture press');
   await fireEvent.press(screen.getByLabelText('View Fixture press'));
   expect(open).toHaveBeenCalledWith(itemId, summary);
+  await fireEvent.press(screen.getByRole('button', { name: 'Add Fixture press to workout' }));
+  expect(add).toHaveBeenCalledWith(itemId);
+  expect(open).toHaveBeenCalledTimes(1);
   await fireEvent.changeText(screen.getByLabelText('Search exercises'), 'press');
   await fireEvent.press(screen.getByText('Search'));
   await waitFor(() =>
@@ -136,10 +142,12 @@ test('detail shows persisted instructions, muscles, equipment and attribution', 
     exercise_muscles: [{ role: 'primary', muscles: { id: itemId, name: 'Fixture muscle' } }],
   };
   mocks.detail.mockResolvedValue(record);
-  await render(<DetailScreen id={itemId} onBack={() => {}} />);
+  const add = jest.fn();
+  await render(<DetailScreen id={itemId} onBack={() => {}} onAddToWorkout={add} />);
   await screen.findByText('Fixture press');
   expect(screen.getByText('1. Move with control.')).toBeTruthy();
   expect(screen.getByText('Fixture muscle · primary')).toBeTruthy();
   expect(screen.getByText('Exercise data by RepDB (repdb.co)')).toBeTruthy();
-  expect(screen.queryByText('Add to workout')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Add to workout' }));
+  expect(add).toHaveBeenCalledWith(itemId);
 });

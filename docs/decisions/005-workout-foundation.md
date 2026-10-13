@@ -60,6 +60,16 @@ Builder drafts stay in React state and survive a failed request, but are not an
 offline queue or persistent active session. Timers, plans and performed logging
 remain separate roadmap tasks. No new dependency was added.
 
+The search/detail shortcut (2026-10-13) carries only a validated exercise UUID to
+the existing workout chooser/builder. The builder fetches actual catalog details,
+appends one exercise to the loaded draft and retains its unchanged saved baseline
+for discard. Both picker entry paths share the same defaults. No mutation occurs
+until Save; unavailable selections or full workouts cannot produce a partial save.
+Chooser replacement and clearing the selection after Save prevent an old selection
+from being reapplied by normal back navigation. Reloading an unsaved draft still
+uses the unchanged saved template plus one selected exercise. Account/ownership
+checks, atomic save and documented last-save-wins semantics remain unchanged.
+
 References:
 
 - [Supabase grants and RLS](https://supabase.com/docs/guides/database/postgres/row-level-security)

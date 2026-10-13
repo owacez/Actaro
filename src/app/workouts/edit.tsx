@@ -5,21 +5,30 @@ import { validExerciseId } from '@/features/exercises/exercise-service';
 import { BuilderScreen } from '@/features/workouts/builder-screen';
 export default function BuilderRoute() {
   const { session, recovery } = useAuth();
-  const { id } = useLocalSearchParams<{ id?: string | string[] }>();
+  const { id, exerciseId } = useLocalSearchParams<{
+    id?: string | string[];
+    exerciseId?: string | string[];
+  }>();
   if (!session || recovery) return <Redirect href="/" />;
-  if (id !== undefined && !validExerciseId(id))
+  if (
+    (id !== undefined && !validExerciseId(id)) ||
+    (exerciseId !== undefined && !validExerciseId(exerciseId))
+  )
     return (
       <AuthFrame>
-        <AuthNotice error>Invalid workout.</AuthNotice>
+        <AuthNotice error>Invalid workout or exercise.</AuthNotice>
         <AuthLink title="My workouts" onPress={() => router.replace('/workouts')} />
       </AuthFrame>
     );
   return (
     <BuilderScreen
-      key={`${session.user.id}-${id ?? 'new'}`}
+      key={`${session.user.id}-${id ?? 'new'}-${exerciseId ?? 'none'}`}
       id={id}
+      exerciseId={exerciseId}
       userId={session.user.id}
-      onBack={() => router.replace('/workouts')}
+      onBack={() =>
+        router.replace({ pathname: '/workouts', params: exerciseId ? { exerciseId } : {} })
+      }
       onSaved={() => router.replace('/workouts')}
       onEquipment={() => router.push('/equipment')}
     />

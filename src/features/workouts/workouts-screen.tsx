@@ -17,11 +17,13 @@ export function WorkoutsScreen({
   onBack,
   onCreate,
   onEdit,
+  selecting = false,
 }: {
   userId: string;
   onBack: () => void;
   onCreate: () => void;
   onEdit: (id: string) => void;
+  selecting?: boolean;
 }) {
   const [page, setPage] = useState<Page | null>(null);
   const [query, setQuery] = useState({ offset: 0 });
@@ -93,7 +95,13 @@ export function WorkoutsScreen({
   return (
     <AuthFrame>
       <AuthLink title="← Exercise Library" disabled={removing} onPress={onBack} />
-      <AuthText kind="heading">My workouts</AuthText>
+      <AuthText kind="heading">{selecting ? 'Add to workout' : 'My workouts'}</AuthText>
+      {selecting && (
+        <AuthText>
+          Choose a saved workout or create one. The selected exercise is added to its draft; save
+          the workout to keep it.
+        </AuthText>
+      )}
       <AuthButton title="Create workout" disabled={removing} onPress={onCreate} />
       {loading ? (
         <AuthLoading>Loading workouts…</AuthLoading>
@@ -114,14 +122,16 @@ export function WorkoutsScreen({
                 disabled={removing}
                 onPress={() => onEdit(row.id)}
               />
-              <AuthLink
-                title={`Delete ${row.name}`}
-                disabled={removing}
-                onPress={() => {
-                  setSelected(row);
-                  setDeleteError(null);
-                }}
-              />
+              {!selecting && (
+                <AuthLink
+                  title={`Delete ${row.name}`}
+                  disabled={removing}
+                  onPress={() => {
+                    setSelected(row);
+                    setDeleteError(null);
+                  }}
+                />
+              )}
               {selected?.id === row.id && (
                 <>
                   <AuthText>

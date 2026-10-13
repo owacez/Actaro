@@ -33,11 +33,13 @@ export function LibraryScreen({
   onOpen,
   onEquipment,
   onWorkouts,
+  onAddToWorkout,
 }: {
   userId: string;
   onOpen: (id: string, exercise: ExerciseSummary) => void;
   onEquipment: () => void;
   onWorkouts?: () => void;
+  onAddToWorkout?: (id: string) => void;
 }) {
   const { colors } = useAppTheme();
   const [query, setQuery] = useState('');
@@ -184,26 +186,35 @@ export function LibraryScreen({
           </View>
         }
         renderItem={({ item }) => (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`View ${item.name}`}
-            onPress={() => onOpen(item.id, item)}
-            style={({ pressed }) => [styles.row, pressed && { opacity: 0.65 }]}
-          >
-            <ExerciseImage
-              key={item.imageUrl ?? item.id}
-              url={item.imageUrl}
-              label={`${item.name} technique`}
-            />
-            <View style={{ flex: 1, gap: 4 }}>
-              <Text style={{ fontFamily: 'Inter_500Medium', fontSize: 14, color: colors.text }}>
-                {item.name}
-              </Text>
-              <AuthText kind="muted">
-                {item.muscles.join(', ')} · {item.equipment.join(', ') || 'No equipment'}
-              </AuthText>
-            </View>
-          </Pressable>
+          <View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`View ${item.name}`}
+              onPress={() => onOpen(item.id, item)}
+              style={({ pressed }) => [styles.row, pressed && { opacity: 0.65 }]}
+            >
+              <ExerciseImage
+                key={item.imageUrl ?? item.id}
+                url={item.imageUrl}
+                label={`${item.name} technique`}
+              />
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text style={{ fontFamily: 'Inter_500Medium', fontSize: 14, color: colors.text }}>
+                  {item.name}
+                </Text>
+                <AuthText kind="muted">
+                  {item.muscles.join(', ')} · {item.equipment.join(', ') || 'No equipment'}
+                </AuthText>
+              </View>
+            </Pressable>
+            {onAddToWorkout && (
+              <AuthLink
+                title="Add to workout"
+                accessibilityLabel={`Add ${item.name} to workout`}
+                onPress={() => onAddToWorkout(item.id)}
+              />
+            )}
+          </View>
         )}
         ListEmptyComponent={
           loading ? (

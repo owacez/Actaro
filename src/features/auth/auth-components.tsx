@@ -130,15 +130,18 @@ export function AuthLink({
   title,
   onPress,
   disabled = false,
+  accessibilityLabel,
 }: {
   title: string;
   onPress: () => void;
   disabled?: boolean;
+  accessibilityLabel?: string;
 }) {
   const { colors } = useAppTheme();
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? title}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}

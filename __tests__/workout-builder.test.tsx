@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-
 import { BuilderScreen } from '@/features/workouts/builder-screen';
 import { WorkoutsScreen } from '@/features/workouts/workouts-screen';
 import { workoutService } from '@/features/workouts/workout-service';
+import { exerciseService, type ExerciseDetail } from '@/features/exercises/exercise-service';
 import {
   blankSet,
   displayWeight,
@@ -13,6 +14,27 @@ import { FeedbackTestRoot } from './helpers/feedback-root';
 const workoutId = '00000000-0000-4000-8000-000000000002';
 const exerciseId = '00000000-0000-4000-8000-000000000003';
 const userId = '00000000-0000-4000-8000-000000000001';
+const selectedId = '00000000-0000-4000-8000-000000000004';
+jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
+const selected: ExerciseDetail = {
+  id: selectedId,
+  name: 'Selected real exercise',
+  description: null,
+  difficulty: null,
+  category: 'strength',
+  movement_pattern: null,
+  source: 'repdb',
+  source_external_id: 'fixture',
+  source_revision: 'fixture',
+  license: 'Fixture license',
+  attribution: 'Fixture attribution',
+  created_at: '2026-01-01',
+  instructions: ['Controlled movement.'],
+  exercise_media: [],
+  exercise_equipment: [],
+  exercise_muscles: [],
+};
+const mockDetail = jest.spyOn(exerciseService, 'detail');
 jest.mock('expo-crypto', () => ({ randomUUID: () => workoutId }));
 jest.mock('@/features/workouts/workout-service', () => ({
   workoutService: { load: jest.fn(), save: jest.fn(), list: jest.fn(), remove: jest.fn() },
@@ -61,8 +83,166 @@ const draft: WorkoutDraft = {
 };
 beforeEach(() => {
   jest.clearAllMocks();
+  mockDetail.mockReset().mockResolvedValue(selected);
   mocks.load.mockResolvedValue({ unit: 'kg', draft: null });
   mocks.save.mockResolvedValue(workoutId);
+});
+test('shortcut starts a new editable workout with the real selected exercise', async () => {
+  await render(
+    <FeedbackTestRoot>
+      <BuilderScreen
+        userId={userId}
+        exerciseId={selectedId}
+        onBack={() => {}}
+        onSaved={() => {}}
+        onEquipment={() => {}}
+      />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByText('1. Selected real exercise');
+  expect(mockDetail).toHaveBeenCalledWith(selectedId);
+  expect(mocks.save).not.toHaveBeenCalled();
+  await fireEvent.changeText(screen.getByLabelText('Workout name'), 'New selected workout');
+  await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
+  await waitFor(() =>
+    expect(mocks.save).toHaveBeenCalledWith(
+      userId,
+      expect.objectContaining({
+        name: 'New selected workout',
+        exercises: [
+          expect.objectContaining({
+            exerciseId: selectedId,
+            sets: [blankSet(), blankSet(), blankSet()],
+          }),
+        ],
+      }),
+      'kg',
+    ),
+  );
+});
+test('shortcut preserves an existing workout and adds once; discard makes no mutation', async () => {
+  mocks.load.mockResolvedValue({ unit: 'lb', draft });
+  const back = jest.fn();
+  const rendered = await render(
+    <FeedbackTestRoot>
+      <BuilderScreen
+        userId={userId}
+        id={workoutId}
+        exerciseId={selectedId}
+        onBack={back}
+        onSaved={() => {}}
+        onEquipment={() => {}}
+      />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByText('2. Selected real exercise');
+  await fireEvent.press(screen.getByRole('button', { name: '← My workouts' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Discard and leave' }));
+  expect(back).toHaveBeenCalledTimes(1);
+  expect(mocks.save).not.toHaveBeenCalled();
+  await rendered.unmount();
+  await render(
+    <FeedbackTestRoot>
+      <BuilderScreen
+        userId={userId}
+        id={workoutId}
+        exerciseId={selectedId}
+        onBack={() => {}}
+        onSaved={() => {}}
+        onEquipment={() => {}}
+      />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByText('2. Selected real exercise');
+  await fireEvent.changeText(screen.getByLabelText('Workout notes (optional)'), 'Keep old targets');
+  expect(screen.getAllByText('2. Selected real exercise')).toHaveLength(1);
+  await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
+  await waitFor(() =>
+    expect(mocks.save).toHaveBeenCalledWith(
+      userId,
+      expect.objectContaining({
+        exercises: [draft.exercises[0], expect.objectContaining({ exerciseId: selectedId })],
+      }),
+      'lb',
+    ),
+  );
+});
+test('unavailable selection retries without a partial save and full workouts reject additions', async () => {
+  mockDetail.mockRejectedValueOnce(new Error('unavailable'));
+  const rendered = await render(
+    <FeedbackTestRoot>
+      <BuilderScreen
+        userId={userId}
+        exerciseId={selectedId}
+        onBack={() => {}}
+        onSaved={() => {}}
+        onEquipment={() => {}}
+      />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByText(/Unable to open the workout or add/);
+  expect(screen.queryByRole('button', { name: 'Save workout' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Retry' }));
+  await screen.findByText('1. Selected real exercise');
+  expect(mocks.save).not.toHaveBeenCalled();
+  await rendered.unmount();
+  mocks.load.mockResolvedValue({
+    unit: 'kg',
+    draft: {
+      ...draft,
+      exercises: Array.from({ length: 100 }, (_, index) => ({
+        ...draft.exercises[0],
+        key: String(index),
+      })),
+    },
+  });
+  await render(
+    <FeedbackTestRoot>
+      <BuilderScreen
+        userId={userId}
+        id={workoutId}
+        exerciseId={selectedId}
+        onBack={() => {}}
+        onSaved={() => {}}
+        onEquipment={() => {}}
+      />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByText(/100-exercise limit/);
+  expect(screen.queryByRole('button', { name: 'Save workout' })).toBeNull();
+});
+test('workout chooser opens the selected template and keeps deletion out of the selection flow', async () => {
+  mocks.list.mockResolvedValue({
+    rows: [
+      {
+        id: workoutId,
+        name: 'Upper A',
+        updated_at: '2026-10-13',
+        workout_template_exercises: [{ count: 1 }],
+      },
+    ],
+    more: false,
+  });
+  const choose = jest.fn(),
+    create = jest.fn();
+  await render(
+    <FeedbackTestRoot>
+      <WorkoutsScreen
+        userId={userId}
+        selecting
+        onBack={() => {}}
+        onCreate={create}
+        onEdit={choose}
+      />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByText('Upper A · 1 exercises');
+  expect(screen.getByRole('header', { name: 'Add to workout' })).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Delete Upper A' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Upper A · 1 exercises' }));
+  expect(choose).toHaveBeenCalledWith(workoutId);
+  await fireEvent.press(screen.getByRole('button', { name: 'Create workout' }));
+  expect(create).toHaveBeenCalledTimes(1);
 });
 test('converts pounds to canonical kilograms and preserves unknown versus zero weight', () => {
   const value = {

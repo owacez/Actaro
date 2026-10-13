@@ -12,6 +12,9 @@ export default function FitnessRoute() {
       onOpen={(id) => router.push({ pathname: '/exercises/[id]', params: { id } })}
       onEquipment={() => router.push('/equipment')}
       onWorkouts={() => router.push('/workouts')}
+      onAddToWorkout={(exerciseId) =>
+        router.push({ pathname: '/workouts', params: { exerciseId } })
+      }
     />
   );
 }

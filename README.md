@@ -371,6 +371,12 @@ rest, optional RPE and notes. Exercises can be moved or removed; each exercise
 keeps at least one set in the editor. New selections start with three editable
 sets of eight reps and 90 seconds rest; these are planned targets, not logged results.
 
+You can also tap **Add to workout** beside a Fitness search result or on Exercise
+Detail. Choose **Create workout** or one of your saved workouts. The real selected
+exercise is added to an editable draft; review its targets and tap **Save workout**
+to persist it. Discarding the draft leaves the saved workout unchanged. Returning
+from an unsaved builder takes you back to the workout chooser for that exercise.
+
 Weight entry follows your kg/lb preference and is stored in kilograms. Blank weight
 means unspecified; zero explicitly means bodyweight. **Save workout** writes the
 whole template in one transaction. Reopen it from My workouts to edit it. Failed

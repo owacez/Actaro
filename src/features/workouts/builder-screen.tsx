@@ -16,6 +16,7 @@ import {
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
 import { LibraryScreen } from '@/features/exercises/library-screen';
 import { ExerciseImage } from '@/features/exercises/exercise-image';
+import { exerciseService } from '@/features/exercises/exercise-service';
 import { workoutService } from './workout-service';
 import {
   blankSet,
@@ -26,15 +27,28 @@ import {
   type WorkoutDraft,
 } from './workout-model';
 
+function exerciseDraft(exerciseId: string, name: string, imageUrl: string | null): ExerciseDraft {
+  return {
+    key: randomUUID(),
+    exerciseId,
+    name,
+    imageUrl,
+    notes: '',
+    sets: [blankSet(), blankSet(), blankSet()],
+  };
+}
+
 export function BuilderScreen({
   userId,
   id,
+  exerciseId,
   onBack,
   onSaved,
   onEquipment,
 }: {
   userId: string;
   id?: string;
+  exerciseId?: string;
   onBack: () => void;
   onSaved: () => void;
   onEquipment: () => void;
@@ -60,13 +74,32 @@ export function BuilderScreen({
   const { colors } = useAppTheme();
   useEffect(() => {
     const request = ++generation.current;
-    void workoutService
-      .load(userId, draft.id)
-      .then((result) => {
+    void Promise.all([
+      workoutService.load(userId, draft.id),
+      exerciseId ? exerciseService.detail(exerciseId) : Promise.resolve(null),
+    ])
+      .then(([result, selected]) => {
         if (request !== generation.current) return;
         if (id && !result.draft) throw new Error('Workout unavailable. Return to My workouts.');
         const initial = result.draft ?? { id: draft.id, name: '', notes: '', exercises: [] };
-        setDraft(initial);
+        if (selected && initial.exercises.length >= 100) throw new Error('Workout full');
+        setDraft(
+          selected
+            ? {
+                ...initial,
+                exercises: [
+                  ...initial.exercises,
+                  exerciseDraft(
+                    selected.id,
+                    selected.name,
+                    selected.exercise_media.find((media) => media.pose === 'start')?.imageUrl ??
+                      selected.exercise_media[0]?.imageUrl ??
+                      null,
+                  ),
+                ],
+              }
+            : initial,
+        );
         setUnit(result.unit);
         setBaseline(JSON.stringify(initial));
         setLoading(false);
@@ -74,14 +107,16 @@ export function BuilderScreen({
       .catch(() => {
         if (request !== generation.current) return;
         setError(
-          'Unable to load this workout and your preferences. Retry or return to My workouts.',
+          exerciseId
+            ? 'Unable to open the workout or add the selected exercise. It may be unavailable or at its 100-exercise limit. Retry or choose another workout.'
+            : 'Unable to load this workout and your preferences. Retry or return to My workouts.',
         );
         setLoading(false);
       });
     return () => {
       generation.current = request + 1;
     };
-  }, [userId, id, draft.id, attempt]);
+  }, [userId, id, exerciseId, draft.id, attempt]);
   const dirty = baseline !== '' && JSON.stringify(draft) !== baseline;
   function changeExercise(key: string, update: (exercise: ExerciseDraft) => ExerciseDraft) {
     setError(null);
@@ -144,17 +179,7 @@ export function BuilderScreen({
           onOpen={(_, item) => {
             setDraft((current) => ({
               ...current,
-              exercises: [
-                ...current.exercises,
-                {
-                  key: randomUUID(),
-                  exerciseId: item.id,
-                  name: item.name,
-                  imageUrl: item.imageUrl,
-                  notes: '',
-                  sets: [blankSet(), blankSet(), blankSet()],
-                },
-              ],
+              exercises: [...current.exercises, exerciseDraft(item.id, item.name, item.imageUrl)],
             }));
             setPicking(false);
             setError(null);

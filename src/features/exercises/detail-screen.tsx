@@ -14,7 +14,15 @@ import {
 import { ExerciseImage } from './exercise-image';
 import { exerciseService, type ExerciseDetail } from './exercise-service';
 
-export function DetailScreen({ id, onBack }: { id: string; onBack: () => void }) {
+export function DetailScreen({
+  id,
+  onBack,
+  onAddToWorkout,
+}: {
+  id: string;
+  onBack: () => void;
+  onAddToWorkout?: (id: string) => void;
+}) {
   const [record, setRecord] = useState<ExerciseDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -58,6 +66,9 @@ export function DetailScreen({ id, onBack }: { id: string; onBack: () => void })
       ) : (
         <>
           <AuthText kind="heading">{record.name}</AuthText>
+          {onAddToWorkout && (
+            <AuthButton title="Add to workout" onPress={() => onAddToWorkout(record.id)} />
+          )}
           <AuthText>
             {record.exercise_equipment.map((item) => item.equipment.name).join(', ') ||
               'No equipment'}
