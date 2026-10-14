@@ -877,9 +877,9 @@ v0.4 functional scope is DONE at 57/57 weight. All tasks have code, tests and in
 
 ## Next 3 Actions
 
-1. v0.6 task 5.1: body Progress from dated weights/measurements, truthful missing dates and unit preferences.
+1. v0.6 task 5.1 — Weight Progress: dated weight history, truthful missing dates and saved unit preferences.
 2. v0.6 task 5.2: nutrition Progress from existing diary snapshots and dated nutrition targets.
-3. v0.6 task 5.3: workout Progress from completed session/volume facts, retaining Timed versus Log Only distinctions.
+3. v0.6 task 5.3 — Workout Frequency: completed sessions grouped by calendar date; retain Timed versus Log Only distinctions. Strength and volume views follow in tasks 5.4/5.5.
 
 Physical-device testing, iPhone sensor permission/count accuracy, Android manual activity,
 notification placement and custom native builds remain **DEFERRED** under the user's instruction.
