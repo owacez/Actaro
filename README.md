@@ -4,7 +4,7 @@ Premium personal fitness and wellness mobile application, developed incrementall
 Current implementation: Expo/Supabase foundation, account management and preferences,
 plus a dataset-backed Exercise Library, full strength workout logging, and manual
 nutrition with USDA foods, recipes and hydration; habits, measurable goals, body
-records, daily steps/activity and a Today dashboard. Remaining foundation acceptance is deferred for later
+records, daily steps/activity, a Today dashboard and weight progress. Remaining foundation acceptance is deferred for later
 testing. Version `0.1.0` is project metadata; v0.1's full release gate has not passed.
 
 ## Project authority
@@ -191,7 +191,7 @@ expire automatically; hovering or focusing the web notification pauses dismissal
 | Callback processing / error | Exchanges a one-use code or displays a safe link error.                                                                            |
 | Email Confirmed             | Shows verified status from the Supabase session, then Continue to Account.                                                         |
 | Today                       | Persisted bodyweight, steps, calories/macros, planned workout, habits, goals, Training Status and recovery.                        |
-| Progress                    | Signed-in destination; historical analytics are scheduled for v0.6.                                                                |
+| Progress                    | Date-bounded weight history, recorded changes/averages, kg/lb preferences and an honest chart with missing dates.                  |
 | Habits                      | Five habit types, schedules, dated target settings, logging, history and configurable motivation.                                  |
 | Goals                       | Body, training, activity, nutrition and habit targets; progress from recorded facts, editing and deletion/restoration.             |
 | Body records                | Dated bodyweight and named measurements, unit conversion, editing and deletion.                                                    |
@@ -212,8 +212,9 @@ The remaining `/explore` route is an Expo starter example, not an Actaro feature
 The five-tab navigation shell is implemented; sign-in opens Today. The populated
 Today dashboard is implemented in v0.5. Workout templates and their builder are implemented;
 plans, pre-start and active-session logging are implemented in v0.3. Manual nutrition
-is implemented in v0.4; habits/goals/body/activity are implemented in v0.5. Historical
-analytics remain scheduled for v0.6. Physical-device acceptance remains deferred.
+is implemented in v0.4; habits/goals/body/activity are implemented in v0.5. Weight
+Progress is implemented as v0.6 task 5.1; other progress modules follow in the plan.
+Physical-device acceptance remains deferred.
 
 Tunnel setup and flags follow the [Expo CLI documentation](https://docs.expo.dev/more/expo-cli/).
 
@@ -548,6 +549,24 @@ dependency, then start Expo Go using the commands above. No new API key or paid
 service is required. Hosted migrations are already applied to the connected
 project. A different Supabase project needs the committed migrations applied
 before using these screens. Native builds and physical sensor QA remain deferred.
+
+## Weight Progress (v0.6 task 5.1)
+
+Open **Progress** to see the latest 30 calendar dates of recorded weights.
+**Change weight dates** accepts an inclusive start/end range. Future dates and
+reversed ranges are rejected. Full history is fetched across response pages,
+so summaries are not limited to the 30-entry body-record editor page.
+
+The chart uses real weigh-ins, preserves missing dates and displays kg/lb from
+Preferences. Period change compares the first and latest recorded weights; it
+needs two dated records. Average means the average of recorded weigh-ins, not
+an estimate for unlogged days. Long ranges display up to 60 intervals averaging
+only recorded values, with exact weights available in the paginated history.
+
+Use **Log or edit bodyweight** to open the existing body-record editor, then
+return to Progress to refresh. Empty/error states and retry are supported. No
+new API key, dependency or database migration is needed. Global period presets
+and the other analytics modules remain scheduled later in v0.6.
 
 ## Release discipline
 

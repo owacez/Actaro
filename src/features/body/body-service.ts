@@ -3,8 +3,41 @@ import { recordResult, requireOwner, recordInput, RecordRequestError } from '@/l
 import { profileService } from '@/features/profile/profile-service';
 import { localNutritionDate, nutritionDate } from '@/features/nutrition/nutrition-model';
 import { canonicalInput } from './body-model';
+import { weightPeriod, type WeightPoint } from './weight-progress-model';
+import { shiftDate } from '@/features/workouts/training-overview';
 export type BodyKind = 'weight' | 'measurement';
 export const bodyService = {
+  async progress(userId: string, period?: { from: string; to: string }) {
+    const preferences = await profileService.getPreferences(userId),
+      today = localNutritionDate(preferences.time_zone),
+      range = weightPeriod(period?.from ?? shiftDate(today, -29), period?.to ?? today, today);
+    if (preferences.weight_unit !== 'kg' && preferences.weight_unit !== 'lb')
+      throw new Error('Weight preference unavailable.');
+    const rows: WeightPoint[] = [];
+    let expected: number | null = null;
+    do {
+      const { data, error, count } = await getSupabase()
+        .from('body_weights')
+        .select('local_date,weight_kg', { count: 'exact' })
+        .eq('user_id', userId)
+        .gte('local_date', range.from)
+        .lte('local_date', range.to)
+        .order('local_date')
+        .range(rows.length, rows.length + 499);
+      const page = recordResult(data, error);
+      if (
+        count === null ||
+        count < 0 ||
+        (expected !== null && count !== expected) ||
+        (!page.length && rows.length < count) ||
+        rows.length + page.length > count
+      )
+        throw new Error('Weight history changed or is incomplete. Retry loading.');
+      expected = count;
+      rows.push(...page);
+    } while (rows.length < expected);
+    return { preferences, today, ...range, rows };
+  },
   async history(userId: string, offset = 0, until?: string) {
     await requireOwner(userId);
     const preferences = await profileService.getPreferences(userId),

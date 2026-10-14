@@ -4,14 +4,14 @@ Updated: 2026-10-14 (America/Los_Angeles).
 
 ## Overall
 
-- Current Release: **v0.5 — Habits, Goals & Today**
-- Release Completion: **100% functional scope (38 / 38 weight)**
-- Previous Releases: **v0.2/v0.3/v0.4 functional scope DONE (100%); v0.1 84.375% verified with remaining acceptance DEFERRED**
-- Current Phase: **Phase 4; functional implementation complete**
-- Current Focus: All eleven v0.5 tasks have hosted persistence, ownership tests and browser evidence. Physical-device acceptance remains user-deferred. Next release is v0.6; no historical Progress analytics implementation has begun.
-- Status: **DONE — functional v0.5; device/native-build acceptance DEFERRED**
-- Blockers: No v0.5 implementation blocker. Figma MCP is limited; approved PDF fallback was used. Existing Auth leaked-password protection, SDK patch recommendations and dependency advisories remain quality follow-ups.
-- Approval boundary: User authorized completing v0.5 on 2026-10-14 and explicitly deferred device testing. No native/EAS build, running/GPS, Active Minutes or future-release analytics was implemented.
+- Current Release: **v0.6 — Basic Progress & Analytics**
+- Release Completion: **12.5% (3 / 24 weight)**
+- Previous Releases: **v0.2/v0.3/v0.4/v0.5 functional scope DONE (100%); v0.1 84.375% verified with remaining acceptance DEFERRED**
+- Current Phase: **Phase 5; task 5.1 Weight Progress DONE**
+- Current Focus: Date-bounded weight progress is verified. Next is task 5.2 Nutrition Progress. Other progress modules and global time presets remain NOT_STARTED.
+- Status: **IN_PROGRESS — v0.6; device/native-build acceptance DEFERRED**
+- Blockers: No Weight Progress implementation blocker. Figma MCP remains limited; the approved PDF Progress reference and verified components were used. Existing SDK patch/security/dependency follow-ups remain documented for quality work.
+- Approval boundary: User authorized the next feature on 2026-10-14. Scope is task 5.1, with only its required date-bounded read/UI. No other analytics module, AI, new migration/dependency or native/EAS build. Device testing stays deferred.
 
 Latest design access: the user supplied a local Figma PDF export and authorized
 it as fallback when MCP calls are exhausted. Its first foundation page retains
@@ -27,6 +27,12 @@ The supplied canonical plan is `docs/ACTARO_DECELOPMENT_PLAN.md`; the requested
 Figma tools are available; no Figma reads or edits are necessary for initialization.
 
 ## Completion accounting
+
+v0.6 denominator: `3 + 3 + 2 + 3 + 3 + 2 + 2 + 2 + 4 = 24`.
+Earned weight: **3**, task 5.1 verified across data access/ownership, calculations,
+UI/states and automated/live/browser acceptance. Release completion:
+`3 / 24 × 100 = 12.5%`. Task 5.8 receives no credit for weight-only custom dates;
+its shared 7D/30D/3M/6M/1Y/All controls are still NOT_STARTED.
 
 Use the Development Plan's weights exactly. For each active item, earned weight
 is `weight × verified completed subtasks / total subtasks`. DONE earns full weight;
@@ -121,7 +127,7 @@ User-deferred device checks are separate, unweighted acceptance records; they ar
 | Phase 4 / 4.9    | Bodyweight Logging                     | v0.5    |      3 | DONE        |       100% | Dated kg/cm values, named measurements, preferences, replace/edit/delete/history verified.                                                      |
 | Phase 4 / 4.10   | Steps Foundation                       | v0.5    |      3 | DONE        |       100% | Manual totals/targets verified; iPhone permission/read adapter unit tested. Physical sensor QA DEFERRED.                                        |
 | Phase 4 / 4.11   | Today Dashboard                        | v0.5    |      8 | DONE        |       100% | Saved weight/trend, steps, nutrition, workout, habits/goals, training/recovery; browser layouts and failed-load/retry pass.                     |
-| Phase 5 / 5.1    | Weight Progress                        | v0.6    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §5.1.                                                                                                              |
+| Phase 5 / 5.1    | Weight Progress                        | v0.6    |      3 | DONE        |       100% | Owned dated history, kg/lb, recorded changes/averages, chart gaps and empty/error/retry; tests and live/browser checks pass.                    |
 | Phase 5 / 5.2    | Nutrition Progress                     | v0.6    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §5.2.                                                                                                              |
 | Phase 5 / 5.3    | Workout Frequency                      | v0.6    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §5.3.                                                                                                              |
 | Phase 5 / 5.4    | Strength Progress                      | v0.6    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §5.4.                                                                                                              |
@@ -195,7 +201,7 @@ User-deferred device checks are separate, unweighted acceptance records; they ar
 | Phase 2  | v0.3    | Strength Workout System           |             70 |       100% | DONE        |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |       100% | DONE        |
 | Phase 4  | v0.5    | Habits, Goals & Today             |             38 |       100% | DONE        |
-| Phase 5  | v0.6    | Basic Progress & Analytics        |             24 |         0% | NOT_STARTED |
+| Phase 5  | v0.6    | Basic Progress & Analytics        |             24 |      12.5% | IN_PROGRESS |
 | Phase 6  | v0.9    | Quality & Personal Beta           |             33 |         0% | NOT_STARTED |
 | Phase 7  | v1.0    | Core Deterministic Release        |    — (9 gates) |         0% | NOT_STARTED |
 | Phase 8  | v1.1    | Active Minutes                    |             16 |         0% | NOT_STARTED |
@@ -412,6 +418,12 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 | Early microservices, Kubernetes/GKE, unnecessary custom backend            | Explicitly excluded for early versions                       | DROPPED     | Source §§19, 23; real future backend triggers remain documented.                                                                                                                      |
 
 ## Last Completed
+
+**Latest DONE — v0.6 task 5.1 Weight Progress (2026-10-14).** Full owned weight
+history within chosen dates, saved units, recorded change/average/range, bounded
+chart with missing dates, exact history, logging link and loading/error/retry.
+Supporting evidence is in the Weight Progress acceptance entry below. v0.5
+remains functionally complete; the earlier dated evidence is retained.
 
 **DONE — v0.4 Manual Nutrition (2026-10-13).**
 
@@ -873,13 +885,13 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-v0.4 functional scope is DONE at 57/57 weight. All tasks have code, tests and integration evidence. Physical iPhone/Android smoke, foundation acceptance and native builds remain separately deferred. No v0.5 implementation has begun. The user requested completing v0.4 and postponing device testing until most of the app is built.
+v0.6 task 5.1 Weight Progress is DONE at 3/3 weight. Overall v0.6 is 3/24 (12.5%). No other progress module is implemented. Earlier v0.2–v0.5 functional work remains DONE. Physical-device and native-build acceptance remain separately user-DEFERRED.
 
 ## Next 3 Actions
 
-1. v0.6 task 5.1 — Weight Progress: dated weight history, truthful missing dates and saved unit preferences.
-2. v0.6 task 5.2: nutrition Progress from existing diary snapshots and dated nutrition targets.
-3. v0.6 task 5.3 — Workout Frequency: completed sessions grouped by calendar date; retain Timed versus Log Only distinctions. Strength and volume views follow in tasks 5.4/5.5.
+1. v0.6 task 5.2 — Nutrition Progress: date-bounded diary summaries and effective nutrition targets; missing logs remain unknown.
+2. v0.6 task 5.3 — Workout Frequency: completed sessions grouped by calendar date; preserve Timed versus Log Only distinctions.
+3. v0.6 task 5.4 — Strength Progress: recorded exercise load/PR history, with explicit estimated-1RM semantics; volume follows in task 5.5.
 
 Physical-device testing, iPhone sensor permission/count accuracy, Android manual activity,
 notification placement and custom native builds remain **DEFERRED** under the user's instruction.
@@ -1427,3 +1439,19 @@ Weights: `3 + 4 + 3 + 3 + 2 + 2 + 4 + 3 + 3 + 3 + 8 = 38`. Each task above has i
 - Device/native builds, physical iPhone count/permission checks, Android activity and cross-platform acceptance remain user-**DEFERRED**. Existing environment configuration is reused; no new API key or privileged app secret.
 - `node .actaro-tools/check-v05-artifacts.mjs`: **PASS**, 145 exported artifacts contain no privileged Supabase key. `node --env-file=.env .actaro-tools/cleanup-v05.mjs`: **PASS**, both verified disposable accounts and their owned records removed; expired access tokens were already unusable. Real user data was preserved.
 - Focused implementation commits: `84c8a6a` (`feat(tracking): add habits goals and daily activity records`) and `6f6785d` (`feat(today): add record editors and daily dashboard`). README and this ledger record usage, functional acceptance and explicit device/future-release deferrals.
+
+## v0.6 task 5.1 — Weight Progress acceptance (2026-10-14)
+
+**DONE — 3 / 3 task weight; v0.6 3 / 24 = 12.5%.** Other v0.6 tasks remain NOT_STARTED. Weight-only custom dates are a necessary query/UI dependency, not completion of shared task 5.8 time presets. Device/native-build testing remains user-DEFERRED.
+
+- Read both canonical documents completely, applied Ponytail full and Supabase guidance, and inspected the relevant approved PDF Progress reference. No Figma edits, dependency, migration, privileged app credential or extra analytics module. No native build submitted.
+- `src/features/body/body-service.ts`: new read uses authenticated, expected-owner preferences, saved time zone and explicit owned/date filters. Fetches all pages with exact counts; incomplete or changing counts fail instead of showing partial summaries. The existing `(user_id, local_date)` primary key/RLS covers this read; policies/schema are unchanged.
+- `weight-progress-model.ts`: inclusive calendar bounds, first/latest recorded change and percentage, mean/min/max of actual weigh-ins, duplicate/invalid data checks and at most 60 plotted intervals. Empty calendar positions remain gaps; long-range means use recorded values only. No missing day is imputed or treated as zero.
+- `weight-progress-screen.tsx` and the existing Progress tab route: saved kg/lb units, compact verified-theme chart, exact paginated dates/weights, default last 30 calendar dates, expandable custom dates, loading/empty/error/retry and existing body-editor navigation. No sample analytics values or inferred physiological outcome.
+- Three focused test files cover period boundaries, gaps, long-range averaging, empty/single/constant histories, invalid records/dates, full-response pagination including a reduced API response cap, changing/partial counts, ownership failure, kg/lb UI conversion, date validation, navigation and retry.
+- `npm.cmd run check`: **PASS**, TypeScript, lint, formatting, **251 Jest tests / 48 suites + 6 dataset tests = 257 tests**. `git diff --check`: **PASS**.
+- `node --env-file=.env .actaro-tools/check-weight-progress-live.mjs`: **PASS**, only two disposable confirmed accounts, six bounded weigh-ins and 38 extended-period records, exact count/date order and two-account RLS isolation. No signup/confirmation emails were sent and no real user history was queried.
+- `node .actaro-tools/check-weight-browser.mjs`: **PASS**, actual persisted summaries, history beyond the previous 30-row page, missing/empty date ranges, saved preference changes from kg to lb, responsive 390px/320px-dark/1280px layouts, failed-load/retry and body-editor navigation. Final screenshots inspected against the PDF reference. Repeated runs reset the fixture's saved unit explicitly; no app state was bypassed.
+- `npm.cmd exec --no -- expo export --platform web` and `npm.cmd exec --no -- expo export --platform all --output-dir .actaro-tools/v06-export`: **PASS**, web plus iOS/Android JavaScript bundles and 37 routes. These exports are not physical-device or native-build passes.
+- Existing SDK patch recommendations/security/dependency advisories remain the previously recorded quality follow-ups. No new implementation blocker or API key requirement. Next tasks are 5.2 Nutrition Progress, 5.3 Workout Frequency and 5.4 Strength Progress.
+- `node .actaro-tools/check-v06-artifacts.mjs`: **PASS**, 145 exported artifacts exclude the privileged Supabase key. `node --env-file=.env .actaro-tools/cleanup-v06.mjs`: **PASS**, both verified disposable accounts and their owned fixture records removed; real user accounts/data preserved. Test-only clock compensation and credentials remained in ignored tooling, not application code.
