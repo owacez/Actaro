@@ -8,6 +8,155 @@ export type Database = {
   };
   public: {
     Tables: {
+      activity_targets: {
+        Row: {
+          created_at: string;
+          steps_target: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          steps_target: number;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          steps_target?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'activity_targets_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      body_measurements: {
+        Row: {
+          created_at: string;
+          local_date: string;
+          measurement: string;
+          notes: string | null;
+          time_zone: string;
+          updated_at: string;
+          user_id: string;
+          value_cm: number;
+        };
+        Insert: {
+          created_at?: string;
+          local_date: string;
+          measurement: string;
+          notes?: string | null;
+          time_zone: string;
+          updated_at?: string;
+          user_id: string;
+          value_cm: number;
+        };
+        Update: {
+          created_at?: string;
+          local_date?: string;
+          measurement?: string;
+          notes?: string | null;
+          time_zone?: string;
+          updated_at?: string;
+          user_id?: string;
+          value_cm?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'body_measurements_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      body_weights: {
+        Row: {
+          created_at: string;
+          local_date: string;
+          notes: string | null;
+          time_zone: string;
+          updated_at: string;
+          user_id: string;
+          weight_kg: number;
+        };
+        Insert: {
+          created_at?: string;
+          local_date: string;
+          notes?: string | null;
+          time_zone: string;
+          updated_at?: string;
+          user_id: string;
+          weight_kg: number;
+        };
+        Update: {
+          created_at?: string;
+          local_date?: string;
+          notes?: string | null;
+          time_zone?: string;
+          updated_at?: string;
+          user_id?: string;
+          weight_kg?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'body_weights_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      daily_activity: {
+        Row: {
+          created_at: string;
+          distance_km: number | null;
+          local_date: string;
+          steps: number | null;
+          steps_source: string | null;
+          time_zone: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          distance_km?: number | null;
+          local_date: string;
+          steps?: number | null;
+          steps_source?: string | null;
+          time_zone: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          distance_km?: number | null;
+          local_date?: string;
+          steps?: number | null;
+          steps_source?: string | null;
+          time_zone?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'daily_activity_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       equipment: {
         Row: {
           created_at: string;
@@ -404,6 +553,227 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: 'foods_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      goals: {
+        Row: {
+          archived: boolean;
+          baseline: number;
+          created_at: string;
+          direction: string;
+          end_date: string | null;
+          exercise_id: string | null;
+          habit_id: string | null;
+          id: string;
+          measurement: string | null;
+          metric: string;
+          name: string;
+          start_date: string;
+          target: number;
+          time_zone: string;
+          tolerance: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          archived?: boolean;
+          baseline: number;
+          created_at?: string;
+          direction: string;
+          end_date?: string | null;
+          exercise_id?: string | null;
+          habit_id?: string | null;
+          id?: string;
+          measurement?: string | null;
+          metric: string;
+          name: string;
+          start_date: string;
+          target: number;
+          time_zone: string;
+          tolerance?: number;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          archived?: boolean;
+          baseline?: number;
+          created_at?: string;
+          direction?: string;
+          end_date?: string | null;
+          exercise_id?: string | null;
+          habit_id?: string | null;
+          id?: string;
+          measurement?: string | null;
+          metric?: string;
+          name?: string;
+          start_date?: string;
+          target?: number;
+          time_zone?: string;
+          tolerance?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'goals_exercise_id_fkey';
+            columns: ['exercise_id'];
+            isOneToOne: false;
+            referencedRelation: 'exercises';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'goals_habit_id_user_id_fkey';
+            columns: ['habit_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'habits';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'goals_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      habit_logs: {
+        Row: {
+          created_at: string;
+          habit_id: string;
+          local_date: string;
+          notes: string | null;
+          updated_at: string;
+          user_id: string;
+          value: number;
+          version_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          habit_id: string;
+          local_date: string;
+          notes?: string | null;
+          updated_at?: string;
+          user_id: string;
+          value: number;
+          version_id: string;
+        };
+        Update: {
+          created_at?: string;
+          habit_id?: string;
+          local_date?: string;
+          notes?: string | null;
+          updated_at?: string;
+          user_id?: string;
+          value?: number;
+          version_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'habit_logs_habit_id_user_id_fkey';
+            columns: ['habit_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'habits';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'habit_logs_version_id_habit_id_user_id_fkey';
+            columns: ['version_id', 'habit_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'habit_versions';
+            referencedColumns: ['id', 'habit_id', 'user_id'];
+          },
+        ];
+      };
+      habit_versions: {
+        Row: {
+          effective_from: string;
+          end_date: string | null;
+          habit_id: string;
+          id: string;
+          motivation: string;
+          reminder_time: string | null;
+          target: number;
+          user_id: string;
+          weekdays: number[];
+        };
+        Insert: {
+          effective_from: string;
+          end_date?: string | null;
+          habit_id: string;
+          id?: string;
+          motivation: string;
+          reminder_time?: string | null;
+          target: number;
+          user_id: string;
+          weekdays: number[];
+        };
+        Update: {
+          effective_from?: string;
+          end_date?: string | null;
+          habit_id?: string;
+          id?: string;
+          motivation?: string;
+          reminder_time?: string | null;
+          target?: number;
+          user_id?: string;
+          weekdays?: number[];
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'habit_versions_habit_id_user_id_fkey';
+            columns: ['habit_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'habits';
+            referencedColumns: ['id', 'user_id'];
+          },
+        ];
+      };
+      habits: {
+        Row: {
+          archived: boolean;
+          created_at: string;
+          id: string;
+          kind: string;
+          name: string;
+          start_date: string;
+          time_zone: string;
+          unit: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          archived?: boolean;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          name: string;
+          start_date: string;
+          time_zone: string;
+          unit: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          archived?: boolean;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          name?: string;
+          start_date?: string;
+          time_zone?: string;
+          unit?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'habits_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
@@ -1289,6 +1659,39 @@ export type Database = {
         Args: { p_exercises: Json; p_revision: string };
         Returns: number;
       };
+      log_habit: {
+        Args: {
+          p_date: string;
+          p_habit_id: string;
+          p_notes?: string;
+          p_user_id: string;
+          p_value: number;
+        };
+        Returns: string;
+      };
+      save_activity: {
+        Args: {
+          p_date: string;
+          p_distance?: number;
+          p_source?: string;
+          p_steps?: number;
+          p_user_id: string;
+          p_zone?: string;
+        };
+        Returns: string;
+      };
+      save_body_record: {
+        Args: {
+          p_date: string;
+          p_kind: string;
+          p_name?: string;
+          p_notes?: string;
+          p_user_id: string;
+          p_value: number;
+          p_zone: string;
+        };
+        Returns: string;
+      };
       save_equipment_profile: {
         Args: { p_equipment_ids: string[] };
         Returns: {
@@ -1312,6 +1715,24 @@ export type Database = {
           p_time_zone: string;
           p_unit: string;
           p_user_id: string;
+        };
+        Returns: string;
+      };
+      save_goal: { Args: { p_goal: Json; p_user_id: string }; Returns: string };
+      save_habit: {
+        Args: {
+          p_days: number[];
+          p_end?: string;
+          p_id: string;
+          p_kind: string;
+          p_motivation: string;
+          p_name: string;
+          p_reminder?: string;
+          p_start: string;
+          p_target: number;
+          p_unit: string;
+          p_user_id: string;
+          p_zone: string;
         };
         Returns: string;
       };
@@ -1348,6 +1769,10 @@ export type Database = {
           p_user_id: string;
         };
         Returns: string;
+      };
+      save_steps_target: {
+        Args: { p_target: number; p_user_id: string };
+        Returns: number;
       };
       save_training_split: {
         Args: {

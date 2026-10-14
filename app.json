@@ -28,6 +28,10 @@
     "plugins": [
       "expo-router",
       [
+        "expo-sensors",
+        { "motionPermission": "Allow Actaro to read today's step count for your activity log." }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",

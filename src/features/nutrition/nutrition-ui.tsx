@@ -14,7 +14,6 @@ import {
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
 import {
   foodUnits,
-  NutritionRequestError,
   formatNumber,
   numeric,
   nutritionLabel,
@@ -23,7 +22,11 @@ import {
   type Nutrients,
 } from './nutrition-model';
 
-export function useNutritionLoad<T>(load: () => Promise<T>, onLoaded?: (data: T) => void) {
+export function useNutritionLoad<T>(
+  load: () => Promise<T>,
+  onLoaded?: (data: T) => void,
+  errorMessage = 'Unable to load nutrition. Retry.',
+) {
   const [result, setResult] = useState<{
       source: typeof load;
       version: number;
@@ -46,14 +49,14 @@ export function useNutritionLoad<T>(load: () => Promise<T>, onLoaded?: (data: T)
             source: load,
             version,
             data: null,
-            error: 'Unable to load nutrition. Retry.',
+            error: errorMessage,
           });
         }
       });
     return () => {
       active = false;
     };
-  }, [load, version, onLoaded]);
+  }, [load, version, onLoaded, errorMessage]);
   const refresh = useCallback(() => setVersion((value) => value + 1), []);
   const loading = !result || result.source !== load || result.version !== version;
   return {
@@ -96,7 +99,7 @@ export function useNutritionAction() {
         attempt.done?.();
       }
     } catch (reason) {
-      if (reason instanceof NutritionRequestError && !reason.retryable) {
+      if (reason instanceof Error && 'retryable' in reason && reason.retryable === false) {
         frozen.current = null;
         if (alive.current) {
           setLocked(false);

@@ -10,7 +10,7 @@ export type ExerciseDraft = {
 export type WorkoutDraft = { id: string; name: string; notes: string; exercises: ExerciseDraft[] };
 export type WeightUnit = 'kg' | 'lb';
 export const blankSet = (): SetDraft => ({ reps: '8', weight: '', rest: '90', rpe: '', notes: '' });
-const poundsPerKg = 2.2046226218487757;
+export const poundsPerKg = 2.2046226218487757;
 export function displayWeight(kg: number | null, unit: WeightUnit) {
   return kg === null
     ? ''

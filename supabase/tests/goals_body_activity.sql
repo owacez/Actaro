@@ -1,0 +1,41 @@
+begin;
+insert into auth.users(id,email_confirmed_at) values('05000000-0000-4000-8000-000000000101',now()),('05000000-0000-4000-8000-000000000102',now());
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"05000000-0000-4000-8000-000000000101"}',true);
+insert into public.body_weights(user_id,local_date,weight_kg,time_zone) values(auth.uid(),current_date,80,'UTC');
+insert into public.body_weights(user_id,local_date,weight_kg,time_zone) values(auth.uid(),current_date,81,'UTC') on conflict(user_id,local_date) do update set weight_kg=excluded.weight_kg;
+insert into public.body_measurements(user_id,local_date,measurement,value_cm,time_zone) values(auth.uid(),current_date,'waist',90,'UTC');
+insert into public.daily_activity(user_id,local_date,steps,steps_source,time_zone) values(auth.uid(),current_date,0,'manual','UTC');
+insert into public.activity_targets(user_id,steps_target) values(auth.uid(),8000);
+select public.save_body_record(auth.uid(),'weight',current_date,82,'UTC');
+select public.save_body_record(auth.uid(),'measurement',current_date,89,'UTC','waist');
+select public.save_activity(auth.uid(),current_date,0,null,'manual','UTC');
+select public.save_activity(auth.uid(),current_date-1,p_distance=>2,p_zone=>'UTC');
+select public.save_steps_target(auth.uid(),9000);
+insert into public.goals(id,user_id,name,metric,baseline,target,direction,start_date,time_zone) values('05000000-0000-4000-8000-000000000103',auth.uid(),'Body goal','body_weight',81,75,'at_most',current_date,'UTC');
+do $$begin
+ if (select weight_kg from public.body_weights where user_id=auth.uid())<>82 then raise exception 'Date upsert did not replace weight';end if;
+ if (select steps from public.daily_activity where local_date=current_date-1) is not null then raise exception 'Unknown steps became zero';end if;
+ if (select steps_target from public.activity_targets)<>9000 then raise exception 'Target was not saved';end if;
+ perform public.save_goal(auth.uid(),jsonb_build_object('id','05000000-0000-4000-8000-000000000103','user_id',auth.uid(),'name','Updated body goal','metric','body_weight','baseline',82,'target',75,'direction','at_most','tolerance',10,'start_date',current_date,'time_zone','UTC'));
+ if (select count(*) from public.goals)<>1 then raise exception 'Retry duplicated goal';end if;
+ begin insert into public.body_weights(user_id,local_date,weight_kg,time_zone) values(auth.uid(),current_date+1,80,'UTC');raise exception 'Accepted future weight';exception when invalid_parameter_value then null;end;
+ begin insert into public.daily_activity(user_id,local_date,steps,steps_source,time_zone) values(auth.uid(),current_date-1,-1,'manual','UTC');raise exception 'Accepted negative steps';exception when check_violation then null;end;
+ begin insert into public.goals(user_id,name,metric,baseline,target,direction,start_date,time_zone) values(auth.uid(),'Bad goal','body_weight',80,80,'at_most',current_date,'UTC');raise exception 'Accepted equal target';exception when check_violation then null;end;
+ begin insert into public.goals(user_id,name,metric,baseline,target,direction,start_date,time_zone) values(auth.uid(),'No source','habit_completion_week',0,100,'at_least',current_date,'UTC');raise exception 'Accepted missing habit';exception when check_violation then null;end;
+end;$$;
+select set_config('request.jwt.claims','{"sub":"05000000-0000-4000-8000-000000000102"}',true);
+do $$begin
+ if exists(select 1 from public.body_weights) or exists(select 1 from public.goals) or exists(select 1 from public.daily_activity) or exists(select 1 from public.body_measurements) or exists(select 1 from public.activity_targets) then raise exception 'Foreign facts leaked';end if;
+ begin insert into public.body_weights(user_id,local_date,weight_kg,time_zone) values('05000000-0000-4000-8000-000000000101',current_date,100,'UTC');raise exception 'Foreign write accepted';exception when insufficient_privilege then null;end;
+ update public.goals set target=70 where id='05000000-0000-4000-8000-000000000103';
+ if found then raise exception 'Foreign goal updated';end if;
+ begin perform public.save_body_record('05000000-0000-4000-8000-000000000101','weight',current_date,100,'UTC');raise exception 'Foreign body RPC accepted';exception when insufficient_privilege then null;end;
+ begin perform public.save_activity('05000000-0000-4000-8000-000000000101',current_date,5000,null,'manual','UTC');raise exception 'Foreign activity RPC accepted';exception when insufficient_privilege then null;end;
+ begin perform public.save_goal(auth.uid(),jsonb_build_object('id','05000000-0000-4000-8000-000000000103','user_id',auth.uid(),'name','Foreign update','metric','steps_day','baseline',0,'target',8000,'direction','at_least','tolerance',10,'start_date',current_date,'time_zone','UTC'));raise exception 'Foreign goal RPC accepted';exception when insufficient_privilege then null;end;
+end;$$;
+set local role anon;
+do $$begin
+ begin perform 1 from public.goals;raise exception 'Anonymous access accepted';exception when insufficient_privilege then null;end;
+end;$$;
+rollback;

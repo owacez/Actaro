@@ -1,0 +1,22 @@
+begin;
+insert into auth.users(id) values('05000000-0000-4000-8000-000000000001'),('05000000-0000-4000-8000-000000000002');
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"05000000-0000-4000-8000-000000000001"}',true);
+select public.save_habit(auth.uid(),'05000000-0000-4000-8000-000000000003','Walk','numeric','minutes',current_date-14,'UTC',20,array[1,2,3,4,5]::smallint[],'streak',null,'18:00');
+select public.log_habit(auth.uid(),'05000000-0000-4000-8000-000000000003',current_date-1,20);
+select public.save_habit(auth.uid(),'05000000-0000-4000-8000-000000000003','Walk updated','numeric','minutes',current_date-14,'UTC',30,array[1,2,3,4,5]::smallint[],'weekly');
+select public.log_habit(auth.uid(),'05000000-0000-4000-8000-000000000003',current_date,25);
+do $$ begin
+ if(select target from public.habit_versions join public.habit_logs on habit_versions.id=habit_logs.version_id where local_date=current_date-1)<>20 then raise exception 'Past target changed';end if;
+ begin perform public.log_habit(auth.uid(),'05000000-0000-4000-8000-000000000003',current_date+1,20);raise exception 'Future log accepted';exception when invalid_parameter_value then null;end;
+ begin update public.habits set kind='boolean';raise exception 'Type mutation accepted';exception when insufficient_privilege then null;end;
+ begin perform public.save_habit(auth.uid(),gen_random_uuid(),'Bad','avoidance','times',current_date,'UTC',0,array[1,1]::smallint[],'none');raise exception 'Duplicate weekdays accepted';exception when check_violation then null;end;
+ begin perform public.save_habit('05000000-0000-4000-8000-000000000002',gen_random_uuid(),'Foreign','boolean','done',current_date,'UTC',1,array[1]::smallint[],'none');raise exception 'Actor mismatch';exception when insufficient_privilege then null;end;
+end; $$;
+select set_config('request.jwt.claims','{"sub":"05000000-0000-4000-8000-000000000002"}',true);
+do $$ begin if exists(select 1 from public.habits) or exists(select 1 from public.habit_logs) then raise exception 'Habit leaked';end if;
+begin perform public.log_habit(auth.uid(),'05000000-0000-4000-8000-000000000003',current_date,1);raise exception 'Foreign log accepted';exception when insufficient_privilege or not_null_violation or invalid_parameter_value then null;end;
+end; $$;
+set local role anon;
+do $$ begin begin perform * from public.habits;raise exception 'Anonymous read';exception when insufficient_privilege then null;end;end; $$;
+rollback;
