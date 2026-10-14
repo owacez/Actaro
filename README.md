@@ -4,7 +4,7 @@ Premium personal fitness and wellness mobile application, developed incrementall
 Current implementation: Expo/Supabase foundation, account management and preferences,
 plus a dataset-backed Exercise Library, full strength workout logging, and manual
 nutrition with USDA foods, recipes and hydration; habits, measurable goals, body
-records, daily steps/activity, a Today dashboard and weight progress. **v0.1 foundation
+records, daily steps/activity, a Today dashboard and complete basic progress analytics. **v0.1 foundation
 development is complete for the active scope.** The user deferred its remaining
 acceptance checks; native builds, platform/visual checks and final live acceptance
 remain documented in [Development Status](docs/DEVELOPMENT_STATUS.md#v01-development-closure--2026-10-14).
@@ -554,7 +554,45 @@ service is required. Hosted migrations are already applied to the connected
 project. A different Supabase project needs the committed migrations applied
 before using these screens. Native builds and physical sensor QA remain deferred.
 
-## Weight Progress (v0.6 task 5.1)
+## Progress and analytics (v0.6)
+
+Open **Progress**, then select **Weight, Nutrition, Frequency, Strength, Volume,
+Steps, Habits, or Summary**. All modules use owned, persisted records. The shared
+**7D / 30D / 3M / 6M / 1Y / All** controls select dates through today in your saved
+time zone; month/year windows clamp to valid calendar dates. All starts at the
+module's earliest available record; Summary considers every source. Custom dates
+are inclusive, validated and cannot include the future. Filters reset to 30D when
+switching modules. Refresh reloads current records; returning from an editor also
+refreshes. No analytics provider, AI, new API key or schema migration is required.
+
+- Nutrition shows energy/protein averages on logged dates, protein target days,
+  and the average share of calories/protein/carbs/fat within ±10% of each date's
+  saved targets. Missing logs are unknown intake; even a logged day may be incomplete.
+- Frequency counts completed sessions and distinct training dates, with Timed/
+  Log Only counts and timed duration. Plans and unfinished drafts are excluded;
+  rest dates are not failures. Volume reuses existing completed-set calculations
+  and primary-muscle allocation. Unknown loads are excluded, not estimated.
+- Strength lets you search recorded exercises and inspect daily heaviest external
+  load, estimated 1RM and first-to-latest load change. The Epley estimate uses
+  1–10 reps; period best is not necessarily an all-time PR or a tested maximum.
+- Steps distinguishes explicit zero, missing values, distance-only dates and
+  manual/reviewed iPhone provenance. The displayed steps target is the current
+  setting; historical target attainment is not invented.
+- Habits uses dated target/schedule versions and saved habit time zones. Rest,
+  open uncompleted periods and partial boundary weeks are excluded from completion.
+  Avoidance requires an explicit report. Currently archived habits are excluded
+  because archive intervals are not recorded; their logs remain in Habits history.
+- Summary groups the selected range into Monday-based weeks or calendar months,
+  marks partial periods, and shows coverage alongside weight, nutrition, steps,
+  training and habit facts. Only complete adjacent periods are compared; missing
+  or zero baselines have no percentage change. Differences do not establish causation.
+
+Charts display at most 60 intervals with their aggregation explained. Exact
+history remains paginated; complete API pagination prevents silent row-cap truncation.
+Loading, empty, failure and retry states are available. Physical-device/native-build
+acceptance remains deferred. Advanced cross-metric analytics belong to v1.3.
+
+### Weight details
 
 Open **Progress** to see the latest 30 calendar dates of recorded weights.
 **Change weight dates** accepts an inclusive start/end range. Future dates and
@@ -569,8 +607,8 @@ only recorded values, with exact weights available in the paginated history.
 
 Use **Log or edit bodyweight** to open the existing body-record editor, then
 return to Progress to refresh. Empty/error states and retry are supported. No
-new API key, dependency or database migration is needed. Global period presets
-and the other analytics modules remain scheduled later in v0.6.
+new API key, dependency or database migration is needed. Weight uses the same
+period presets as the other completed v0.6 modules.
 
 ## Release discipline
 

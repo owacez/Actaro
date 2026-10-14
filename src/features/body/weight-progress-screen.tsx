@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import {
@@ -17,8 +17,19 @@ import { formatNumber } from '@/features/nutrition/nutrition-model';
 import { unitFactor } from './body-model';
 import { bodyService } from './body-service';
 import { weightPeriod, weightProgress } from './weight-progress-model';
-export function WeightProgressScreen({ userId, onLog }: { userId: string; onLog: () => void }) {
-  const [period, setPeriod] = useState<{ from: string; to: string }>(),
+import { ProgressPresets } from '@/features/progress/progress-components';
+import type { ProgressPreset } from '@/features/progress/progress-period';
+export function WeightProgressScreen({
+  userId,
+  onLog,
+  navigation,
+}: {
+  userId: string;
+  onLog: () => void;
+  navigation?: React.ReactNode;
+}) {
+  const [preset, setPreset] = useState<ProgressPreset>('30D'),
+    [period, setPeriod] = useState<{ from: string; to: string }>(),
     [from, setFrom] = useState(''),
     [to, setTo] = useState(''),
     [today, setToday] = useState(''),
@@ -26,9 +37,11 @@ export function WeightProgressScreen({ userId, onLog }: { userId: string; onLog:
     [page, setPage] = useState(0),
     [editingDates, setEditingDates] = useState(false);
   const load = useCallback(async () => {
-    const data = await bodyService.progress(userId, period);
+    const data = await (preset === '30D'
+      ? bodyService.progress(userId, period)
+      : bodyService.progress(userId, period, preset));
     return { ...data, summary: weightProgress(data.rows, data.from, data.to) };
-  }, [userId, period]);
+  }, [userId, period, preset]);
   const onLoaded = useCallback((data: Awaited<ReturnType<typeof bodyService.progress>>) => {
       setFrom(data.from);
       setTo(data.to);
@@ -39,10 +52,12 @@ export function WeightProgressScreen({ userId, onLog }: { userId: string; onLog:
     resource = useRecords(load, onLoaded),
     refresh = resource.refresh,
     { colors } = useAppTheme(),
-    data = resource.data;
+    data = resource.data,
+    initialFocus = useRef(true);
   useFocusEffect(
     useCallback(() => {
-      refresh();
+      if (initialFocus.current) initialFocus.current = false;
+      else refresh();
     }, [refresh]),
   );
   function apply() {
@@ -68,7 +83,18 @@ export function WeightProgressScreen({ userId, onLog }: { userId: string; onLog:
     <AuthFrame>
       <AuthText kind="eyebrow">ACTARO</AuthText>
       <AuthText kind="title">Progress</AuthText>
+      {navigation}
       <AuthText kind="heading">Weight progress</AuthText>
+      <ProgressPresets
+        selected={period ? undefined : preset}
+        disabled={resource.loading}
+        onChange={(value) => {
+          setPreset(value);
+          setPeriod(undefined);
+          setEditingDates(false);
+          if (value === preset && !period) refresh();
+        }}
+      />
       <View style={authStyles.choices}>
         <AuthLink title="Log or edit bodyweight" onPress={onLog} />
         <AuthLink title="Refresh weight progress" disabled={resource.loading} onPress={refresh} />
@@ -221,8 +247,7 @@ export function WeightProgressScreen({ userId, onLog }: { userId: string; onLog:
         </>
       )}
       <AuthText>
-        Charts and change use recorded weights only. Nutrition, workout, steps and habit progress
-        will follow in the planned sequence.
+        Charts and change use recorded weights only. Missing dates are never estimated.
       </AuthText>
     </AuthFrame>
   );

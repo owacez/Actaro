@@ -4,38 +4,44 @@ import { profileService } from '@/features/profile/profile-service';
 import { localNutritionDate, nutritionDate } from '@/features/nutrition/nutrition-model';
 import { canonicalInput } from './body-model';
 import { weightPeriod, type WeightPoint } from './weight-progress-model';
-import { shiftDate } from '@/features/workouts/training-overview';
+import { progressRange, type ProgressPreset } from '@/features/progress/progress-period';
+import { progressPages } from '@/features/progress/progress-service';
 export type BodyKind = 'weight' | 'measurement';
 export const bodyService = {
-  async progress(userId: string, period?: { from: string; to: string }) {
+  async progress(
+    userId: string,
+    period?: { from: string; to: string },
+    preset: ProgressPreset = '30D',
+  ) {
     const preferences = await profileService.getPreferences(userId),
-      today = localNutritionDate(preferences.time_zone),
-      range = weightPeriod(period?.from ?? shiftDate(today, -29), period?.to ?? today, today);
+      today = localNutritionDate(preferences.time_zone);
+    let earliest: string | null = null;
+    if (preset === 'All' && !period) {
+      const first = await getSupabase()
+        .from('body_weights')
+        .select('local_date')
+        .eq('user_id', userId)
+        .lte('local_date', today)
+        .order('local_date')
+        .limit(1)
+        .maybeSingle();
+      if (first.error) throw new Error('Weight dates unavailable. Retry.');
+      earliest = first.data?.local_date ?? null;
+    }
+    const dates = period ?? progressRange(today, preset, earliest),
+      range = weightPeriod(dates.from, dates.to, today);
     if (preferences.weight_unit !== 'kg' && preferences.weight_unit !== 'lb')
       throw new Error('Weight preference unavailable.');
-    const rows: WeightPoint[] = [];
-    let expected: number | null = null;
-    do {
-      const { data, error, count } = await getSupabase()
+    const rows: WeightPoint[] = await progressPages((from, to) =>
+      getSupabase()
         .from('body_weights')
         .select('local_date,weight_kg', { count: 'exact' })
         .eq('user_id', userId)
         .gte('local_date', range.from)
         .lte('local_date', range.to)
         .order('local_date')
-        .range(rows.length, rows.length + 499);
-      const page = recordResult(data, error);
-      if (
-        count === null ||
-        count < 0 ||
-        (expected !== null && count !== expected) ||
-        (!page.length && rows.length < count) ||
-        rows.length + page.length > count
-      )
-        throw new Error('Weight history changed or is incomplete. Retry loading.');
-      expected = count;
-      rows.push(...page);
-    } while (rows.length < expected);
+        .range(from, to),
+    );
     return { preferences, today, ...range, rows };
   },
   async history(userId: string, offset = 0, until?: string) {
