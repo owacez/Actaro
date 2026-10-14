@@ -282,6 +282,10 @@ export function AccountScreen() {
         disabled={busy}
         onPress={() => router.push({ pathname: '/nutrition/manage', params: { view: 'recipes' } })}
       />
+      <AuthLink title="Habits" disabled={busy} onPress={() => router.push('/habits')} />
+      <AuthLink title="Goals" disabled={busy} onPress={() => router.push('/goals')} />
+      <AuthLink title="Body records" disabled={busy} onPress={() => router.push('/body')} />
+      <AuthLink title="Steps & activity" disabled={busy} onPress={() => router.push('/activity')} />
       <AuthButton title="Sign out" busy={busy} onPress={() => void signOut()} />
     </AuthFrame>
   );

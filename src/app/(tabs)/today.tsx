@@ -1,10 +1,9 @@
-import { PlannedModuleScreen } from '@/components/planned-module-screen';
+import { Redirect } from 'expo-router';
+import { useAuth } from '@/features/auth/auth-provider';
+import { TodayScreen } from '@/features/today/today-screen';
 
 export default function TodayRoute() {
-  return (
-    <PlannedModuleScreen
-      title="Today"
-      description="Your daily overview will be available in v0.5. For now, manage your account from More."
-    />
-  );
+  const { session, recovery } = useAuth();
+  if (!session || recovery) return <Redirect href="/" />;
+  return <TodayScreen key={session.user.id} userId={session.user.id} />;
 }
