@@ -1,6 +1,6 @@
 # Development inputs
 
-Updated: 2026-10-11
+Updated: 2026-10-14
 
 ## Already supplied
 
@@ -26,7 +26,11 @@ For a different Supabase project, apply the committed migrations and configure
 Auth callback URLs for that runtime. Authenticate the development tools against
 that project before administrative tasks; the public key cannot apply migrations.
 
-## Needed for upcoming foundation tasks
+## Foundation configuration and deferred acceptance
+
+v0.1 active development is DONE. No additional API key or account is needed to
+close that scope. The remaining acceptance checks and all native/cloud builds
+are user-DEFERRED; retain the following access notes for when testing resumes.
 
 1. Supabase MCP authorization is established. The first profile/preferences migration is applied with database ownership tests; no additional database credential is needed for subsequent reviewed tasks.
 2. EAS login was verified and Actaro is linked to that account. The user approved
@@ -40,10 +44,11 @@ that project before administrative tasks; the public key cannot apply migrations
 
 ## Later core-release inputs
 
-- Exercise import: obtain/verify the approved RepDB source, its usage rights and
-  the source media to import into Supabase Storage. No runtime hotlinking.
-- Nutrition: select a licensed food-data source in the v0.4 task. If its API needs
-  a private key, use an approved server-side Supabase function; never ship that key.
+- Exercise import is complete: RepDB metadata/media are served from our own
+  Supabase project. A fresh backend needs the committed migrations and local
+  import described in README; no runtime hotlinking or new application key.
+- Nutrition import is complete: USDA SR Legacy is served from our own database.
+  No USDA API key is needed. A fresh backend needs migrations and the local import.
 - Public distribution: Expo/build account, approved package identifiers and
   store accounts, production email delivery and privacy/store materials.
 
@@ -51,7 +56,10 @@ No AI, maps/GPS, wearable or health-platform credentials are required for v1.0.
 Those belong to the explicitly scheduled future releases. Request each input only
 when its corresponding task needs it.
 
-## Outstanding v0.1 evidence and access
+## Deferred v0.1 evidence and access
+
+All remaining checks below are DEFERRED by the user's 2026-10-14 instruction.
+They do not block further development, but must pass before final release acceptance.
 
 - Figma's Starter call limit blocks the remaining design reads. The approved PDF
   fallback and functional dark palette are in use. Current shared controls and
@@ -72,4 +80,7 @@ when its corresponding task needs it.
 `npm run check` runs typecheck, lint, formatting and real Jest tests without
 administrative Supabase access. `npm run check:supabase` checks the supplied live
 public configuration without creating users, tables or reading user rows.
-`npm start` launches the auth entry screens; fitness features remain unimplemented. Exports and mocked native contract tests do not replace device testing.
+`npm start` launches Sign In or the authenticated Today dashboard. Exercise,
+workout, nutrition, habits/goals and Today functionality is implemented, with
+Weight Progress as the first v0.6 module. Exports and mocked native contract tests
+do not replace the deferred device testing.

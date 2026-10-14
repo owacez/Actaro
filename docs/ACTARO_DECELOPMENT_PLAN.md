@@ -432,6 +432,23 @@ Raw Supabase access must not be scattered throughout UI components.
 - Typecheck/lint/tests pass
 - `docs/DEVELOPMENT_STATUS.md` exists
 
+### v0.1 development closure — user decision (2026-10-14)
+
+The user explicitly authorized completing v0.1 with its remaining checks deferred.
+The implemented foundation is tracked as DONE for the active development scope;
+full release acceptance remains DEFERRED until the retained checks pass. This
+supersedes the earlier instruction to leave the development phase IN_PROGRESS.
+It does not authorize native/cloud builds or claim production readiness.
+
+Keep the original 40-weight plan. Split the already verified 33.75 weight from
+the remaining 6.25 weight of acceptance checks, which are DEFERRED and excluded
+from the active denominator under section 4. Active completion is therefore
+33.75 / 33.75 = 100%; the original full-scope verified baseline remains
+33.75 / 40 = 84.375%. No additional implementation or acceptance weight is earned
+by deferral. Preserve all six weighted check groups in Development Status and
+resume them before v1.0 release acceptance. Future defects found by those checks
+require fixes even though foundation development is closed.
+
 ---
 
 # Phase 1 — v0.2 Exercise Library
@@ -442,7 +459,9 @@ Track those checks as DEFERRED in Development Status; do not mark them passed or
 declare v0.1 release acceptance complete. Resume sequencing with Phase 1, one
 focused task at a time. Supabase access subsequently recovered; the user authorized
 completing v0.2 and its hosted checks/imports. Native builds remain user-deferred.
-The roadmap requirements and weights are unchanged.
+The roadmap requirements and weights are unchanged. The 2026-10-14 development
+closure above supersedes the earlier active-status treatment of v0.1; its full
+release acceptance is still deferred.
 
 ## 1.1 Muscle & Equipment Schema — Weight 2
 

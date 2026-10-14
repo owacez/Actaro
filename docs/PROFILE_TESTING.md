@@ -1,6 +1,8 @@
 # Profile testing
 
-Updated: 2026-10-11. v0.1 Profile / Preferences is DONE; separate Auth/security/visual acceptance remains open.
+Updated: 2026-10-14. v0.1 Profile / Preferences is DONE; separate remaining
+Auth/security/visual acceptance checks are user-DEFERRED. The existing passing
+evidence is preserved; deferral does not count as passing acceptance.
 
 ## Current scope
 

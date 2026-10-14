@@ -1,6 +1,9 @@
 # Authentication testing
 
-Updated: 2026-10-11. Release item 0.8 remains IN_PROGRESS until live and native checks pass.
+Updated: 2026-10-14. v0.1 authentication development is DONE for the active scope.
+Remaining live signup/verification and native acceptance checks are user-DEFERRED;
+this checklist is retained for later testing, not marked passed. See
+[foundation closure](DEVELOPMENT_STATUS.md#v01-development-closure--2026-10-14).
 
 ## Configuration
 

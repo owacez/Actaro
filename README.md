@@ -4,8 +4,12 @@ Premium personal fitness and wellness mobile application, developed incrementall
 Current implementation: Expo/Supabase foundation, account management and preferences,
 plus a dataset-backed Exercise Library, full strength workout logging, and manual
 nutrition with USDA foods, recipes and hydration; habits, measurable goals, body
-records, daily steps/activity, a Today dashboard and weight progress. Remaining foundation acceptance is deferred for later
-testing. Version `0.1.0` is project metadata; v0.1's full release gate has not passed.
+records, daily steps/activity, a Today dashboard and weight progress. **v0.1 foundation
+development is complete for the active scope.** The user deferred its remaining
+acceptance checks; native builds, platform/visual checks and final live acceptance
+remain documented in [Development Status](docs/DEVELOPMENT_STATUS.md#v01-development-closure--2026-10-14).
+Version `0.1.0` is project metadata; deferred checks have not passed and the full
+v0.1 release gate is not accepted.
 
 ## Project authority
 

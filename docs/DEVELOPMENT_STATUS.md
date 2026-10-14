@@ -6,12 +6,12 @@ Updated: 2026-10-14 (America/Los_Angeles).
 
 - Current Release: **v0.6 — Basic Progress & Analytics**
 - Release Completion: **12.5% (3 / 24 weight)**
-- Previous Releases: **v0.2/v0.3/v0.4/v0.5 functional scope DONE (100%); v0.1 84.375% verified with remaining acceptance DEFERRED**
+- Previous Releases: **v0.1 active development DONE (100%; remaining acceptance DEFERRED); v0.2/v0.3/v0.4/v0.5 functional scope DONE (100%)**
 - Current Phase: **Phase 5; task 5.1 Weight Progress DONE**
-- Current Focus: Date-bounded weight progress is verified. Next is task 5.2 Nutrition Progress. Other progress modules and global time presets remain NOT_STARTED.
+- Current Focus: v0.1 development closure is complete under the user's acceptance deferral. Weight Progress is verified; the next implementation task is 5.2 Nutrition Progress. Other progress modules and global time presets remain NOT_STARTED.
 - Status: **IN_PROGRESS — v0.6; device/native-build acceptance DEFERRED**
 - Blockers: No Weight Progress implementation blocker. Figma MCP remains limited; the approved PDF Progress reference and verified components were used. Existing SDK patch/security/dependency follow-ups remain documented for quality work.
-- Approval boundary: User authorized the next feature on 2026-10-14. Scope is task 5.1, with only its required date-bounded read/UI. No other analytics module, AI, new migration/dependency or native/EAS build. Device testing stays deferred.
+- Approval boundary: The latest user work order closes v0.1 active development and defers its remaining checks. This task adds no analytics module, migration, dependency or native/EAS build. Task 5.1 remains DONE; testing deferral is not acceptance evidence.
 
 Latest design access: the user supplied a local Figma PDF export and authorized
 it as fallback when MCP calls are exhausted. Its first foundation page retains
@@ -38,28 +38,39 @@ Use the Development Plan's weights exactly. For each active item, earned weight
 is `weight × verified completed subtasks / total subtasks`. DONE earns full weight;
 NOT_STARTED earns zero; BLOCKED earns only completed subtasks. DEFERRED and DROPPED
 items are excluded from their release denominator. Never infer progress from Figma.
-All eight v0.2 tasks and all sixteen v0.3 functional tasks are verified. Device acceptance remains an unweighted pending follow-up; native builds are user-deferred. No future-release or retained feature has been silently removed.
+All eight v0.2 tasks and all sixteen v0.3 functional tasks are verified. Their device acceptance remains an unweighted pending follow-up; native builds are user-deferred. v0.1's weighted acceptance split is recorded below. No future-release or retained feature has been silently removed.
 
 v0.1 denominator: `2 + 3 + 3 + 2 + 5 + 3 + 3 + 6 + 3 + 6 + 4 = 40`.
-Subtasks below define a reproducible foundation baseline; partial values are
-fractions, not subjective estimates. CI is implemented and its remote run passed.
+Subtasks below define a reproducible foundation baseline. CI is implemented and
+its remote run passed. The user's 2026-10-14 instruction closes the active
+development scope and excludes the remaining 6.25 DEFERRED acceptance weight
+from the active denominator: **33.75 / (40 - 6.25) = 100%, DONE**.
+The unchanged full-scope verified baseline is **33.75 / 40 = 84.375%**;
+full release acceptance is **DEFERRED**, not passed. Canonical weights are
+preserved; no new weight is earned by this scope change. See the closure table
+for each item's active/deferred weight and existing implementation evidence.
 v1.0 has no plan weight: track its nine explicit
 release gates separately, without inventing a numeric weight.
 
 Earned weight: `2 × 4/4 + 3 × 2/3 + 3 × 5/5 + 2 × 2/2 + 5 × 4/5 + 3 × 2/3 + 3 × 3/4 + 6 × 10/12 + 3 × 4/4 + 6 × 3/4 + 4 × 4/4 = 33.75`.
-Release completion: `33.75 / 40 × 100 = 84.375%`. Rounded table percentages never
-replace these exact fractions. This is verified foundation progress, not a completed v0.1 release.
+Full-scope verified baseline: `33.75 / 40 × 100 = 84.375%`. Rounded table
+percentages never replace these exact fractions. Active development completion
+is 100% after the explicit check deferral; full v0.1 release acceptance is pending.
 
 v0.2 denominator: `2 + 4 + 3 + 5 + 4 + 5 + 3 + 2 = 28`.
 Earned weight: `2 + 4 + 3 + 5 + 4 + 5 + 3 + 2 = 28`.
 Release completion: `28 / 28 × 100 = 100%`. Each verification group below has implementation evidence; this does not claim physical-device QA or v0.1 acceptance.
-Deferred unweighted acceptance-check records below do not reweight completed
-foundation work or turn the unchanged 84.375% full-scope baseline into 100%.
+The 2026-10-14 weighted v0.1 acceptance split supersedes the earlier unweighted
+deferral records. Its original full-scope verified baseline remains 84.375%.
 
 v0.3 denominator: `6 + 6 + 5 + 3 + 3 + 10 + 4 + 2 + 4 + 4 + 4 + 3 + 4 + 4 + 3 + 5 = 70`.
 Earned weight: `6 + 6 + 5 + 3 + 3 + 10 + 4 + 2 + 4 + 4 + 4 + 3 + 4 + 4 + 3 + 5 = 70`. Functional completion is `70 / 70 × 100 = 100%`. The physical-device/native-build follow-ups are not claimed passed.
 
 ## Feature Table
+
+For v0.1, status/completion refer to active development only. Weight retains the
+original planned total; the closure table splits each total into verified DONE
+weight and DEFERRED check weight. Do not count a DONE row's deferred portion as earned.
 
 v0.4 denominator: `5 + 3 + 5 + 5 + 6 + 6 + 6 + 3 + 3 + 4 + 5 + 4 + 2 = 57`.
 Earned weight: **57**. Functional completion is `57 / 57 × 100 = 100%`.
@@ -69,15 +80,15 @@ User-deferred device checks are separate, unweighted acceptance records; they ar
 | Area             | Feature                                | Release | Weight | Status      | Completion | Notes                                                                                                                                           |
 | ---------------- | -------------------------------------- | ------- | -----: | ----------- | ---------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | Phase 0 / 0.1    | Repository                             | v0.1    |      2 | DONE        |       100% | Git, ignores, README, env template verified (4/4).                                                                                              |
-| Phase 0 / 0.2    | React Native / Expo                    | v0.1    |      3 | IN_PROGRESS |     66.67% | Config/exports, TypeScript and EAS setup verified; native compilation/launch pending (2/3).                                                     |
+| Phase 0 / 0.2    | React Native / Expo                    | v0.1    |      3 | DONE        |       100% | Config, TypeScript, exports and EAS setup verified. Active weight 2 DONE; native launch weight 1 DEFERRED.                                      |
 | Phase 0 / 0.3    | Quality Baseline                       | v0.1    |      3 | DONE        |       100% | Typecheck, lint, format, tests and remote CI passed (5/5).                                                                                      |
 | Phase 0 / 0.4    | App Structure                          | v0.1    |      2 | DONE        |       100% | Router scaffold and current architecture boundaries verified (2/2).                                                                             |
-| Phase 0 / 0.5    | Design System                          | v0.1    |      5 | IN_PROGRESS |        80% | Palette, typography, layout and current component/state catalog verified (4/5); exact visual/theme acceptance pending.                          |
-| Phase 0 / 0.6    | Navigation                             | v0.1    |      3 | IN_PROGRESS |     66.67% | Five routes and authenticated/recovery routing contracts verified (2/3); iPhone switching user-confirmed; complete live tab acceptance pending. |
-| Phase 0 / 0.7    | Supabase Integration                   | v0.1    |      3 | IN_PROGRESS |        75% | Configuration, client/lifecycle contracts and live API probes verified (3/4); native checks pending.                                            |
-| Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | IN_PROGRESS |     83.33% | Six implementation contracts plus sign-in/out, reset and session persistence user-verified (10/12); signup/verification acceptance open.        |
+| Phase 0 / 0.5    | Design System                          | v0.1    |      5 | DONE        |       100% | Tokens, shared controls/states and approved themes verified. Active weight 4 DONE; full visual acceptance weight 1 DEFERRED.                    |
+| Phase 0 / 0.6    | Navigation                             | v0.1    |      3 | DONE        |       100% | Five routes and session/recovery guards verified; iPhone tab switching user-confirmed. Active weight 2 DONE; live transitions weight 1 DEFERRED |
+| Phase 0 / 0.7    | Supabase Integration                   | v0.1    |      3 | DONE        |       100% | Public config, client/lifecycle and live probes verified. Active weight 2.25 DONE; platform checks weight 0.75 DEFERRED.                        |
+| Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | DONE        |       100% | Six flows implemented; sign-in/out/reset/persistence accepted. Active weight 5 DONE; signup/verification checks weight 1 DEFERRED.              |
 | Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | DONE        |       100% | Schema/services/UI and web/iPhone profile/preferences save/reopen user-verified (4/4); separate native email-change follow-up remains.          |
-| Phase 0 / 0.10   | RLS / Security Foundation              | v0.1    |      6 | IN_PROGRESS |        75% | Grants/policies, database isolation/constraints and lifecycle tested (3/4); application integration pending.                                    |
+| Phase 0 / 0.10   | RLS / Security Foundation              | v0.1    |      6 | DONE        |       100% | Grants/RLS, SQL isolation, constraints and lifecycle verified. Active weight 4.5 DONE; app/security checks weight 1.5 DEFERRED.                 |
 | Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | DONE        |       100% | Types, owned services, validation/error mapping and live profile/preferences reads/writes verified (4/4).                                       |
 | Phase 1 / 1.1    | Muscle & Equipment Schema              | v0.2    |      2 | DONE        |       100% | Hosted catalogs, stable UUIDs/constraints, RLS and generated types verified (4/4).                                                              |
 | Phase 1 / 1.2    | Exercise Schema                        | v0.2    |      4 | DONE        |       100% | Source IDs, instructions, relationships and licenses deployed; repeat import preserves all 643 IDs (4/4).                                       |
@@ -196,7 +207,7 @@ User-deferred device checks are separate, unweighted acceptance records; they ar
 
 | Phase    | Release | Purpose                           | Planned weight | Completion | Status      |
 | -------- | ------- | --------------------------------- | -------------: | ---------: | ----------- |
-| Phase 0  | v0.1    | Foundation                        |             40 |    84.375% | IN_PROGRESS |
+| Phase 0  | v0.1    | Foundation                        |             40 |       100% | DONE        |
 | Phase 1  | v0.2    | Exercise Library                  |             28 |       100% | DONE        |
 | Phase 2  | v0.3    | Strength Workout System           |             70 |       100% | DONE        |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |       100% | DONE        |
@@ -211,7 +222,65 @@ User-deferred device checks are separate, unweighted acceptance records; they ar
 | Phase 12 | v1.5    | Advanced Offline / Sync           |             28 |         0% | NOT_STARTED |
 | Phase 13 | v2.0    | Health / Wearables                |             47 |         0% | NOT_STARTED |
 
-## Foundation subtask ledger
+## v0.1 development closure — 2026-10-14
+
+**DONE — 100% of active foundation development; full release acceptance DEFERRED.**
+The user explicitly requested deferring the remaining checks and completing v0.1.
+All eleven foundation items have existing implementation evidence. Review found
+no unfinished non-deferred foundation feature; no placeholder, disabled security,
+new dependency, schema, key, paid service or build was added to close the phase.
+The next planned feature remains v0.6 task 5.2, not implemented by this work order.
+
+The main feature/phase tables now report active completion. Their original plan
+weights remain unchanged. Completed weight is still 33.75; it has not increased.
+
+| Task                           | Original weight | Verified active weight | Deferred check weight | Active status | Evidence                                                                                        |
+| ------------------------------ | --------------: | ---------------------: | --------------------: | ------------- | ----------------------------------------------------------------------------------------------- |
+| 0.1 Repository                 |               2 |                      2 |                     0 | DONE          | Git, ignores, README and credential-free env template.                                          |
+| 0.2 React Native / Expo        |               3 |                      2 |                     1 | DONE          | Strict TypeScript, supported project configuration/exports and configured development profiles. |
+| 0.3 Quality Baseline           |               3 |                      3 |                     0 | DONE          | Typecheck, lint, format, tests and previously passing remote CI.                                |
+| 0.4 App Structure              |               2 |                      2 |                     0 | DONE          | Expo Router composition and feature UI/business/data boundaries.                                |
+| 0.5 Design System              |               5 |                      4 |                     1 | DONE          | Verified palette/type/layout, shared controls/states and approved functional dark mode.         |
+| 0.6 Navigation                 |               3 |                      2 |                     1 | DONE          | Five guarded tabs, icons, account routes and recovery contracts.                                |
+| 0.7 Supabase Integration       |               3 |                   2.25 |                  0.75 | DONE          | Validated public configuration, persistent client, lifecycle and prior live probes.             |
+| 0.8 Authentication             |               6 |                      5 |                     1 | DONE          | Six flow implementations/contracts; existing user-verified sign-in/out/reset/persistence.       |
+| 0.9 Profile / Preferences      |               3 |                      3 |                     0 | DONE          | Owned profile/preferences, account updates, units/time zone, opt-ins and saved themes.          |
+| 0.10 RLS / Security Foundation |               6 |                    4.5 |                   1.5 | DONE          | Grants/ownership policies, SQL isolation, constraints, initialization and cascades.             |
+| 0.11 Data Access Layer         |               4 |                      4 |                     0 | DONE          | Generated types, owned services, validated inputs/safe errors and persistence evidence.         |
+| Total                          |              40 |                  33.75 |                  6.25 | DONE          | Active: 33.75 / 33.75 = 100%; original full scope: 33.75 / 40 = 84.375%.                        |
+
+Deferred checks remain weighted and excluded only from the current active denominator:
+
+| Check                                                            | Weight | Status   | Resume condition                                                                              |
+| ---------------------------------------------------------------- | -----: | -------- | --------------------------------------------------------------------------------------------- |
+| Custom native development-build compilation and launch           |      1 | DEFERRED | User authorizes builds; target/signing access is available.                                   |
+| Full visual/theme acceptance, including unverified Figma parity  |      1 | DEFERRED | Foundation visual review against approved references.                                         |
+| Complete live tab/back/sign-out/recovery transitions             |      1 | DEFERRED | Cross-platform acceptance pass; preserve accepted basic switching/icons.                      |
+| Remaining Supabase platform integration                          |   0.75 | DEFERRED | iOS/Android target availability and live platform checks.                                     |
+| Individually identified live signup/email verification groups    |      1 | DEFERRED | Fresh confirmation flows on the initiating platform within email limits.                      |
+| Foundation two-account application isolation/security acceptance |    1.5 | DEFERRED | Dedicated foundation acceptance pass; reuse recorded SQL and later-module isolation evidence. |
+
+Native email-change/post-crypto callback checks remain within the Auth follow-up;
+they do not add another weight. None of these checks is claimed passed. Before
+v1.0 release acceptance, resume every retained check and fix any discovered defect.
+Account deletion/export remain retained product requirements with placement still
+unresolved; this foundation closure does not claim them implemented. Existing
+dependency/SDK/advisor findings remain open quality-phase work.
+
+Verification for this documentation-only closure:
+
+- Reread both canonical documents and inspected foundation config, route/session
+  guards, shared controls, client lifecycle, profile/preferences/security services,
+  the foundation migration and existing regression coverage. Existing code and
+  historical user/database evidence support the completed active groups above.
+- `npm.cmd run check`: PASS — strict TypeScript, lint, formatting, 251 Jest tests
+  across 48 suites and 6 dataset tests (257 total).
+- `git diff --check` and `git check-ignore .env .actaro-tools/close-foundation.cjs`:
+  PASS. Only the six scoped documentation files are staged for the closure commit.
+- No live Supabase call, confirmation email, native build or device check was run;
+  the user's deferral is respected. The supplied design PDF is unchanged/untracked.
+
+## Historical foundation subtask ledger (before 2026-10-14 closure)
 
 Each numbered task retains its canonical weight. A checked item requires the
 specific implementation and validation evidence listed in Last Completed.
@@ -236,7 +305,7 @@ specific implementation and validation evidence listed in Last Completed.
 - **0.5 Design System (5 subtasks):** shared verified palette; shared typography; shared layout/radius/touch-target values; complete current component catalog and screen states; full Figma matching including themes. Verified: 4/5. Shared controls now cover buttons, inputs, account cards, preference chips, selected tabs and real loading/empty/error states. Theme-aware styling uses verified light values and the user-approved functional dark palette; explicit preference selection/save contracts pass. Full visual/theme acceptance remains pending. No unused future performance component or guessed lime color was added.
 - **0.6 Navigation (3 subtasks):** five-tab composition and bundle validation; signed-in landing/signed-out/recovery routing contracts; live switching/back/sign-out acceptance on web and native. Verified: 2/3. Navigator contract tests mock rendering; separate isolated browser checks exercise actual tab selection with a local session fixture. The user confirms tab switching and the new icon rendering. Complete live back/sign-out/recovery acceptance remains open; the icon request intentionally replaces the PDF's dots.
 
-## v0.1 dependencies and remaining acceptance (2026-10-11)
+## Historical v0.1 dependencies and remaining acceptance (2026-10-11)
 
 The user confirms that the new icons load correctly. That closes the reported
 icon-rendering follow-up; it does not by itself verify every back/sign-out/recovery
@@ -293,6 +362,9 @@ reconciliation changes documentation only, adds no completion weight and sends
 no Supabase request. Reuse the existing local preview for the next visual task.
 
 ## Deferred v0.1 testing (2026-10-12)
+
+Historical record: the weighted closure above supersedes the earlier unweighted
+status treatment. All retained checks remain DEFERRED; none is newly passed.
 
 The user explicitly requested testing these later. These are unweighted acceptance
 records, not removed roadmap features. Preserve the 84.375% full-scope baseline and
@@ -419,7 +491,12 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 
 ## Last Completed
 
-**Latest DONE — v0.6 task 5.1 Weight Progress (2026-10-14).** Full owned weight
+**Latest DONE — v0.1 active development closure (2026-10-14).** All foundation
+implementation groups are complete; the remaining 6.25 check weight is explicitly
+user-DEFERRED. The closure table records weights, evidence and resume conditions.
+No app behavior changed and no full-release acceptance was granted.
+
+**DONE — v0.6 task 5.1 Weight Progress (2026-10-14).** Full owned weight
 history within chosen dates, saved units, recorded change/average/range, bounded
 chart with missing dates, exact history, logging link and loading/error/retry.
 Supporting evidence is in the Weight Progress acceptance entry below. v0.5
@@ -885,6 +962,10 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
+v0.1 active development is DONE (33.75/33.75 = 100%) under the latest user
+check-deferral instruction. Full foundation release acceptance remains DEFERRED.
+The closure changes documentation only; no additional module was implemented.
+
 v0.6 task 5.1 Weight Progress is DONE at 3/3 weight. Overall v0.6 is 3/24 (12.5%). No other progress module is implemented. Earlier v0.2–v0.5 functional work remains DONE. Physical-device and native-build acceptance remain separately user-DEFERRED.
 
 ## Next 3 Actions
@@ -919,6 +1000,11 @@ notification placement and custom native builds remain **DEFERRED** under the us
   should be reviewed alongside SDK-compatible dependency remediation.
 
 ## Recent Decisions
+
+- 2026-10-14: User explicitly closed v0.1 active development with remaining
+  acceptance checks DEFERRED. Preserve original weights and historical evidence;
+  report active DONE separately from unaccepted full release gates. This overrides
+  the earlier IN_PROGRESS development status, not the product requirements.
 
 - Preserve official default template structure and dependencies (SDK 57), with
   lowercase slug `actaro`, visible name `Actaro`, and metadata version `0.1.0`.
