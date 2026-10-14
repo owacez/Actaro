@@ -1,17 +1,17 @@
 # Actaro — Development Status
 
-Updated: 2026-10-13 (America/Los_Angeles).
+Updated: 2026-10-14 (America/Los_Angeles).
 
 ## Overall
 
-- Current Release: **v0.4 — Manual Nutrition**
-- Release Completion: **100% (57 / 57 weight)**
-- Previous Releases: **v0.2/v0.3 functional scope DONE (100%); v0.1 84.375% verified with remaining acceptance DEFERRED**
-- Current Phase: **Phase 3 — Manual Nutrition; functional scope complete**
-- Current Focus: All thirteen v0.4 tasks are verified. Device/native acceptance remains user-deferred until more of the app is complete. Next planned release is v0.5; no habit/goal/dashboard implementation has begun.
-- Status: **DONE — v0.4 functional scope; physical-device acceptance remains deferred**
-- Blockers: No nutrition implementation blocker. Figma subtree access remains limited; approved PDF fallback is available. Device/native build and foundation acceptance deferrals remain unchanged. Existing Auth leaked-password protection and dependency advisories remain follow-ups.
-- Approval boundary: User explicitly authorized progressing through v0.2/v0.3 and completing v0.4 on 2026-10-13, with device acceptance postponed until most of the app is implemented. Each module is independently verified. Custom native builds remain deferred; no build was submitted. v0.5 has not started.
+- Current Release: **v0.5 — Habits, Goals & Today**
+- Release Completion: **100% functional scope (38 / 38 weight)**
+- Previous Releases: **v0.2/v0.3/v0.4 functional scope DONE (100%); v0.1 84.375% verified with remaining acceptance DEFERRED**
+- Current Phase: **Phase 4; functional implementation complete**
+- Current Focus: All eleven v0.5 tasks have hosted persistence, ownership tests and browser evidence. Physical-device acceptance remains user-deferred. Next release is v0.6; no historical Progress analytics implementation has begun.
+- Status: **DONE — functional v0.5; device/native-build acceptance DEFERRED**
+- Blockers: No v0.5 implementation blocker. Figma MCP is limited; approved PDF fallback was used. Existing Auth leaked-password protection, SDK patch recommendations and dependency advisories remain quality follow-ups.
+- Approval boundary: User authorized completing v0.5 on 2026-10-14 and explicitly deferred device testing. No native/EAS build, running/GPS, Active Minutes or future-release analytics was implemented.
 
 Latest design access: the user supplied a local Figma PDF export and authorized
 it as fallback when MCP calls are exhausted. Its first foundation page retains
@@ -110,17 +110,17 @@ User-deferred device checks are separate, unweighted acceptance records; they ar
 | Phase 3 / 3.11   | Recipes                                | v0.4    |      5 | DONE        |       100% | Actual ingredient portions, servings/total/per-serving, owned create/edit/delete verified.                                                      |
 | Phase 3 / 3.12   | Recipe-by-Weight                       | v0.4    |      4 | DONE        |       100% | Optional cooked total weight, per-100g and arbitrary grams; serving-only behavior verified.                                                     |
 | Phase 3 / 3.13   | Hydration                              | v0.4    |      2 | DONE        |       100% | Persisted targets and ml/L/US fl oz entries with validation, reopen and delete verified.                                                        |
-| Phase 4 / 4.1    | Habit Schema                           | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.1.                                                                                                              |
-| Phase 4 / 4.2    | Habit Creation                         | v0.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §4.2.                                                                                                              |
-| Phase 4 / 4.3    | Habit Logging                          | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.3.                                                                                                              |
-| Phase 4 / 4.4    | Habit History / Consistency            | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.4.                                                                                                              |
-| Phase 4 / 4.5    | Motivation Mode                        | v0.5    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §4.5.                                                                                                              |
-| Phase 4 / 4.6    | Goal Schema                            | v0.5    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §4.6.                                                                                                              |
-| Phase 4 / 4.7    | Goal Creation                          | v0.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §4.7.                                                                                                              |
-| Phase 4 / 4.8    | Goal Progress                          | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.8.                                                                                                              |
-| Phase 4 / 4.9    | Bodyweight Logging                     | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.9.                                                                                                              |
-| Phase 4 / 4.10   | Steps Foundation                       | v0.5    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §4.10.                                                                                                             |
-| Phase 4 / 4.11   | Today Dashboard                        | v0.5    |      8 | NOT_STARTED |         0% | Requirements: canonical plan §4.11.                                                                                                             |
+| Phase 4 / 4.1    | Habit Schema                           | v0.5    |      3 | DONE        |       100% | Owned definitions/dated settings/logs; local/hosted constraints, ownership and grants pass.                                                     |
+| Phase 4 / 4.2    | Habit Creation                         | v0.5    |      4 | DONE        |       100% | All five types, units, schedule/dates/reminder and create/reopen verified.                                                                      |
+| Phase 4 / 4.3    | Habit Logging                          | v0.5    |      3 | DONE        |       100% | Explicit zero/not-done, dated edit/removal and exact acknowledged retry verified.                                                               |
+| Phase 4 / 4.4    | Habit History / Consistency            | v0.5    |      3 | DONE        |       100% | 90-date history, dated targets, rest/partial weeks; calendar tests and browser history pass.                                                    |
+| Phase 4 / 4.5    | Motivation Mode                        | v0.5    |      2 | DONE        |       100% | Streaks/weekly/completion/None, actual in-app due reminders; OS delivery remains later.                                                         |
+| Phase 4 / 4.6    | Goal Schema                            | v0.5    |      2 | DONE        |       100% | Owned validated goals and compatible owned sources; hosted/local RLS and retries verified.                                                      |
+| Phase 4 / 4.7    | Goal Creation                          | v0.5    |      4 | DONE        |       100% | Thirteen metrics, baseline/direction/date/unit validation and source selection; create/edit/delete/restore pass.                                |
+| Phase 4 / 4.8    | Goal Progress                          | v0.5    |      3 | DONE        |       100% | Body/workout/PR/activity/nutrition/habit facts; missing sources, deadlines and dated targets handled.                                           |
+| Phase 4 / 4.9    | Bodyweight Logging                     | v0.5    |      3 | DONE        |       100% | Dated kg/cm values, named measurements, preferences, replace/edit/delete/history verified.                                                      |
+| Phase 4 / 4.10   | Steps Foundation                       | v0.5    |      3 | DONE        |       100% | Manual totals/targets verified; iPhone permission/read adapter unit tested. Physical sensor QA DEFERRED.                                        |
+| Phase 4 / 4.11   | Today Dashboard                        | v0.5    |      8 | DONE        |       100% | Saved weight/trend, steps, nutrition, workout, habits/goals, training/recovery; browser layouts and failed-load/retry pass.                     |
 | Phase 5 / 5.1    | Weight Progress                        | v0.6    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §5.1.                                                                                                              |
 | Phase 5 / 5.2    | Nutrition Progress                     | v0.6    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §5.2.                                                                                                              |
 | Phase 5 / 5.3    | Workout Frequency                      | v0.6    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §5.3.                                                                                                              |
@@ -194,7 +194,7 @@ User-deferred device checks are separate, unweighted acceptance records; they ar
 | Phase 1  | v0.2    | Exercise Library                  |             28 |       100% | DONE        |
 | Phase 2  | v0.3    | Strength Workout System           |             70 |       100% | DONE        |
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |       100% | DONE        |
-| Phase 4  | v0.5    | Habits, Goals & Today             |             38 |         0% | NOT_STARTED |
+| Phase 4  | v0.5    | Habits, Goals & Today             |             38 |       100% | DONE        |
 | Phase 5  | v0.6    | Basic Progress & Analytics        |             24 |         0% | NOT_STARTED |
 | Phase 6  | v0.9    | Quality & Personal Beta           |             33 |         0% | NOT_STARTED |
 | Phase 7  | v1.0    | Core Deterministic Release        |    — (9 gates) |         0% | NOT_STARTED |
@@ -877,11 +877,12 @@ v0.4 functional scope is DONE at 57/57 weight. All tasks have code, tests and in
 
 ## Next 3 Actions
 
-1. v0.5 task 4.1: owned habit definitions/log schema with date/schedule constraints and two-account RLS tests.
-2. v0.5 task 4.2: create a habit with the approved type, goal, unit, frequency and date settings; validate and reopen it.
-3. v0.5 task 4.3: record today's boolean/numeric/duration/frequency/avoidance result and verify persisted history.
+1. v0.6 task 5.1: body Progress from dated weights/measurements, truthful missing dates and unit preferences.
+2. v0.6 task 5.2: nutrition Progress from existing diary snapshots and dated nutrition targets.
+3. v0.6 task 5.3: workout Progress from completed session/volume facts, retaining Timed versus Log Only distinctions.
 
-Device acceptance and custom native builds remain separately recorded.
+Physical-device testing, iPhone sensor permission/count accuracy, Android manual activity,
+notification placement and custom native builds remain **DEFERRED** under the user's instruction.
 
 ## Blockers / Decisions
 
@@ -1404,3 +1405,25 @@ Device acceptance and custom native builds remain separately recorded.
   NOT_STARTED while Supabase calls are paused. Task 1.1 is **75%**; v0.2 earns
   **1.5/28 = 5.357143%**. Remaining v0.1 tests are DEFERRED by the user, with the
   full-scope baseline unchanged at **84.375%**; no false release completion.
+
+## v0.5 functional acceptance — 2026-10-14
+
+**DONE: 38 / 38 = 100% functional implementation. Device QA remains DEFERRED.**
+Weights: `3 + 4 + 3 + 3 + 2 + 2 + 4 + 3 + 3 + 3 + 8 = 38`. Each task above has implementation and verification evidence. This does not change v0.1's 84.375% baseline or declare v1.0 ready.
+
+- Read both canonical documents completely; applied Ponytail full, Supabase and RLS guidance. Used relevant approved Habits/Goals/Today PDF regions and existing verified primitives. No Figma edits, new backend, AI, paid service or build submission.
+- Six hosted migrations, matching local versions: `20261014104828_habit_foundation.sql`, `20261014111517_goals_body_activity.sql`, `20261014112105_record_save_operations.sql`, `20261014112253_activity_optional_metrics.sql`, `20261014113535_goal_source_lifecycle.sql`, `20261014115349_habit_ownership_indexes.sql`. Generated database types match. Eight owned tables, actor-checked invoker RPCs, empty search paths, role grants, constraints, source ownership and covering indexes verified.
+- Habits: five types, explicit logging, dated target/schedule settings, optional end/reminder, all motivation styles, history, edit/remove logs, archive/restore. Rest days and partial frequency weeks do not create false consistency misses. Reminders are in-app due states; OS delivery remains later notification work.
+- Goals: thirteen body/training/activity/nutrition/habit metrics. Progress reads recorded facts; missing food/body/activity is unavailable, not success. Decreasing targets, deadlines, chosen units, recurring periods and estimated-PR semantics are explicit. Running/pace/event sources remain DEFERRED to v1.2.
+- Body/activity: canonical kg/cm/km, preference conversion, dated edit/delete/history, named measurements, provenance and explicit daily steps targets. iPhone adapter checks availability/permission and reads since midnight; it requires review/save and replaces, never adds, manual/sensor totals. Android/web use manual daily totals. Actual sensor accuracy/permissions on devices remain DEFERRED.
+- Today reuses underlying module services/models for weight/week change/seven-date trend, steps/target/remaining, nutrition/macros/hydration, planned workout/pre-start totals, local workout resume, habits/goals, Training Status and manual Recovery. No mock values or duplicate workout/nutrition formulas. Empty/loading/error/retry states are implemented.
+- `npm.cmd run check`: **PASS** — strict TypeScript, lint, formatting, **243 Jest tests / 45 suites + 6 dataset tests = 249 tests**. New tests cover calendar/rest/partial weeks, explicit zero, goal direction/source validation, unit conversion, DST, sensor denial/platform fallback, input correction, ownership and exact failed-save retries.
+- `node .actaro-tools/test-v05.mjs`: **PASS** — all migrations on PostgreSQL 18.3/PGlite, prior workout/nutrition contracts and new `supabase/tests/habits.sql` / `goals_body_activity.sql`. Both new rollback SQL suites also executed on hosted Supabase: **PASS**.
+- `node --env-file=.env .actaro-tools/check-habits-live.mjs` and `check-v05-live.mjs`: **PASS** — two disposable confirmed accounts, all five habit types and thirteen goal metrics save/retry/reopen, source records, archive/restore, foreign read/write denial and invalid/future denial. No signup/confirmation emails. Fixture credentials/tooling remain ignored.
+- Browser: `check-habits-browser.mjs` **PASS** for create/reopen/log/history/archive/restore. `check-v05-browser.mjs` verified body/measurement/activity edit/reopen, goal create/edit/archive/restore and real Today facts at 390px, 320px dark and 1280px without overflow. Its final negative scenario initially targeted Goals; corrected standalone `check-today-error-browser.mjs` **PASS** for failed Today load and Retry recovery. Screenshots inspected; viewport emulation is not physical-device evidence.
+- `npm.cmd exec --no -- expo export --platform all --output-dir .actaro-tools/v05-export`: **PASS** — Android/iOS JS bundles plus web export with 37 routes. No native build was submitted.
+- `npm.cmd exec --no -- expo install --check`: **FAIL** — existing SDK 57 patch recommendations for `@expo/ui`, `expo`, `expo-crypto`, `expo-dev-client`, `expo-router`, `expo-splash-screen`, `jest-expo`. New `expo-sensors ~57.0.3` matches SDK guidance. Working dependency versions were preserved; patch upgrades/device regressions and existing dependency advisories are tracked for v0.9. No forced audit upgrade.
+- Hosted security advisor: only existing Auth leaked-password protection WARN; no new table security errors. Both new habit FK index findings resolved. Five existing workout composite-FK INFO findings and unused-index INFO notices remain quality follow-ups.
+- Device/native builds, physical iPhone count/permission checks, Android activity and cross-platform acceptance remain user-**DEFERRED**. Existing environment configuration is reused; no new API key or privileged app secret.
+- `node .actaro-tools/check-v05-artifacts.mjs`: **PASS**, 145 exported artifacts contain no privileged Supabase key. `node --env-file=.env .actaro-tools/cleanup-v05.mjs`: **PASS**, both verified disposable accounts and their owned records removed; expired access tokens were already unusable. Real user data was preserved.
+- Focused implementation commits: `84c8a6a` (`feat(tracking): add habits goals and daily activity records`) and `6f6785d` (`feat(today): add record editors and daily dashboard`). README and this ledger record usage, functional acceptance and explicit device/future-release deferrals.

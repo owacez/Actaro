@@ -3,7 +3,8 @@
 Premium personal fitness and wellness mobile application, developed incrementally.
 Current implementation: Expo/Supabase foundation, account management and preferences,
 plus a dataset-backed Exercise Library, full strength workout logging, and manual
-nutrition with USDA foods, recipes and hydration. Remaining foundation acceptance is deferred for later
+nutrition with USDA foods, recipes and hydration; habits, measurable goals, body
+records, daily steps/activity and a Today dashboard. Remaining foundation acceptance is deferred for later
 testing. Version `0.1.0` is project metadata; v0.1's full release gate has not passed.
 
 ## Project authority
@@ -189,7 +190,12 @@ expire automatically; hovering or focusing the web notification pauses dismissal
 | Set a New Password          | Updates the password after the SDK recovery event.                                                                                 |
 | Callback processing / error | Exchanges a one-use code or displays a safe link error.                                                                            |
 | Email Confirmed             | Shows verified status from the Supabase session, then Continue to Account.                                                         |
-| Today / Progress            | Signed-in tab destinations; real dashboards and analytics are scheduled for v0.5/v0.6.                                             |
+| Today                       | Persisted bodyweight, steps, calories/macros, planned workout, habits, goals, Training Status and recovery.                        |
+| Progress                    | Signed-in destination; historical analytics are scheduled for v0.6.                                                                |
+| Habits                      | Five habit types, schedules, dated target settings, logging, history and configurable motivation.                                  |
+| Goals                       | Body, training, activity, nutrition and habit targets; progress from recorded facts, editing and deletion/restoration.             |
+| Body records                | Dated bodyweight and named measurements, unit conversion, editing and deletion.                                                    |
+| Steps & activity            | Manual steps/distance, daily target and history; iPhone pedometer read/review/save with permission.                                |
 | Nutrition                   | Daily targets, food search, portion preview, four meal groups, diary editing/copying and hydration.                                |
 | Custom foods / Recipes      | Private label foods, food-specific portions, ingredient recipes, servings and cooked-weight logging.                               |
 | Saved meals                 | Create from a logged meal, log its snapshot to another meal/date or delete the saved template.                                     |
@@ -204,9 +210,10 @@ expire automatically; hovering or focusing the web notification pauses dismissal
 
 The remaining `/explore` route is an Expo starter example, not an Actaro feature.
 The five-tab navigation shell is implemented; sign-in opens Today. The populated
-Today dashboard belongs to v0.5. Workout templates and their builder are implemented;
+Today dashboard is implemented in v0.5. Workout templates and their builder are implemented;
 plans, pre-start and active-session logging are implemented in v0.3. Manual nutrition
-is implemented in v0.4; habits/goals and progress remain in their scheduled releases.
+is implemented in v0.4; habits/goals/body/activity are implemented in v0.5. Historical
+analytics remain scheduled for v0.6. Physical-device acceptance remains deferred.
 
 Tunnel setup and flags follow the [Expo CLI documentation](https://docs.expo.dev/more/expo-cli/).
 
@@ -506,6 +513,42 @@ nutrients and portions, and repeat imports preserve stable source IDs. Do not ru
 an import for ordinary app testing. See the [serving/data decision](docs/decisions/006-nutrition-serving-model.md).
 Physical-device acceptance is deferred; exported native bundles are not device tests.
 
+## Habits, goals and Today (v0.5)
+
+Open **More → Habits**, **Goals**, **Body records**, or **Steps & activity**. Today
+summarizes the same saved records. It refreshes when opened and has a manual
+refresh action; no sample health data is shown.
+
+- Habits support boolean, numeric, duration (minutes), weekly frequency and
+  avoidance. Choose scheduled weekdays, dates and an optional in-app reminder.
+  Reminder times display as due inside the app; OS notification delivery is a
+  later quality-phase task. Start date/type/unit/time zone are fixed after
+  creation. Target/schedule edits take effect from today, preserving prior dates.
+  Rest days and partial first/last weeks do not create false consistency misses.
+  An avoidance value of zero must be explicitly recorded.
+- Goals use measured sources: bodyweight/measurements, weekly workouts,
+  exercise load/estimated 1RM, daily steps/manual distance, active days, recorded
+  calories/protein, macro adherence and habit completion/frequency. Choose a
+  baseline, target, direction and dates. Missing food/body/activity records
+  display as unavailable. The current day/week can change; meeting a recurring
+  target today does not permanently complete later periods. Running/pace/event
+  goals remain scheduled for v1.2.
+- Body records store kg/cm and daily activity stores steps/km, displaying your
+  saved unit preferences. Saving the same date/measurement replaces its value.
+  Edit/delete recorded entries from history; goals recalculate from the records.
+- Set a daily steps target explicitly. On iPhone, **Read iPhone steps for today**
+  requests Motion permission and reads since midnight in your saved time zone.
+  Review the count, then save. A sensor reading replaces that day's steps; it
+  does not add to a manual count or another phone. Android/web support manual
+  daily totals because foreground sensor updates are not full-day totals.
+  Permission denial or unavailable sensing retains the manual option.
+
+After pulling this update, run `npm ci` for the SDK-compatible `expo-sensors`
+dependency, then start Expo Go using the commands above. No new API key or paid
+service is required. Hosted migrations are already applied to the connected
+project. A different Supabase project needs the committed migrations applied
+before using these screens. Native builds and physical sensor QA remain deferred.
+
 ## Release discipline
 
 Core order: v0.1 Foundation → v0.2 Exercise Library → v0.3 Strength Workouts →
@@ -519,5 +562,5 @@ Future order: v1.1 Active Minutes → v1.2 Running & GPS → v1.3 Advanced Analy
 Initialization stops at review. Feature development requires explicit approval
 of the next small, independently verifiable task.
 
-For signup, verification and reset testing, see [authentication testing](docs/AUTH_TESTING.md). After sign-in, Today opens within the five-tab shell; More contains account management and sign-out. Product dashboards are not implemented.
+For signup, verification and reset testing, see [authentication testing](docs/AUTH_TESTING.md). After sign-in, Today opens within the five-tab shell; More contains account management and the v0.5 record editors.
 For name/email/password and account-isolation checks, see [profile testing](docs/PROFILE_TESTING.md).
