@@ -1,6 +1,6 @@
 # Actaro — Development Status
 
-Updated: 2026-10-15 (America/Los_Angeles).
+Updated: 2026-10-16 (America/Los_Angeles).
 
 ## Overall
 
@@ -13,7 +13,14 @@ Updated: 2026-10-15 (America/Los_Angeles).
 - Blockers: No remaining authorized implementation blocker. Dependency advisories, disabled leaked-password protection, exact visual/device checks and native-build acceptance remain documented release-review findings. They are not claimed passed or waived.
 - Approval boundary: The user authorized completing v0.9, retaining the earlier instruction that device acceptance, personal testing and v1.0 release approval happen afterward. No paid service or native/EAS build was used.
 
-Latest design access: the user supplied a local Figma PDF export and authorized
+Latest design sync (2026-10-16): **BLOCKED** at final visual correction by the
+Figma Starter MCP limit. The authorized code-to-design update applied 78 editable
+screens/states and preserved 23 future concepts separately. Short-link wrapping,
+blank exercise-image previews and native-only visual variants remain pending;
+exact visual acceptance is not claimed. See [sync evidence and frame links](FIGMA_IMPLEMENTATION_SYNC.md).
+No app implementation or weighted release-completion values changed.
+
+Earlier design access: the user supplied a local Figma PDF export and authorized
 it as fallback when MCP calls are exhausted. Its first foundation page retains
 an older green accent, conflicting with the canonical orange-coral decision and
 previously fetched auth nodes; those verified orange values remain in use.
