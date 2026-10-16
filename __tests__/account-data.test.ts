@@ -15,7 +15,9 @@ const user: User = {
   app_metadata: {},
   user_metadata: {},
 };
-const mockFetch = jest.fn<typeof fetch>();
+// DOM, React Native and Node can add different overloads to global fetch.
+// Accept every input shape, as in the other Supabase request-mock tests.
+const mockFetch = jest.fn<(input: unknown, init?: unknown) => Promise<Response>>();
 const makeClient = () =>
   createClient<Database>('https://example-project.supabase.co', 'test-public-key', {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -84,13 +86,18 @@ test('deletion requires deliberate confirmation and never sends an account ID or
   expect(mockFetch).not.toHaveBeenCalled();
   await deleteOwnAccount(user.id, 'password', 'DELETE');
   expect(String(mockFetch.mock.calls[0][0])).toContain('/functions/v1/delete-account');
-  expect(JSON.parse(String(mockFetch.mock.calls[0][1]?.body))).toEqual({
-    password: 'password',
-    confirmation: 'DELETE',
+  const options = mockFetch.mock.calls[0][1];
+  if (
+    !options ||
+    typeof options !== 'object' ||
+    !('headers' in options) ||
+    !(options.headers instanceof Headers)
+  )
+    throw new Error('Expected fetch options with Headers.');
+  expect(options).toMatchObject({
+    body: JSON.stringify({ password: 'password', confirmation: 'DELETE' }),
   });
-  expect(new Headers(mockFetch.mock.calls[0][1]?.headers).get('authorization')).toBe(
-    'Bearer fixture-token',
-  );
+  expect(options.headers.get('authorization')).toBe('Bearer fixture-token');
   mockFetch.mockImplementationOnce(
     async () => new Response('{}', { headers: { 'Content-Type': 'application/json' } }),
   );

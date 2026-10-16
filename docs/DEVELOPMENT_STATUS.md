@@ -1648,3 +1648,23 @@ Security findings remain visible: latest audit 67 affected nodes (50 high, 17 mo
 disabled Supabase leaked-password protection and five INFO composite-FK suggestions.
 No forced major upgrades, speculative indexes, paid protection or production-readiness
 claim. See [V09_TESTING.md](V09_TESTING.md) for links, limitations and release actions.
+
+## v0.9 CI fetch-mock correction — 2026-10-15
+
+- GitHub Actions [run 38780621787](https://github.com/owacez/Actaro/actions/runs/38780621787)
+  failed TypeScript in `account-data.test.ts`. Jest's mock of the overloaded global
+  `fetch` narrowed its input and rejected `URL`, producing a second client-inference
+  error. The Ubuntu runner migration annotation was a notice, not the cause.
+- Reused the explicit `(input: unknown, init?: unknown) => Promise<Response>` mock
+  signature from existing Supabase tests. Request options are narrowed at runtime;
+  the exact deletion body and session Authorization header remain asserted.
+- `npm.cmd ci`: PASS from the unchanged lockfile. A tracked-source-only TypeScript
+  configuration, excluding ignored generated Expo declarations, reproduces both
+  errors with the original test and passes with the corrected test. Commands:
+  `node node_modules/typescript/bin/tsc --noEmit --project .actaro-tools/tsconfig.ci-original.json`
+  (expected FAIL) and the same command with `tsconfig.ci-fixed.json` (PASS).
+- `npm.cmd run check`: PASS — TypeScript, lint, formatting, 288 Jest tests across
+  58 suites and six dataset tests. The new remote workflow is checked after push
+  before reporting this correction complete. No app behavior, dependency, workflow,
+  credential, Supabase setting or completion weight changed; deferred acceptance
+  and retained security findings remain unchanged.
