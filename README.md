@@ -89,7 +89,9 @@ EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 ```
 
 Use the HTTPS API origin, not the dashboard URL. `.env` is ignored by Git;
-the publishable key is public app configuration. No privileged key belongs here.
+the publishable key is public app configuration. Never put a privileged key in an
+`EXPO_PUBLIC_` variable. The optional local administrator import key described
+below is separate and is never required by the app.
 
 ### Start Expo Go on your phone
 
@@ -525,7 +527,7 @@ summarizes the same saved records. It refreshes when opened and has a manual
 refresh action; no sample health data is shown.
 
 - Habits support boolean, numeric, duration (minutes), weekly frequency and
-  avoidance. Choose scheduled weekdays, dates and an optional in-app reminder.
+  avoidance. Choose scheduled weekdays, dates and an optional reminder time.
   Reminder times display as due inside the app; OS notification delivery is a
   later quality-phase task. Start date/type/unit/time zone are fixed after
   creation. Target/schedule edits take effect from today, preserving prior dates.
@@ -609,6 +611,35 @@ Use **Log or edit bodyweight** to open the existing body-record editor, then
 return to Progress to refresh. Empty/error states and retry are supported. No
 new API key, dependency or database migration is needed. Weight uses the same
 period presets as the other completed v0.6 modules.
+
+## Privacy controls and local reminders (v0.9)
+
+In **More → Profile → Privacy & account data**, export your owned records as JSON
+or permanently delete your account after password verification and typing `DELETE`.
+Export files contain private health information; store them carefully. Native export
+uses the device share sheet. An export is not an atomic backup or restore feature.
+
+In **More → Preferences → Manage habit reminders**, explicitly enable notification
+permission on your phone. Set a reminder time and weekdays inside each habit.
+Actaro schedules the next seven days, up to the earliest 48 local reminders, and
+refreshes them on app open/resume or edits. Keep opening Actaro regularly. There is
+no server push or background sync; web retains in-app due reminders only.
+
+The app still needs only the two public Supabase environment values. Account
+deletion uses the deployed `delete-account` Supabase Edge Function: it verifies the
+signed-in user and current password, revokes refresh sessions, then deletes that
+account and cascading records. Its administrative credentials are provided inside
+Supabase, never bundled in the app. A separate Supabase project needs the repository's
+migrations, reference imports and this function deployed, in addition to public app
+configuration. Keep the function's `verify_jwt = true` setting. See
+[Supabase deployment](https://supabase.com/docs/guides/functions/deploy).
+
+Local quality checks include `npm run check`; the Deno entry point was separately
+checked with `npm exec --yes -- deno check supabase/functions/delete-account/index.ts`.
+No native/cloud build was submitted. For deferred device checks, real daily use,
+notification limits and retained security findings, use the
+[v0.9 testing checklist](docs/V09_TESTING.md). Passing automated checks does not
+approve v1.0.
 
 ## Release discipline
 

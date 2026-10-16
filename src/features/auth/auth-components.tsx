@@ -40,12 +40,7 @@ export function AuthText({
   kind = 'body',
 }: PropsWithChildren<{ kind?: 'body' | 'title' | 'heading' | 'eyebrow' | 'muted' }>) {
   const { colors } = useAppTheme();
-  const color =
-    kind === 'eyebrow'
-      ? colors.accent
-      : kind === 'body' || kind === 'muted'
-        ? colors.muted
-        : colors.text;
+  const color = kind === 'body' || kind === 'muted' ? colors.muted : colors.text;
   return (
     <Text
       accessibilityRole={kind === 'title' || kind === 'heading' ? 'header' : undefined}
@@ -94,12 +89,8 @@ export function AuthButton({
   outlined?: boolean;
   selected?: boolean;
 }) {
-  const { colors, scheme } = useAppTheme();
-  const foreground = outlined
-    ? colors.text
-    : scheme === 'dark'
-      ? actaroColors.text
-      : authColors.background;
+  const { colors } = useAppTheme();
+  const foreground = outlined ? colors.text : actaroColors.text;
   return (
     <Pressable
       accessibilityRole="button"
@@ -285,7 +276,11 @@ const styles = StyleSheet.create({
   },
   outlined: { borderColor: authColors.border, backgroundColor: 'transparent' },
   dimmed: { opacity: 0.65 },
-  choiceTarget: { minHeight: actaroLayout.minimumTouchHeight, justifyContent: 'center' },
+  choiceTarget: {
+    minHeight: actaroLayout.minimumTouchHeight,
+    minWidth: actaroLayout.minimumTouchHeight,
+    justifyContent: 'center',
+  },
   choice: { borderWidth: 1, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 7 },
   choiceText: { fontFamily: 'Inter_500Medium', fontSize: 11 },
   buttonText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: authColors.background },

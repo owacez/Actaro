@@ -854,6 +854,10 @@ Deterministic only.
 
 ## 6.3 Security Review — Weight 5
 
+Execution placement (2026-10-15): the retained core account-deletion and data-export
+requirements in Source of Truth §20 belong to this security/privacy task. Implement
+them with ownership checks and verification; no additional roadmap weight is created.
+
 ## 6.4 Error / Crash Handling — Weight 4
 
 ## 6.5 Notifications — Weight 3
@@ -861,6 +865,12 @@ Deterministic only.
 ## 6.6 Personal Beta — Weight 6
 
 Use the product for real daily logging.
+
+User-directed acceptance deferral (2026-10-15): finish the v0.9 implementation and
+verification, then the user will test and report findings before release approval.
+Track task 6.6's six-weight personal beta as DEFERRED, not passed. The seven other
+tasks retain 27 active weight; original planned weight remains 33. Device/native
+acceptance and v1.0 approval remain deferred. Fix reported defects before release.
 
 ## 6.7 Bug Fix / Polish — Weight 6
 

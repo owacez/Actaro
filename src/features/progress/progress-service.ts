@@ -38,7 +38,7 @@ export async function progressPages<T>(
       (!page.length && rows.length < result.count) ||
       rows.length + page.length > result.count
     )
-      throw new Error('Progress history changed or is incomplete. Retry loading.');
+      throw new Error('History changed or is incomplete. Retry loading.');
     expected = result.count;
     rows.push(...page);
   } while (rows.length < expected);

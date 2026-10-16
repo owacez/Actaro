@@ -1,17 +1,17 @@
 # Actaro — Development Status
 
-Updated: 2026-10-14 (America/Los_Angeles).
+Updated: 2026-10-15 (America/Los_Angeles).
 
 ## Overall
 
-- Current Release: **v0.6 — Basic Progress & Analytics**
-- Release Completion: **100% functional scope (24 / 24 weight)**
-- Previous Releases: **v0.1 active development DONE (100%; remaining acceptance DEFERRED); v0.2/v0.3/v0.4/v0.5 functional scope DONE (100%)**
-- Current Phase: **Phase 5; all nine v0.6 tasks DONE**
-- Current Focus: v0.6 functional implementation and local/live/browser verification are complete. Next planned work is v0.9 Quality & Personal Beta; none of its tasks is marked started by this work order.
-- Status: **DONE — v0.6 functional scope; device/native-build acceptance DEFERRED**
-- Blockers: No v0.6 implementation blocker. Figma MCP remains limited; the approved PDF Progress reference and verified components were used. Existing SDK/dependency/security findings remain open v0.9 work. Deferred device checks and full release gates are not claimed passed.
-- Approval boundary: User authorized completing all of v0.6 without stopping. All nine tasks are implemented and verified within that scope. No v0.9 feature, AI, migration, dependency or native/EAS build was added. Existing device/check deferrals remain in effect.
+- Current Release: **v0.9 — Quality & Personal Beta**
+- Release Completion: **100% active implementation (27 / 27 weight); personal beta DEFERRED (6 weight)**
+- Previous Releases: **v0.1 active development and v0.2–v0.6 functional scopes DONE (100%); retained acceptance DEFERRED**
+- Current Phase: **Phase 6; seven implementation/review tasks DONE, task 6.6 Personal Beta DEFERRED**
+- Current Focus: Implementation handoff for the user's real daily testing and observations. No v1.0 approval or future-release implementation.
+- Status: **DONE — active v0.9 development; full beta/release acceptance DEFERRED**
+- Blockers: No remaining authorized implementation blocker. Dependency advisories, disabled leaked-password protection, exact visual/device checks and native-build acceptance remain documented release-review findings. They are not claimed passed or waived.
+- Approval boundary: The user authorized completing v0.9, retaining the earlier instruction that device acceptance, personal testing and v1.0 release approval happen afterward. No paid service or native/EAS build was used.
 
 Latest design access: the user supplied a local Figma PDF export and authorized
 it as fallback when MCP calls are exhausted. Its first foundation page retains
@@ -27,6 +27,13 @@ The supplied canonical plan is `docs/ACTARO_DECELOPMENT_PLAN.md`; the requested
 Figma tools are available; no Figma reads or edits are necessary for initialization.
 
 ## Completion accounting
+
+v0.9 original denominator: `3 + 3 + 5 + 4 + 3 + 6 + 6 + 3 = 33`.
+The user-deferred personal beta retains six weight and earns zero. Verified
+active work earns **27**: `27 / (33 - 6) = 100%` active development. The unchanged
+full-scope baseline is `27 / 33 = 81.818…%`; full beta/release acceptance remains
+DEFERRED. Platform checks are retained unweighted follow-ups, not claimed passes.
+See the v0.9 closure evidence and [testing handoff](V09_TESTING.md).
 
 v0.6 denominator: `3 + 3 + 2 + 3 + 3 + 2 + 2 + 2 + 4 = 24`.
 Earned weight: **24**, all nine tasks have implementation, calculation/data-access,
@@ -78,131 +85,131 @@ Earned weight: **57**. Functional completion is `57 / 57 × 100 = 100%`.
 All thirteen tasks have implementation, validation and integration evidence below.
 User-deferred device checks are separate, unweighted acceptance records; they are not claimed passed.
 
-| Area             | Feature                                | Release | Weight | Status      | Completion | Notes                                                                                                                                           |
-| ---------------- | -------------------------------------- | ------- | -----: | ----------- | ---------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Phase 0 / 0.1    | Repository                             | v0.1    |      2 | DONE        |       100% | Git, ignores, README, env template verified (4/4).                                                                                              |
-| Phase 0 / 0.2    | React Native / Expo                    | v0.1    |      3 | DONE        |       100% | Config, TypeScript, exports and EAS setup verified. Active weight 2 DONE; native launch weight 1 DEFERRED.                                      |
-| Phase 0 / 0.3    | Quality Baseline                       | v0.1    |      3 | DONE        |       100% | Typecheck, lint, format, tests and remote CI passed (5/5).                                                                                      |
-| Phase 0 / 0.4    | App Structure                          | v0.1    |      2 | DONE        |       100% | Router scaffold and current architecture boundaries verified (2/2).                                                                             |
-| Phase 0 / 0.5    | Design System                          | v0.1    |      5 | DONE        |       100% | Tokens, shared controls/states and approved themes verified. Active weight 4 DONE; full visual acceptance weight 1 DEFERRED.                    |
-| Phase 0 / 0.6    | Navigation                             | v0.1    |      3 | DONE        |       100% | Five routes and session/recovery guards verified; iPhone tab switching user-confirmed. Active weight 2 DONE; live transitions weight 1 DEFERRED |
-| Phase 0 / 0.7    | Supabase Integration                   | v0.1    |      3 | DONE        |       100% | Public config, client/lifecycle and live probes verified. Active weight 2.25 DONE; platform checks weight 0.75 DEFERRED.                        |
-| Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | DONE        |       100% | Six flows implemented; sign-in/out/reset/persistence accepted. Active weight 5 DONE; signup/verification checks weight 1 DEFERRED.              |
-| Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | DONE        |       100% | Schema/services/UI and web/iPhone profile/preferences save/reopen user-verified (4/4); separate native email-change follow-up remains.          |
-| Phase 0 / 0.10   | RLS / Security Foundation              | v0.1    |      6 | DONE        |       100% | Grants/RLS, SQL isolation, constraints and lifecycle verified. Active weight 4.5 DONE; app/security checks weight 1.5 DEFERRED.                 |
-| Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | DONE        |       100% | Types, owned services, validation/error mapping and live profile/preferences reads/writes verified (4/4).                                       |
-| Phase 1 / 1.1    | Muscle & Equipment Schema              | v0.2    |      2 | DONE        |       100% | Hosted catalogs, stable UUIDs/constraints, RLS and generated types verified (4/4).                                                              |
-| Phase 1 / 1.2    | Exercise Schema                        | v0.2    |      4 | DONE        |       100% | Source IDs, instructions, relationships and licenses deployed; repeat import preserves all 643 IDs (4/4).                                       |
-| Phase 1 / 1.3    | Exercise Media Schema                  | v0.2    |      3 | DONE        |       100% | Separate pose metadata, validated paths/checksums, private bucket and signed reads verified (4/4).                                              |
-| Phase 1 / 1.4    | RepDB Import Script                    | v0.2    |      5 | DONE        |       100% | Pinned local parsing, taxonomy mapping, attribution and atomic idempotent hosted import verified (4/4).                                         |
-| Phase 1 / 1.5    | RepDB Media Import                     | v0.2    |      4 | DONE        |       100% | 1,138 WebP objects uploaded; metadata/checksums, signed retrieval and repeat upsert verified (4/4).                                             |
-| Phase 1 / 1.6    | Exercise Library UI                    | v0.2    |      5 | DONE        |       100% | Search, muscle/equipment/setup filters, thumbnails and bounded pagination tested in API/UI/browser (4/4).                                       |
-| Phase 1 / 1.7    | Exercise Detail                        | v0.2    |      3 | DONE        |       100% | Actual poses, instructions, muscles/equipment and attribution; authenticated detail/back browser flow passed (4/4).                             |
-| Phase 1 / 1.8    | Equipment Profile                      | v0.2    |      2 | DONE        |       100% | Owned schema/RLS, atomic save service, editable UI and real browser save/reload passed (4/4).                                                   |
-| Phase 2 / 2.1    | Workout Schema                         | v0.3    |      6 | DONE        |       100% | Six owned tables, snapshots/constraints, RLS/grants and hosted deployment/types verified (4/4).                                                 |
-| Phase 2 / 2.2    | Custom Workout Builder                 | v0.3    |      6 | DONE        |       100% | Create/edit/delete, atomic owned save and search/detail → new/existing draft → discard/save/reopen verified (5/5).                              |
-| Phase 2 / 2.3    | Splits & Predefined Training Plans     | v0.3    |      5 | DONE        |       100% | Split CRUD/active choice and real catalog/filter/preview/private adoption verified (5/5).                                                       |
-| Phase 2 / 2.4    | Workout Pre-Start                      | v0.3    |      3 | DONE        |       100% | Actual exercises/sets, explicit estimate and durable Start entry verified.                                                                      |
-| Phase 2 / 2.5    | Session Mode Chooser                   | v0.3    |      3 | DONE        |       100% | Timed Workout / Log Only choices start the dedicated saved draft.                                                                               |
-| Phase 2 / 2.6    | Dedicated Active Workout               | v0.3    |     10 | DONE        |       100% | Compact media/metadata, previous/best, set table/add/remove/next/previous/finish verified.                                                      |
-| Phase 2 / 2.7    | Timed Session                          | v0.3    |      4 | DONE        |       100% | Pause/resume excludes paused time; nonzero duration saves and rest stays independent.                                                           |
-| Phase 2 / 2.8    | Log Only                               | v0.3    |      2 | DONE        |       100% | No total timer; complete persistence and direct exercise entry verified.                                                                        |
-| Phase 2 / 2.9    | Rest Timer                             | v0.3    |      4 | DONE        |       100% | Auto start, pause/resume, skip and ±15 seconds verified in both modes.                                                                          |
-| Phase 2 / 2.10   | Workout Summary                        | v0.3    |      4 | DONE        |       100% | Actual completed exercises/sets/volume/duration/records and note displayed after acknowledgement.                                               |
-| Phase 2 / 2.11   | Workout History                        | v0.3    |      4 | DONE        |       100% | Owned search/mode/pagination, reopen/edit/add/remove, frozen retry, revision-safe delete and recalculated results verified.                     |
-| Phase 2 / 2.12   | PR Detection                           | v0.3    |      3 | DONE        |       100% | Detection plus fresh history edit/delete and subsequent prior/best recalculation verified (2/2); repeated exercises share records.              |
-| Phase 2 / 2.13   | Training Volume                        | v0.3    |      4 | DONE        |       100% | Working sets/reps/known external volume, frequency and snapshot primary-muscle allocation verified (2/2).                                       |
-| Phase 2 / 2.14   | Training Status                        | v0.3    |      4 | DONE        |       100% | Transparent planned-day, relative-volume and allocation rules; insufficient history/unassigned days handled without fake physiology.            |
-| Phase 2 / 2.15   | Recovery Check                         | v0.3    |      3 | DONE        |       100% | Owned daily energy/soreness/sleep and optional stress/notes; categories/context, save/update/reopen and RLS verified.                           |
-| Phase 2 / 2.16   | Active Workout Resilience              | v0.3    |      5 | DONE        |       100% | Owner-scoped queued device save, wall-time clock, restart and offline completion/retry verified; device smoke remains pending.                  |
-| Phase 3 / 3.1    | Nutrition Schema                       | v0.4    |      5 | DONE        |       100% | Eight nutrition tables, FK/constraints, owned RLS, typed hosted deployment and local/hosted rollback checks.                                    |
-| Phase 3 / 3.2    | Nutrition Targets                      | v0.4    |      3 | DONE        |       100% | Owned targets, kcal/kJ validation, date-effective history, UI checks and browser save/reopen.                                                   |
-| Phase 3 / 3.3    | Food Database/Search                   | v0.4    |      5 | DONE        |       100% | 7,793 USDA foods/14,449 portions; stable repeated import, prefix search, detail and pagination.                                                 |
-| Phase 3 / 3.4    | Serving Units / Conversion             | v0.4    |      5 | DONE        |       100% | Explicit food base; g/oz, volume and food-specific servings; no assumed density; tested math.                                                   |
-| Phase 3 / 3.5    | Portion Editor                         | v0.4    |      6 | DONE        |       100% | Unit choices, direct quantity/stepper, base/live nutrition and meal impact; UI/browser retry checks.                                            |
-| Phase 3 / 3.6    | Nutrition Calculation Engine           | v0.4    |      6 | DONE        |       100% | Unrounded scaling, source energy, meal/daily totals and recipe math; Jest plus SQL parity.                                                      |
-| Phase 3 / 3.7    | Food Diary                             | v0.4    |      6 | DONE        |       100% | Four meal groups/date, actual totals/remaining, edit/delete and browser reload verified.                                                        |
-| Phase 3 / 3.8    | Custom Foods                           | v0.4    |      3 | DONE        |       100% | Private label foods, known serving equivalents, create/edit/archive and historical retention.                                                   |
-| Phase 3 / 3.9    | Favorites / Recent / Frequent          | v0.4    |      3 | DONE        |       100% | Authenticated recent/frequency ranking and favorites; API, ownership and browser selection.                                                     |
-| Phase 3 / 3.10   | Saved Meals / Copy Meal / Copy Day     | v0.4    |      4 | DONE        |       100% | Snapshot saved meals, repeat/copy meal/day, stable retry and create/log/delete acceptance.                                                      |
-| Phase 3 / 3.11   | Recipes                                | v0.4    |      5 | DONE        |       100% | Actual ingredient portions, servings/total/per-serving, owned create/edit/delete verified.                                                      |
-| Phase 3 / 3.12   | Recipe-by-Weight                       | v0.4    |      4 | DONE        |       100% | Optional cooked total weight, per-100g and arbitrary grams; serving-only behavior verified.                                                     |
-| Phase 3 / 3.13   | Hydration                              | v0.4    |      2 | DONE        |       100% | Persisted targets and ml/L/US fl oz entries with validation, reopen and delete verified.                                                        |
-| Phase 4 / 4.1    | Habit Schema                           | v0.5    |      3 | DONE        |       100% | Owned definitions/dated settings/logs; local/hosted constraints, ownership and grants pass.                                                     |
-| Phase 4 / 4.2    | Habit Creation                         | v0.5    |      4 | DONE        |       100% | All five types, units, schedule/dates/reminder and create/reopen verified.                                                                      |
-| Phase 4 / 4.3    | Habit Logging                          | v0.5    |      3 | DONE        |       100% | Explicit zero/not-done, dated edit/removal and exact acknowledged retry verified.                                                               |
-| Phase 4 / 4.4    | Habit History / Consistency            | v0.5    |      3 | DONE        |       100% | 90-date history, dated targets, rest/partial weeks; calendar tests and browser history pass.                                                    |
-| Phase 4 / 4.5    | Motivation Mode                        | v0.5    |      2 | DONE        |       100% | Streaks/weekly/completion/None, actual in-app due reminders; OS delivery remains later.                                                         |
-| Phase 4 / 4.6    | Goal Schema                            | v0.5    |      2 | DONE        |       100% | Owned validated goals and compatible owned sources; hosted/local RLS and retries verified.                                                      |
-| Phase 4 / 4.7    | Goal Creation                          | v0.5    |      4 | DONE        |       100% | Thirteen metrics, baseline/direction/date/unit validation and source selection; create/edit/delete/restore pass.                                |
-| Phase 4 / 4.8    | Goal Progress                          | v0.5    |      3 | DONE        |       100% | Body/workout/PR/activity/nutrition/habit facts; missing sources, deadlines and dated targets handled.                                           |
-| Phase 4 / 4.9    | Bodyweight Logging                     | v0.5    |      3 | DONE        |       100% | Dated kg/cm values, named measurements, preferences, replace/edit/delete/history verified.                                                      |
-| Phase 4 / 4.10   | Steps Foundation                       | v0.5    |      3 | DONE        |       100% | Manual totals/targets verified; iPhone permission/read adapter unit tested. Physical sensor QA DEFERRED.                                        |
-| Phase 4 / 4.11   | Today Dashboard                        | v0.5    |      8 | DONE        |       100% | Saved weight/trend, steps, nutrition, workout, habits/goals, training/recovery; browser layouts and failed-load/retry pass.                     |
-| Phase 5 / 5.1    | Weight Progress                        | v0.6    |      3 | DONE        |       100% | Owned dated history, kg/lb, recorded changes/averages, chart gaps and empty/error/retry; tests and live/browser checks pass.                    |
-| Phase 5 / 5.2    | Nutrition Progress                     | v0.6    |      3 | DONE        |       100% | Owned complete food history, effective targets, logged-day averages/adherence, units and UI/retry verified.                                     |
-| Phase 5 / 5.3    | Workout Frequency                      | v0.6    |      2 | DONE        |       100% | Completed owned sessions, distinct dates, modes, timed duration and calendar-normalized frequency verified.                                     |
-| Phase 5 / 5.4    | Strength Progress                      | v0.6    |      3 | DONE        |       100% | Owned completed-set joins, recorded exercise search, daily external load/Epley trends and history verified.                                     |
-| Phase 5 / 5.5    | Training Volume                        | v0.6    |      3 | DONE        |       100% | Reuses tested volume/muscle allocation; unknown loads and bodyweight semantics, daily chart/history verified.                                   |
-| Phase 5 / 5.6    | Steps Progress                         | v0.6    |      2 | DONE        |       100% | Dated totals/provenance, explicit zero versus unknown, recorded-day averages and current-target labeling verified.                              |
-| Phase 5 / 5.7    | Habit Progress                         | v0.6    |      2 | DONE        |       100% | Dated versions, eligible periods/rest/partial weeks, explicit avoidance and archive exclusion verified.                                         |
-| Phase 5 / 5.8    | Time Filters                           | v0.6    |      2 | DONE        |       100% | 7D/30D/3M/6M/1Y/All on every module, month clamping, earliest records and inclusive custom dates verified.                                      |
-| Phase 5 / 5.9    | Weekly / Monthly Summary               | v0.6    |      4 | DONE        |       100% | Weekly/monthly recorded summaries, partial boundaries, coverage and noncausal complete-period comparisons verified.                             |
-| Phase 6 / 6.1    | Accessibility                          | v0.9    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §6.1.                                                                                                              |
-| Phase 6 / 6.2    | Performance                            | v0.9    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §6.2.                                                                                                              |
-| Phase 6 / 6.3    | Security Review                        | v0.9    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §6.3.                                                                                                              |
-| Phase 6 / 6.4    | Error / Crash Handling                 | v0.9    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §6.4.                                                                                                              |
-| Phase 6 / 6.5    | Notifications                          | v0.9    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §6.5.                                                                                                              |
-| Phase 6 / 6.6    | Personal Beta                          | v0.9    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §6.6.                                                                                                              |
-| Phase 6 / 6.7    | Bug Fix / Polish                       | v0.9    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §6.7.                                                                                                              |
-| Phase 6 / 6.8    | Documentation Review                   | v0.9    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §6.8.                                                                                                              |
-| Phase 7          | Core release gate (nine prerequisites) | v1.0    |      — | NOT_STARTED |        0/9 | Release gate, no new weighted feature scope.                                                                                                    |
-| Phase 8 / 8.1    | Motion / Activity Source Evaluation    | v1.1    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §8.1.                                                                                                              |
-| Phase 8 / 8.2    | Active Minutes Calculation             | v1.1    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §8.2.                                                                                                              |
-| Phase 8 / 8.3    | Today Integration                      | v1.1    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §8.3.                                                                                                              |
-| Phase 8 / 8.4    | Progress Integration                   | v1.1    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §8.4.                                                                                                              |
-| Phase 8 / 8.5    | Accuracy / Messaging Review            | v1.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §8.5.                                                                                                              |
-| Phase 9 / 9.1    | Location Permission Flow               | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.1.                                                                                                              |
-| Phase 9 / 9.2    | Run Session Schema                     | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.2.                                                                                                              |
-| Phase 9 / 9.3    | Run Start                              | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.3.                                                                                                              |
-| Phase 9 / 9.4    | GPS Route Recording                    | v1.2    |      8 | NOT_STARTED |         0% | Requirements: canonical plan §9.4.                                                                                                              |
-| Phase 9 / 9.5    | Active Run                             | v1.2    |      7 | NOT_STARTED |         0% | Requirements: canonical plan §9.5.                                                                                                              |
-| Phase 9 / 9.6    | Distance / Pace Calculation            | v1.2    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §9.6.                                                                                                              |
-| Phase 9 / 9.7    | Run Summary                            | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.7.                                                                                                              |
-| Phase 9 / 9.8    | Route Thumbnail                        | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.8.                                                                                                              |
-| Phase 9 / 9.9    | Run History                            | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.9.                                                                                                              |
-| Phase 9 / 9.10   | Run Detail                             | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.10.                                                                                                             |
-| Phase 9 / 9.11   | Today Recent-Run Card                  | v1.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §9.11.                                                                                                             |
-| Phase 9 / 9.12   | Progress Running Card                  | v1.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §9.12.                                                                                                             |
-| Phase 10 / 10.1  | Performance Dashboard                  | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.1.                                                                                                             |
-| Phase 10 / 10.2  | Training Block Comparison              | v1.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §10.2.                                                                                                             |
-| Phase 10 / 10.3  | Unified Timeline                       | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.3.                                                                                                             |
-| Phase 10 / 10.4  | Advanced Cross-Metric Analytics        | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.4.                                                                                                             |
-| Phase 10 / 10.5  | Badge Rules Engine                     | v1.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §10.5.                                                                                                             |
-| Phase 10 / 10.6  | Achievement UI                         | v1.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §10.6.                                                                                                             |
-| Phase 11 / 11.1  | Image Capture                          | v1.4    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §11.1.                                                                                                             |
-| Phase 11 / 11.2  | Secure Vision Provider Integration     | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.2.                                                                                                             |
-| Phase 11 / 11.3  | Food Identification                    | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.3.                                                                                                             |
-| Phase 11 / 11.4  | Portion Estimation                     | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.4.                                                                                                             |
-| Phase 11 / 11.5  | Nutrition Matching                     | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.5.                                                                                                             |
-| Phase 11 / 11.6  | Editable Review                        | v1.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §11.6.                                                                                                             |
-| Phase 11 / 11.7  | Confirmed Logging                      | v1.4    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §11.7.                                                                                                             |
-| Phase 12 / 12.1  | Local Data Strategy                    | v1.5    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §12.1.                                                                                                             |
-| Phase 12 / 12.2  | Sync Queue                             | v1.5    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §12.2.                                                                                                             |
-| Phase 12 / 12.3  | Idempotency                            | v1.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §12.3.                                                                                                             |
-| Phase 12 / 12.4  | Conflict Handling                      | v1.5    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §12.4.                                                                                                             |
-| Phase 12 / 12.5  | Reconciliation                         | v1.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §12.5.                                                                                                             |
-| Phase 12 / 12.6  | Offline Coverage Expansion             | v1.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §12.6.                                                                                                             |
-| Phase 13 / 13.1  | Apple Health                           | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.1.                                                                                                             |
-| Phase 13 / 13.2  | Android Health Connect                 | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.2.                                                                                                             |
-| Phase 13 / 13.3  | Imported Activities                    | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.3.                                                                                                             |
-| Phase 13 / 13.4  | Sleep                                  | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.4.                                                                                                             |
-| Phase 13 / 13.5  | Heart Rate                             | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.5.                                                                                                             |
-| Phase 13 / 13.6  | HRV                                    | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.6.                                                                                                             |
-| Phase 13 / 13.7  | Sensor-Enhanced Recovery               | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.7.                                                                                                             |
-| Phase 13 / 13.8  | Physiological Training Load            | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.8.                                                                                                             |
-| Phase 13 / 13.9  | Daily Suggested Workout                | v2.0    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §13.9.                                                                                                             |
-| Phase 13 / 13.10 | Advanced Running Analytics             | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.10.                                                                                                            |
+| Area             | Feature                                | Release | Weight | Status      | Completion | Notes                                                                                                                                                    |
+| ---------------- | -------------------------------------- | ------- | -----: | ----------- | ---------: | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase 0 / 0.1    | Repository                             | v0.1    |      2 | DONE        |       100% | Git, ignores, README, env template verified (4/4).                                                                                                       |
+| Phase 0 / 0.2    | React Native / Expo                    | v0.1    |      3 | DONE        |       100% | Config, TypeScript, exports and EAS setup verified. Active weight 2 DONE; native launch weight 1 DEFERRED.                                               |
+| Phase 0 / 0.3    | Quality Baseline                       | v0.1    |      3 | DONE        |       100% | Typecheck, lint, format, tests and remote CI passed (5/5).                                                                                               |
+| Phase 0 / 0.4    | App Structure                          | v0.1    |      2 | DONE        |       100% | Router scaffold and current architecture boundaries verified (2/2).                                                                                      |
+| Phase 0 / 0.5    | Design System                          | v0.1    |      5 | DONE        |       100% | Tokens, shared controls/states and approved themes verified. Active weight 4 DONE; full visual acceptance weight 1 DEFERRED.                             |
+| Phase 0 / 0.6    | Navigation                             | v0.1    |      3 | DONE        |       100% | Five routes and session/recovery guards verified; iPhone tab switching user-confirmed. Active weight 2 DONE; live transitions weight 1 DEFERRED          |
+| Phase 0 / 0.7    | Supabase Integration                   | v0.1    |      3 | DONE        |       100% | Public config, client/lifecycle and live probes verified. Active weight 2.25 DONE; platform checks weight 0.75 DEFERRED.                                 |
+| Phase 0 / 0.8    | Authentication                         | v0.1    |      6 | DONE        |       100% | Six flows implemented; sign-in/out/reset/persistence accepted. Active weight 5 DONE; signup/verification checks weight 1 DEFERRED.                       |
+| Phase 0 / 0.9    | Profile / Preferences                  | v0.1    |      3 | DONE        |       100% | Schema/services/UI and web/iPhone profile/preferences save/reopen user-verified (4/4); separate native email-change follow-up remains.                   |
+| Phase 0 / 0.10   | RLS / Security Foundation              | v0.1    |      6 | DONE        |       100% | Grants/RLS, SQL isolation, constraints and lifecycle verified. Active weight 4.5 DONE; app/security checks weight 1.5 DEFERRED.                          |
+| Phase 0 / 0.11   | Data Access Layer                      | v0.1    |      4 | DONE        |       100% | Types, owned services, validation/error mapping and live profile/preferences reads/writes verified (4/4).                                                |
+| Phase 1 / 1.1    | Muscle & Equipment Schema              | v0.2    |      2 | DONE        |       100% | Hosted catalogs, stable UUIDs/constraints, RLS and generated types verified (4/4).                                                                       |
+| Phase 1 / 1.2    | Exercise Schema                        | v0.2    |      4 | DONE        |       100% | Source IDs, instructions, relationships and licenses deployed; repeat import preserves all 643 IDs (4/4).                                                |
+| Phase 1 / 1.3    | Exercise Media Schema                  | v0.2    |      3 | DONE        |       100% | Separate pose metadata, validated paths/checksums, private bucket and signed reads verified (4/4).                                                       |
+| Phase 1 / 1.4    | RepDB Import Script                    | v0.2    |      5 | DONE        |       100% | Pinned local parsing, taxonomy mapping, attribution and atomic idempotent hosted import verified (4/4).                                                  |
+| Phase 1 / 1.5    | RepDB Media Import                     | v0.2    |      4 | DONE        |       100% | 1,138 WebP objects uploaded; metadata/checksums, signed retrieval and repeat upsert verified (4/4).                                                      |
+| Phase 1 / 1.6    | Exercise Library UI                    | v0.2    |      5 | DONE        |       100% | Search, muscle/equipment/setup filters, thumbnails and bounded pagination tested in API/UI/browser (4/4).                                                |
+| Phase 1 / 1.7    | Exercise Detail                        | v0.2    |      3 | DONE        |       100% | Actual poses, instructions, muscles/equipment and attribution; authenticated detail/back browser flow passed (4/4).                                      |
+| Phase 1 / 1.8    | Equipment Profile                      | v0.2    |      2 | DONE        |       100% | Owned schema/RLS, atomic save service, editable UI and real browser save/reload passed (4/4).                                                            |
+| Phase 2 / 2.1    | Workout Schema                         | v0.3    |      6 | DONE        |       100% | Six owned tables, snapshots/constraints, RLS/grants and hosted deployment/types verified (4/4).                                                          |
+| Phase 2 / 2.2    | Custom Workout Builder                 | v0.3    |      6 | DONE        |       100% | Create/edit/delete, atomic owned save and search/detail → new/existing draft → discard/save/reopen verified (5/5).                                       |
+| Phase 2 / 2.3    | Splits & Predefined Training Plans     | v0.3    |      5 | DONE        |       100% | Split CRUD/active choice and real catalog/filter/preview/private adoption verified (5/5).                                                                |
+| Phase 2 / 2.4    | Workout Pre-Start                      | v0.3    |      3 | DONE        |       100% | Actual exercises/sets, explicit estimate and durable Start entry verified.                                                                               |
+| Phase 2 / 2.5    | Session Mode Chooser                   | v0.3    |      3 | DONE        |       100% | Timed Workout / Log Only choices start the dedicated saved draft.                                                                                        |
+| Phase 2 / 2.6    | Dedicated Active Workout               | v0.3    |     10 | DONE        |       100% | Compact media/metadata, previous/best, set table/add/remove/next/previous/finish verified.                                                               |
+| Phase 2 / 2.7    | Timed Session                          | v0.3    |      4 | DONE        |       100% | Pause/resume excludes paused time; nonzero duration saves and rest stays independent.                                                                    |
+| Phase 2 / 2.8    | Log Only                               | v0.3    |      2 | DONE        |       100% | No total timer; complete persistence and direct exercise entry verified.                                                                                 |
+| Phase 2 / 2.9    | Rest Timer                             | v0.3    |      4 | DONE        |       100% | Auto start, pause/resume, skip and ±15 seconds verified in both modes.                                                                                   |
+| Phase 2 / 2.10   | Workout Summary                        | v0.3    |      4 | DONE        |       100% | Actual completed exercises/sets/volume/duration/records and note displayed after acknowledgement.                                                        |
+| Phase 2 / 2.11   | Workout History                        | v0.3    |      4 | DONE        |       100% | Owned search/mode/pagination, reopen/edit/add/remove, frozen retry, revision-safe delete and recalculated results verified.                              |
+| Phase 2 / 2.12   | PR Detection                           | v0.3    |      3 | DONE        |       100% | Detection plus fresh history edit/delete and subsequent prior/best recalculation verified (2/2); repeated exercises share records.                       |
+| Phase 2 / 2.13   | Training Volume                        | v0.3    |      4 | DONE        |       100% | Working sets/reps/known external volume, frequency and snapshot primary-muscle allocation verified (2/2).                                                |
+| Phase 2 / 2.14   | Training Status                        | v0.3    |      4 | DONE        |       100% | Transparent planned-day, relative-volume and allocation rules; insufficient history/unassigned days handled without fake physiology.                     |
+| Phase 2 / 2.15   | Recovery Check                         | v0.3    |      3 | DONE        |       100% | Owned daily energy/soreness/sleep and optional stress/notes; categories/context, save/update/reopen and RLS verified.                                    |
+| Phase 2 / 2.16   | Active Workout Resilience              | v0.3    |      5 | DONE        |       100% | Owner-scoped queued device save, wall-time clock, restart and offline completion/retry verified; device smoke remains pending.                           |
+| Phase 3 / 3.1    | Nutrition Schema                       | v0.4    |      5 | DONE        |       100% | Eight nutrition tables, FK/constraints, owned RLS, typed hosted deployment and local/hosted rollback checks.                                             |
+| Phase 3 / 3.2    | Nutrition Targets                      | v0.4    |      3 | DONE        |       100% | Owned targets, kcal/kJ validation, date-effective history, UI checks and browser save/reopen.                                                            |
+| Phase 3 / 3.3    | Food Database/Search                   | v0.4    |      5 | DONE        |       100% | 7,793 USDA foods/14,449 portions; stable repeated import, prefix search, detail and pagination.                                                          |
+| Phase 3 / 3.4    | Serving Units / Conversion             | v0.4    |      5 | DONE        |       100% | Explicit food base; g/oz, volume and food-specific servings; no assumed density; tested math.                                                            |
+| Phase 3 / 3.5    | Portion Editor                         | v0.4    |      6 | DONE        |       100% | Unit choices, direct quantity/stepper, base/live nutrition and meal impact; UI/browser retry checks.                                                     |
+| Phase 3 / 3.6    | Nutrition Calculation Engine           | v0.4    |      6 | DONE        |       100% | Unrounded scaling, source energy, meal/daily totals and recipe math; Jest plus SQL parity.                                                               |
+| Phase 3 / 3.7    | Food Diary                             | v0.4    |      6 | DONE        |       100% | Four meal groups/date, actual totals/remaining, edit/delete and browser reload verified.                                                                 |
+| Phase 3 / 3.8    | Custom Foods                           | v0.4    |      3 | DONE        |       100% | Private label foods, known serving equivalents, create/edit/archive and historical retention.                                                            |
+| Phase 3 / 3.9    | Favorites / Recent / Frequent          | v0.4    |      3 | DONE        |       100% | Authenticated recent/frequency ranking and favorites; API, ownership and browser selection.                                                              |
+| Phase 3 / 3.10   | Saved Meals / Copy Meal / Copy Day     | v0.4    |      4 | DONE        |       100% | Snapshot saved meals, repeat/copy meal/day, stable retry and create/log/delete acceptance.                                                               |
+| Phase 3 / 3.11   | Recipes                                | v0.4    |      5 | DONE        |       100% | Actual ingredient portions, servings/total/per-serving, owned create/edit/delete verified.                                                               |
+| Phase 3 / 3.12   | Recipe-by-Weight                       | v0.4    |      4 | DONE        |       100% | Optional cooked total weight, per-100g and arbitrary grams; serving-only behavior verified.                                                              |
+| Phase 3 / 3.13   | Hydration                              | v0.4    |      2 | DONE        |       100% | Persisted targets and ml/L/US fl oz entries with validation, reopen and delete verified.                                                                 |
+| Phase 4 / 4.1    | Habit Schema                           | v0.5    |      3 | DONE        |       100% | Owned definitions/dated settings/logs; local/hosted constraints, ownership and grants pass.                                                              |
+| Phase 4 / 4.2    | Habit Creation                         | v0.5    |      4 | DONE        |       100% | All five types, units, schedule/dates/reminder and create/reopen verified.                                                                               |
+| Phase 4 / 4.3    | Habit Logging                          | v0.5    |      3 | DONE        |       100% | Explicit zero/not-done, dated edit/removal and exact acknowledged retry verified.                                                                        |
+| Phase 4 / 4.4    | Habit History / Consistency            | v0.5    |      3 | DONE        |       100% | 90-date history, dated targets, rest/partial weeks; calendar tests and browser history pass.                                                             |
+| Phase 4 / 4.5    | Motivation Mode                        | v0.5    |      2 | DONE        |       100% | Streaks/weekly/completion/None, actual in-app due reminders; OS delivery remains later.                                                                  |
+| Phase 4 / 4.6    | Goal Schema                            | v0.5    |      2 | DONE        |       100% | Owned validated goals and compatible owned sources; hosted/local RLS and retries verified.                                                               |
+| Phase 4 / 4.7    | Goal Creation                          | v0.5    |      4 | DONE        |       100% | Thirteen metrics, baseline/direction/date/unit validation and source selection; create/edit/delete/restore pass.                                         |
+| Phase 4 / 4.8    | Goal Progress                          | v0.5    |      3 | DONE        |       100% | Body/workout/PR/activity/nutrition/habit facts; missing sources, deadlines and dated targets handled.                                                    |
+| Phase 4 / 4.9    | Bodyweight Logging                     | v0.5    |      3 | DONE        |       100% | Dated kg/cm values, named measurements, preferences, replace/edit/delete/history verified.                                                               |
+| Phase 4 / 4.10   | Steps Foundation                       | v0.5    |      3 | DONE        |       100% | Manual totals/targets verified; iPhone permission/read adapter unit tested. Physical sensor QA DEFERRED.                                                 |
+| Phase 4 / 4.11   | Today Dashboard                        | v0.5    |      8 | DONE        |       100% | Saved weight/trend, steps, nutrition, workout, habits/goals, training/recovery; browser layouts and failed-load/retry pass.                              |
+| Phase 5 / 5.1    | Weight Progress                        | v0.6    |      3 | DONE        |       100% | Owned dated history, kg/lb, recorded changes/averages, chart gaps and empty/error/retry; tests and live/browser checks pass.                             |
+| Phase 5 / 5.2    | Nutrition Progress                     | v0.6    |      3 | DONE        |       100% | Owned complete food history, effective targets, logged-day averages/adherence, units and UI/retry verified.                                              |
+| Phase 5 / 5.3    | Workout Frequency                      | v0.6    |      2 | DONE        |       100% | Completed owned sessions, distinct dates, modes, timed duration and calendar-normalized frequency verified.                                              |
+| Phase 5 / 5.4    | Strength Progress                      | v0.6    |      3 | DONE        |       100% | Owned completed-set joins, recorded exercise search, daily external load/Epley trends and history verified.                                              |
+| Phase 5 / 5.5    | Training Volume                        | v0.6    |      3 | DONE        |       100% | Reuses tested volume/muscle allocation; unknown loads and bodyweight semantics, daily chart/history verified.                                            |
+| Phase 5 / 5.6    | Steps Progress                         | v0.6    |      2 | DONE        |       100% | Dated totals/provenance, explicit zero versus unknown, recorded-day averages and current-target labeling verified.                                       |
+| Phase 5 / 5.7    | Habit Progress                         | v0.6    |      2 | DONE        |       100% | Dated versions, eligible periods/rest/partial weeks, explicit avoidance and archive exclusion verified.                                                  |
+| Phase 5 / 5.8    | Time Filters                           | v0.6    |      2 | DONE        |       100% | 7D/30D/3M/6M/1Y/All on every module, month clamping, earliest records and inclusive custom dates verified.                                               |
+| Phase 5 / 5.9    | Weekly / Monthly Summary               | v0.6    |      4 | DONE        |       100% | Weekly/monthly recorded summaries, partial boundaries, coverage and noncausal complete-period comparisons verified.                                      |
+| Phase 6 / 6.1    | Accessibility                          | v0.9    |      3 | DONE        |       100% | Contrast/touch-target fixes; labels/chart alternatives and responsive themes reviewed; automated checks pass. Device assistive-tech acceptance deferred. |
+| Phase 6 / 6.2    | Performance                            | v0.9    |      3 | DONE        |       100% | Bounded reads/charts reviewed; long-history benchmark and indexed summary fix; all-platform exports. Device profiling deferred.                          |
+| Phase 6 / 6.3    | Security Review                        | v0.9    |      5 | DONE        |       100% | 35-table RLS review, 28-table isolation, live export/deletion and negative auth checks pass. Residual advisories retained for release review.            |
+| Phase 6 / 6.4    | Error / Crash Handling                 | v0.9    |      4 | DONE        |       100% | Safe route fallback/retry; durable workout regression coverage and failure/cleanup tests pass. Native crash acceptance deferred.                         |
+| Phase 6 / 6.5    | Notifications                          | v0.9    |      3 | DONE        |       100% | Free local habit scheduling, DST/owner/permission/cancellation/tap tests and native exports pass. OS delivery acceptance deferred; web in-app only.      |
+| Phase 6 / 6.6    | Personal Beta                          | v0.9    |      6 | DEFERRED    |         0% | User will perform real daily logging and report findings. Six weight excluded from active denominator; no beta pass claimed.                             |
+| Phase 6 / 6.7    | Bug Fix / Polish                       | v0.9    |      6 | DONE        |       100% | Regression suite, live/browser core/privacy smoke, SDK patches and responsive/dark polish verified; later beta findings remain actionable.               |
+| Phase 6 / 6.8    | Documentation Review                   | v0.9    |      3 | DONE        |       100% | README, deployment/privacy/reminder usage, known findings, testing checklist and weighted status reviewed.                                               |
+| Phase 7          | Core release gate (nine prerequisites) | v1.0    |      — | NOT_STARTED |        0/9 | Release gate, no new weighted feature scope.                                                                                                             |
+| Phase 8 / 8.1    | Motion / Activity Source Evaluation    | v1.1    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §8.1.                                                                                                                       |
+| Phase 8 / 8.2    | Active Minutes Calculation             | v1.1    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §8.2.                                                                                                                       |
+| Phase 8 / 8.3    | Today Integration                      | v1.1    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §8.3.                                                                                                                       |
+| Phase 8 / 8.4    | Progress Integration                   | v1.1    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §8.4.                                                                                                                       |
+| Phase 8 / 8.5    | Accuracy / Messaging Review            | v1.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §8.5.                                                                                                                       |
+| Phase 9 / 9.1    | Location Permission Flow               | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.1.                                                                                                                       |
+| Phase 9 / 9.2    | Run Session Schema                     | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.2.                                                                                                                       |
+| Phase 9 / 9.3    | Run Start                              | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.3.                                                                                                                       |
+| Phase 9 / 9.4    | GPS Route Recording                    | v1.2    |      8 | NOT_STARTED |         0% | Requirements: canonical plan §9.4.                                                                                                                       |
+| Phase 9 / 9.5    | Active Run                             | v1.2    |      7 | NOT_STARTED |         0% | Requirements: canonical plan §9.5.                                                                                                                       |
+| Phase 9 / 9.6    | Distance / Pace Calculation            | v1.2    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §9.6.                                                                                                                       |
+| Phase 9 / 9.7    | Run Summary                            | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.7.                                                                                                                       |
+| Phase 9 / 9.8    | Route Thumbnail                        | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.8.                                                                                                                       |
+| Phase 9 / 9.9    | Run History                            | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.9.                                                                                                                       |
+| Phase 9 / 9.10   | Run Detail                             | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.10.                                                                                                                      |
+| Phase 9 / 9.11   | Today Recent-Run Card                  | v1.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §9.11.                                                                                                                      |
+| Phase 9 / 9.12   | Progress Running Card                  | v1.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §9.12.                                                                                                                      |
+| Phase 10 / 10.1  | Performance Dashboard                  | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.1.                                                                                                                      |
+| Phase 10 / 10.2  | Training Block Comparison              | v1.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §10.2.                                                                                                                      |
+| Phase 10 / 10.3  | Unified Timeline                       | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.3.                                                                                                                      |
+| Phase 10 / 10.4  | Advanced Cross-Metric Analytics        | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.4.                                                                                                                      |
+| Phase 10 / 10.5  | Badge Rules Engine                     | v1.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §10.5.                                                                                                                      |
+| Phase 10 / 10.6  | Achievement UI                         | v1.3    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §10.6.                                                                                                                      |
+| Phase 11 / 11.1  | Image Capture                          | v1.4    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §11.1.                                                                                                                      |
+| Phase 11 / 11.2  | Secure Vision Provider Integration     | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.2.                                                                                                                      |
+| Phase 11 / 11.3  | Food Identification                    | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.3.                                                                                                                      |
+| Phase 11 / 11.4  | Portion Estimation                     | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.4.                                                                                                                      |
+| Phase 11 / 11.5  | Nutrition Matching                     | v1.4    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §11.5.                                                                                                                      |
+| Phase 11 / 11.6  | Editable Review                        | v1.4    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §11.6.                                                                                                                      |
+| Phase 11 / 11.7  | Confirmed Logging                      | v1.4    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §11.7.                                                                                                                      |
+| Phase 12 / 12.1  | Local Data Strategy                    | v1.5    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §12.1.                                                                                                                      |
+| Phase 12 / 12.2  | Sync Queue                             | v1.5    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §12.2.                                                                                                                      |
+| Phase 12 / 12.3  | Idempotency                            | v1.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §12.3.                                                                                                                      |
+| Phase 12 / 12.4  | Conflict Handling                      | v1.5    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §12.4.                                                                                                                      |
+| Phase 12 / 12.5  | Reconciliation                         | v1.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §12.5.                                                                                                                      |
+| Phase 12 / 12.6  | Offline Coverage Expansion             | v1.5    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §12.6.                                                                                                                      |
+| Phase 13 / 13.1  | Apple Health                           | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.1.                                                                                                                      |
+| Phase 13 / 13.2  | Android Health Connect                 | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.2.                                                                                                                      |
+| Phase 13 / 13.3  | Imported Activities                    | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.3.                                                                                                                      |
+| Phase 13 / 13.4  | Sleep                                  | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.4.                                                                                                                      |
+| Phase 13 / 13.5  | Heart Rate                             | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.5.                                                                                                                      |
+| Phase 13 / 13.6  | HRV                                    | v2.0    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §13.6.                                                                                                                      |
+| Phase 13 / 13.7  | Sensor-Enhanced Recovery               | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.7.                                                                                                                      |
+| Phase 13 / 13.8  | Physiological Training Load            | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.8.                                                                                                                      |
+| Phase 13 / 13.9  | Daily Suggested Workout                | v2.0    |      6 | NOT_STARTED |         0% | Requirements: canonical plan §13.9.                                                                                                                      |
+| Phase 13 / 13.10 | Advanced Running Analytics             | v2.0    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §13.10.                                                                                                                     |
 
 ## Phase Summary
 
@@ -214,7 +221,7 @@ User-deferred device checks are separate, unweighted acceptance records; they ar
 | Phase 3  | v0.4    | Manual Nutrition                  |             57 |       100% | DONE        |
 | Phase 4  | v0.5    | Habits, Goals & Today             |             38 |       100% | DONE        |
 | Phase 5  | v0.6    | Basic Progress & Analytics        |             24 |       100% | DONE        |
-| Phase 6  | v0.9    | Quality & Personal Beta           |             33 |         0% | NOT_STARTED |
+| Phase 6  | v0.9    | Quality & Personal Beta           |             33 |       100% | DONE        |
 | Phase 7  | v1.0    | Core Deterministic Release        |    — (9 gates) |         0% | NOT_STARTED |
 | Phase 8  | v1.1    | Active Minutes                    |             16 |         0% | NOT_STARTED |
 | Phase 9  | v1.2    | Running / GPS                     |             48 |         0% | NOT_STARTED |
@@ -264,9 +271,9 @@ Deferred checks remain weighted and excluded only from the current active denomi
 Native email-change/post-crypto callback checks remain within the Auth follow-up;
 they do not add another weight. None of these checks is claimed passed. Before
 v1.0 release acceptance, resume every retained check and fix any discovered defect.
-Account deletion/export remain retained product requirements with placement still
-unresolved; this foundation closure does not claim them implemented. Existing
-dependency/SDK/advisor findings remain open quality-phase work.
+At foundation closure, account deletion/export remained unimplemented. They are
+subsequently completed under v0.9 task 6.3 below; no foundation weight was added.
+Residual dependency/advisor findings remain documented for release review.
 
 Verification for this documentation-only closure:
 
@@ -468,7 +475,7 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 
 | Feature or requirement                                                     | Release / placement                                          | Status      | Authority / note                                                                                                                                                                      |
 | -------------------------------------------------------------------------- | ------------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Account deletion and data export                                           | Core security work; exact task not separately numbered       | NOT_STARTED | Source §20; retain ownership/privacy requirements.                                                                                                                                    |
+| Account deletion and data export                                           | Core security, v0.9 task 6.3 (no new weight)                 | DONE        | Owned 28-table JSON export and password-verified Edge deletion; live/browser/cascade/isolation evidence below.                                                                        |
 | Body measurements and measurement history                                  | Body goals/progress; exact task not separately numbered      | NOT_STARTED | Source §§13–14, 21.                                                                                                                                                                   |
 | User-created exercises                                                     | Placement undecided                                          | DEFERRED    | Source §21 ownership/RLS.                                                                                                                                                             |
 | Warm-up sets, supersets, drop sets, advanced set types                     | Later strength enhancement; release unassigned               | DEFERRED    | Source §8.4.                                                                                                                                                                          |
@@ -492,7 +499,12 @@ before implementation. DEFERRED means intentionally not in this setup's scope.
 
 ## Last Completed
 
-**Latest DONE — v0.6 Basic Progress & Analytics (2026-10-14).** All nine tasks
+**DONE — v0.9 active implementation (2026-10-15).** Seven tasks earn 27/27
+active weight. Privacy export/deletion, local reminders and quality improvements
+have local/live/browser evidence in the closure entry below. Personal beta's six
+weight and device/native/v1.0 acceptance remain DEFERRED, not passed.
+
+**DONE — v0.6 Basic Progress & Analytics (2026-10-14).** All nine tasks
 are verified at 24/24 weight. Detailed evidence is recorded in the completion
 entry below. User-deferred device/build checks and v1.0 gates remain separate.
 
@@ -967,18 +979,16 @@ Doctor/audit failures remain documented; this setup is not release readiness.
 
 ## Current Work
 
-v0.6 is functionally DONE: all nine tasks, 24/24 weight, 100%. v0.1 active
-development and v0.2–v0.5 functional scopes remain DONE. No later-release
-implementation was started. Physical-device/native-build acceptance remains DEFERRED.
+v0.9 active implementation/review is DONE: seven tasks, 27/27 active weight.
+Personal beta (6 weight), physical-device/native-build acceptance and v1.0
+approval remain DEFERRED. Earlier release implementation remains DONE. No v1.1+
+work has begun. Use [V09_TESTING.md](V09_TESTING.md) for the retained acceptance.
 
 ## Next 3 Actions
 
-1. v0.9 task 6.1 — Accessibility: inspect labels, focus, dynamic text and contrast across core flows.
-2. v0.9 task 6.2 — Performance: profile actual screens/queries and prioritize measured bottlenecks.
-3. v0.9 task 6.3 — Security Review: review grants/RLS/Auth and retained dependency/advisor findings.
-
-Device/sensor QA, native/cloud builds and remaining v0.1 acceptance stay user-
-DEFERRED. Resume required acceptance before v1.0 approval; do not infer a beta pass.
+1. User personal beta: log real workouts, nutrition and habits; report reproducible findings.
+2. Verify deferred phone flows, local-notification delivery, native export and account/email callbacks when available.
+3. Fix findings, resolve/accept documented release risks and complete the retained v1.0 gates before approval.
 
 ## Blockers / Decisions
 
@@ -995,10 +1005,7 @@ DEFERRED. Resume required acceptance before v1.0 approval; do not infer a beta p
   It does not block initialization using the supplied plan.
 - Supabase public configuration and MCP authorization are established. The profile/preferences migration is applied and database-tested. Both Android and iOS remain test targets; the latest user report identifies iPhone Expo Go and confirms the name editor works. Android and new account-update flows remain unverified.
 - Earlier reported Supabase exhaustion remains undiagnosed for the native/email follow-up. Database/API access and v0.2/v0.3 acceptance now pass using bounded disposable fixtures and no test emails; pending foundation email/device acceptance is not credited.
-- Latest `npm audit --json` reports 66 affected packages (50 high, 16 moderate).
-  Review runtime/tooling exposure and dependency chains before release; no safety
-  claim is made. Automated suggestions include incompatible SDK changes, so
-  `npm audit fix --force` was not run. No production release gate has passed.
+- Latest `npm audit --json` reports 67 affected package nodes (50 high, 17 moderate, zero critical). Compatible SDK patches and non-breaking fixes were applied; remaining recommendations include incompatible major changes. No forced SDK/Jest replacement or safety claim. See [quality findings](V09_TESTING.md#quality-findings-retained-for-release-review); no production release gate has passed.
 - Expo selected ESLint 9.39.5, which npm marks unsupported; lint tooling support
   should be reviewed alongside SDK-compatible dependency remediation.
 
@@ -1590,3 +1597,54 @@ The host/server clock difference is corrected only inside ignored fixture/browse
 tooling. No app clock, redirect, secret, authentication bypass or personal machine
 address was added to the product. Fixture tooling/artifacts remain ignored, and
 the supplied design PDF remains unchanged/untracked. No paid build/service used.
+
+## v0.9 active development closure — 2026-10-15
+
+**DONE — 27/27 active weight (100%).** Original plan: 33; six-weight Personal Beta
+is user-DEFERRED and earns zero. Full baseline: 27/33 = 81.818…%. This closes the
+authorized implementation, not full beta/device acceptance or v1.0 approval.
+
+| Task                     | Verified evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 6.1 Accessibility (3)    | Shared charcoal-on-orange button text and readable small labels; minimum 44px choice width; existing labels/headers/selected state and chart text alternatives reviewed. Contrast tests and browser 390px/320px dark/desktop screenshots pass. VoiceOver/TalkBack/large-text device checks remain deferred.                                                                                                                                                                                                                                                                              |
+| 6.2 Performance (3)      | Exact-count/bounded pagination and chart bins retained. Weekly/monthly summaries index habit logs once; training frequency uses a date Map. Synthetic ten-year benchmark (14,612 foods, 36,530 habit logs) median 1,511ms before → 1,061ms after on this host (three samples each, not a phone latency guarantee). Historical frequency/partial-period regression test passes. Final JS bundles: iOS ~5MB, Android ~5.2MB, web ~2.9MB.                                                                                                                                                   |
+| 6.3 Security/privacy (5) | All 35 public tables have RLS; cross-account reads empty for all 28 owned tables. New export uses explicit table allowlist, owner checks before/after, stable pagination and selected account metadata; no session/key/password. New Edge Function verifies JWT + authoritative owner + password + exact confirmation, revokes sessions then hard-deletes with cascades. No caller owner ID accepted; app binds the request to its verified access token. Wrong-password/body/owner and CORS live tests pass. First browser-deleted fixture's rows removed and second fixture preserved. |
+| 6.4 Error handling (4)   | Root route fallback gives safe retry guidance without logging raw errors or clearing drafts. Existing offline/session recovery tests plus duplicate-submit, unconfirmed deletion, local-cleanup failure, stale export and temporary-file cleanup tests pass. No external telemetry or native crash pass claimed.                                                                                                                                                                                                                                                                         |
+| 6.5 Notifications (3)    | SDK local date notifications only; explicit permission and saved opt-in, generic content, owned taps including cold start, clearing on account changes, refresh after edits/resume. Seven-day/48 cap, DST gaps/folds and partial-failure cleanup tested. Web states in-app-only support. Physical OS delivery remains deferred.                                                                                                                                                                                                                                                          |
+| 6.7 Bugfix/polish (6)    | Compatible SDK 57 patches, stable same-name habit ordering, correct reminder copy, shared controls/error recovery, verified-canvas splash background; full tests, real browser core-tab/privacy flows and iOS/Android/web exports. Starter icon artwork and exact unprovided Figma states remain acceptance work.                                                                                                                                                                                                                                                                        |
+| 6.8 Documentation (3)    | README includes privacy/reminder usage, required public configuration, server-only deletion deployment, Deno check and links to the retained beta checklist. Canonical plan records privacy placement and user deferral; all release weights preserved.                                                                                                                                                                                                                                                                                                                                  |
+
+Files/reasons: shared auth controls and the route error boundary provide contrast,
+touch targets and safe fallback; notification model/device adapters/service/coordinator/
+screen implement local reminders; profile data service/share helper/screen and privacy
+route implement export/deletion; the Supabase function owns privileged deletion;
+habit/preferences routes emit refresh changes; progress models remove measured repeated
+scans. Package/config changes add only Notifications, FileSystem and Sharing for those
+current needs, plus SDK-compatible patches. App TypeScript excludes only the Deno
+entry point; its handler is checked by app tests and entry is checked separately by Deno.
+
+Verification (2026-10-15):
+
+- `npm.cmd run check`: PASS — strict TypeScript, lint, formatting; 288 Jest tests / 58 suites + six dataset tests = 294 tests. Initial formatting/mock issues were corrected before final verification.
+- `npm.cmd exec --no -- expo install --check`: PASS — dependencies up to date.
+- `npm.cmd exec --yes -- expo-doctor`: PASS — 21/21 checks.
+- `npm.cmd exec --yes -- deno check supabase/functions/delete-account/index.ts`: PASS.
+- `npm.cmd exec --no -- expo export --platform all --output-dir .actaro-tools/v09-export`: PASS — 39 routes and three-platform JS export. A stale Metro cache fell back to a successful full crawl; no app workaround.
+- `node --env-file=.env .actaro-tools/setup-v09-fixture.mjs` and `seed-v09.mjs`: PASS — two disposable confirmed accounts with bounded core fixtures; no email sends or real-account changes.
+- `node --env-file=.env .actaro-tools/check-v09-live.mjs`: PASS — all 28 owned-table isolation checks, deployed wrong-password/invalid-body/foreign-owner rejection and CORS.
+- `node .actaro-tools/check-v09-browser.mjs`: PASS — all 28 tables and seeded rows in actual browser JSON download, no tokens/password, destructive guard, successful deletion/sign-out, all five tabs and responsive/dark layouts. Screenshots inspected.
+- `node --env-file=.env .actaro-tools/check-v09-deletion.mjs`: PASS — deleted fixture/cascades absent; second account and record intact.
+- `node .actaro-tools/check-v09-final-browser.mjs`: PASS — repeated final session-bound export/deletion on the remaining disposable fixture after the race fix.
+- `node .actaro-tools/check-v09-artifacts.mjs`: PASS — 147 final exported artifacts exclude the privileged Supabase key.
+- `node --env-file=.env .actaro-tools/cleanup-v09.mjs`: PASS — both fixtures removed; no real user data touched.
+- `git diff --check`: PASS. No paid service, build, real confirmation email, production domain or privileged client credential added. The supplied PDF remains unchanged/untracked.
+
+The deployment is `delete-account` with platform JWT verification enabled. Runtime
+server credentials come from Supabase, not Expo public variables. No new app API
+key is required. Data export is an interval collection, not a transactional backup
+or restore feature. Native share and scheduled delivery still require user device QA.
+
+Security findings remain visible: latest audit 67 affected nodes (50 high, 17 moderate),
+disabled Supabase leaked-password protection and five INFO composite-FK suggestions.
+No forced major upgrades, speculative indexes, paid protection or production-readiness
+claim. See [V09_TESTING.md](V09_TESTING.md) for links, limitations and release actions.

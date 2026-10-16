@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
+import { router } from 'expo-router';
 
 import {
   AuthButton,
@@ -97,6 +98,11 @@ export function ProfileScreen({
           onBusyChange={setSecurityBusy}
         />
       )}
+      <AuthLink
+        title="Privacy & account data"
+        disabled={editor.saving || securityBusy}
+        onPress={() => router.push('/privacy')}
+      />
     </AuthFrame>
   );
 }

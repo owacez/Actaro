@@ -41,6 +41,10 @@ export function periodSummaries(
   now = new Date(),
 ) {
   const rows: PeriodSummary[] = [];
+  const indexedHabits = sources.habits.map((record) => ({
+    record,
+    dates: new Map(record.habit_logs.map((log) => [log.local_date, log])),
+  }));
   for (let from = range.from; from <= range.to;) {
     const start = group === 'week' ? monday(from) : from.slice(0, 7) + '-01',
       next =
@@ -51,10 +55,24 @@ export function periodSummaries(
               .slice(0, 10),
       end = shiftDate(next, -1),
       to = end < range.to ? end : range.to,
-      bounds = { from, to };
+      bounds = { from, to },
+      habitFrom = monday(from);
+    const habitDates: string[] = [];
+    for (let date = habitFrom; date <= to; date = shiftDate(date, 1)) habitDates.push(date);
     const nutrition = nutritionProgress(sources.logs, sources.targets, bounds),
       steps = stepsProgress(sources.activity, bounds),
-      habits = habitsProgress(sources.habits, bounds, now),
+      habits = habitsProgress(
+        indexedHabits.map(({ record, dates }) => ({
+          ...record,
+          // Weekly frequency may need logs from before a custom period's first day.
+          habit_logs: habitDates.flatMap((date) => {
+            const log = dates.get(date);
+            return log ? [log] : [];
+          }),
+        })),
+        bounds,
+        now,
+      ),
       weight = weightProgress(sources.weights, from, to),
       training = sources.training.days.filter((day) => day.date >= from && day.date <= to),
       days = periodDays(from, to);

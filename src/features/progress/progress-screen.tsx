@@ -470,6 +470,7 @@ function TrainingResults({
         No completed workout logs in this period. Plans and unfinished drafts are excluded.
       </AuthNotice>
     );
+  const sessionsByDate = new Map(overview.days.map((day) => [day.date, day.sessions]));
   const points = volume
     ? overview.days.map((day) => ({
         date: day.date,
@@ -477,7 +478,7 @@ function TrainingResults({
       }))
     : Array.from({ length: periodDays(data.from, data.to) }, (_, index) => {
         const date = shiftDate(data.from, index);
-        return { date, value: overview.days.find((day) => day.date === date)?.sessions ?? 0 };
+        return { date, value: sessionsByDate.get(date) ?? 0 };
       });
   return (
     <>

@@ -63,7 +63,7 @@ test('creation requires a name and persists the chosen type/schedule/reminder/mo
   await fireEvent.changeText(screen.getByLabelText('Habit name'), 'Read');
   await fireEvent.press(screen.getByRole('button', { name: 'duration' }));
   await fireEvent.changeText(screen.getByLabelText('Daily target (minutes)'), '20');
-  await fireEvent.changeText(screen.getByLabelText('In-app reminder (optional HH:MM)'), '18:30');
+  await fireEvent.changeText(screen.getByLabelText('Reminder time (optional HH:MM)'), '18:30');
   await fireEvent.press(screen.getByRole('button', { name: 'None' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Save habit' }));
   await waitFor(() => expect(saved).toHaveBeenCalled());

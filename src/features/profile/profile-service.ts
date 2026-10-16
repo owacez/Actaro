@@ -1,4 +1,5 @@
 import { getSupabase } from '@/lib/supabase/client';
+import { remindersChanged } from '@/features/notifications/reminder-events';
 
 import {
   ProfileError,
@@ -94,7 +95,9 @@ export const profileService = {
         .eq('user_id', id)
         .select('*')
         .maybeSingle();
-      return requireRecord(data, error);
+      const record = requireRecord(data, error);
+      remindersChanged();
+      return record;
     });
   },
 };

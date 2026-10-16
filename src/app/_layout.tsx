@@ -13,6 +13,8 @@ import { AuthProvider, useAuth } from '@/features/auth/auth-provider';
 import { AuthFeedbackProvider } from '@/features/auth/auth-feedback';
 import { AppThemeProvider } from '@/features/profile/theme-provider';
 import { useAppTheme } from '@/features/profile/theme-context';
+import { ReminderCoordinator } from '@/features/notifications/reminder-coordinator';
+export { ScreenErrorBoundary as ErrorBoundary } from '@/components/screen-error-boundary';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -46,6 +48,8 @@ function AuthRoutes() {
       <Stack.Protected guard={!!session && !recovery}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="profile" />
+        <Stack.Screen name="privacy" />
+        <Stack.Screen name="reminders" />
         <Stack.Screen name="preferences" />
         <Stack.Screen name="equipment" />
         <Stack.Screen name="exercises/[id]" />
@@ -77,6 +81,7 @@ function AccountTheme() {
   return (
     <AppThemeProvider userId={recovery ? undefined : session?.user.id}>
       <AuthFeedbackProvider>
+        <ReminderCoordinator userId={recovery ? undefined : session?.user.id} />
         <AuthRoutes />
       </AuthFeedbackProvider>
     </AppThemeProvider>

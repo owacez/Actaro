@@ -275,3 +275,30 @@ test('weekly/monthly summaries preserve gaps, label partial boundaries and avoid
   expect(weekly[2].comparison).toBeNull();
   expect(weekly[1].steps.average).toBeNull();
 });
+
+test('indexed summary habits keep previous-month frequency logs and historical target semantics', () => {
+  const record = habit('frequency');
+  record.start_date = '2026-09-01';
+  record.habit_versions[0].effective_from = '2026-09-01';
+  record.habit_logs = [
+    habitLog('2026-09-29', 1),
+    habitLog('2026-10-01', 1),
+    habitLog('2026-10-04', 1),
+    habitLog('2026-10-08', 1),
+  ];
+  const sources: SummarySources = {
+    logs: [],
+    targets: [],
+    training,
+    activity: [],
+    habits: [record],
+    weights: [],
+  };
+  const now = new Date('2026-11-01T12:00:00Z'),
+    bounds = { from: '2026-10-01', to: '2026-10-31' };
+  const monthly = periodSummaries(sources, bounds, 'month', now)[0];
+  const direct = habitsProgress([record], bounds, now);
+  expect(monthly.habits.rows[0].periods).toEqual(direct.rows[0].periods);
+  expect(monthly.habits.completed).toBe(direct.completed);
+  expect(monthly.habits.expected).toBe(direct.expected);
+});

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Platform, View } from 'react-native';
+import { router } from 'expo-router';
 
 import {
   AuthButton,
@@ -187,9 +188,14 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
             }
           />
           <AuthText>
-            These preferences are saved for future reminders and achievements. They do not request
-            device permissions or enable features that have not been released.
+            Notifications also require permission on each phone. Achievements remain a future
+            release.
           </AuthText>
+          <AuthLink
+            title="Manage habit reminders"
+            disabled={saving}
+            onPress={() => router.push('/reminders')}
+          />
           <AuthText kind="heading">Appearance</AuthText>
           <View style={authStyles.choices}>
             {(['system', 'light', 'dark'] as const).map((theme) => (

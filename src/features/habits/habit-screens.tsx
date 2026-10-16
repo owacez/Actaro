@@ -168,7 +168,7 @@ export function HabitsScreen({
                 </AuthText>
                 <Progress record={record} today={today} />
                 {version?.reminder_time && (
-                  <AuthText>In-app reminder {version.reminder_time}</AuthText>
+                  <AuthText>Reminder time {version.reminder_time}</AuthText>
                 )}
                 <View style={authStyles.choices}>
                   {active && (
@@ -451,13 +451,14 @@ export function HabitEditor({
             settings.
           </AuthText>
           <AuthInput
-            label="In-app reminder (optional HH:MM)"
+            label="Reminder time (optional HH:MM)"
             value={form.reminder}
             editable={!action.locked}
             onChangeText={(reminder) => setForm((current) => ({ ...current, reminder }))}
           />
           <AuthText>
-            Shown as due in the app on scheduled days. Device alerts are not enabled.
+            Shown as due in the app on scheduled days. Enable device alerts in Preferences → Manage
+            habit reminders.
           </AuthText>
           <AuthText kind="eyebrow">Progress style</AuthText>
           <View style={authStyles.choices}>

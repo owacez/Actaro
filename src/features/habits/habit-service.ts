@@ -7,6 +7,7 @@ import {
 } from '@/features/nutrition/nutrition-model';
 import { shiftDate } from '@/features/workouts/training-overview';
 import { habitPayload, type HabitForm, type HabitRecord } from './habit-model';
+import { remindersChanged } from '@/features/notifications/reminder-events';
 function bounded(records: HabitRecord[]) {
   if (
     records.some(
@@ -37,6 +38,7 @@ export const habitService = {
       .gte('habit_logs.local_date', shiftDate(today, -92))
       .lte('habit_logs.local_date', shiftDate(today, 1))
       .order('name')
+      .order('id')
       .range(offset, offset + 23);
     return { preferences, today, rows: bounded(recordResult(data, error)) };
   },
@@ -103,6 +105,7 @@ export const habitService = {
     });
     if (recordResult(data, error) !== id)
       throw new Error('Habit save was not acknowledged. Retry.');
+    remindersChanged();
   },
   async log(userId: string, id: string, date: string, value: number, notes: string) {
     await requireOwner(userId);
@@ -115,6 +118,7 @@ export const habitService = {
     });
     if (recordResult(data, error) !== date)
       throw new Error('Habit log was not acknowledged. Retry.');
+    remindersChanged();
   },
   async removeLog(userId: string, id: string, date: string) {
     await requireOwner(userId);
@@ -126,6 +130,7 @@ export const habitService = {
       .eq('local_date', validDate(date))
       .select('habit_id');
     recordResult(data, error);
+    remindersChanged();
   },
   async archive(userId: string, id: string, archived = true) {
     await requireOwner(userId);
@@ -137,5 +142,6 @@ export const habitService = {
       .select('id')
       .single();
     recordResult(data, error);
+    remindersChanged();
   },
 };
