@@ -13,6 +13,12 @@ Updated: 2026-10-16 (America/Los_Angeles).
 - Blockers: No remaining authorized implementation blocker. Dependency advisories, disabled leaked-password protection, exact visual/device checks and native-build acceptance remain documented release-review findings. They are not claimed passed or waived.
 - Approval boundary: The user authorized completing v0.9, retaining the earlier instruction that device acceptance, personal testing and v1.0 release approval happen afterward. No paid service or native/EAS build was used.
 
+Offline design reference (2026-10-16): **DONE** - a 91-page PDF atlas and 87
+sample-data screen PNGs document the current implementation, including full
+scrolling content and labelled source-derived native/date variants. See the
+[atlas and verification scope](DESIGN_ATLAS.md). This does not close device
+acceptance or earn additional release weight.
+
 Latest design sync (2026-10-16): **BLOCKED** at final visual correction by the
 Figma Starter MCP limit. The authorized code-to-design update applied 78 editable
 screens/states and preserved 23 future concepts separately. Short-link wrapping,

@@ -56,3 +56,7 @@ coverage/
 .actaro-tools/
 supabase/.temp/
 docs/.obsidian/
+
+# Design PDF generation: keep the PDF and image archive, not loose previews
+/tmp/pdfs/
+/output/pdf/actaro-screen-images/
