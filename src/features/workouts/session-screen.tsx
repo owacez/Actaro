@@ -365,6 +365,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
   ) : null;
   return (
     <AuthFrame
+      pinnedHeader
       header={
         <ScreenHeader
           title={summary ? 'Workout complete' : draft.name}

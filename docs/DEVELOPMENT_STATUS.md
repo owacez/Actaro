@@ -8,7 +8,7 @@ Updated: 2026-10-17 (America/Los_Angeles).
 - Release Completion: **100% active implementation (27 / 27 weight); personal beta DEFERRED (6 weight)**
 - Previous Releases: **v0.1 active development and v0.2–v0.6 functional scopes DONE (100%); retained acceptance DEFERRED**
 - Current Phase: **Phase 6; seven implementation/review tasks DONE, task 6.6 Personal Beta DEFERRED**
-- Current Focus: User-authorized core visual redesign from `Actaro-v1-redesign.pdf` implemented; user visual/device review next. No v1.0 approval or future-release implementation.
+- Current Focus: User-requested header reconciliation implemented and locally verified; user visual/device review next. No v1.0 approval or future-release implementation.
 - Status: **DONE — active v0.9 development; full beta/release acceptance DEFERRED**
 - Blockers: No remaining authorized implementation blocker. Dependency advisories, disabled leaked-password protection, exact visual/device checks and native-build acceptance remain documented release-review findings. They are not claimed passed or waived.
 - Approval boundary: The user authorized completing v0.9, retaining the earlier instruction that device acceptance, personal testing and v1.0 release approval happen afterward. No paid service or native/EAS build was used.
@@ -21,6 +21,17 @@ calendar controls and actual-data charts are implemented. TypeScript/lint/format
 See [coverage, retained differences and evidence](REDESIGN_IMPLEMENTATION.md).
 The new PDF supersedes the older atlas and visual palette. Page 15 running stays
 v1.2 and is not implemented. Release weights and deferred acceptance are unchanged.
+
+Header reconciliation (2026-10-17): **DONE** for implementation/local verification.
+Removed the detached full-width white/glass header strip. Page headings now share
+the canvas, content margins and scroll area, including the virtualized Library.
+Active workouts retain a canvas-colored pinned timer/finish header. This follows
+the user's newer visual correction; the reference PDF remains unchanged.
+`npm.cmd run check`: **PASS**, TypeScript/lint/format, 293 Jest + six dataset tests.
+Web export and 16 isolated layout captures passed; the five main page headings
+were checked inside their scroll containers. Zero live Supabase requests.
+See [verification and changed files](REDESIGN_IMPLEMENTATION.md#header-reconciliation).
+No dependency, data service, schema or release-weight change.
 
 Historical offline reference (2026-10-16): **DONE** - a 91-page PDF atlas and 87
 sample-data screen PNGs document the current implementation, including full

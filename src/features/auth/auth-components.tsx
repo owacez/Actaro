@@ -22,7 +22,8 @@ export function AuthFrame({
   children,
   header,
   footer,
-}: PropsWithChildren<{ header?: ReactNode; footer?: ReactNode }>) {
+  pinnedHeader = false,
+}: PropsWithChildren<{ header?: ReactNode; footer?: ReactNode; pinnedHeader?: boolean }>) {
   const { colors } = useAppTheme();
   const screenStyle = [styles.screen, { backgroundColor: colors.background }];
   return (
@@ -31,9 +32,12 @@ export function AuthFrame({
         style={screenStyle}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {header}
+        {pinnedHeader && header && <View style={styles.pinnedHeader}>{header}</View>}
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <View style={styles.content}>{children}</View>
+          <View style={styles.content}>
+            {!pinnedHeader && header}
+            {children}
+          </View>
         </ScrollView>
         {footer}
       </KeyboardAvoidingView>
@@ -283,6 +287,14 @@ export const authStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: authColors.background },
   scroll: { flexGrow: 1, alignItems: 'center' },
+  pinnedHeader: {
+    width: '100%',
+    maxWidth: actaroLayout.contentWidth,
+    alignSelf: 'center',
+    paddingHorizontal: actaroLayout.screenPadding,
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
   content: {
     width: '100%',
     maxWidth: actaroLayout.contentWidth,

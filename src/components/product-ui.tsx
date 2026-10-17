@@ -81,15 +81,13 @@ export function ScreenHeader({
   action?: ReactNode;
 }) {
   return (
-    <NavigationSurface style={ui.header}>
-      <View style={ui.headerContent}>
-        <View style={{ flex: 1 }}>
-          {subtitle && <AuthText kind="eyebrow">{subtitle}</AuthText>}
-          <AuthText kind="title">{title}</AuthText>
-        </View>
-        {action}
+    <View style={ui.headerContent}>
+      <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
+        {subtitle && <AuthText kind="eyebrow">{subtitle}</AuthText>}
+        <AuthText kind="title">{title}</AuthText>
       </View>
-    </NavigationSurface>
+      {action}
+    </View>
   );
 }
 
@@ -299,14 +297,12 @@ export function Meter({ value, target, color }: { value: number; target: number;
 }
 
 export const ui = StyleSheet.create({
-  header: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'transparent' },
   headerContent: {
     maxWidth: actaroLayout.contentWidth,
     width: '100%',
     alignSelf: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 18,
+    paddingTop: 8,
+    paddingBottom: 4,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,

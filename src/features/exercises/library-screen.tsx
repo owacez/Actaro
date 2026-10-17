@@ -98,7 +98,6 @@ export function LibraryScreen({
       style={{ flex: 1, backgroundColor: colors.background }}
       edges={['top', 'left', 'right']}
     >
-      {navigation && <ScreenHeader title="Train" />}
       <FlatList
         data={rows}
         keyExtractor={(item) => item.id}
@@ -106,6 +105,7 @@ export function LibraryScreen({
         contentContainerStyle={styles.content}
         ListHeaderComponent={
           <View style={styles.header}>
+            {navigation && <ScreenHeader title="Train" />}
             {navigation}
             {!navigation && <AuthText kind="heading">Exercise Library</AuthText>}
 

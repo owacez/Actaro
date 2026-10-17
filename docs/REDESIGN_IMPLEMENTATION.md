@@ -57,6 +57,31 @@ behavior, keyboard placement and existing deferred integration checks remain
 **DEFERRED** to user testing. A JavaScript export is not a native build or device
 test. This work earns no additional release weight and does not approve v1.0.
 
+## Header reconciliation
+
+User follow-up, 2026-10-17: the top bar looked like an attached strip. The newer
+instruction refines the PDF's full-width header treatment. The supplied PDF was
+preserved; exact matching to that treatment is no longer intended.
+
+- `src/components/product-ui.tsx`: ScreenHeader is a transparent page-heading row, with title/subtitle spacing and room for actions; removed its white/glass wrapper.
+- `src/features/auth/auth-components.tsx`: headings share the content column and scroll naturally; a narrow `pinnedHeader` option retains operational controls where needed.
+- `src/features/exercises/library-screen.tsx`: Train heading moves into the existing virtualized list header so it follows the same scroll/margin behavior.
+- `src/features/workouts/session-screen.tsx`: explicitly retains the pinned workout timer/finish header on the screen canvas. Existing footer rest controls remain available.
+
+Validation: **DONE** locally. `npm.cmd run check` passed TypeScript, lint,
+formatting, 293 Jest tests / 59 suites and six dataset tests. The command ran
+through the same Windows `cmd.exe` wrapper described above, with exit code 0.
+`npm.cmd exec -- expo export --platform web --output-dir .actaro-tools/redesign-export`
+passed. `node --env-file=.env .actaro-tools/check-header-browser.mjs` passed 16
+offline layout captures, including light/dark and 320/390/1280px widths, with
+zero document overflow/runtime exceptions and zero live Supabase calls. It also
+verified that all five main headings are inside their scroll container and move
+when scrolled. Food, Today, narrow dark Progress and Preferences captures were
+visually inspected. `git diff --check` passed. No package or backend change.
+
+Physical-device visual approval remains **DEFERRED**; next actions below remain
+the testing handoff. Release completion weights are unchanged.
+
 ## Next three actions
 
 1. Review Today, Train, Food, Progress and You on iPhone in both themes, including Quick log and keyboard/safe-area placement.
