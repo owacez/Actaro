@@ -297,9 +297,17 @@ export function BuilderScreen({
                             ['rpe', 'RPE (optional)'],
                           ] as const
                         ).map(([field, label]) => (
-                          <View key={field} style={{ flexBasis: '45%', flexGrow: 1 }}>
+                          <View key={field} style={{ flexBasis: '20%', flexGrow: 1 }}>
                             <AuthInput
-                              label={label}
+                              label={
+                                field === 'weight'
+                                  ? unit
+                                  : field === 'rest'
+                                    ? 'Rest'
+                                    : field === 'rpe'
+                                      ? 'RPE'
+                                      : 'Reps'
+                              }
                               accessibilityLabel={`${label} · exercise ${index + 1} set ${position + 1}`}
                               value={set[field]}
                               keyboardType={

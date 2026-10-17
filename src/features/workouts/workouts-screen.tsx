@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
+import type { ReactNode } from 'react';
+import { ActionRow, ActionSheet, IconButton, ScreenHeader } from '@/components/product-ui';
 import { useFocusEffect } from 'expo-router';
 import {
   AuthButton,
   AuthFrame,
+  AuthCard,
   AuthLink,
   AuthLoading,
   AuthNotice,
@@ -11,9 +14,11 @@ import {
 } from '@/features/auth/auth-components';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
 import { workoutService } from './workout-service';
+import { ScheduledTraining } from './scheduled-training';
 type Page = Awaited<ReturnType<typeof workoutService.list>>;
 export function WorkoutsScreen({
   userId,
+  navigation,
   onBack,
   onCreate,
   onEdit,
@@ -29,6 +34,7 @@ export function WorkoutsScreen({
   onTraining,
 }: {
   userId: string;
+  navigation?: ReactNode;
   onBack: () => void;
   onCreate: () => void;
   onEdit: (id: string, name: string) => void;
@@ -111,26 +117,13 @@ export function WorkoutsScreen({
     }
   }
   return (
-    <AuthFrame>
-      <AuthLink title={backTitle} disabled={removing} onPress={onBack} />
-      <AuthText kind="heading">{selecting ? selectionTitle : 'My workouts'}</AuthText>
+    <AuthFrame header={<ScreenHeader title={selecting ? selectionTitle : 'Train'} />}>
+      {navigation ?? <AuthLink title={backTitle} disabled={removing} onPress={onBack} />}
       {selecting && <AuthText>{selectionDescription}</AuthText>}
-      <AuthButton title="Create workout" disabled={removing} onPress={onCreate} />
-      {!selecting && onSplits && (
-        <AuthLink title="Training splits" disabled={removing} onPress={onSplits} />
+      {navigation && !selecting && onStart && (
+        <ScheduledTraining userId={userId} onStart={onStart} />
       )}
-      {!selecting && onPlans && (
-        <AuthLink title="Training plans" disabled={removing} onPress={onPlans} />
-      )}
-      {!selecting && onResume && (
-        <AuthLink title="Resume saved workout" disabled={removing} onPress={onResume} />
-      )}
-      {!selecting && onHistory && (
-        <AuthLink title="Workout history" disabled={removing} onPress={onHistory} />
-      )}
-      {!selecting && onTraining && (
-        <AuthLink title="Training summary" disabled={removing} onPress={onTraining} />
-      )}
+      <AuthText kind="heading">Your workouts</AuthText>
       {loading ? (
         <AuthLoading>Loading workouts…</AuthLoading>
       ) : error ? (
@@ -141,72 +134,109 @@ export function WorkoutsScreen({
       ) : (
         <>
           {!page?.rows.length && (
-            <AuthText>No saved workouts yet. Create your first workout.</AuthText>
+            <AuthCard>
+              <AuthText kind="heading">Build your first workout</AuthText>
+              <AuthText>Choose exercises from the library, then set your own targets.</AuthText>
+            </AuthCard>
           )}
           {page?.rows.map((row) => (
-            <View key={row.id} style={{ gap: 8 }}>
-              <AuthLink
-                title={`${row.name} · ${row.workout_template_exercises[0]?.count ?? 0} exercises`}
+            <View key={row.id}>
+              <ActionRow
+                title={row.name}
+                detail={String(row.workout_template_exercises[0]?.count ?? 0) + ' exercises'}
+                icon={{ ios: 'dumbbell', android: 'fitness_center', web: 'fitness_center' }}
                 disabled={removing}
                 onPress={() => onEdit(row.id, row.name)}
+                trailing={
+                  !selecting ? (
+                    <View style={{ flexDirection: 'row' }}>
+                      {onStart && (
+                        <IconButton
+                          label={'Start ' + row.name}
+                          name={{ ios: 'play', android: 'play_arrow', web: 'play_arrow' }}
+                          disabled={removing}
+                          onPress={() => onStart(row.id)}
+                        />
+                      )}
+                      <IconButton
+                        label={'Delete ' + row.name}
+                        name={{ ios: 'trash', android: 'delete_outline', web: 'delete_outline' }}
+                        disabled={removing}
+                        onPress={() => {
+                          setSelected(row);
+                          setDeleteError(null);
+                        }}
+                      />
+                    </View>
+                  ) : undefined
+                }
               />
-              {!selecting && (
-                <AuthLink
-                  title={`Delete ${row.name}`}
-                  disabled={removing}
-                  onPress={() => {
-                    setSelected(row);
-                    setDeleteError(null);
-                  }}
-                />
-              )}
-              {!selecting && onStart && (
-                <AuthLink
-                  title={`Start ${row.name}`}
-                  disabled={removing}
-                  onPress={() => onStart(row.id)}
-                />
-              )}
-              {selected?.id === row.id && (
-                <>
-                  <AuthText>
-                    Delete “{selected.name}”? Its planned exercises and sets will be removed.
-                    Recorded sessions stay in your history.
-                  </AuthText>
-                  {deleteError && <AuthNotice error>{deleteError}</AuthNotice>}
-                  <AuthButton
-                    title="Keep workout"
-                    outlined
-                    disabled={removing}
-                    onPress={() => {
-                      setSelected(null);
-                      setDeleteError(null);
-                    }}
-                  />
-                  <AuthButton
-                    title="Delete workout"
-                    busy={removing}
-                    onPress={() => void remove()}
-                  />
-                </>
-              )}
             </View>
           ))}
-          <AuthButton
-            title="Previous workouts"
-            outlined
-            disabled={removing || offset === 0}
-            onPress={() => refresh(Math.max(0, offset - 10))}
-          />
-          <AuthText>Page {offset / 10 + 1}</AuthText>
-          <AuthButton
-            title="Next workouts"
-            outlined
-            disabled={removing || !page?.more}
-            onPress={() => refresh(offset + 10)}
-          />
+          {(offset > 0 || page?.more) && (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <AuthLink
+                title="Previous workouts"
+                disabled={removing || offset === 0}
+                onPress={() => refresh(Math.max(0, offset - 10))}
+              />
+              <AuthText>Page {offset / 10 + 1}</AuthText>
+              <AuthLink
+                title="Next workouts"
+                disabled={removing || !page?.more}
+                onPress={() => refresh(offset + 10)}
+              />
+            </View>
+          )}
         </>
       )}
+      <ActionRow
+        title="Create workout"
+        detail="Build from the library"
+        disabled={removing}
+        icon={{ ios: 'plus', android: 'add', web: 'add' }}
+        onPress={onCreate}
+      />
+      {!selecting && (
+        <>
+          <AuthText kind="heading">Plan and review</AuthText>
+          <AuthCard>
+            {onSplits && (
+              <ActionRow title="Training splits" onPress={onSplits} disabled={removing} />
+            )}
+            {onPlans && <ActionRow title="Training plans" onPress={onPlans} disabled={removing} />}
+            {onResume && (
+              <ActionRow title="Resume saved workout" onPress={onResume} disabled={removing} />
+            )}
+            {onHistory && (
+              <ActionRow title="Workout history" onPress={onHistory} disabled={removing} />
+            )}
+            {onTraining && (
+              <ActionRow title="Training summary" onPress={onTraining} disabled={removing} />
+            )}
+          </AuthCard>
+        </>
+      )}
+      <ActionSheet
+        title="Delete workout?"
+        visible={!!selected}
+        onClose={() => {
+          if (!removing) setSelected(null);
+        }}
+      >
+        <AuthText>
+          Delete “{selected?.name}”? Planned exercises and sets are removed. Recorded sessions stay
+          in your history.
+        </AuthText>
+        {deleteError && <AuthNotice error>{deleteError}</AuthNotice>}
+        <AuthButton
+          title="Keep workout"
+          outlined
+          disabled={removing}
+          onPress={() => setSelected(null)}
+        />
+        <AuthButton title="Delete workout" busy={removing} onPress={() => void remove()} />
+      </ActionSheet>
     </AuthFrame>
   );
 }

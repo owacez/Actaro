@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
+import { ActionRow, ProductIcon } from '@/components/product-ui';
 import { randomUUID } from 'expo-crypto';
 import {
   AuthButton,
@@ -75,20 +76,22 @@ export function FoodPicker({
           if (query === input) resource.refresh();
         }}
       />
-      <View style={authStyles.choices}>
-        {['Search', 'Recent', 'Frequent', 'Favorites', 'Custom', 'Recipes'].map((value) => (
-          <AuthChoice
-            key={value}
-            title={value}
-            selected={mode === value}
-            disabled={disabled}
-            onPress={() => {
-              setMode(value);
-              setOffset(0);
-            }}
-          />
-        ))}
-      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {['Search', 'Recent', 'Frequent', 'Favorites', 'Custom', 'Recipes'].map((value) => (
+            <AuthChoice
+              key={value}
+              title={value}
+              selected={mode === value}
+              disabled={disabled}
+              onPress={() => {
+                setMode(value);
+                setOffset(0);
+              }}
+            />
+          ))}
+        </View>
+      </ScrollView>
       <LoadFeedback {...resource} retry={resource.refresh} />
       {resource.data && !resource.loading && (
         <>
@@ -98,8 +101,21 @@ export function FoodPicker({
             </AuthNotice>
           )}
           {resource.data.map((food) => (
-            <AuthCard key={food.id}>
-              <AuthLink title={food.name} disabled={disabled} onPress={() => onSelect(food)} />
+            <View key={food.id}>
+              <ActionRow
+                title={food.name}
+                disabled={disabled}
+                onPress={() => onSelect(food)}
+                trailing={
+                  <ProductIcon
+                    name={{
+                      ios: 'plus.circle',
+                      android: 'add_circle_outline',
+                      web: 'add_circle_outline',
+                    }}
+                  />
+                }
+              />
               <AuthText>
                 {nutritionLabel(food)} / {formatNumber(food.base_amount)} {food.base_unit}
               </AuthText>
@@ -110,7 +126,7 @@ export function FoodPicker({
                     ? 'Your recipe'
                     : 'Your custom food'}
               </AuthText>
-            </AuthCard>
+            </View>
           ))}
           <View style={authStyles.row}>
             <AuthLink

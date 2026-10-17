@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
+import { Segments } from '@/components/product-ui';
 import {
   AuthChoice,
   AuthInput,
@@ -21,12 +22,12 @@ import { periodDays, type ProgressPreset, type ProgressRange } from './progress-
 import { progressService } from './progress-service';
 
 const modules = [
-  { key: 'weight', title: 'Weight' },
+  { key: 'weight', title: 'Body' },
   { key: 'nutrition', title: 'Nutrition' },
   { key: 'frequency', title: 'Frequency' },
   { key: 'strength', title: 'Strength' },
   { key: 'volume', title: 'Volume' },
-  { key: 'steps', title: 'Steps' },
+  { key: 'steps', title: 'Activity' },
   { key: 'habits', title: 'Habits' },
   { key: 'summary', title: 'Summary' },
 ] as const;
@@ -47,17 +48,35 @@ export function ProgressScreen({
   onHabits?: () => void;
 }) {
   const [module, setModule] = useState<Module>('weight');
+  const training = ['frequency', 'strength', 'volume'].includes(module);
   const navigation = (
-    <View style={authStyles.choices}>
-      {modules.map((item) => (
-        <AuthChoice
-          key={item.key}
-          title={item.title}
-          selected={module === item.key}
-          disabled={false}
-          onPress={() => setModule(item.key)}
+    <View style={{ gap: 8 }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {modules
+            .filter((item) => item.key !== 'strength' && item.key !== 'volume')
+            .map((item) => (
+              <AuthChoice
+                key={item.key}
+                title={item.key === 'frequency' ? 'Training' : item.title}
+                selected={module === item.key || (item.key === 'frequency' && training)}
+                disabled={false}
+                onPress={() => setModule(item.key)}
+              />
+            ))}
+        </View>
+      </ScrollView>
+      {training && (
+        <Segments
+          value={module}
+          options={[
+            { value: 'frequency', label: 'Frequency' },
+            { value: 'strength', label: 'Strength' },
+            { value: 'volume', label: 'Volume' },
+          ]}
+          onChange={setModule}
         />
-      ))}
+      )}
     </View>
   );
   const read = useCallback(

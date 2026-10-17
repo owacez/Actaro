@@ -72,14 +72,13 @@ test('restores the owned theme and gives shared controls readable dark colors', 
   await render(app('user-a'));
   expect(await screen.findByText('Appearance: dark')).toBeTruthy();
   expect(service.getPreferences).toHaveBeenCalledWith('user-a');
-  expect(screen.getByTestId('surface')).toHaveStyle({ backgroundColor: '#121211' });
-  expect(screen.getByText('Theme heading')).toHaveStyle({ color: '#fffdf8' });
+  expect(screen.getByTestId('surface')).toHaveStyle({ backgroundColor: '#0c0d0c' });
+  expect(screen.getByText('Theme heading')).toHaveStyle({ color: '#f1f2ee' });
   expect(screen.getByLabelText('Theme input')).toHaveStyle({
-    color: '#fffdf8',
-    borderColor: '#6d6961',
+    color: '#f1f2ee',
   });
   expect(screen.getByLabelText('Theme input')).toHaveProp('keyboardAppearance', 'dark');
-  expect(screen.getByText('Saved dark')).toHaveStyle({ color: '#121211' });
+  expect(screen.getByText('Saved dark')).toHaveStyle({ color: '#111311' });
 });
 
 test('System follows device changes, including signed-out state and null fallback', async () => {

@@ -21,8 +21,8 @@ test('selected and inactive navigation labels remain readable in dark mode', asy
       <NavigationTabLabel title="Fitness" focused={false} icon={fitnessIcon} />
     </ThemeContext.Provider>,
   );
-  expect(screen.getByText('Today')).toHaveStyle({ color: '#fffdf8' });
-  expect(screen.getByText('Fitness')).toHaveStyle({ color: '#ddd5c8' });
+  expect(screen.getByText('Today')).toHaveStyle({ color: actaroDarkColors.background });
+  expect(screen.getByText('Fitness')).toHaveStyle({ color: actaroDarkColors.muted });
   await view.rerender(<NavigationTabLabel title="Today" focused={false} icon={todayIcon} />);
-  expect(screen.getByText('Today')).toHaveStyle({ color: '#6d6961' });
+  expect(screen.getByText('Today')).toHaveStyle({ color: '#5e645e' });
 });

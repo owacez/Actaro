@@ -12,6 +12,8 @@ import {
   AuthText,
   authStyles,
 } from '@/features/auth/auth-components';
+import { NavigationSurface, ScreenHeader, Meter, IconButton } from '@/components/product-ui';
+import { ProgressMetrics } from '@/features/progress/progress-components';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
 import { ExerciseImage } from '@/features/exercises/exercise-image';
@@ -27,6 +29,19 @@ import {
 import { sessionStore } from './session-store';
 import { sessionService } from './session-service';
 import { exerciseRecords, trainingVolume } from './training-metrics';
+
+function FinishWorkoutButton({
+  busy,
+  onFinish,
+}: {
+  busy: boolean;
+  onFinish: (time: number) => Promise<void>;
+}) {
+  return (
+    <AuthButton title="Finish workout" busy={busy} onPress={() => void onFinish(Date.now())} />
+  );
+}
+
 export function SessionScreen({ userId, onBack }: { userId: string; onBack: () => void }) {
   const [draft, setDraft] = useState<SessionDraft | null>(null),
     current = useRef<SessionDraft | null>(null);
@@ -281,8 +296,104 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
       ),
     }));
   }
+  function adjustRest(seconds: number) {
+    change((value) => ({
+      ...value,
+      restDuration: Math.max(
+        0,
+        Math.min(
+          3600000,
+          Math.max(0, value.restDuration - (value.rest ? elapsed(value.rest, now) : 0)) +
+            seconds * 1000,
+        ),
+      ),
+      rest: value.rest
+        ? { elapsedMs: 0, runningSince: value.rest.runningSince === null ? null : now }
+        : null,
+    }));
+  }
+  const restPanel = draft.rest ? (
+    <View style={{ gap: 8, paddingVertical: 12 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 8,
+        }}
+      >
+        <View>
+          <AuthText kind="eyebrow">REST</AuthText>
+          <AuthText kind="title">{timerText(remaining)}</AuthText>
+        </View>
+        <View style={{ flexDirection: 'row', gap: 6 }}>
+          {[-15, 15].map((seconds) => (
+            <AuthLink
+              key={seconds}
+              title={seconds > 0 ? '+15' : '-15'}
+              accessibilityLabel={seconds > 0 ? '+15 sec' : '-15 sec'}
+              onPress={() => adjustRest(seconds)}
+            />
+          ))}
+          <IconButton
+            label={draft.rest.runningSince === null ? 'Resume rest' : 'Pause rest'}
+            name={
+              draft.rest.runningSince === null
+                ? { ios: 'play', android: 'play_arrow', web: 'play_arrow' }
+                : { ios: 'pause', android: 'pause', web: 'pause' }
+            }
+            onPress={() =>
+              change((value) => ({
+                ...value,
+                rest: value.rest
+                  ? value.rest.runningSince === null
+                    ? resumeClock(value.rest, Date.now())
+                    : pauseClock(value.rest, Date.now())
+                  : null,
+              }))
+            }
+          />
+          <IconButton
+            label="Skip rest"
+            name={{ ios: 'forward.end', android: 'skip_next', web: 'skip_next' }}
+            onPress={() => change((value) => ({ ...value, rest: null, restDuration: 0 }))}
+          />
+        </View>
+      </View>
+      <Meter value={remaining} target={draft.restDuration} color={colors.accent} />
+    </View>
+  ) : null;
   return (
-    <AuthFrame>
+    <AuthFrame
+      header={
+        <ScreenHeader
+          title={summary ? 'Workout complete' : draft.name}
+          subtitle={
+            summary
+              ? draft.localDate
+              : (draft.mode === 'timed'
+                  ? timerText(elapsed(draft.clock, now)) + ' · TIMED'
+                  : 'LOG ONLY') +
+                ' · ' +
+                String(index + 1) +
+                ' OF ' +
+                String(draft.exercises.length)
+          }
+          action={
+            !summary && draft.status === 'active' ? (
+              <FinishWorkoutButton busy={busy} onFinish={finish} />
+            ) : undefined
+          }
+        />
+      }
+      footer={
+        !summary && draft.status === 'active' && draft.rest ? (
+          <NavigationSurface style={{ paddingHorizontal: 20, paddingBottom: 12 }}>
+            {restPanel}
+          </NavigationSurface>
+        ) : undefined
+      }
+    >
       <AuthLink title="← My workouts (workout kept)" disabled={busy} onPress={onBack} />
       <AuthText kind="heading">{summary ? 'Workout summary' : draft.name}</AuthText>
       {error && <AuthNotice error>{error}</AuthNotice>}
@@ -303,9 +414,19 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
           <AuthText>
             {draft.name} · {draft.localDate}
           </AuthText>
-          <AuthText>
-            {summary.exercises.length} exercises · {totals.sets} completed sets · {totals.reps} reps
-          </AuthText>
+          <ProgressMetrics
+            metrics={[
+              ...(draft.mode === 'timed'
+                ? [{ title: 'Duration', value: timerText((summary.duration_seconds ?? 0) * 1000) }]
+                : []),
+              { title: 'Sets', value: String(totals.sets) },
+              { title: 'Reps', value: String(totals.reps) },
+              {
+                title: 'Volume',
+                value: displayWeight(totals.volumeKg, draft.unit) + ' ' + draft.unit + '·reps',
+              },
+            ]}
+          />
           <AuthText>
             Training Volume: {displayWeight(totals.volumeKg, draft.unit)} {draft.unit}·reps
           </AuthText>
@@ -361,7 +482,6 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
         <>
           {draft.mode === 'timed' && (
             <>
-              <AuthText kind="title">{timerText(elapsed(draft.clock, now))}</AuthText>
               <AuthButton
                 title={
                   draft.clock.runningSince === null ? 'Resume workout timer' : 'Pause workout timer'
@@ -429,7 +549,15 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
             </View>
           </View>
           {exercise.sets.map((set, position) => (
-            <View key={set.id} style={{ gap: 4 }}>
+            <View
+              key={set.id}
+              style={{
+                gap: 4,
+                padding: 6,
+                borderRadius: 16,
+                backgroundColor: set.completedAt ? colors.volt + '24' : 'transparent',
+              }}
+            >
               <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
                 <View style={{ width: 25 }}>
                   <AuthText>{position + 1}</AuthText>
@@ -458,7 +586,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
                       color: colors.text,
                       backgroundColor: colors.surface,
                       fontFamily: 'Inter_400Regular',
-                      fontSize: 12,
+                      fontSize: 16,
                     }}
                     onChangeText={(value) => setField(position, field, value)}
                   />
@@ -476,11 +604,15 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
                       borderRadius: 8,
                       borderWidth: 1,
                       borderColor: colors.border,
-                      backgroundColor: set.completedAt ? colors.accent : colors.surface,
+                      backgroundColor: set.completedAt ? colors.volt : colors.surface,
                     }}
                   >
                     <Text
-                      style={{ color: colors.text, fontSize: 11, fontFamily: 'Inter_500Medium' }}
+                      style={{
+                        color: set.completedAt ? '#111311' : colors.text,
+                        fontSize: 14,
+                        fontFamily: 'Inter_500Medium',
+                      }}
                     >
                       {set.completedAt ? '✓' : 'Done'}
                     </Text>
@@ -546,60 +678,6 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
               }))
             }
           />
-          {draft.rest && (
-            <AuthCard>
-              <AuthText kind="title">Rest: {timerText(remaining)}</AuthText>
-              <AuthButton
-                title={draft.rest.runningSince === null ? 'Resume rest' : 'Pause rest'}
-                outlined
-                onPress={() =>
-                  change((value) => ({
-                    ...value,
-                    rest: value.rest
-                      ? value.rest.runningSince === null
-                        ? resumeClock(value.rest, Date.now())
-                        : pauseClock(value.rest, Date.now())
-                      : null,
-                  }))
-                }
-              />
-              <View style={authStyles.choices}>
-                {[-15, 15].map((seconds) => (
-                  <AuthButton
-                    key={seconds}
-                    title={seconds > 0 ? '+15 sec' : '-15 sec'}
-                    outlined
-                    onPress={() =>
-                      change((value) => ({
-                        ...value,
-                        restDuration: Math.max(
-                          0,
-                          Math.min(
-                            3600000,
-                            Math.max(
-                              0,
-                              value.restDuration - (value.rest ? elapsed(value.rest, now) : 0),
-                            ) +
-                              seconds * 1000,
-                          ),
-                        ),
-                        rest: value.rest
-                          ? {
-                              elapsedMs: 0,
-                              runningSince: value.rest.runningSince === null ? null : now,
-                            }
-                          : null,
-                      }))
-                    }
-                  />
-                ))}
-              </View>
-              <AuthLink
-                title="Skip rest"
-                onPress={() => change((value) => ({ ...value, rest: null, restDuration: 0 }))}
-              />
-            </AuthCard>
-          )}
           <AuthInput
             label="Workout note (optional)"
             multiline
@@ -621,7 +699,6 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
               onPress={() => setIndex((value) => value + 1)}
             />
           </View>
-          <AuthButton title="Finish workout" busy={busy} onPress={() => void finish(Date.now())} />
           <AuthLink title="Cancel workout" onPress={() => setDiscard(true)} />
           {discard && (
             <>

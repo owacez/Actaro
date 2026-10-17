@@ -14,11 +14,9 @@ export function NavigationTabLabel({
   icon: SymbolViewProps['name'];
 }) {
   const { colors } = useAppTheme();
-  const color = focused ? colors.text : colors.muted;
+  const color = focused ? colors.background : colors.muted;
   return (
-    <View
-      style={[styles.container, { backgroundColor: focused ? colors.background : 'transparent' }]}
-    >
+    <View style={[styles.container, { backgroundColor: focused ? colors.text : 'transparent' }]}>
       <View
         accessible={false}
         accessibilityElementsHidden
@@ -38,9 +36,8 @@ const styles = StyleSheet.create({
     gap: 3,
     paddingVertical: 3,
     paddingHorizontal: 4,
-    borderRadius: 12,
-    minWidth: 54,
-    minHeight: 44,
+    borderRadius: 32,
+    minHeight: 52,
   },
-  label: { fontFamily: 'Inter_500Medium', fontSize: 10, lineHeight: 12 },
+  label: { fontFamily: 'Inter_500Medium', fontSize: 10, lineHeight: 14 },
 });

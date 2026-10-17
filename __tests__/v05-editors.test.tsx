@@ -47,6 +47,7 @@ test('goal editor validates baseline/direction and saves the measurable target w
   );
   await screen.findByLabelText('Goal name');
   await fireEvent.changeText(screen.getByLabelText('Goal name'), 'Weight target');
+  await fireEvent.press(screen.getByRole('button', { name: 'Body' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Bodyweight' }));
   await fireEvent.changeText(screen.getByLabelText('Baseline (kg)'), '80');
   await fireEvent.changeText(screen.getByLabelText('Target (kg)'), '75');

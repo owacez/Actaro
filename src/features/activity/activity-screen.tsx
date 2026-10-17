@@ -17,13 +17,15 @@ import {
   RecordLoadFeedback,
   RecordSaveFeedback,
 } from '@/hooks/use-records';
-import { formatNumber, nutritionDate } from '@/features/nutrition/nutrition-model';
+import { formatNumber } from '@/features/nutrition/nutrition-model';
 import { unitFactor } from '@/features/body/body-model';
 import { activityService } from './activity-service';
+import { WeekStrip } from '@/components/date-picker';
+import { ScreenHeader } from '@/components/product-ui';
+import { NumberStepper } from '@/components/number-stepper';
 import { readTodaySteps } from './pedometer-service';
 export function ActivityScreen({ userId, onBack }: { userId: string; onBack: () => void }) {
   const [date, setDate] = useState<string>(),
-    [dateInput, setDateInput] = useState(''),
     [offset, setOffset] = useState(0),
     [steps, setSteps] = useState(''),
     [distance, setDistance] = useState(''),
@@ -37,7 +39,6 @@ export function ActivityScreen({ userId, onBack }: { userId: string; onBack: () 
     [userId, date, offset],
   );
   const onLoaded = useCallback((data: Awaited<ReturnType<typeof activityService.load>>) => {
-    setDateInput(data.day);
     setSteps(data.current?.steps === null || !data.current ? '' : String(data.current.steps));
     setDistance(
       data.current?.distance_km === null || !data.current
@@ -74,41 +75,32 @@ export function ActivityScreen({ userId, onBack }: { userId: string; onBack: () 
     }
   }
   return (
-    <AuthFrame>
+    <AuthFrame header={<ScreenHeader title="Steps and activity" />}>
       <AuthLink title="← More" disabled={locked} onPress={onBack} />
-      <AuthText kind="title">Steps & activity</AuthText>
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {data && !resource.loading && (
         <>
-          <AuthText kind="heading">Editing {data.day}</AuthText>
-          <AuthInput
-            label="Activity date (YYYY-MM-DD)"
-            value={dateInput}
-            editable={!locked}
-            onChangeText={setDateInput}
-          />
-          <AuthButton
-            title="Open activity date"
-            outlined
+          <WeekStrip
+            value={data.day}
             disabled={locked}
-            onPress={() => {
-              try {
-                const selected = nutritionDate(dateInput);
-                if (selected > data.today) throw new Error('Cannot log a future date.');
-                setDate(selected);
-                setOffset(0);
-                setSensorError(null);
-              } catch (error) {
-                action.setError(error instanceof Error ? error.message : 'Check the date.');
+            onChange={(selected) => {
+              if (selected > data.today) {
+                action.setError('Cannot log a future date.');
+                return;
               }
+              setDate(selected);
+              setOffset(0);
+              setSensorError(null);
             }}
           />
-          <AuthInput
+          <NumberStepper
+            large
+            step={100}
+            max={1000000}
             label="Daily steps"
             value={steps}
-            keyboardType="number-pad"
-            editable={!locked}
-            onChangeText={(text) => {
+            disabled={locked}
+            onChange={(text) => {
               setSteps(text);
               setSource('manual');
             }}

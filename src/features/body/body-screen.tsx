@@ -1,5 +1,8 @@
 import { useCallback, useState } from 'react';
 import { View } from 'react-native';
+import { NumberStepper } from '@/components/number-stepper';
+import { DatePicker } from '@/components/date-picker';
+import { ScreenHeader } from '@/components/product-ui';
 import { useFocusEffect } from 'expo-router';
 import {
   AuthButton,
@@ -80,9 +83,8 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
     }
   }
   return (
-    <AuthFrame>
+    <AuthFrame header={<ScreenHeader title="Body records" />}>
       <AuthLink title="← More" disabled={action.locked} onPress={onBack} />
-      <AuthText kind="title">Body records</AuthText>
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {data && !resource.loading && (
         <>
@@ -102,11 +104,12 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
               />
             ))}
           </View>
-          <AuthInput
-            label="Body record date (YYYY-MM-DD)"
-            value={date}
-            editable={!action.locked}
-            onChangeText={setDate}
+          <DatePicker
+            label="Body record date"
+            value={date || data.today}
+            max={data.today}
+            disabled={action.locked}
+            onChange={setDate}
           />
           {kind === 'measurement' && (
             <AuthInput
@@ -117,12 +120,14 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
               onChangeText={setName}
             />
           )}
-          <AuthInput
+          <NumberStepper
+            large
+            step={0.1}
+            max={kind === 'weight' ? 1500 : 1000}
             label={kind === 'weight' ? `Bodyweight (${unit})` : `Measurement (${unit})`}
             value={value}
-            keyboardType="decimal-pad"
-            editable={!action.locked}
-            onChangeText={setValue}
+            disabled={action.locked}
+            onChange={setValue}
           />
           <AuthInput
             label="Body record note (optional)"
@@ -134,7 +139,7 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
           />
           <AuthText>
             One weight and one value per named measurement per date. Saving the same date replaces
-            its recorded value. Measurements support body goals; historical analytics come in v0.6.
+            its recorded value. Measurements also support your body goals.
           </AuthText>
           <AuthButton
             title="Save body record"

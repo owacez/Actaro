@@ -18,7 +18,9 @@ v0.1 release gate is not accepted.
   This is the supplied file's actual name; the requested
   `ACTARO_DEVELOPMENT_PLAN_FINAL.md` is absent. Both supplied documents retain
   older `FITNESS_APP_*` references. Original canonical files are preserved.
-- [Figma](https://www.figma.com/design/7u3UDAzE64TiTUzGjA22XW): visual authority.
+- [Actaro v1 redesign](docs/Actaro-v1-redesign.pdf): current user-approved visual authority.
+  It supersedes the older [Figma](https://www.figma.com/design/7u3UDAzE64TiTUzGjA22XW)
+  foundation and screen atlas for the core app. See [implementation coverage](docs/REDESIGN_IMPLEMENTATION.md).
 - [Development Status](docs/DEVELOPMENT_STATUS.md): verified implementation.
 - [Agent instructions](AGENTS.md): development rules and verification.
 
@@ -205,14 +207,14 @@ expire automatically; hovering or focusing the web notification pauses dismissal
 | Nutrition                   | Daily targets, food search, portion preview, four meal groups, diary editing/copying and hydration.                                |
 | Custom foods / Recipes      | Private label foods, food-specific portions, ingredient recipes, servings and cooked-weight logging.                               |
 | Saved meals                 | Create from a logged meal, log its snapshot to another meal/date or delete the saved template.                                     |
-| Fitness / Exercise Library  | Search 643 imported exercises, filter by muscle/equipment/your saved setup, paginate and open technique details.                   |
+| Train / Exercise Library    | Search 643 imported exercises, filter by muscle/equipment/your saved setup, paginate and open technique details.                   |
 | Exercise Detail             | Start/peak or main poses from private Supabase Storage, instructions, muscles, equipment and source attribution.                   |
 | My equipment                | Save available equipment, discard drafts or clear the selection; available-equipment filtering always includes no-equipment moves. |
-| My workouts                 | List and reopen your saved workout templates. Open Fitness → My workouts.                                                          |
+| My workouts                 | List and reopen your saved workout templates. Open Train → Workouts.                                                               |
 | Build Workout               | Select real exercises, reorder/remove them, configure sets/reps/weight/rest/RPE/notes and save atomically.                         |
-| More                        | Real signed-in email, Profile management and local sign-out.                                                                       |
-| Profile                     | Edit/clear name, view/change email and change password. Open More → Profile management.                                            |
-| Preferences                 | Save units, time zone, notification/gamification preferences and System/Light/Dark appearance. Open More → Preferences.            |
+| You                         | Real signed-in email, Profile management and local sign-out.                                                                       |
+| Profile                     | Edit/clear name, view/change email and change password. Open You → Profile management.                                             |
+| Preferences                 | Save units, time zone, notification/gamification preferences and System/Light/Dark appearance. Open You → Preferences.             |
 
 The remaining `/explore` route is an Expo starter example, not an Actaro feature.
 The five-tab navigation shell is implemented; sign-in opens Today. The populated
@@ -375,20 +377,20 @@ npm run import:repdb -- --download --media
 
 Downloads stay under ignored `.actaro-tools/repdb`. Metadata is imported atomically;
 image metadata is saved only after its object uploads successfully. Failed image
-imports can be rerun safely. At runtime, open **Fitness → My equipment** to save
+imports can be rerun safely. At runtime, open **Train → Library → My equipment** to save
 your setup; use **Filters → Use my available equipment** to apply it. Equipment
 drafts do not affect results until saved. Search submits through the Search action
 or keyboard; Previous/Next load 24 exercises per page. Refresh retries image loading.
 
 ## Building and editing workouts
 
-Open **Fitness → My workouts → Create workout**. Enter a name, add exercises from
+Open **Train → Workouts → Create workout**. Enter a name, add exercises from
 the searchable library, and use **Edit** on a row to change its sets, targets,
 rest, optional RPE and notes. Exercises can be moved or removed; each exercise
 keeps at least one set in the editor. New selections start with three editable
 sets of eight reps and 90 seconds rest; these are planned targets, not logged results.
 
-You can also tap **Add to workout** beside a Fitness search result or on Exercise
+You can also tap **Add to workout** in a Train → Library result’s actions or on Exercise
 Detail. Choose **Create workout** or one of your saved workouts. The real selected
 exercise is added to an editable draft; review its targets and tap **Save workout**
 to persist it. Discarding the draft leaves the saved workout unchanged. Returning
@@ -464,7 +466,7 @@ Running remains deferred to the running release, v1.2.
 
 ## Manual nutrition (v0.4)
 
-Open **Nutrition → Daily targets** to save energy, protein, carbohydrates, fat and
+Open **Food → Food options → Daily targets** to save energy, protein, carbohydrates, fat and
 water goals. Energy follows your kcal/kJ preference. Changes take effect from
 today in your saved time zone; previous diary dates retain their earlier goals.
 Logging is available without setting targets.
@@ -481,7 +483,7 @@ directly rather than reconstructed from macros.
 Add known serving equivalents such as one bottle, slice, cup, tablespoon or piece.
 **Recipes → New recipe** uses actual selected ingredients and quantities. Enter
 servings and optionally total cooked edible weight. Without cooked weight, log by
-servings; with weight, log any gram amount. Recipes are also reachable from More.
+servings; with weight, log any gram amount. Recipes are also reachable from You.
 Editing food/recipe nutrition affects new portions; existing diary snapshots stay.
 Library deletion removes a food from search while retaining earlier diary values.
 
@@ -522,7 +524,7 @@ Physical-device acceptance is deferred; exported native bundles are not device t
 
 ## Habits, goals and Today (v0.5)
 
-Open **More → Habits**, **Goals**, **Body records**, or **Steps & activity**. Today
+Open **You → Habits**, **Goals**, **Body records**, or **Steps & activity**. Today
 summarizes the same saved records. It refreshes when opened and has a manual
 refresh action; no sample health data is shown.
 
@@ -558,8 +560,8 @@ before using these screens. Native builds and physical sensor QA remain deferred
 
 ## Progress and analytics (v0.6)
 
-Open **Progress**, then select **Weight, Nutrition, Frequency, Strength, Volume,
-Steps, Habits, or Summary**. All modules use owned, persisted records. The shared
+Open **Progress**, then select **Body, Nutrition, Training, Activity, Habits, or Summary**.
+Training contains **Frequency / Strength / Volume**. All modules use owned, persisted records. The shared
 **7D / 30D / 3M / 6M / 1Y / All** controls select dates through today in your saved
 time zone; month/year windows clamp to valid calendar dates. All starts at the
 module's earliest available record; Summary considers every source. Custom dates
@@ -614,12 +616,12 @@ period presets as the other completed v0.6 modules.
 
 ## Privacy controls and local reminders (v0.9)
 
-In **More → Profile → Privacy & account data**, export your owned records as JSON
+In **You → Profile → Privacy & account data**, export your owned records as JSON
 or permanently delete your account after password verification and typing `DELETE`.
 Export files contain private health information; store them carefully. Native export
 uses the device share sheet. An export is not an atomic backup or restore feature.
 
-In **More → Preferences → Manage habit reminders**, explicitly enable notification
+In **You → Preferences → Manage habit reminders**, explicitly enable notification
 permission on your phone. Set a reminder time and weekdays inside each habit.
 Actaro schedules the next seven days, up to the earliest 48 local reminders, and
 refreshes them on app open/resume or edits. Keep opening Actaro regularly. There is
@@ -654,5 +656,5 @@ Future order: v1.1 Active Minutes → v1.2 Running & GPS → v1.3 Advanced Analy
 Initialization stops at review. Feature development requires explicit approval
 of the next small, independently verifiable task.
 
-For signup, verification and reset testing, see [authentication testing](docs/AUTH_TESTING.md). After sign-in, Today opens within the five-tab shell; More contains account management and the v0.5 record editors.
+For signup, verification and reset testing, see [authentication testing](docs/AUTH_TESTING.md). After sign-in, Today opens within the five-tab shell; You contains account management and the v0.5 record editors.
 For name/email/password and account-isolation checks, see [profile testing](docs/PROFILE_TESTING.md).

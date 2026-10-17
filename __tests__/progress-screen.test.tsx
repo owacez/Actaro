@@ -76,9 +76,15 @@ test('navigation opens nutrition, distinguishes unavailable targets and validate
     ),
   );
   await fireEvent.press(screen.getByRole('button', { name: 'Change dates' }));
-  await fireEvent.changeText(screen.getByLabelText('Progress start (YYYY-MM-DD)'), '2026-10-14');
+  await fireEvent.press(screen.getByRole('button', { name: 'From: 2026-10-01' }));
+  await fireEvent.press(screen.getByRole('button', { name: '2026-10-13' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'To: 2026-10-13' }));
+  await fireEvent.press(screen.getByRole('button', { name: '2026-10-12' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Apply dates' }));
-  expect(screen.getByText('Start date must be on or before the end date.')).toBeTruthy();
+  expect(
+    screen.getAllByText('Start date must be on or before the end date.').length,
+  ).toBeGreaterThan(0);
+  await fireEvent.press(screen.getByRole('button', { name: 'Dismiss Custom range' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Log or edit nutrition' }));
   expect(onNutrition).toHaveBeenCalled();
 });
@@ -140,7 +146,7 @@ test('frequency and volume distinguish modes, unknown loads and actual recorded 
       <ProgressScreen userId={data.userId} onLog={jest.fn()} onNutrition={jest.fn()} />
     </FeedbackTestRoot>,
   );
-  await fireEvent.press(screen.getByRole('button', { name: 'Frequency' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Training' }));
   await screen.findByText('1 timed · 1 Log Only');
   expect(screen.getByText('1/13')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Volume' }));
@@ -179,7 +185,7 @@ test('steps show distance-only records as unknown and summary toggles real weekl
       <ProgressScreen userId={data.userId} onLog={jest.fn()} onNutrition={jest.fn()} />
     </FeedbackTestRoot>,
   );
-  await fireEvent.press(screen.getByRole('button', { name: 'Steps' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Activity' }));
   await screen.findByText(/Steps not recorded/);
   expect(screen.getAllByText('Unavailable')).toHaveLength(3);
   await fireEvent.press(screen.getByRole('button', { name: 'Summary' }));

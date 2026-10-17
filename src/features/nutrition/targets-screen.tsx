@@ -1,8 +1,9 @@
+import { NumberStepper } from '@/components/number-stepper';
+import { ScreenHeader } from '@/components/product-ui';
 import { useCallback, useState } from 'react';
 import {
   AuthButton,
   AuthFrame,
-  AuthInput,
   AuthLink,
   AuthNotice,
   AuthText,
@@ -57,7 +58,7 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
     }
   }
   return (
-    <AuthFrame>
+    <AuthFrame header={<ScreenHeader title="Daily targets" />}>
       <AuthLink title="← Nutrition" disabled={action.locked} onPress={onBack} />
       <AuthText kind="title">Daily targets</AuthText>
       <AuthNotice>
@@ -68,40 +69,40 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
       <LoadFeedback {...resource} retry={resource.refresh} />
       {resource.data && !resource.loading && (
         <>
-          <AuthInput
+          <NumberStepper
             label={`Energy (${resource.data.preferences.energy_unit})`}
             value={calories}
-            onChangeText={setCalories}
-            keyboardType="decimal-pad"
-            editable={!action.locked}
+            onChange={setCalories}
+            step={10}
+            disabled={action.locked}
           />
-          <AuthInput
+          <NumberStepper
             label="Protein (g)"
             value={protein}
-            onChangeText={setProtein}
-            keyboardType="decimal-pad"
-            editable={!action.locked}
+            onChange={setProtein}
+            step={10}
+            disabled={action.locked}
           />
-          <AuthInput
+          <NumberStepper
             label="Carbohydrates (g)"
             value={carbs}
-            onChangeText={setCarbs}
-            keyboardType="decimal-pad"
-            editable={!action.locked}
+            onChange={setCarbs}
+            step={10}
+            disabled={action.locked}
           />
-          <AuthInput
+          <NumberStepper
             label="Fat (g)"
             value={fat}
-            onChangeText={setFat}
-            keyboardType="decimal-pad"
-            editable={!action.locked}
+            onChange={setFat}
+            step={10}
+            disabled={action.locked}
           />
-          <AuthInput
+          <NumberStepper
             label="Water (ml)"
             value={water}
-            onChangeText={setWater}
-            keyboardType="decimal-pad"
-            editable={!action.locked}
+            onChange={setWater}
+            step={10}
+            disabled={action.locked}
           />
           <AuthButton
             title="Save daily targets"

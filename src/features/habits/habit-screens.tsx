@@ -2,6 +2,9 @@ import { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { randomUUID } from 'expo-crypto';
 import { View } from 'react-native';
+import { ScreenHeader, ActionSheet, IconButton } from '@/components/product-ui';
+import { NumberStepper } from '@/components/number-stepper';
+import { RecordCalendar } from '@/components/record-calendar';
 import {
   AuthButton,
   AuthCard,
@@ -82,6 +85,7 @@ export function HabitsScreen({
   onOpen: OpenHabit;
   onBack: () => void;
 }) {
+  const [menu, setMenu] = useState<string | null>(null);
   const [offset, setOffset] = useState(0),
     [archived, setArchived] = useState(false),
     [remove, setRemove] = useState<string | null>(null),
@@ -101,9 +105,8 @@ export function HabitsScreen({
     }, [refresh]),
   );
   return (
-    <AuthFrame>
-      <AuthLink title="← More" disabled={action.locked} onPress={onBack} />
-      <AuthText kind="title">Habits</AuthText>
+    <AuthFrame header={<ScreenHeader title="Habits" />}>
+      <AuthLink title="← You" disabled={action.locked} onPress={onBack} />
       <AuthButton title="Create habit" disabled={action.locked} onPress={() => onOpen('edit')} />
       <View style={authStyles.choices}>
         <AuthChoice
@@ -206,59 +209,83 @@ export function HabitsScreen({
                       />
                     </>
                   )}
-                  <AuthLink
-                    title={`History: ${record.name}`}
-                    disabled={action.locked}
-                    onPress={() => onOpen('history', record.id)}
-                  />
-                  {!archived && (
-                    <AuthLink
-                      title={`Edit ${record.name}`}
-                      disabled={action.locked}
-                      onPress={() => onOpen('edit', record.id)}
-                    />
-                  )}
-                  <AuthLink
-                    title={`${archived ? 'Restore' : 'Delete'} ${record.name}`}
-                    disabled={action.locked}
-                    onPress={() =>
-                      archived
-                        ? void action.run(
-                            () => habitService.archive(userId, record.id, false),
-                            'Habit restored',
-                            refresh,
-                          )
-                        : setRemove(record.id)
-                    }
-                  />
                 </View>
-                {remove === record.id && (
-                  <>
-                    <AuthText>
-                      Remove this habit from active tracking? Its history is retained.
-                    </AuthText>
-                    <AuthButton
-                      title="Confirm habit deletion"
+                <IconButton
+                  label={`Manage ${record.name}`}
+                  name={{ ios: 'ellipsis', android: 'more_horiz', web: 'more_horiz' }}
+                  disabled={action.locked}
+                  onPress={() => setMenu(record.id)}
+                />
+                <ActionSheet
+                  title={record.name}
+                  visible={menu === record.id}
+                  onClose={() => {
+                    if (!action.locked) setMenu(null);
+                  }}
+                >
+                  <View style={{ gap: 8 }}>
+                    <AuthLink
+                      title={`History: ${record.name}`}
                       disabled={action.locked}
-                      busy={action.busy}
+                      onPress={() => {
+                        setMenu(null);
+                        onOpen('history', record.id);
+                      }}
+                    />
+                    {!archived && (
+                      <AuthLink
+                        title={`Edit ${record.name}`}
+                        disabled={action.locked}
+                        onPress={() => {
+                          setMenu(null);
+                          onOpen('edit', record.id);
+                        }}
+                      />
+                    )}
+                    <AuthLink
+                      title={`${archived ? 'Restore' : 'Delete'} ${record.name}`}
+                      disabled={action.locked}
                       onPress={() =>
-                        void action.run(
-                          () => habitService.archive(userId, record.id),
-                          'Habit deleted',
-                          () => {
-                            setRemove(null);
-                            refresh();
-                          },
-                        )
+                        archived
+                          ? void action.run(
+                              () => habitService.archive(userId, record.id, false),
+                              'Habit restored',
+                              refresh,
+                            )
+                          : setRemove(record.id)
                       }
                     />
-                    <AuthLink
-                      title="Keep habit"
-                      disabled={action.locked}
-                      onPress={() => setRemove(null)}
-                    />
-                  </>
-                )}
+
+                    {remove === record.id && (
+                      <>
+                        <AuthText>
+                          Remove this habit from active tracking? Its history is retained.
+                        </AuthText>
+                        <AuthButton
+                          title="Confirm habit deletion"
+                          disabled={action.locked}
+                          busy={action.busy}
+                          onPress={() =>
+                            void action.run(
+                              () => habitService.archive(userId, record.id),
+                              'Habit deleted',
+                              () => {
+                                setRemove(null);
+                                refresh();
+                              },
+                            )
+                          }
+                        />
+                        <AuthLink
+                          title="Keep habit"
+                          disabled={action.locked}
+                          onPress={() => setRemove(null)}
+                        />
+                      </>
+                    )}
+                    <RecordSaveFeedback action={action} />
+                  </View>
+                </ActionSheet>
               </AuthCard>
             );
           })}
@@ -277,7 +304,7 @@ export function HabitsScreen({
           </View>
         </>
       )}
-      <RecordSaveFeedback action={action} />
+      {!menu && <RecordSaveFeedback action={action} />}
     </AuthFrame>
   );
 }
@@ -561,12 +588,12 @@ export function HabitLogScreen({
               />
             </View>
           ) : (
-            <AuthInput
+            <NumberStepper
+              large
               label={`Logged value (${resource.data.record.unit})`}
               value={value}
-              editable={!action.locked}
-              keyboardType="decimal-pad"
-              onChangeText={setValue}
+              disabled={action.locked}
+              onChange={setValue}
             />
           )}
           <AuthInput
@@ -671,39 +698,52 @@ export function HabitHistoryScreen({
           {error && <AuthNotice error>{error}</AuthNotice>}
           <Progress record={data.record} today={data.until} />
           {!result.periods.length && <AuthNotice>No habit periods in this window.</AuthNotice>}
-          {[...result.periods].reverse().map((period) => (
-            <AuthCard key={period.date}>
-              <AuthText kind="heading">
-                {period.date}
-                {data.record.kind === 'frequency' ? ` – ${period.end}` : ''}
-              </AuthText>
-              <AuthText>
-                {period.status}
-                {period.partial ? ' · Partial week, excluded from consistency' : ''} ·{' '}
-                {period.value === null
-                  ? 'Not logged'
-                  : `${formatNumber(period.value)} ${data.record.unit}`}{' '}
-                / target {formatNumber(period.target)}
-              </AuthText>
-              {data.record.kind !== 'frequency' && !data.record.archived && (
-                <AuthLink
-                  title={`Edit log ${period.date}`}
-                  onPress={() => onOpen('log', habitId, period.date)}
-                />
-              )}
-              {data.record.kind === 'frequency' &&
-                data.record.habit_logs
-                  .filter((log) => log.local_date >= period.date && log.local_date <= period.end)
-                  .map((log) => (
-                    <AuthLink
-                      key={log.local_date}
-                      title={`Edit log ${log.local_date} (${formatNumber(log.value)} times)`}
-                      disabled={data.record.archived}
-                      onPress={() => onOpen('log', habitId, log.local_date)}
-                    />
-                  ))}
+          {data.record.kind !== 'frequency' && (
+            <AuthCard>
+              <RecordCalendar
+                until={data.until}
+                today={data.today}
+                periods={result.periods}
+                disabled={data.record.archived}
+                onMonth={setUntil}
+                onSelect={(date) => onOpen('log', habitId, date)}
+              />
             </AuthCard>
-          ))}
+          )}
+          {data.record.kind === 'frequency' &&
+            [...result.periods].reverse().map((period) => (
+              <AuthCard key={period.date}>
+                <AuthText kind="heading">
+                  {period.date}
+                  {data.record.kind === 'frequency' ? ` – ${period.end}` : ''}
+                </AuthText>
+                <AuthText>
+                  {period.status}
+                  {period.partial ? ' · Partial week, excluded from consistency' : ''} ·{' '}
+                  {period.value === null
+                    ? 'Not logged'
+                    : `${formatNumber(period.value)} ${data.record.unit}`}{' '}
+                  / target {formatNumber(period.target)}
+                </AuthText>
+                {data.record.kind !== 'frequency' && !data.record.archived && (
+                  <AuthLink
+                    title={`Edit log ${period.date}`}
+                    onPress={() => onOpen('log', habitId, period.date)}
+                  />
+                )}
+                {data.record.kind === 'frequency' &&
+                  data.record.habit_logs
+                    .filter((log) => log.local_date >= period.date && log.local_date <= period.end)
+                    .map((log) => (
+                      <AuthLink
+                        key={log.local_date}
+                        title={`Edit log ${log.local_date} (${formatNumber(log.value)} times)`}
+                        disabled={data.record.archived}
+                        onPress={() => onOpen('log', habitId, log.local_date)}
+                      />
+                    ))}
+              </AuthCard>
+            ))}
         </>
       )}
       <AuthNotice>

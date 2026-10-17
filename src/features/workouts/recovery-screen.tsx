@@ -1,16 +1,15 @@
+import { Segments } from '@/components/product-ui';
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import {
   AuthButton,
   AuthCard,
-  AuthChoice,
   AuthFrame,
   AuthInput,
   AuthLink,
   AuthLoading,
   AuthNotice,
   AuthText,
-  authStyles,
 } from '@/features/auth/auth-components';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
 import { displayWeight } from './workout-model';
@@ -141,17 +140,18 @@ export function RecoveryScreen({ userId, onBack }: { userId: string; onBack: () 
           {(['energy', 'soreness', 'sleep', 'stress'] as const).map((field) => (
             <View key={field} style={{ gap: 8 }}>
               <AuthText kind="eyebrow">{field === 'sleep' ? 'Sleep quality' : field}</AuthText>
-              <View style={authStyles.choices}>
-                {recoveryChoices[field].map((choice) => (
-                  <AuthChoice
-                    key={choice.value ?? 'none'}
-                    title={`${field === 'sleep' ? 'Sleep' : field[0].toUpperCase() + field.slice(1)}: ${choice.label}`}
-                    selected={input[field] === choice.value}
-                    disabled={busy}
-                    onPress={() => setInput({ ...input, [field]: choice.value })}
-                  />
-                ))}
-              </View>
+              <Segments
+                label={field === 'sleep' ? 'Sleep' : field[0].toUpperCase() + field.slice(1)}
+                value={input[field] === null ? '' : String(input[field])}
+                options={recoveryChoices[field].map((choice) => ({
+                  value: choice.value === null ? '' : String(choice.value),
+                  label: choice.label,
+                }))}
+                disabled={busy}
+                onChange={(value) =>
+                  setInput({ ...input, [field]: value === '' ? null : Number(value) })
+                }
+              />
             </View>
           ))}
           <AuthInput

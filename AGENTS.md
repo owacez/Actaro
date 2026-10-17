@@ -10,6 +10,10 @@ This is an Expo/React Native mobile application. Prioritize mobile-first pattern
   HOW it looks; Development Status records implementation evidence. Flag
   conflicts and follow the user's explicitly authorized scope.
 - Figma reference: https://www.figma.com/design/7u3UDAzE64TiTUzGjA22XW.
+  User-approved core redesign (2026-10-17): `docs/Actaro-v1-redesign.pdf` is the
+  current visual authority, superseding the older atlas and visual foundation.
+  It authorizes Chalk/Carbon, navigation-only glass, and Today/Train/Food/Progress/You
+  plus Quick log. Page 15 running is a v1.2 concept and stays unimplemented.
   Read only relevant nodes when visual work is authorized. Never edit Figma
   without explicit authorization. Starter visuals are not Actaro design evidence.
 - User-approved Figma fallback: when MCP calls are exhausted, consult the local

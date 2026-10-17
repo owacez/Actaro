@@ -1,13 +1,16 @@
 import { useCallback, useEffect } from 'react';
-import { View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
+import { randomUUID } from 'expo-crypto';
 import {
   AuthButton,
   AuthCard,
   AuthFrame,
   AuthLink,
   AuthText,
+  authStyles,
 } from '@/features/auth/auth-components';
+import { ActionRow, IconButton, Meter, ScreenHeader } from '@/components/product-ui';
 import {
   useRecords,
   useRecordAction,
@@ -18,13 +21,8 @@ import { formatNumber, energy, localNutritionDate } from '@/features/nutrition/n
 import { weightSummary, unitFactor, goalUnit } from '@/features/body/body-model';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { habitService } from '@/features/habits/habit-service';
-import {
-  habitToday,
-  habitValue,
-  habitVersion,
-  habitReached,
-  reminderDue,
-} from '@/features/habits/habit-model';
+import { habitToday, habitValue, habitVersion, habitReached } from '@/features/habits/habit-model';
+import { nutritionService } from '@/features/nutrition/nutrition-service';
 import { todayService } from './today-service';
 export function TodayScreen({ userId }: { userId: string }) {
   const load = useCallback(() => todayService.load(userId), [userId]),
@@ -51,246 +49,232 @@ export function TodayScreen({ userId }: { userId: string }) {
     steps = data?.activity.current?.steps ?? null,
     target = data?.activity.target?.steps_target ?? null,
     unit = data?.body.preferences.weight_unit ?? 'kg';
+  const titleDate = today
+    ? new Date(today + 'T12:00:00')
+        .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })
+        .toUpperCase()
+    : undefined;
   return (
-    <AuthFrame>
-      <AuthText kind="eyebrow">{today ?? 'ACTARO'}</AuthText>
-      <AuthText kind="title">Today</AuthText>
-      <AuthLink
-        title="Refresh Today"
-        disabled={resource.loading || action.locked}
-        onPress={refresh}
-      />
+    <AuthFrame
+      header={
+        <ScreenHeader
+          title="Today"
+          subtitle={titleDate}
+          action={
+            <IconButton
+              label="Refresh Today"
+              name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }}
+              onPress={refresh}
+              disabled={resource.loading || action.locked}
+            />
+          }
+        />
+      }
+    >
       <RecordLoadFeedback {...resource} retry={refresh} />
       {data && !resource.loading && (
         <>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
-            <View style={{ flex: 1, minWidth: 140 }}>
+          {!weight?.latest && !data.nutrition.targets && !data.training.plan && (
+            <AuthCard>
+              <AuthText kind="heading">Welcome to Actaro</AuthText>
+              <AuthText>Three steps make Today useful.</AuthText>
+              <ActionRow
+                title="Set daily targets"
+                detail="Calories, protein, carbs and fat"
+                onPress={() =>
+                  router.push({ pathname: '/nutrition/manage', params: { view: 'targets' } })
+                }
+              />
+              <ActionRow
+                title="Choose a training split"
+                detail="Or start from a plan"
+                onPress={() => router.push('/workouts/plans')}
+              />
+              <ActionRow
+                title="Log a weigh-in"
+                detail="Starts your weight trend"
+                onPress={() => router.push('/body')}
+              />
+            </AuthCard>
+          )}
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <View style={{ flex: 1 }}>
               <AuthCard>
-                <AuthText kind="eyebrow">Bodyweight</AuthText>
-                <AuthText kind="heading">
-                  {weight?.latest
-                    ? formatNumber(weight.latest.weight_kg * unitFactor(unit)) + ' ' + unit
-                    : 'Not logged'}
-                </AuthText>
-                <AuthText>
-                  {weight?.latest
-                    ? 'Last recorded ' + weight.latest.local_date
-                    : 'Record your first weigh-in.'}
+                <AuthText>Bodyweight</AuthText>
+                <AuthText kind="metric">
+                  {weight?.latest ? formatNumber(weight.latest.weight_kg * unitFactor(unit)) : '—'}
+                  <AuthText kind="muted"> {unit}</AuthText>
                 </AuthText>
                 <AuthText>
                   {weight?.change === null || weight?.change === undefined
-                    ? 'This-week change needs two dated records.'
-                    : `This week ${weight.change > 0 ? '+' : ''}${formatNumber(weight.change * unitFactor(unit))} ${unit} (from ${weight.baseline?.local_date})`}
+                    ? 'Needs two dated records'
+                    : `${weight.change > 0 ? '+' : ''}${formatNumber(weight.change * unitFactor(unit))} ${unit} this week`}
                 </AuthText>
-                {weight && weight.trend.some((point) => point.value !== null) && (
-                  <View
-                    accessibilityRole="image"
-                    accessibilityLabel={
-                      'Seven-day weight trend. ' +
-                      weight.trend
-                        .map(
-                          (point) =>
-                            point.date +
-                            ': ' +
-                            (point.value === null
-                              ? 'not logged'
-                              : formatNumber(point.value * unitFactor(unit)) + ' ' + unit),
-                        )
-                        .join('; ')
-                    }
-                    style={{ height: 52, flexDirection: 'row', alignItems: 'flex-end', gap: 5 }}
-                  >
-                    {weight.trend.map((point) => {
-                      const values = weight.trend.flatMap((item) =>
-                          item.value === null ? [] : [item.value],
-                        ),
-                        min = Math.min(...values),
-                        max = Math.max(...values);
-                      return (
-                        <View
-                          key={point.date}
-                          style={{
-                            flex: 1,
-                            height:
-                              point.value === null
-                                ? 2
-                                : max === min
-                                  ? 32
-                                  : 10 + ((point.value - min) / (max - min)) * 38,
-                            backgroundColor:
-                              point.value === null
-                                ? colors.border
-                                : point.date === data.context.today
-                                  ? colors.text
-                                  : colors.border,
-                            borderRadius: 3,
-                          }}
-                        />
-                      );
-                    })}
-                  </View>
-                )}
-                <AuthLink
-                  title="Log bodyweight"
-                  disabled={action.locked}
-                  onPress={() => router.push('/body')}
-                />
+                <AuthLink title="Log bodyweight" onPress={() => router.push('/body')} />
               </AuthCard>
             </View>
-            <View style={{ flex: 1, minWidth: 140 }}>
+            <View style={{ flex: 1 }}>
               <AuthCard>
-                <AuthText kind="eyebrow">Steps</AuthText>
-                <AuthText kind="heading">
-                  {steps === null ? 'Not recorded' : formatNumber(steps)}
-                </AuthText>
+                <AuthText>Steps</AuthText>
+                <AuthText kind="metric">{steps === null ? '—' : formatNumber(steps)}</AuthText>
                 <AuthText>
-                  {target === null ? 'Set a daily target' : formatNumber(target) + ' daily target'}
+                  {steps === null
+                    ? 'Not recorded yet'
+                    : target === null
+                      ? 'Set a daily target'
+                      : formatNumber(Math.max(0, target - steps)) + ' to go'}
                 </AuthText>
-                <AuthText>
-                  {steps === null || target === null
-                    ? 'Progress needs a count and target.'
-                    : `${formatNumber((steps / target) * 100)}% · ${formatNumber(Math.max(0, target - steps))} remaining`}
-                </AuthText>
-                {data.activity.current && (
-                  <AuthText>
-                    {data.activity.current.steps_source === 'ios_pedometer'
-                      ? 'iPhone pedometer'
-                      : 'Manual daily record'}
-                  </AuthText>
-                )}
-                <AuthLink
-                  title="Log steps & activity"
-                  disabled={action.locked}
-                  onPress={() => router.push('/activity')}
-                />
+                {steps !== null && target !== null && <Meter value={steps} target={target} />}
+                <AuthLink title="Log steps & activity" onPress={() => router.push('/activity')} />
               </AuthCard>
             </View>
           </View>
-          <AuthCard>
-            <AuthText kind="eyebrow">Calories & macros</AuthText>
-            <AuthText kind="heading">
-              {formatNumber(energy(data.total.calories, data.context.preferences.energy_unit))}{' '}
-              {data.context.preferences.energy_unit}
-              {data.nutrition.targets
-                ? ' / ' +
-                  formatNumber(
-                    energy(data.nutrition.targets.calories, data.context.preferences.energy_unit),
-                  )
-                : ''}
-            </AuthText>
-            {!data.nutrition.logs.length && <AuthText>No food logged today.</AuthText>}
-            {(['protein', 'carbs', 'fat'] as const).map((key) => (
-              <AuthText key={key}>
-                {key === 'protein' ? 'Protein' : key === 'carbs' ? 'Carbs' : 'Fat'}{' '}
-                {formatNumber(data.total[key])} g
-                {data.nutrition.targets
-                  ? ' / ' + formatNumber(data.nutrition.targets[key]) + ' g'
-                  : ''}
-              </AuthText>
-            ))}
-            {!data.nutrition.targets && (
-              <AuthText>Set nutrition targets to see your daily goals.</AuthText>
-            )}
-            <AuthText>
-              Hydration {formatNumber(data.waterMl)} ml
-              {data.nutrition.targets
-                ? ' / ' + formatNumber(data.nutrition.targets.water_ml) + ' ml'
-                : ''}
-            </AuthText>
-            <AuthLink
-              title="Open nutrition diary"
-              disabled={action.locked}
-              onPress={() => router.push('/(tabs)/nutrition')}
-            />
-          </AuthCard>
-          <AuthCard>
-            <AuthText kind="eyebrow">Today’s training</AuthText>
-            <AuthText kind="heading">
-              {data.workout?.draft.name ??
-                (data.splitDay?.isRest
-                  ? 'Scheduled rest day'
-                  : data.training.plan
-                    ? 'No workout assigned today'
-                    : 'Choose a workout or split')}
-            </AuthText>
+          <View
+            style={{
+              backgroundColor: data.workout || data.session ? colors.accent : colors.surface,
+              borderRadius: 28,
+              padding: 20,
+              gap: 18,
+              overflow: 'hidden',
+            }}
+          >
             {data.workout && (
-              <AuthText>
-                {data.workout.draft.exercises.length} exercises · {data.workout.sets} working sets ·
-                ~{data.workout.estimatedMinutes} min estimate
-              </AuthText>
+              <View
+                pointerEvents="none"
+                style={{
+                  position: 'absolute',
+                  width: 230,
+                  height: 230,
+                  right: -70,
+                  top: -90,
+                  borderRadius: 120,
+                  backgroundColor: '#ffffff26',
+                }}
+              />
+            )}
+            <Text
+              style={{
+                color: data.workout || data.session ? '#111311' : colors.muted,
+                fontSize: 12,
+              }}
+            >
+              TODAY · {titleDate}
+            </Text>
+            <Text
+              style={{
+                color: data.workout || data.session ? '#111311' : colors.text,
+                fontFamily: 'Inter_600SemiBold',
+                fontSize: 25,
+                lineHeight: 31,
+              }}
+            >
+              {data.session?.name ??
+                data.workout?.draft.name ??
+                (data.splitDay?.isRest ? 'Scheduled rest day' : 'No workout scheduled')}
+            </Text>
+            {data.workout && (
+              <Text style={{ color: '#111311', fontSize: 14 }}>
+                {data.workout.draft.exercises.length} exercises · {data.workout.sets} sets · ~
+                {data.workout.estimatedMinutes} min
+              </Text>
             )}
             {data.session ? (
-              <>
-                <AuthText>
-                  {data.session.status === 'active'
-                    ? 'Workout in progress on this device'
-                    : 'Workout awaiting save on this device'}
-                  : {data.session.name}
-                </AuthText>
-                <AuthButton
-                  title="Resume saved workout"
-                  disabled={action.locked}
-                  onPress={() => router.push('/workouts/session')}
-                />
-              </>
+              <AuthButton
+                title="Resume saved workout"
+                outlined
+                disabled={action.locked}
+                onPress={() => router.push('/workouts/session')}
+              />
+            ) : data.workout ? (
+              <AuthButton
+                title="Start today's workout"
+                outlined
+                disabled={action.locked}
+                onPress={() =>
+                  router.push({
+                    pathname: '/workouts/start',
+                    params: { id: data.workout?.draft.id },
+                  })
+                }
+              />
             ) : (
-              data.workout && (
-                <AuthButton
-                  title="Start today's workout"
-                  disabled={action.locked}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/workouts/start',
-                      params: { id: data.workout?.draft.id },
-                    })
-                  }
-                />
-              )
+              <AuthButton
+                title="Browse plans"
+                outlined
+                onPress={() => router.push('/workouts/plans')}
+              />
             )}
-            <AuthLink
-              title="Choose a workout"
-              disabled={action.locked}
-              onPress={() => router.push('/workouts')}
+          </View>
+          <AuthCard>
+            <ActionRow
+              title="Calories"
+              detail={`${formatNumber(energy(data.total.calories, data.context.preferences.energy_unit))}${data.nutrition.targets ? ' / ' + formatNumber(energy(data.nutrition.targets.calories, data.context.preferences.energy_unit)) : ''} ${data.context.preferences.energy_unit}`}
+              onPress={() => router.push('/nutrition')}
             />
-            <AuthLink
-              title="Manage training split"
-              disabled={action.locked}
-              onPress={() => router.push('/workouts/splits')}
-            />
-            <AuthText kind="heading">Training Status</AuthText>
-            {data.status.map((status) => (
-              <View key={status.label}>
-                <AuthText kind="heading">{status.label}</AuthText>
-                <AuthText>{status.reason}</AuthText>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              {(['protein', 'carbs', 'fat'] as const).map((key) => (
+                <View key={key} style={{ flex: 1, gap: 5 }}>
+                  <AuthText kind="muted">{key[0].toUpperCase() + key.slice(1)}</AuthText>
+                  <AuthText>{formatNumber(data.total[key])} g</AuthText>
+                  <Meter
+                    value={data.total[key]}
+                    target={data.nutrition.targets?.[key] ?? 0}
+                    color={colors[key]}
+                  />
+                </View>
+              ))}
+            </View>
+            {!data.nutrition.logs.length && <AuthText kind="muted">No food logged today.</AuthText>}
+            <View style={authStyles.row}>
+              <View style={{ flex: 1 }}>
+                <AuthText>
+                  Water {formatNumber(data.waterMl)}
+                  {data.nutrition.targets
+                    ? ' / ' + formatNumber(data.nutrition.targets.water_ml)
+                    : ''}{' '}
+                  ml
+                </AuthText>
               </View>
-            ))}
+              <AuthLink
+                title="+250 ml"
+                disabled={action.locked}
+                onPress={() => {
+                  const id = randomUUID();
+                  void action.run(
+                    () =>
+                      nutritionService.water(
+                        userId,
+                        id,
+                        data.context.today,
+                        data.context.preferences.time_zone,
+                        250,
+                      ),
+                    'Water logged',
+                    refresh,
+                  );
+                }}
+              />
+            </View>
           </AuthCard>
           <AuthCard>
-            <AuthText kind="eyebrow">Habits</AuthText>
-            <AuthText kind="heading">
-              {data.completedHabits} of {data.habits.length} scheduled today
+            <AuthText>
+              Habits · {data.completedHabits} of {data.habits.length}
             </AuthText>
-            {!data.habits.length && <AuthText>No scheduled habits today.</AuthText>}
-            {data.habits.slice(0, 4).map((habit) => {
-              const date = habitToday(habit),
-                version = habitVersion(habit, date),
-                value = habitValue(habit, date),
-                done = !!version && habitReached(habit, value, version.target);
-              return (
-                <View key={habit.id}>
-                  <AuthText kind="heading">
-                    {habit.name}
-                    {done ? ' · Done' : reminderDue(habit) ? ' · Reminder due' : ''}
-                  </AuthText>
-                  <AuthText>
-                    {value === null ? 'Not logged' : formatNumber(value) + ' ' + habit.unit}
-                    {version ? ' / ' + formatNumber(version.target) : ''}
-                  </AuthText>
-                  {!done && (habit.kind === 'boolean' || habit.kind === 'avoidance') ? (
-                    <AuthLink
-                      title={`${habit.kind === 'boolean' ? 'Mark done' : 'No occurrences'}: ${habit.name}`}
-                      disabled={action.locked}
-                      onPress={() =>
+            <View style={authStyles.choices}>
+              {data.habits.slice(0, 4).map((habit) => {
+                const date = habitToday(habit),
+                  version = habitVersion(habit, date),
+                  value = habitValue(habit, date),
+                  done = !!version && habitReached(habit, value, version.target);
+                return (
+                  <Pressable
+                    key={habit.id}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Log habit ${habit.name}`}
+                    accessibilityState={{ disabled: action.locked }}
+                    disabled={action.locked}
+                    onPress={() => {
+                      if (!done && (habit.kind === 'boolean' || habit.kind === 'avoidance'))
                         void action.run(
                           () =>
                             habitService.log(
@@ -302,50 +286,58 @@ export function TodayScreen({ userId }: { userId: string }) {
                             ),
                           'Habit logged',
                           refresh,
-                        )
-                      }
-                    />
-                  ) : (
-                    <AuthLink
-                      title={`Log habit ${habit.name}`}
-                      disabled={action.locked}
-                      onPress={() =>
+                        );
+                      else
                         router.push({
                           pathname: '/habits/manage',
                           params: { view: 'log', id: habit.id, date },
-                        })
-                      }
-                    />
-                  )}
-                </View>
-              );
-            })}
-            <AuthLink
-              title="Manage all habits"
-              disabled={action.locked}
-              onPress={() => router.push('/habits')}
-            />
+                        });
+                    }}
+                    style={{
+                      minHeight: 44,
+                      padding: 12,
+                      borderRadius: 24,
+                      backgroundColor: done ? colors.text : colors.fill,
+                    }}
+                  >
+                    <Text style={{ color: done ? colors.background : colors.text, fontSize: 13 }}>
+                      {done ? '✓ ' : '+ '}
+                      {habit.name}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            {!data.habits.length && <AuthText>No scheduled habits today.</AuthText>}
+            <AuthLink title="Manage all habits" onPress={() => router.push('/habits')} />
           </AuthCard>
           <AuthCard>
-            <AuthText kind="eyebrow">Recovery</AuthText>
-            <AuthText kind="heading">{data.recovery?.label ?? 'Not checked today'}</AuthText>
-            <AuthText>
-              {data.recovery?.reason ??
-                'Record energy, soreness and sleep to see your manual check-in category.'}
-            </AuthText>
-            <AuthLink
-              title="Open recovery check"
-              disabled={action.locked}
+            <ActionRow
+              title="Recovery"
+              detail={data.recovery?.label ?? 'Not checked today'}
               onPress={() => router.push('/workouts/recovery')}
             />
+            {data.recovery && <AuthText>{data.recovery.reason}</AuthText>}
+            <AuthText kind="eyebrow">Training status</AuthText>
+            {data.status.map((status) => (
+              <View key={status.label}>
+                <AuthText kind="heading">{status.label}</AuthText>
+                <AuthText>{status.reason}</AuthText>
+              </View>
+            ))}
+            <AuthLink
+              title="Manage training split"
+              onPress={() => router.push('/workouts/splits')}
+            />
+            <AuthLink title="Choose a workout" onPress={() => router.push('/workouts')} />
           </AuthCard>
           <AuthCard>
-            <AuthText kind="eyebrow">Goals</AuthText>
+            <AuthText kind="heading">Goals</AuthText>
             {!data.goals.length && <AuthText>No active goals yet.</AuthText>}
             {data.goals.slice(0, 4).map((result) => {
-              const unit = goalUnit(result.goal.metric, data.context.preferences);
+              const goalUnitLabel = goalUnit(result.goal.metric, data.context.preferences);
               return (
-                <View key={result.goal.id}>
+                <View key={result.goal.id} style={{ gap: 8 }}>
                   <AuthText kind="heading">{result.goal.name}</AuthText>
                   <AuthText>
                     {result.status} ·{' '}
@@ -355,17 +347,18 @@ export function TodayScreen({ userId }: { userId: string }) {
                     ·{' '}
                     {result.value === null
                       ? 'Not recorded'
-                      : formatNumber(result.value * unitFactor(unit)) + ' ' + unit}{' '}
-                    / {formatNumber(result.goal.target * unitFactor(unit))} {unit}
+                      : formatNumber(result.value * unitFactor(goalUnitLabel)) +
+                        ' ' +
+                        goalUnitLabel}{' '}
+                    / {formatNumber(result.goal.target * unitFactor(goalUnitLabel))} {goalUnitLabel}
                   </AuthText>
+                  {result.percentage !== null && (
+                    <Meter value={result.percentage} target={100} color={colors.accent} />
+                  )}
                 </View>
               );
             })}
-            <AuthLink
-              title="Manage all goals"
-              disabled={action.locked}
-              onPress={() => router.push('/goals')}
-            />
+            <AuthLink title="Manage all goals" onPress={() => router.push('/goals')} />
           </AuthCard>
         </>
       )}

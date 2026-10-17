@@ -1,6 +1,6 @@
 # Actaro — Development Status
 
-Updated: 2026-10-16 (America/Los_Angeles).
+Updated: 2026-10-17 (America/Los_Angeles).
 
 ## Overall
 
@@ -8,12 +8,21 @@ Updated: 2026-10-16 (America/Los_Angeles).
 - Release Completion: **100% active implementation (27 / 27 weight); personal beta DEFERRED (6 weight)**
 - Previous Releases: **v0.1 active development and v0.2–v0.6 functional scopes DONE (100%); retained acceptance DEFERRED**
 - Current Phase: **Phase 6; seven implementation/review tasks DONE, task 6.6 Personal Beta DEFERRED**
-- Current Focus: Implementation handoff for the user's real daily testing and observations. No v1.0 approval or future-release implementation.
+- Current Focus: User-authorized core visual redesign from `Actaro-v1-redesign.pdf` implemented; user visual/device review next. No v1.0 approval or future-release implementation.
 - Status: **DONE — active v0.9 development; full beta/release acceptance DEFERRED**
 - Blockers: No remaining authorized implementation blocker. Dependency advisories, disabled leaked-password protection, exact visual/device checks and native-build acceptance remain documented release-review findings. They are not claimed passed or waived.
 - Approval boundary: The user authorized completing v0.9, retaining the earlier instruction that device acceptance, personal testing and v1.0 release approval happen afterward. No paid service or native/EAS build was used.
 
-Offline design reference (2026-10-16): **DONE** - a 91-page PDF atlas and 87
+Core redesign (2026-10-17): **DONE** for implementation/local verification — Chalk/Carbon foundations,
+Today/Train/Food/Progress/You navigation, Quick log, compact records, sheets,
+calendar controls and actual-data charts are implemented. TypeScript/lint/format,
+293 Jest tests and six dataset tests passed; all-platform JavaScript export and
+16 isolated sample-data layout captures passed with zero live Supabase requests.
+See [coverage, retained differences and evidence](REDESIGN_IMPLEMENTATION.md).
+The new PDF supersedes the older atlas and visual palette. Page 15 running stays
+v1.2 and is not implemented. Release weights and deferred acceptance are unchanged.
+
+Historical offline reference (2026-10-16): **DONE** - a 91-page PDF atlas and 87
 sample-data screen PNGs document the current implementation, including full
 scrolling content and labelled source-derived native/date variants. See the
 [atlas and verification scope](DESIGN_ATLAS.md). This does not close device

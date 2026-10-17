@@ -1,3 +1,4 @@
+import { ActionSheet, ScreenHeader } from '@/components/product-ui';
 import { useEffect, useRef, useState } from 'react';
 import {
   AuthButton,
@@ -16,7 +17,8 @@ import { shareExport } from './share-export';
 
 export function AccountDataScreen({ userId, onBack }: { userId: string; onBack: () => void }) {
   const [password, setPassword] = useState(''),
-    [confirmation, setConfirmation] = useState('');
+    [confirmation, setConfirmation] = useState(''),
+    [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [deleted, setDeleted] = useState(false);
@@ -78,7 +80,7 @@ export function AccountDataScreen({ userId, onBack }: { userId: string; onBack: 
     }
   }
   return (
-    <AuthFrame>
+    <AuthFrame header={<ScreenHeader title="Privacy and data" />}>
       <AuthLink title="← Profile" disabled={busy} onPress={onBack} />
       <AuthText kind="heading">Privacy & account data</AuthText>
       <AuthText>
@@ -104,32 +106,51 @@ export function AccountDataScreen({ userId, onBack }: { userId: string; onBack: 
         <AuthNotice>Account deleted. Restart the app if sign-out did not finish.</AuthNotice>
       ) : (
         <>
-          <AuthInput
-            label="Current password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoComplete="current-password"
-            editable={!busy}
-          />
-          <AuthInput
-            label="Type DELETE to confirm"
-            value={confirmation}
-            onChangeText={setConfirmation}
-            autoCapitalize="characters"
-            autoCorrect={false}
-            editable={!busy}
-          />
           <AuthButton
-            title="Permanently delete my account"
+            title="Delete account"
             outlined
-            busy={busy}
-            disabled={confirmation !== 'DELETE' || !password}
-            onPress={() => void run(true)}
+            disabled={busy}
+            onPress={() => setConfirming(true)}
           />
+          <ActionSheet
+            title="Delete your account?"
+            visible={confirming}
+            onClose={() => {
+              if (!busy) {
+                setConfirming(false);
+                setPassword('');
+                setConfirmation('');
+              }
+            }}
+          >
+            <AuthInput
+              label="Current password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoComplete="current-password"
+              editable={!busy}
+            />
+            <AuthInput
+              label="Type DELETE to confirm"
+              value={confirmation}
+              onChangeText={setConfirmation}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              editable={!busy}
+            />
+            <AuthButton
+              title="Permanently delete my account"
+              outlined
+              busy={busy}
+              disabled={confirmation !== 'DELETE' || !password}
+              onPress={() => void run(true)}
+            />
+            {!!error && <AuthNotice error>{error}</AuthNotice>}
+          </ActionSheet>
         </>
       )}
-      {!!error && <AuthNotice error>{error}</AuthNotice>}
+      {!!error && (!confirming || deleted) && <AuthNotice error>{error}</AuthNotice>}
     </AuthFrame>
   );
 }

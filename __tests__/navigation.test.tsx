@@ -1,11 +1,13 @@
 import { beforeEach, expect, jest, test } from '@jest/globals';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render as nativeRender, screen } from '@testing-library/react-native';
 
 import IndexScreen from '@/app/index';
 import MainTabs from '@/app/(tabs)/_layout';
 import WorkoutsRoute from '@/app/workouts';
 import BuilderRoute from '@/app/workouts/edit';
 import { FeedbackTestRoot } from './helpers/feedback-root';
+const render: typeof nativeRender = (ui, options) =>
+  nativeRender(ui, { wrapper: FeedbackTestRoot, ...options });
 
 let mockSession: object | null = {};
 let mockRecovery = false;

@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from 'react';
+import { useState, type PropsWithChildren, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -18,7 +18,11 @@ import { useAppTheme } from '@/features/profile/theme-context';
 // Preserve current consumers while sharing the verified foundation with navigation.
 export const authColors = actaroColors;
 
-export function AuthFrame({ children }: PropsWithChildren) {
+export function AuthFrame({
+  children,
+  header,
+  footer,
+}: PropsWithChildren<{ header?: ReactNode; footer?: ReactNode }>) {
   const { colors } = useAppTheme();
   const screenStyle = [styles.screen, { backgroundColor: colors.background }];
   return (
@@ -27,9 +31,11 @@ export function AuthFrame({ children }: PropsWithChildren) {
         style={screenStyle}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
+        {header}
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.content}>{children}</View>
         </ScrollView>
+        {footer}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -38,38 +44,74 @@ export function AuthFrame({ children }: PropsWithChildren) {
 export function AuthText({
   children,
   kind = 'body',
-}: PropsWithChildren<{ kind?: 'body' | 'title' | 'heading' | 'eyebrow' | 'muted' }>) {
+}: PropsWithChildren<{ kind?: 'body' | 'title' | 'heading' | 'eyebrow' | 'muted' | 'metric' }>) {
   const { colors } = useAppTheme();
-  const color = kind === 'body' || kind === 'muted' ? colors.muted : colors.text;
+  const color =
+    kind === 'body' || kind === 'muted' || kind === 'eyebrow' ? colors.muted : colors.text;
   return (
     <Text
       accessibilityRole={kind === 'title' || kind === 'heading' ? 'header' : undefined}
-      style={[styles.text, styles[kind], { color }]}
+      style={[styles.text, styles[kind], { color, fontVariant: ['tabular-nums'] }]}
     >
       {children}
     </Text>
   );
 }
 
-export function AuthInput({ label, ...props }: TextInputProps & { label: string }) {
+export function AuthInput({
+  label,
+  error,
+  ...props
+}: TextInputProps & { label: string; error?: string }) {
   const { colors, scheme } = useAppTheme();
+  const [visible, setVisible] = useState(false);
   return (
     <View style={styles.field}>
-      <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
-      <TextInput
-        {...props}
-        accessibilityLabel={props.accessibilityLabel ?? label}
-        keyboardAppearance={props.keyboardAppearance ?? scheme}
-        placeholderTextColor={colors.muted}
-        style={[
-          styles.input,
-          {
-            color: colors.text,
-            borderColor: colors.border,
-            backgroundColor: colors.surface,
-          },
-        ]}
-      />
+      <Text style={[styles.label, { color: colors.muted }]}>{label}</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          borderWidth: 1,
+          borderRadius: actaroLayout.fieldRadius,
+          borderColor: error ? colors.danger : colors.border,
+          backgroundColor: colors.surface,
+        }}
+      >
+        <TextInput
+          {...props}
+          secureTextEntry={props.secureTextEntry && !visible}
+          accessibilityLabel={props.accessibilityLabel ?? label}
+          keyboardAppearance={props.keyboardAppearance ?? scheme}
+          placeholderTextColor={colors.muted}
+          style={[
+            styles.input,
+            {
+              color: colors.text,
+              flex: 1,
+              minWidth: 0,
+              borderWidth: 0,
+              backgroundColor: colors.surface,
+            },
+            props.style,
+          ]}
+        />
+        {props.secureTextEntry && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={(visible ? 'Hide ' : 'Show ') + label.toLowerCase()}
+            onPress={() => setVisible(!visible)}
+            style={{ minHeight: 44, minWidth: 48, justifyContent: 'center', alignItems: 'center' }}
+          >
+            <Text style={{ color: colors.muted, fontSize: 12 }}>{visible ? 'Hide' : 'Show'}</Text>
+          </Pressable>
+        )}
+      </View>
+      {error && (
+        <Text accessibilityRole="alert" style={{ color: colors.danger, fontSize: 12 }}>
+          {error}
+        </Text>
+      )}
     </View>
   );
 }
@@ -102,8 +144,8 @@ export function AuthButton({
         styles.button,
         outlined && styles.outlined,
         {
-          backgroundColor: outlined ? 'transparent' : colors.accent,
-          borderColor: outlined ? colors.border : colors.text,
+          backgroundColor: outlined ? colors.surface : colors.accent,
+          borderColor: outlined ? colors.border : colors.accent,
         },
         (pressed || disabled || busy) && styles.dimmed,
       ]}
@@ -167,12 +209,12 @@ export function AuthChoice({
         style={[
           styles.choice,
           {
-            backgroundColor: selected ? colors.accent : 'transparent',
-            borderColor: selected ? colors.accent : colors.border,
+            backgroundColor: selected ? colors.text : colors.surface,
+            borderColor: selected ? colors.text : colors.border,
           },
         ]}
       >
-        <Text style={[styles.choiceText, { color: selected ? actaroColors.text : colors.text }]}>
+        <Text style={[styles.choiceText, { color: selected ? colors.background : colors.text }]}>
           {title}
         </Text>
       </View>
@@ -214,7 +256,7 @@ export function AuthNotice({
       <Text
         accessibilityRole={announce ? 'alert' : undefined}
         accessibilityLiveRegion={announce ? 'polite' : undefined}
-        style={[styles.errorText, { color: colors.text }]}
+        style={[styles.errorText, { color: colors.danger }]}
       >
         {children}
       </Text>
@@ -245,12 +287,13 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: actaroLayout.contentWidth,
     padding: actaroLayout.screenPadding,
+    paddingBottom: 120,
     gap: actaroLayout.contentGap,
   },
   text: { fontFamily: 'Inter_400Regular', color: authColors.text },
   ...actaroTypography,
   field: { gap: 5 },
-  label: { fontFamily: 'Inter_500Medium', fontSize: 11, color: authColors.text },
+  label: { fontFamily: 'Inter_400Regular', fontSize: 14, color: authColors.muted },
   input: {
     minHeight: actaroLayout.minimumTouchHeight,
     paddingHorizontal: 12,
@@ -260,7 +303,7 @@ const styles = StyleSheet.create({
     borderColor: authColors.border,
     backgroundColor: authColors.surface,
     fontFamily: 'Inter_400Regular',
-    fontSize: 12,
+    fontSize: 16,
     color: authColors.text,
   },
   button: {
@@ -282,22 +325,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   choice: { borderWidth: 1, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 7 },
-  choiceText: { fontFamily: 'Inter_500Medium', fontSize: 11 },
-  buttonText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: authColors.background },
+  choiceText: { fontFamily: 'Inter_500Medium', fontSize: 13 },
+  buttonText: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: authColors.background },
   outlinedText: { color: authColors.text },
   link: { minHeight: actaroLayout.minimumTouchHeight, justifyContent: 'center' },
-  linkText: { fontFamily: 'Inter_500Medium', fontSize: 10, color: authColors.text },
+  linkText: { fontFamily: 'Inter_500Medium', fontSize: 14, color: authColors.text },
   notice: {
-    borderRadius: actaroLayout.fieldRadius,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: authColors.border,
-    padding: 12,
+    padding: 16,
+    gap: 10,
     backgroundColor: authColors.surface,
   },
   noticeText: {
     fontFamily: 'Inter_400Regular',
-    fontSize: 11,
-    lineHeight: 16,
+    fontSize: 12,
+    lineHeight: 18,
     color: authColors.muted,
   },
   errorText: {

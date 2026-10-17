@@ -4,6 +4,7 @@ import { Platform } from 'react-native';
 import { AuthButton, AuthInput, AuthNotice, AuthText } from '@/features/auth/auth-components';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
 
+import { ActionRow, ActionSheet } from '@/components/product-ui';
 import { accountSecurityError, accountSecurityService } from './account-security-service';
 
 export function AccountSecurity({
@@ -87,22 +88,23 @@ export function AccountSecurity({
   return (
     <>
       <AuthText kind="heading">Account security</AuthText>
-      <AuthText>Email</AuthText>
-      <AuthText>{email}</AuthText>
+
       {!mode ? (
         <>
-          <AuthButton
+          <ActionRow
             title="Change email"
-            outlined
+            detail={email}
+            icon={{ ios: 'envelope', android: 'mail_outline', web: 'mail_outline' }}
             disabled={blocked}
             onPress={() => {
               clear();
               setMode('email');
             }}
           />
-          <AuthButton
+          <ActionRow
             title="Change password"
-            outlined
+            detail="Update your account password"
+            icon={{ ios: 'lock', android: 'lock_outline', web: 'lock_outline' }}
             disabled={blocked}
             onPress={() => {
               clear();
@@ -111,7 +113,13 @@ export function AccountSecurity({
           />
         </>
       ) : (
-        <>
+        <ActionSheet
+          title={mode === 'email' ? 'Change email' : 'Change password'}
+          visible
+          onClose={() => {
+            if (!busy) reset();
+          }}
+        >
           {mode === 'email' ? (
             <>
               <AuthInput
@@ -169,7 +177,7 @@ export function AccountSecurity({
               reset();
             }}
           />
-        </>
+        </ActionSheet>
       )}
     </>
   );

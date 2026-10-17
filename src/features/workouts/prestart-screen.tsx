@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
+import { ActionSheet } from '@/components/product-ui';
 import {
   AuthButton,
   AuthCard,
@@ -89,10 +90,8 @@ export function PrestartScreen({
   return (
     <AuthFrame>
       <AuthLink title="← My workouts" disabled={busy} onPress={onBack} />
-      <AuthText kind="heading">
-        {choosing ? 'Choose session mode' : (prepared?.draft.name ?? 'Workout pre-start')}
-      </AuthText>
-      {error && <AuthNotice error>{error}</AuthNotice>}
+      <AuthText kind="heading">{prepared?.draft.name ?? 'Workout pre-start'}</AuthText>
+      {error && !choosing && <AuthNotice error>{error}</AuthNotice>}
       {loading ? (
         <AuthLoading>Loading workout…</AuthLoading>
       ) : existing ? (
@@ -104,7 +103,13 @@ export function PrestartScreen({
         </>
       ) : prepared ? (
         choosing ? (
-          <>
+          <ActionSheet
+            title="Choose session mode"
+            visible
+            onClose={() => {
+              if (!busy) setChoosing(false);
+            }}
+          >
             <AuthText>
               Timed Workout tracks total duration with pause/resume. Log Only records sets without a
               total workout timer. Both include a separate rest timer.
@@ -121,7 +126,8 @@ export function PrestartScreen({
               disabled={busy}
               onPress={() => setChoosing(false)}
             />
-          </>
+            {error && <AuthNotice error>{error}</AuthNotice>}
+          </ActionSheet>
         ) : (
           <>
             <AuthText>

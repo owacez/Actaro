@@ -1,3 +1,4 @@
+import { NavigationSurface, Segments } from '@/components/product-ui';
 import { useEffect, useRef, useState } from 'react';
 import { Linking, View } from 'react-native';
 import {
@@ -29,6 +30,7 @@ export function DetailScreen({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [pose, setPose] = useState('start');
   const generation = useRef(0);
   useEffect(() => {
     const request = ++generation.current;
@@ -54,7 +56,20 @@ export function DetailScreen({
     setAttempt((value) => value + 1);
   }
   return (
-    <AuthFrame>
+    <AuthFrame
+      footer={
+        record && !loading && !error ? (
+          <NavigationSurface style={{ padding: 16, gap: 8 }}>
+            {onAddToWorkout && (
+              <AuthButton title="Add to workout" onPress={() => onAddToWorkout(record.id)} />
+            )}
+            {onLogExercise && (
+              <AuthButton title="Log exercise" outlined onPress={() => onLogExercise(record.id)} />
+            )}
+          </NavigationSurface>
+        ) : undefined
+      }
+    >
       <AuthLink title="← Exercise Library" onPress={onBack} />
       {loading ? (
         <AuthLoading>Loading exercise…</AuthLoading>
@@ -68,19 +83,27 @@ export function DetailScreen({
       ) : (
         <>
           <AuthText kind="heading">{record.name}</AuthText>
-          {onAddToWorkout && (
-            <AuthButton title="Add to workout" onPress={() => onAddToWorkout(record.id)} />
-          )}
-          {onLogExercise && (
-            <AuthButton title="Log exercise" outlined onPress={() => onLogExercise(record.id)} />
-          )}
           <AuthText>
             {record.exercise_equipment.map((item) => item.equipment.name).join(', ') ||
               'No equipment'}
             {record.difficulty ? ` · ${record.difficulty}` : ''}
           </AuthText>
           {record.description && <AuthText>{record.description}</AuthText>}
-          {['start', 'peak', 'main'].map((pose) =>
+          <Segments
+            value={pose}
+            onChange={setPose}
+            options={['start', 'peak', 'main']
+              .filter((value) => record.exercise_media.some((media) => media.pose === value))
+              .map((value) => ({
+                value,
+                label: value === 'main' ? 'Technique' : value[0].toUpperCase() + value.slice(1),
+              }))}
+          />
+          {[
+            record.exercise_media.some((media) => media.pose === pose)
+              ? pose
+              : record.exercise_media[0]?.pose,
+          ].map((pose) =>
             record.exercise_media
               .filter((media) => media.pose === pose)
               .map((media) => (

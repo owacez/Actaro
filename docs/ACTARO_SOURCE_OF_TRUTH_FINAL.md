@@ -18,7 +18,7 @@
 - **Product / public-facing app name:** **Actaro** (title case); marketing wordmark may use **actaro.** in lowercase.
 - **Brand intent:** simple, memorable, athletic, progressive, and broad enough for training, nutrition, habits, daily activity, running, and wellness.
 - **Short positioning line:** **Train. Track. Progress.** (working tagline, not a required UI element).
-- **Visual identity:** retain the established athletic Figma design system: warm off-white/stone canvas, charcoal typography, orange-coral primary accent, limited electric-lime performance highlights, crisp compact components.
+- **Visual identity (user-approved redesign, 2026-10-17):** Chalk and Carbon from `docs/Actaro-v1-redesign.pdf`: cool chalk canvas, solid white/charcoal surfaces, ink typography, ember actions, and limited volt completion/PR highlights. The new PDF supersedes the earlier screen atlas and older visual choices for the core release. Product behavior and release boundaries remain governed here.
 - **Technical naming defaults:** repository slug `actaro`, Expo project display name `Actaro`, package/project slug `actaro`. Reverse-DNS bundle/package IDs and production domains must be decided and checked prior to store submission; do not assume ownership of `actaro.com` or any identifier.
 - **Scope:** branding decision only. No new feature, deadline, version, architecture, or development-status claims are implied.
 - **Publication note:** final trademark, store-name, domain, and social-handle clearance is still required before public launch; the brand selection here is a product decision, not legal clearance.
@@ -139,8 +139,8 @@ The product should feel:
 
 Use:
 
-- Warm off-white / soft stone background
-- Slightly elevated soft-white/light-stone surfaces
+- Chalk `#F1F2EE` / Carbon `#0C0D0C` background
+- Solid white `#FFFFFF` / Carbon `#171917` surfaces with distinct neutral fills
 - Near-black / charcoal text and strong controls
 - **Orange-coral** as the primary action/accent family
 - **Electric lime** only for limited high-performance highlights
@@ -154,7 +154,7 @@ Use:
 Avoid:
 
 - Random gradients
-- Glassmorphism
+- Glass on content cards; glass is permitted only on navigation, headers, floating controls and pinned action bars, with a solid fallback for Reduce Transparency/unsupported platforms
 - Generic AI dashboard cards
 - Excessive shadows
 - Neon gaming-dashboard styling
@@ -187,22 +187,25 @@ Figma can contain designs for Core V1 and later releases before they are impleme
 
 # 5. Navigation & Information Architecture
 
-Primary bottom navigation:
+Primary bottom navigation (user-approved redesign, 2026-10-17):
 
 - Today
-- Fitness
-- Nutrition
+- Train (workouts, exercise library and plans)
+- Food (nutrition diary)
 - Progress
-- More
+- You
 
-Inside **More**:
+A separate **Quick log** button is available from all five tabs for food, water, weight, steps, habits and workouts. It reuses the same owned records and validation as the existing logging flows. Existing internal route paths remain compatible.
+
+Inside **You**:
 
 - Habits
 - Goals
 - Recipes
-- Achievements
-- Profile
-- Settings
+- Body records and steps/activity
+- Profile and account security
+- Preferences, habit reminders, privacy and data
+- Achievements later
 - Integrations later
 
 ---

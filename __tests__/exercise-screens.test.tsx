@@ -1,5 +1,11 @@
 import { beforeEach, expect, jest, test } from '@jest/globals';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render as nativeRender,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 import { LibraryScreen } from '@/features/exercises/library-screen';
 import { EquipmentScreen } from '@/features/exercises/equipment-screen';
 import { DetailScreen } from '@/features/exercises/detail-screen';
@@ -9,6 +15,8 @@ import {
   type ExerciseSummary,
 } from '@/features/exercises/exercise-service';
 import { FeedbackTestRoot as FeedbackRoot } from './helpers/feedback-root';
+const render: typeof nativeRender = (ui, options) =>
+  nativeRender(ui, { wrapper: FeedbackRoot, ...options });
 
 jest.mock('@/features/exercises/exercise-service', () => ({
   exerciseService: {
@@ -58,7 +66,8 @@ test('library searches, paginates, filters and opens the actual exercise ID', as
   await screen.findByText('Fixture press');
   await fireEvent.press(screen.getByLabelText('View Fixture press'));
   expect(open).toHaveBeenCalledWith(itemId, summary);
-  await fireEvent.press(screen.getByRole('button', { name: 'Add Fixture press to workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Actions for Fixture press' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Add to workout' }));
   expect(add).toHaveBeenCalledWith(itemId);
   expect(open).toHaveBeenCalledTimes(1);
   await fireEvent.changeText(screen.getByLabelText('Search exercises'), 'press');

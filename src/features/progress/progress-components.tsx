@@ -1,12 +1,12 @@
 import { useCallback, useRef, useState, type ReactNode } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { View } from 'react-native';
+import { ScreenHeader, Segments, ActionSheet, IconButton } from '@/components/product-ui';
+import { DatePicker } from '@/components/date-picker';
 import {
   AuthButton,
   AuthCard,
-  AuthChoice,
   AuthFrame,
-  AuthInput,
   AuthLink,
   AuthNotice,
   AuthText,
@@ -76,9 +76,38 @@ export function ProgressPanel<T extends ProgressRange & { today: string }>({
     }
   }
   return (
-    <AuthFrame>
-      <AuthText kind="eyebrow">ACTARO</AuthText>
-      <AuthText kind="title">Progress</AuthText>
+    <AuthFrame
+      header={
+        <ScreenHeader
+          title="Progress"
+          action={
+            <View style={{ flexDirection: 'row', gap: 2 }}>
+              {onLog && (
+                <IconButton
+                  label={
+                    title === 'Nutrition progress' ? 'Log or edit nutrition' : 'Open source records'
+                  }
+                  name={{ ios: 'square.and.pencil', android: 'edit_note', web: 'edit_note' }}
+                  onPress={onLog}
+                />
+              )}
+              <IconButton
+                label="Refresh progress"
+                name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }}
+                disabled={resource.loading}
+                onPress={refresh}
+              />
+              <IconButton
+                label="Change dates"
+                name={{ ios: 'calendar', android: 'calendar_month', web: 'calendar_month' }}
+                disabled={!resource.data || resource.loading}
+                onPress={() => setEditing((value) => !value)}
+              />
+            </View>
+          }
+        />
+      }
+    >
       {navigation}
       <AuthText kind="heading">{title}</AuthText>
       <ProgressPresets
@@ -86,26 +115,13 @@ export function ProgressPanel<T extends ProgressRange & { today: string }>({
         disabled={resource.loading}
         onChange={changePreset}
       />
-      <View style={authStyles.choices}>
-        {onLog && (
-          <AuthLink
-            title={title === 'Nutrition progress' ? 'Log or edit nutrition' : 'Open source records'}
-            onPress={onLog}
-          />
-        )}
-        <AuthLink title="Refresh progress" disabled={resource.loading} onPress={refresh} />
-        <AuthLink
-          title="Change dates"
-          disabled={!resource.data || resource.loading}
-          onPress={() => setEditing((value) => !value)}
-        />
-      </View>
       {editing && (
-        <>
-          <AuthInput label="Progress start (YYYY-MM-DD)" value={from} onChangeText={setFrom} />
-          <AuthInput label="Progress end (YYYY-MM-DD)" value={to} onChangeText={setTo} />
+        <ActionSheet title="Custom range" visible onClose={() => setEditing(false)}>
+          <DatePicker label="From" value={from} onChange={setFrom} max={resource.data?.today} />
+          <DatePicker label="To" value={to} onChange={setTo} max={resource.data?.today} />
           <AuthButton title="Apply dates" disabled={resource.loading} onPress={apply} />
-        </>
+          {inputError && <AuthNotice error>{inputError}</AuthNotice>}
+        </ActionSheet>
       )}
       {inputError && <AuthNotice error>{inputError}</AuthNotice>}
       <RecordLoadFeedback {...resource} retry={refresh} />
@@ -165,19 +181,18 @@ export function ProgressPresets({
   onChange: (preset: ProgressPreset) => void;
 }) {
   return (
-    <View style={authStyles.choices}>
-      {progressPresets.map((preset) => (
-        <AuthChoice
-          key={preset}
-          title={preset}
-          selected={selected === preset}
-          disabled={disabled}
-          onPress={() => onChange(preset)}
-        />
-      ))}
-    </View>
+    <Segments
+      options={progressPresets.map((preset) => ({ value: preset, label: preset }))}
+      value={selected ?? ''}
+      disabled={disabled}
+      onChange={(value) => {
+        const preset = progressPresets.find((item) => item === value);
+        if (preset) onChange(preset);
+      }}
+    />
   );
 }
+
 export function ProgressChart({
   title,
   points,
@@ -217,7 +232,7 @@ export function ProgressChart({
                   ? colors.border
                   : bin.from === latest
                     ? colors.accent
-                    : colors.border,
+                    : colors.muted,
               opacity: bin.value === null ? 0.35 : 1,
               borderRadius: 3,
             }}
@@ -245,10 +260,12 @@ export function ProgressMetrics({
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
       {metrics.map((metric) => (
-        <View key={metric.title} style={{ flexGrow: 1, flexBasis: 170 }}>
+        <View key={metric.title} style={{ flexGrow: 1, flexBasis: '45%' }}>
           <AuthCard>
             <AuthText kind="eyebrow">{metric.title}</AuthText>
-            <AuthText kind="heading">{metric.value}</AuthText>
+            <AuthText kind={metric.value.length < 15 ? 'metric' : 'heading'}>
+              {metric.value}
+            </AuthText>
             {metric.detail && <AuthText>{metric.detail}</AuthText>}
           </AuthCard>
         </View>

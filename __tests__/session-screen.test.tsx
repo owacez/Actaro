@@ -37,7 +37,7 @@ test('Log Only completes sets, controls independent rest and preserves frozen fa
   expect(screen.queryByRole('button', { name: 'Pause workout timer' })).toBeNull();
   await fireEvent.changeText(screen.getByLabelText('Reps · set 1'), '10');
   await fireEvent.press(screen.getByRole('button', { name: 'Complete set 1' }));
-  await screen.findByText('Rest: 1:30');
+  await screen.findByText('1:30');
   await fireEvent.press(screen.getByRole('button', { name: 'Pause rest' }));
   await screen.findByRole('button', { name: 'Resume rest' });
   await fireEvent.press(screen.getByRole('button', { name: '+15 sec' }));

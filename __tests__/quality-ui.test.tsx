@@ -24,8 +24,11 @@ test('shared primary text and metric labels have readable contrast and compact c
   const foreground = StyleSheet.flatten(screen.getByText('Continue').props.style).color;
   expect(foreground).toBe(actaroColors.text);
   expect(StyleSheet.flatten(screen.getByText('Daily calories').props.style).color).toBe(
-    actaroColors.text,
+    actaroColors.muted,
   );
+  expect(
+    (luminance(actaroColors.surface) + 0.05) / (luminance(actaroColors.muted) + 0.05),
+  ).toBeGreaterThanOrEqual(4.5);
   for (const background of [actaroColors.accent, actaroColors.surface, actaroColors.background])
     expect(
       (luminance(background) + 0.05) / (luminance(actaroColors.text) + 0.05),

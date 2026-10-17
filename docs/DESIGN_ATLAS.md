@@ -1,5 +1,10 @@
 # Current application screen atlas
 
+Historical capture: the user-approved [v1 redesign](Actaro-v1-redesign.pdf)
+supersedes this atlas as visual authority from 2026-10-17. These exports still
+document the earlier implementation; they have not been regenerated for the
+redesign. See [current implementation coverage](REDESIGN_IMPLEMENTATION.md).
+
 Status: **DONE** - offline PDF and reusable screen-image export, 2026-10-16.
 
 - [Open the screen atlas](../output/pdf/Actaro-Current-Screen-Atlas.pdf)

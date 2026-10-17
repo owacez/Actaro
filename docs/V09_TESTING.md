@@ -21,7 +21,7 @@ Do not repeatedly request emails to work around rate limits.
 
 ## New flows
 
-**More → Profile → Privacy & account data**:
+**You → Profile → Privacy & account data**:
 
 - Export downloads JSON on web or opens the native share sheet. Save it privately.
   It includes all 28 owned tables, selected account metadata and this device's active
@@ -34,7 +34,7 @@ Do not repeatedly request emails to work around rate limits.
   while another account remains unchanged. Export files/backups on other devices
   are not remotely erased. Supabase's own backup retention is outside the app.
 
-**More → Preferences → Manage habit reminders**:
+**You → Preferences → Manage habit reminders**:
 
 - Set reminder time and weekdays in the habit editor. Enable permission explicitly
   on the phone. The account opt-in and device permission are both required.

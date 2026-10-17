@@ -36,6 +36,7 @@ test('destructive confirmation is guarded; duplicate submission and failures can
       }),
   );
   await open();
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete account' }));
   const button = screen.getByRole('button', { name: 'Permanently delete my account' });
   expect(button).toBeDisabled();
   await fireEvent.changeText(screen.getByLabelText('Current password'), 'password');
@@ -53,6 +54,7 @@ test('confirmed server deletion stays final if local cleanup fails', async () =>
   jest.mocked(deleteOwnAccount).mockResolvedValue();
   jest.mocked(sessionStore.discard).mockRejectedValue(new Error('device storage unavailable'));
   await open();
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete account' }));
   await fireEvent.changeText(screen.getByLabelText('Current password'), 'password');
   await fireEvent.changeText(screen.getByLabelText('Type DELETE to confirm'), 'DELETE');
   await fireEvent.press(screen.getByRole('button', { name: 'Permanently delete my account' }));

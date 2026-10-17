@@ -1,11 +1,13 @@
 import { useCallback, useRef, useState } from 'react';
+import { WeightLineChart } from '@/components/weight-line-chart';
 import { View } from 'react-native';
+import { ScreenHeader, ActionSheet, IconButton } from '@/components/product-ui';
+import { DatePicker } from '@/components/date-picker';
 import { useFocusEffect } from 'expo-router';
 import {
   AuthButton,
   AuthCard,
   AuthFrame,
-  AuthInput,
   AuthLink,
   AuthNotice,
   AuthText,
@@ -73,16 +75,40 @@ export function WeightProgressScreen({
   }
   const factor = data ? unitFactor(data.preferences.weight_unit) : 1,
     unit = data?.preferences.weight_unit ?? 'kg',
-    summary = data?.summary,
-    latestBin = summary?.bins.filter((bin) => bin.value !== null).at(-1)?.from;
+    summary = data?.summary;
   const label = (value: number | null | undefined) =>
     value === null || value === undefined
       ? 'Not recorded'
       : `${formatNumber(value * factor)} ${unit}`;
   return (
-    <AuthFrame>
-      <AuthText kind="eyebrow">ACTARO</AuthText>
-      <AuthText kind="title">Progress</AuthText>
+    <AuthFrame
+      header={
+        <ScreenHeader
+          title="Progress"
+          action={
+            <View style={{ flexDirection: 'row', gap: 2 }}>
+              <IconButton
+                label="Log or edit bodyweight"
+                name={{ ios: 'square.and.pencil', android: 'edit_note', web: 'edit_note' }}
+                onPress={onLog}
+              />
+              <IconButton
+                label="Refresh weight progress"
+                name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }}
+                disabled={resource.loading}
+                onPress={refresh}
+              />
+              <IconButton
+                label={editingDates ? 'Hide weight dates' : 'Change weight dates'}
+                name={{ ios: 'calendar', android: 'calendar_month', web: 'calendar_month' }}
+                disabled={!today || resource.loading}
+                onPress={() => setEditingDates((value) => !value)}
+              />
+            </View>
+          }
+        />
+      }
+    >
       {navigation}
       <AuthText kind="heading">Weight progress</AuthText>
       <ProgressPresets
@@ -95,30 +121,21 @@ export function WeightProgressScreen({
           if (value === preset && !period) refresh();
         }}
       />
-      <View style={authStyles.choices}>
-        <AuthLink title="Log or edit bodyweight" onPress={onLog} />
-        <AuthLink title="Refresh weight progress" disabled={resource.loading} onPress={refresh} />
-        {today && (
-          <AuthLink
-            title={editingDates ? 'Hide weight dates' : 'Change weight dates'}
-            disabled={resource.loading}
-            onPress={() => setEditingDates((current) => !current)}
-          />
-        )}
-      </View>
       {today && editingDates && (
-        <>
-          <AuthInput
-            label="Weight progress start (YYYY-MM-DD)"
+        <ActionSheet title="Custom range" visible onClose={() => setEditingDates(false)}>
+          <DatePicker
+            label="From"
             value={from}
-            editable={!resource.loading}
-            onChangeText={setFrom}
+            onChange={setFrom}
+            max={today}
+            disabled={resource.loading}
           />
-          <AuthInput
-            label="Weight progress end (YYYY-MM-DD)"
+          <DatePicker
+            label="To"
             value={to}
-            editable={!resource.loading}
-            onChangeText={setTo}
+            onChange={setTo}
+            max={today}
+            disabled={resource.loading}
           />
           <AuthButton
             title="Apply weight dates"
@@ -126,7 +143,8 @@ export function WeightProgressScreen({
             disabled={resource.loading}
             onPress={apply}
           />
-        </>
+          {inputError && <AuthNotice error>{inputError}</AuthNotice>}
+        </ActionSheet>
       )}
       {inputError && <AuthNotice error>{inputError}</AuthNotice>}
       <RecordLoadFeedback {...resource} retry={refresh} />
@@ -158,46 +176,19 @@ export function WeightProgressScreen({
                 <AuthText>
                   Scale {label(summary.low)} — {label(summary.high)}
                 </AuthText>
-                <View
-                  accessible
-                  accessibilityRole="image"
-                  accessibilityLabel={`Weight trend from ${data.from} to ${data.to}. ${summary.count} recorded weigh-ins. Lowest ${label(summary.low)}, highest ${label(summary.high)}. Blank positions have no records. Exact dated weights appear below.`}
-                  style={{ height: 120, flexDirection: 'row', alignItems: 'flex-end', gap: 2 }}
-                >
-                  {summary.bins.map((bin) => (
-                    <View
-                      key={bin.from}
-                      style={{
-                        flex: 1,
-                        height:
-                          bin.value === null
-                            ? 2
-                            : summary.high === summary.low
-                              ? 72
-                              : 12 +
-                                ((bin.value - (summary.low ?? bin.value)) /
-                                  ((summary.high ?? bin.value) - (summary.low ?? bin.value))) *
-                                  92,
-                        backgroundColor:
-                          bin.value === null
-                            ? colors.border
-                            : bin.from === latestBin
-                              ? colors.accent
-                              : colors.border,
-                        borderRadius: 3,
-                        opacity: bin.value === null ? 0.35 : 1,
-                      }}
-                    />
-                  ))}
-                </View>
+                <WeightLineChart
+                  rows={summary.rows}
+                  from={data.from}
+                  to={data.to}
+                  description={`Weight trend from ${data.from} to ${data.to}. ${summary.count} recorded weigh-ins. Lowest ${label(summary.low)}, highest ${label(summary.high)}. Blank positions have no records. Lines join recorded weigh-ins only. Exact dated weights appear below.`}
+                />
                 <View style={authStyles.row}>
                   <AuthText kind="muted">{data.from}</AuthText>
                   <AuthText kind="muted">{data.to}</AuthText>
                 </View>
                 <AuthText>
-                  {summary.binDays === 1
-                    ? 'One bar per recorded calendar date. Blank dates remain gaps.'
-                    : `Bars average recorded weigh-ins within ${summary.binDays}-date intervals. Empty intervals remain gaps; missing dates are never filled.`}
+                  Recorded weigh-ins only. Lines join observations; missing dates are never
+                  estimated.
                 </AuthText>
               </AuthCard>
               <AuthCard>

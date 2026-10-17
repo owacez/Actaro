@@ -44,7 +44,9 @@ test('filters, previews real targets and schedule, and keeps a stable adoption i
     </FeedbackTestRoot>,
   );
   await screen.findByRole('button', { name: 'Preview Bodyweight' });
+  await fireEvent.press(screen.getByRole('button', { name: 'Plan filters' }));
   await fireEvent.press(screen.getByRole('button', { name: '3 days' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Dismiss Plan filters' }));
   await waitFor(() =>
     expect(mocks.list).toHaveBeenLastCalledWith('owner', expect.objectContaining({ days: 3 })),
   );
@@ -70,10 +72,14 @@ test('guards double adoption while pending and reports an empty equipment match'
     </FeedbackTestRoot>,
   );
   await screen.findByRole('button', { name: 'Preview Bodyweight' });
+  await fireEvent.press(screen.getByRole('button', { name: 'Plan filters' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Use only my available equipment' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Dismiss Plan filters' }));
   await screen.findByText(/No plans match/);
   mocks.list.mockResolvedValue([plan]);
+  await fireEvent.press(screen.getByRole('button', { name: 'Plan filters' }));
   await fireEvent.press(screen.getByRole('button', { name: 'All goals' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Dismiss Plan filters' }));
   await screen.findByRole('button', { name: 'Preview Bodyweight' });
   await fireEvent.press(screen.getByRole('button', { name: 'Preview Bodyweight' }));
   let finish: ((id: string) => void) | undefined;

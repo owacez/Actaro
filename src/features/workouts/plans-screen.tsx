@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 import { randomUUID } from 'expo-crypto';
 import {
@@ -13,6 +13,8 @@ import {
   authStyles,
 } from '@/features/auth/auth-components';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
+import { ScreenHeader, ActionSheet } from '@/components/product-ui';
+import { useAppTheme } from '@/features/profile/theme-context';
 import { weekdays } from './split-model';
 import { planService, type PlanFilters, type TrainingPlan } from './plan-service';
 const initialFilters: PlanFilters = {
@@ -23,13 +25,16 @@ const initialFilters: PlanFilters = {
 };
 export function PlansScreen({
   userId,
+  navigation,
   onBack,
   onAdopted,
 }: {
   userId: string;
+  navigation?: ReactNode;
   onBack: () => void;
   onAdopted: (id: string) => void;
 }) {
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [query, setQuery] = useState(initialFilters),
     [rows, setRows] = useState<TrainingPlan[]>([]);
   const [loading, setLoading] = useState(true),
@@ -89,18 +94,22 @@ export function PlansScreen({
     }
   }
   const plan = selection?.plan;
+  const { colors } = useAppTheme();
   return (
-    <AuthFrame>
-      <AuthLink
-        title={plan ? '← Training plans' : '← My workouts'}
-        disabled={busy}
-        onPress={() => {
-          if (selection) {
-            setSelection(null);
-            setError(null);
-          } else onBack();
-        }}
-      />
+    <AuthFrame header={navigation ? <ScreenHeader title="Train" /> : undefined}>
+      {navigation}
+      {(!navigation || plan) && (
+        <AuthLink
+          title={plan ? '← Training plans' : '← My workouts'}
+          disabled={busy}
+          onPress={() => {
+            if (selection) {
+              setSelection(null);
+              setError(null);
+            } else onBack();
+          }}
+        />
+      )}
       <AuthText kind="heading">{plan?.name ?? 'Training plans'}</AuthText>
       <AuthText>
         Actaro-authored starting templates. Review and edit the exercises, targets and schedule to
@@ -147,44 +156,51 @@ export function PlansScreen({
         </>
       ) : (
         <>
-          <AuthText kind="eyebrow">Goal</AuthText>
-          <View style={authStyles.choices}>
-            {([null, 'general', 'strength', 'hypertrophy'] as const).map((goal) => (
-              <AuthChoice
-                key={goal ?? 'all'}
-                title={goal ?? 'All goals'}
-                selected={query.goal === goal}
-                onPress={() => filter({ ...query, goal })}
-              />
-            ))}
-          </View>
-          <AuthText kind="eyebrow">Experience</AuthText>
-          <View style={authStyles.choices}>
-            {([null, 'beginner', 'intermediate'] as const).map((experience) => (
-              <AuthChoice
-                key={experience ?? 'all'}
-                title={experience ?? 'All experience levels'}
-                selected={query.experience === experience}
-                onPress={() => filter({ ...query, experience })}
-              />
-            ))}
-          </View>
-          <AuthText kind="eyebrow">Training days per week</AuthText>
-          <View style={authStyles.choices}>
-            {[null, 1, 2, 3, 4, 5, 6, 7].map((days) => (
-              <AuthChoice
-                key={days ?? 'all'}
-                title={days ? `${days} days` : 'Any days'}
-                selected={query.days === days}
-                onPress={() => filter({ ...query, days })}
-              />
-            ))}
-          </View>
-          <AuthChoice
-            title="Use only my available equipment"
-            selected={query.availableOnly}
-            onPress={() => filter({ ...query, availableOnly: !query.availableOnly })}
-          />
+          <AuthLink title="Plan filters" onPress={() => setFiltersOpen(true)} />
+          <ActionSheet
+            title="Plan filters"
+            visible={filtersOpen}
+            onClose={() => setFiltersOpen(false)}
+          >
+            <AuthText kind="eyebrow">Goal</AuthText>
+            <View style={authStyles.choices}>
+              {([null, 'general', 'strength', 'hypertrophy'] as const).map((goal) => (
+                <AuthChoice
+                  key={goal ?? 'all'}
+                  title={goal ?? 'All goals'}
+                  selected={query.goal === goal}
+                  onPress={() => filter({ ...query, goal })}
+                />
+              ))}
+            </View>
+            <AuthText kind="eyebrow">Experience</AuthText>
+            <View style={authStyles.choices}>
+              {([null, 'beginner', 'intermediate'] as const).map((experience) => (
+                <AuthChoice
+                  key={experience ?? 'all'}
+                  title={experience ?? 'All experience levels'}
+                  selected={query.experience === experience}
+                  onPress={() => filter({ ...query, experience })}
+                />
+              ))}
+            </View>
+            <AuthText kind="eyebrow">Training days per week</AuthText>
+            <View style={authStyles.choices}>
+              {[null, 1, 2, 3, 4, 5, 6, 7].map((days) => (
+                <AuthChoice
+                  key={days ?? 'all'}
+                  title={days ? `${days} days` : 'Any days'}
+                  selected={query.days === days}
+                  onPress={() => filter({ ...query, days })}
+                />
+              ))}
+            </View>
+            <AuthChoice
+              title="Use only my available equipment"
+              selected={query.availableOnly}
+              onPress={() => filter({ ...query, availableOnly: !query.availableOnly })}
+            />
+          </ActionSheet>
           {loading ? (
             <AuthLoading>Loading plans…</AuthLoading>
           ) : error ? (
@@ -199,7 +215,20 @@ export function PlansScreen({
               )}
               {rows.map((row) => (
                 <AuthCard key={row.id}>
-                  <AuthText kind="eyebrow">{row.name}</AuthText>
+                  <AuthText kind="heading">{row.name}</AuthText>
+                  <View style={{ flexDirection: 'row', gap: 4 }}>
+                    {row.schedule.map((workout, index) => (
+                      <View
+                        key={index}
+                        style={{
+                          flex: 1,
+                          height: 6,
+                          borderRadius: 4,
+                          backgroundColor: workout ? colors.accent : colors.fill,
+                        }}
+                      />
+                    ))}
+                  </View>
                   <AuthText>
                     {row.days_per_week} days/week · {row.experience} ·{' '}
                     {row.required_equipment.join(', ') || 'No equipment'}

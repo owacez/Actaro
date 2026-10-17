@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
+import { Meter, ScreenHeader } from '@/components/product-ui';
+import { useAppTheme } from '@/features/profile/theme-context';
 import { useFocusEffect } from 'expo-router';
 import { randomUUID } from 'expo-crypto';
 import {
@@ -34,6 +36,7 @@ export function GoalsScreen({
   onBack: () => void;
   onEdit: (id?: string) => void;
 }) {
+  const { colors } = useAppTheme();
   const [archived, setArchived] = useState(false),
     [remove, setRemove] = useState<string | null>(null);
   const load = useCallback(async () => {
@@ -50,9 +53,8 @@ export function GoalsScreen({
     }, [refresh]),
   );
   return (
-    <AuthFrame>
+    <AuthFrame header={<ScreenHeader title="Goals" />}>
       <AuthLink title="← More" disabled={action.locked} onPress={onBack} />
-      <AuthText kind="title">Goals</AuthText>
       <AuthButton title="Create goal" disabled={action.locked} onPress={() => onEdit()} />
       <View style={authStyles.choices}>
         <AuthChoice
@@ -98,6 +100,12 @@ export function GoalsScreen({
                     ? 'Not recorded'
                     : formatNumber(result.value * factor) + ' ' + unit}
                 </AuthText>
+                <AuthText kind="metric">
+                  {result.percentage === null ? '—' : formatNumber(result.percentage) + '%'}
+                </AuthText>
+                {result.percentage !== null && (
+                  <Meter value={result.percentage} target={100} color={colors.accent} />
+                )}
                 <AuthText>{result.detail}</AuthText>
                 <AuthText>
                   Baseline {formatNumber(goal.baseline * factor)} {unit} · {goal.start_date}
@@ -293,6 +301,7 @@ export function GoalEditor({
   goalId?: string;
   onBack: () => void;
 }) {
+  const [category, setCategory] = useState('Training');
   const [id] = useState(() => goalId ?? randomUUID()),
     [form, setForm] = useState<GoalForm>({
       name: '',
@@ -313,6 +322,7 @@ export function GoalEditor({
       if (g) {
         const metric = goalMetrics.find((item) => item.key === g.metric);
         if (!metric) throw new Error('Unsupported goal.');
+        setCategory(metric.category);
         const factor = unitFactor(goalUnit(g.metric, data.preferences));
         setForm({
           name: g.name,
@@ -363,7 +373,21 @@ export function GoalEditor({
             editable={!action.locked}
             onChangeText={(name) => setForm((current) => ({ ...current, name }))}
           />
-          {['Body', 'Training', 'Activity', 'Nutrition', 'Habits'].map((category) => (
+          <AuthText kind="eyebrow">CATEGORY</AuthText>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {['Body', 'Training', 'Activity', 'Nutrition', 'Habits'].map((value) => (
+                <AuthChoice
+                  key={value}
+                  title={value}
+                  selected={category === value}
+                  disabled={action.locked}
+                  onPress={() => setCategory(value)}
+                />
+              ))}
+            </View>
+          </ScrollView>
+          {[category].map((category) => (
             <View key={category}>
               <AuthText kind="heading">{category}</AuthText>
               <View style={authStyles.choices}>

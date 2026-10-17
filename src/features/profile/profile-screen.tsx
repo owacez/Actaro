@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Platform } from 'react-native';
+import { Platform, Text, View } from 'react-native';
+import { ScreenHeader } from '@/components/product-ui';
+import { useAppTheme } from './theme-context';
 import { router } from 'expo-router';
 
 import {
@@ -27,6 +29,7 @@ export function ProfileScreen({
   onBack: () => void;
 }) {
   const editor = useProfileEditor(userId);
+  const { colors } = useAppTheme();
   const [securityBusy, setSecurityBusy] = useState(false);
   const { clear, notify } = useAuthFeedback();
   useEffect(() => {
@@ -40,9 +43,8 @@ export function ProfileScreen({
   }
 
   return (
-    <AuthFrame>
+    <AuthFrame header={<ScreenHeader title="Profile" />}>
       <AuthLink title="← More" disabled={editor.saving || securityBusy} onPress={onBack} />
-      <AuthText kind="heading">Profile</AuthText>
       {editor.loading ? (
         <AuthLoading>Loading your profile…</AuthLoading>
       ) : editor.loadError ? (
@@ -52,6 +54,23 @@ export function ProfileScreen({
         </>
       ) : (
         <>
+          <View
+            style={{
+              alignSelf: 'center',
+              width: 88,
+              height: 88,
+              borderRadius: 44,
+              backgroundColor: colors.text,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text
+              style={{ color: colors.background, fontSize: 34, fontFamily: 'Inter_600SemiBold' }}
+            >
+              {(editor.name.trim() || email || '?').charAt(0).toUpperCase()}
+            </Text>
+          </View>
           <AuthInput
             label="Display name"
             value={editor.name}

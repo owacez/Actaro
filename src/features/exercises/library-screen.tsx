@@ -1,4 +1,5 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { ActionSheet, IconButton, ScreenHeader } from '@/components/product-ui';
 import { useFocusEffect } from 'expo-router';
 import { FlatList, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -30,6 +31,7 @@ const initialFilters: SearchFilters = {
 };
 export function LibraryScreen({
   userId,
+  navigation,
   onOpen,
   onEquipment,
   onWorkouts,
@@ -37,6 +39,7 @@ export function LibraryScreen({
   onLogExercise,
 }: {
   userId: string;
+  navigation?: ReactNode;
   onOpen: (id: string, exercise: ExerciseSummary) => void;
   onEquipment: () => void;
   onWorkouts?: () => void;
@@ -53,6 +56,7 @@ export function LibraryScreen({
   const [rows, setRows] = useState<ExerciseSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedExercise, setSelectedExercise] = useState<ExerciseSummary | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const generation = useRef(0);
   useFocusEffect(
@@ -94,6 +98,7 @@ export function LibraryScreen({
       style={{ flex: 1, backgroundColor: colors.background }}
       edges={['top', 'left', 'right']}
     >
+      {navigation && <ScreenHeader title="Train" />}
       <FlatList
         data={rows}
         keyExtractor={(item) => item.id}
@@ -101,10 +106,10 @@ export function LibraryScreen({
         contentContainerStyle={styles.content}
         ListHeaderComponent={
           <View style={styles.header}>
-            <AuthText kind="eyebrow">FITNESS</AuthText>
-            <AuthText kind="heading">Exercise Library</AuthText>
-            <AuthText>Find exercises for your training.</AuthText>
-            {onWorkouts && <AuthLink title="My workouts" onPress={onWorkouts} />}
+            {navigation}
+            {!navigation && <AuthText kind="heading">Exercise Library</AuthText>}
+
+            {!navigation && onWorkouts && <AuthLink title="My workouts" onPress={onWorkouts} />}
             <AuthInput
               label="Search exercises"
               value={query}
@@ -208,21 +213,18 @@ export function LibraryScreen({
                   {item.muscles.join(', ')} · {item.equipment.join(', ') || 'No equipment'}
                 </AuthText>
               </View>
+              {(onAddToWorkout || onLogExercise) && (
+                <IconButton
+                  label={`Actions for ${item.name}`}
+                  name={{
+                    ios: 'plus.circle',
+                    android: 'add_circle_outline',
+                    web: 'add_circle_outline',
+                  }}
+                  onPress={() => setSelectedExercise(item)}
+                />
+              )}
             </Pressable>
-            {onAddToWorkout && (
-              <AuthLink
-                title="Add to workout"
-                accessibilityLabel={`Add ${item.name} to workout`}
-                onPress={() => onAddToWorkout(item.id)}
-              />
-            )}
-            {onLogExercise && (
-              <AuthLink
-                title="Log exercise"
-                accessibilityLabel={`Log ${item.name} directly`}
-                onPress={() => onLogExercise(item.id)}
-              />
-            )}
           </View>
         )}
         ListEmptyComponent={
@@ -264,6 +266,37 @@ export function LibraryScreen({
           </View>
         }
       />
+      <ActionSheet
+        title={selectedExercise?.name ?? 'Exercise actions'}
+        visible={!!selectedExercise}
+        onClose={() => setSelectedExercise(null)}
+      >
+        {onAddToWorkout && (
+          <AuthButton
+            title="Add to workout"
+            onPress={() => {
+              if (selectedExercise) {
+                const id = selectedExercise.id;
+                setSelectedExercise(null);
+                onAddToWorkout(id);
+              }
+            }}
+          />
+        )}
+        {onLogExercise && (
+          <AuthButton
+            title="Log exercise"
+            outlined
+            onPress={() => {
+              if (selectedExercise) {
+                const id = selectedExercise.id;
+                setSelectedExercise(null);
+                onLogExercise(id);
+              }
+            }}
+          />
+        )}
+      </ActionSheet>
     </SafeAreaView>
   );
 }
@@ -273,7 +306,7 @@ const styles = StyleSheet.create({
     maxWidth: actaroLayout.contentWidth,
     alignSelf: 'center',
     padding: 20,
-    paddingBottom: 30,
+    paddingBottom: 120,
     gap: 12,
   },
   header: { gap: 12 },

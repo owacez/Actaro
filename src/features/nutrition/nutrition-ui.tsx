@@ -4,16 +4,17 @@ import {
   AuthButton,
   AuthCard,
   AuthChoice,
-  AuthInput,
-  AuthLink,
   AuthLoading,
   AuthNotice,
   AuthText,
   authStyles,
 } from '@/features/auth/auth-components';
+import { useAppTheme } from '@/features/profile/theme-context';
+import { NumberStepper } from '@/components/number-stepper';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
 import {
   foodUnits,
+  energy,
   formatNumber,
   numeric,
   nutritionLabel,
@@ -164,13 +165,44 @@ export function NutrientSummary({
   unit?: 'kcal' | 'kJ';
   title?: string;
 }) {
+  const { colors } = useAppTheme();
   return (
-    <AuthCard>
-      {title && <AuthText kind="eyebrow">{title}</AuthText>}
-      <AuthText kind="heading">{nutritionLabel(values, unit)}</AuthText>
-    </AuthCard>
+    <View accessible accessibilityLabel={nutritionLabel(values, unit)}>
+      <AuthCard>
+        {title && <AuthText kind="eyebrow">{title}</AuthText>}
+        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+          {(['calories', 'protein', 'carbs', 'fat'] as const).map((key) => (
+            <View key={key} style={{ flex: 1, minWidth: 60, gap: 4 }}>
+              <AuthText kind="heading">
+                {formatNumber(key === 'calories' ? energy(values[key], unit) : values[key])}
+              </AuthText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <View
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: 4,
+                    backgroundColor: key === 'calories' ? colors.text : colors[key],
+                  }}
+                />
+                <AuthText kind="muted">
+                  {key === 'calories'
+                    ? unit
+                    : key === 'protein'
+                      ? 'Protein'
+                      : key === 'carbs'
+                        ? 'Carbs'
+                        : 'Fat'}
+                </AuthText>
+              </View>
+            </View>
+          ))}
+        </View>
+      </AuthCard>
+    </View>
   );
 }
+
 export function PortionEditor({
   food,
   unit,
@@ -214,27 +246,15 @@ export function PortionEditor({
           />
         ))}
       </View>
-      <View style={authStyles.row}>
-        <AuthLink
-          title="−"
-          accessibilityLabel="Decrease quantity"
-          disabled={disabled}
-          onPress={() => onQuantity(String(Math.max(0.1, (Number(quantity) || 1) - 1)))}
-        />
-        <AuthInput
-          label="Quantity"
-          value={quantity}
-          onChangeText={onQuantity}
-          keyboardType="decimal-pad"
-          editable={!disabled}
-        />
-        <AuthLink
-          title="+"
-          accessibilityLabel="Increase quantity"
-          disabled={disabled}
-          onPress={() => onQuantity(String(Math.min(100000, (Number(quantity) || 0) + 1)))}
-        />
-      </View>
+      <NumberStepper
+        label="Quantity"
+        large
+        value={quantity}
+        onChange={onQuantity}
+        disabled={disabled}
+        min={0.1}
+        max={100000}
+      />
       {values ? (
         <NutrientSummary title="Live portion nutrition" values={values} unit={energyUnit} />
       ) : (

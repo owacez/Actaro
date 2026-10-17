@@ -60,7 +60,9 @@ test('portion changes update live totals; failed save locks inputs and retries t
   );
   await screen.findByLabelText('Quantity');
   await fireEvent.changeText(screen.getByLabelText('Quantity'), '180');
-  expect(screen.getAllByText('297 kcal · P 55.8 g · C 0 g · F 6.5 g').length).toBeGreaterThan(0);
+  expect(screen.getAllByLabelText('297 kcal · P 55.8 g · C 0 g · F 6.5 g').length).toBeGreaterThan(
+    0,
+  );
   await fireEvent.press(screen.getByRole('button', { name: 'Log to Lunch' }));
   await screen.findByRole('button', { name: 'Retry saved request' });
   expect(screen.getByLabelText('Quantity').props.editable).toBe(false);
@@ -114,8 +116,8 @@ test('recipe editor sums selected ingredients, cooked weight and fractional serv
   await fireEvent.press(screen.getByRole('button', { name: 'Use ingredient portion' }));
   await fireEvent.changeText(screen.getByLabelText('Recipe servings'), '2.5');
   await fireEvent.changeText(screen.getByLabelText('Total cooked weight (g, optional)'), '600');
-  expect(screen.getByText('198 kcal · P 37.2 g · C 0 g · F 4.3 g')).toBeTruthy();
-  expect(screen.getByText('82.5 kcal · P 15.5 g · C 0 g · F 1.8 g')).toBeTruthy();
+  expect(screen.getByLabelText('198 kcal · P 37.2 g · C 0 g · F 4.3 g')).toBeTruthy();
+  expect(screen.getByLabelText('82.5 kcal · P 15.5 g · C 0 g · F 1.8 g')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Save recipe' }));
   await waitFor(() => expect(saved).toHaveBeenCalled());
   expect(service.recipe).toHaveBeenCalledWith(
@@ -169,9 +171,10 @@ test('diary shows all four empty groups and hydration validates before logging',
       <DiaryScreen userId={nutritionOwner} onOpen={jest.fn()} />
     </FeedbackTestRoot>,
   );
-  await screen.findByText('No daily targets set. Food logging works without targets.');
+  await screen.findByText(/No target set/);
   for (const meal of ['Breakfast', 'Lunch', 'Dinner', 'Snacks'])
     expect(screen.getByRole('button', { name: 'Add to ' + meal })).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Hydration' }));
   await fireEvent.changeText(screen.getByLabelText('Water quantity'), '0');
   await fireEvent.press(screen.getByRole('button', { name: 'Log water' }));
   expect(service.water).not.toHaveBeenCalled();
@@ -187,4 +190,28 @@ test('diary shows all four empty groups and hydration validates before logging',
       500,
     ),
   );
+});
+
+test('food options keep a failed copy visible and retry the same request before closing', async () => {
+  service.copy.mockRejectedValueOnce(new Error('offline')).mockResolvedValue(1);
+  await render(
+    <FeedbackTestRoot>
+      <DiaryScreen userId={nutritionOwner} onOpen={jest.fn()} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByRole('button', { name: 'Food options' });
+  await waitFor(() =>
+    expect(
+      screen.getByRole('button', { name: 'Food options' }).props.accessibilityState.disabled,
+    ).toBe(false),
+  );
+  await fireEvent.press(screen.getByRole('button', { name: 'Food options' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Copy yesterday' }));
+  await screen.findByRole('button', { name: 'Retry saved request' });
+  await fireEvent.press(screen.getByRole('button', { name: 'Dismiss Food options' }));
+  expect(screen.getByRole('button', { name: 'Retry saved request' })).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Retry saved request' }));
+  await waitFor(() => expect(screen.queryByRole('button', { name: 'Copy yesterday' })).toBeNull());
+  expect(service.copy).toHaveBeenCalledTimes(2);
+  expect(service.copy.mock.calls[1]).toEqual(service.copy.mock.calls[0]);
 });

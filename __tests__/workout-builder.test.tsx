@@ -236,10 +236,10 @@ test('workout chooser opens the selected template and keeps deletion out of the 
       />
     </FeedbackTestRoot>,
   );
-  await screen.findByText('Upper A · 1 exercises');
+  await screen.findByText('Upper A');
   expect(screen.getByRole('header', { name: 'Add to workout' })).toBeTruthy();
   expect(screen.queryByRole('button', { name: 'Delete Upper A' })).toBeNull();
-  await fireEvent.press(screen.getByRole('button', { name: 'Upper A · 1 exercises' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Upper A' }));
   expect(choose).toHaveBeenCalledWith(workoutId, 'Upper A');
   await fireEvent.press(screen.getByRole('button', { name: 'Create workout' }));
   expect(create).toHaveBeenCalledTimes(1);
@@ -348,7 +348,7 @@ test('workout list handles request failure and empty retry', async () => {
   );
   await screen.findByText(/Unable to load workouts/);
   await fireEvent.press(screen.getByRole('button', { name: 'Retry' }));
-  await screen.findByText('No saved workouts yet. Create your first workout.');
+  await screen.findByText('Build your first workout');
   expect(mocks.list).toHaveBeenCalledTimes(2);
 });
 test('delete requires confirmation, keeps failed rows and blocks duplicate pending requests', async () => {
@@ -370,7 +370,7 @@ test('delete requires confirmation, keeps failed rows and blocks duplicate pendi
       <WorkoutsScreen userId={userId} onBack={back} onCreate={create} onEdit={edit} />
     </FeedbackTestRoot>,
   );
-  await screen.findByText('Upper A · 1 exercises');
+  await screen.findByText('Upper A');
   await fireEvent.press(screen.getByRole('button', { name: 'Delete Upper A' }));
   expect(mocks.remove).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Keep workout' }));
@@ -378,7 +378,7 @@ test('delete requires confirmation, keeps failed rows and blocks duplicate pendi
   await fireEvent.press(screen.getByRole('button', { name: 'Delete Upper A' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Delete workout' }));
   await screen.findByText('Unable to delete workout. Check your connection and retry.');
-  expect(screen.getByText('Upper A · 1 exercises')).toBeTruthy();
+  expect(screen.getByText('Upper A')).toBeTruthy();
   let finish: (() => void) | undefined;
   mocks.remove.mockImplementationOnce(
     () =>
@@ -391,7 +391,7 @@ test('delete requires confirmation, keeps failed rows and blocks duplicate pendi
   await fireEvent.press(screen.getByRole('button', { name: 'Delete workout' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Keep workout' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Create workout' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'Upper A · 1 exercises' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Upper A' }));
   await fireEvent.press(screen.getByRole('button', { name: '← Exercise Library' }));
   expect(mocks.remove).toHaveBeenCalledTimes(2);
   expect(mocks.remove).toHaveBeenLastCalledWith(userId, workoutId);
@@ -401,8 +401,8 @@ test('delete requires confirmation, keeps failed rows and blocks duplicate pendi
   await act(async () => {
     finish?.();
   });
-  await screen.findByText('No saved workouts yet. Create your first workout.');
-  expect(screen.queryByText('Upper A · 1 exercises')).toBeNull();
+  await screen.findByText('Build your first workout');
+  expect(screen.queryByText('Upper A')).toBeNull();
 });
 test('deleting the last workout on a later page reloads the previous page', async () => {
   const row = {
@@ -426,7 +426,7 @@ test('deleting the last workout on a later page reloads the previous page', asyn
   await screen.findByText('Page 2');
   await fireEvent.press(screen.getByRole('button', { name: 'Delete Upper A' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Delete workout' }));
-  await screen.findByText('No saved workouts yet. Create your first workout.');
+  await screen.findByText('Build your first workout');
   expect(mocks.list.mock.calls.map(([, offset]) => offset)).toEqual([0, 10, 0]);
 });
 test('orders exercises and adds/removes sets and exercises before saving', async () => {

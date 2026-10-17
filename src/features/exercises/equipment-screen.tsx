@@ -100,6 +100,11 @@ export function EquipmentScreen({ userId, onBack }: { userId: string; onBack: ()
           <View style={authStyles.choices}>
             {catalog
               .filter((item) => item.name.toLowerCase().includes(query.toLowerCase().trim()))
+              .sort(
+                (a, b) =>
+                  Number(selected.includes(b.id)) - Number(selected.includes(a.id)) ||
+                  a.name.localeCompare(b.name),
+              )
               .map((item) => (
                 <AuthChoice
                   key={item.id}

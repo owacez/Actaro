@@ -4,15 +4,14 @@ import { router } from 'expo-router';
 
 import {
   AuthButton,
-  AuthChoice,
   AuthFrame,
   AuthInput,
   AuthLink,
   AuthNotice,
   AuthText,
   AuthLoading,
-  authStyles,
 } from '@/features/auth/auth-components';
+import { ScreenHeader, Segments } from '@/components/product-ui';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
 
 import {
@@ -109,10 +108,10 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
     }
   }
 
+  const theme = draft.theme ?? saved?.theme;
   return (
-    <AuthFrame>
+    <AuthFrame header={<ScreenHeader title="Preferences" />}>
       <AuthLink title="← More" disabled={saving} onPress={onBack} />
-      <AuthText kind="heading">Preferences</AuthText>
       {loading ? (
         <AuthLoading>Loading preferences…</AuthLoading>
       ) : !saved ? (
@@ -129,17 +128,17 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
         </>
       ) : (
         <>
+          <AuthText kind="eyebrow">UNITS</AuthText>
           {unitChoices.map(({ field, label, values }) => (
-            <View key={field} style={authStyles.choices}>
-              {values.map((unit) => (
-                <AuthChoice
-                  key={unit}
-                  title={`${label}: ${unit}`}
-                  selected={(draft[field] ?? saved[field]) === unit}
-                  disabled={saving}
-                  onPress={() => edit({ [field]: unit })}
-                />
-              ))}
+            <View key={field} style={{ gap: 8 }}>
+              <AuthText kind="heading">{label}</AuthText>
+              <Segments
+                label={label}
+                value={draft[field] ?? saved[field]}
+                options={values.map((unit) => ({ value: unit, label: unit }))}
+                disabled={saving}
+                onChange={(unit) => edit({ [field]: unit })}
+              />
             </View>
           ))}
           <AuthInput
@@ -197,17 +196,17 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
             onPress={() => router.push('/reminders')}
           />
           <AuthText kind="heading">Appearance</AuthText>
-          <View style={authStyles.choices}>
-            {(['system', 'light', 'dark'] as const).map((theme) => (
-              <AuthChoice
-                key={theme}
-                title={`Theme: ${theme[0].toUpperCase()}${theme.slice(1)}`}
-                selected={(draft.theme ?? saved.theme) === theme}
-                disabled={saving}
-                onPress={() => edit({ theme })}
-              />
-            ))}
-          </View>
+          <Segments<'system' | 'light' | 'dark'>
+            label="Theme"
+            value={theme === 'light' ? 'light' : theme === 'dark' ? 'dark' : 'system'}
+            options={[
+              { value: 'system', label: 'System' },
+              { value: 'light', label: 'Light' },
+              { value: 'dark', label: 'Dark' },
+            ]}
+            disabled={saving}
+            onChange={(theme) => edit({ theme })}
+          />
           <AuthText>Save to apply your appearance. System follows your device setting.</AuthText>
           {error && (
             <AuthNotice error announce={Platform.OS !== 'web'}>

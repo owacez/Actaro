@@ -2,6 +2,9 @@ import { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { randomUUID } from 'expo-crypto';
 import { View } from 'react-native';
+import { ActionSheet, ActionRow, IconButton, ScreenHeader, Meter } from '@/components/product-ui';
+import { WeekStrip } from '@/components/date-picker';
+import { useAppTheme } from '@/features/profile/theme-context';
 import {
   AuthButton,
   AuthCard,
@@ -9,7 +12,6 @@ import {
   AuthFrame,
   AuthInput,
   AuthLink,
-  AuthNotice,
   AuthText,
   authStyles,
 } from '@/features/auth/auth-components';
@@ -26,13 +28,7 @@ import {
   type Meal,
 } from './nutrition-model';
 import { nutritionService } from './nutrition-service';
-import {
-  LoadFeedback,
-  NutrientSummary,
-  SaveFeedback,
-  useNutritionAction,
-  useNutritionLoad,
-} from './nutrition-ui';
+import { LoadFeedback, SaveFeedback, useNutritionAction, useNutritionLoad } from './nutrition-ui';
 export type NutritionView =
   'search' | 'recipes' | 'portion' | 'targets' | 'custom' | 'recipe' | 'saved';
 export type OpenNutrition = (
@@ -42,8 +38,11 @@ export type OpenNutrition = (
   foodId?: string,
 ) => void;
 export function DiaryScreen({ userId, onOpen }: { userId: string; onOpen: OpenNutrition }) {
+  const [optionsOpen, setOptionsOpen] = useState(false),
+    [waterOpen, setWaterOpen] = useState(false);
   const [date, setDate] = useState(''),
-    [dateInput, setDateInput] = useState(''),
+    [mealMenu, setMealMenu] = useState<Meal | null>(null),
+    [foodMenu, setFoodMenu] = useState<FoodLog | null>(null),
     [edit, setEdit] = useState<FoodLog | null>(null),
     [quantity, setQuantity] = useState(''),
     [water, setWater] = useState('250'),
@@ -70,11 +69,15 @@ export function DiaryScreen({ userId, onOpen }: { userId: string; onOpen: OpenNu
       refresh();
     }, [refresh]),
   );
+  const { colors } = useAppTheme();
   const data = resource.data,
     unit = data?.preferences.energy_unit ?? 'kcal',
     total = totalNutrition(data?.logs ?? []);
   function open(view: NutritionView, meal: Meal = 'Lunch') {
-    if (data && !action.locked) onOpen(view, data.date, meal);
+    if (data && !action.locked) {
+      setOptionsOpen(false);
+      onOpen(view, data.date, meal);
+    }
   }
   function validate(work: () => void) {
     try {
@@ -91,148 +94,140 @@ export function DiaryScreen({ userId, onOpen }: { userId: string; onOpen: OpenNu
       'Food entries copied',
       () => {
         setCopyOpen(false);
+        setMealMenu(null);
+        setOptionsOpen(false);
         resource.refresh();
       },
     );
   }
   return (
-    <AuthFrame>
-      <AuthText kind="eyebrow">ACTARO</AuthText>
-      <AuthText kind="title">Nutrition</AuthText>
+    <AuthFrame
+      header={
+        <ScreenHeader
+          title="Food"
+          subtitle={data?.date}
+          action={
+            <IconButton
+              label="Food options"
+              name={{ ios: 'ellipsis', android: 'more_horiz', web: 'more_horiz' }}
+              disabled={!data || action.locked}
+              onPress={() => setOptionsOpen(true)}
+            />
+          }
+        />
+      }
+    >
       <LoadFeedback {...resource} retry={resource.refresh} />
       {data && !resource.loading && (
         <>
-          <View style={authStyles.row}>
-            <AuthText kind="heading">{data.date}</AuthText>
-            <AuthLink
-              title="Today"
-              disabled={action.locked}
-              onPress={() => {
-                setDate('');
-                setDateInput('');
-                resource.refresh();
-              }}
-            />
-          </View>
-          <AuthInput
-            label="Diary date (YYYY-MM-DD)"
-            value={dateInput || data.date}
-            onChangeText={setDateInput}
-            editable={!action.locked}
-          />
-          <AuthButton
-            title="Open date"
-            outlined
+          <WeekStrip
+            value={data.date}
             disabled={action.locked}
-            onPress={() =>
-              validate(() => {
-                setDate(nutritionDate(dateInput || data.date));
-                setEdit(null);
-                setRemove(null);
-              })
-            }
+            onChange={(value) => {
+              setDate(value);
+              setEdit(null);
+              setRemove(null);
+            }}
           />
-          <NutrientSummary title="Consumed" values={total} unit={unit} />
-          {data.targets ? (
-            <AuthCard>
-              {(['calories', 'protein', 'carbs', 'fat'] as const).map((key) => {
-                const remaining = data.targets![key] - total[key];
-                return (
-                  <AuthText key={key}>
-                    {key === 'calories' ? 'Energy' : key[0].toUpperCase() + key.slice(1)}:{' '}
-                    {formatNumber(
-                      key === 'calories' ? energy(data.targets![key], unit) : data.targets![key],
-                    )}{' '}
-                    {key === 'calories' ? unit : 'g'} target ·{' '}
-                    {formatNumber(
-                      Math.abs(key === 'calories' ? energy(remaining, unit) : remaining),
-                    )}{' '}
-                    {key === 'calories' ? unit : 'g'} {remaining < 0 ? 'over' : 'remaining'}
+          <AuthCard>
+            <AuthText kind="eyebrow">
+              {data.targets && total.calories > data.targets.calories ? 'OVER TARGET' : 'REMAINING'}
+            </AuthText>
+            <AuthText kind="metric">
+              {data.targets
+                ? formatNumber(Math.abs(energy(data.targets.calories - total.calories, unit)))
+                : '—'}{' '}
+              {unit}
+            </AuthText>
+            <AuthText>
+              {formatNumber(energy(total.calories, unit))} eaten
+              {data.targets
+                ? ' / ' + formatNumber(energy(data.targets.calories, unit)) + ' target'
+                : ' · No target set'}
+            </AuthText>
+            <Meter
+              value={total.calories}
+              target={data.targets?.calories ?? 0}
+              color={colors.accent}
+            />
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              {(['protein', 'carbs', 'fat'] as const).map((key) => (
+                <View key={key} style={{ flex: 1, gap: 5 }}>
+                  <AuthText kind="muted">{key[0].toUpperCase() + key.slice(1)}</AuthText>
+                  <AuthText>
+                    {formatNumber(total[key])}
+                    {data.targets ? ' / ' + formatNumber(data.targets[key]) : ''} g
                   </AuthText>
-                );
-              })}
-            </AuthCard>
-          ) : (
-            <AuthNotice>No daily targets set. Food logging works without targets.</AuthNotice>
-          )}
-          <View style={authStyles.choices}>
-            <AuthLink
-              title="Daily targets"
-              disabled={action.locked}
-              onPress={() => open('targets')}
-            />
-            <AuthLink
-              title="Custom foods"
-              disabled={action.locked}
-              onPress={() => open('custom')}
-            />
-            <AuthLink title="Recipes" disabled={action.locked} onPress={() => open('recipes')} />
-            <AuthLink title="Saved meals" disabled={action.locked} onPress={() => open('saved')} />
-          </View>
-          {meals.map((meal) => {
-            const items = data.logs.filter((log) => log.meal === meal);
-            return (
-              <AuthCard key={meal}>
-                <View style={authStyles.row}>
-                  <AuthText kind="heading">{meal}</AuthText>
-                  <AuthLink
-                    title={`Add to ${meal}`}
-                    disabled={action.locked}
-                    onPress={() => open('search', meal)}
-                  />
+                  <Meter value={total[key]} target={data.targets?.[key] ?? 0} color={colors[key]} />
                 </View>
-                <AuthText>{nutritionLabel(totalNutrition(items), unit)}</AuthText>
-                {!items.length && <AuthText>No foods logged.</AuthText>}
-                {items.map((log) => (
-                  <View key={log.id}>
-                    <AuthText kind="heading">{log.food_name}</AuthText>
-                    <AuthText>
-                      {formatNumber(log.quantity)} × {log.portion_label} ·{' '}
-                      {nutritionLabel(log, unit)}
-                    </AuthText>
-                    <View style={authStyles.choices}>
-                      <AuthLink
-                        title={`Edit ${log.food_name}`}
+              ))}
+            </View>
+          </AuthCard>
+          <AuthCard>
+            {meals.map((meal) => {
+              const items = data.logs.filter((log) => log.meal === meal);
+              return (
+                <View
+                  key={meal}
+                  style={{
+                    gap: 6,
+                    paddingBottom: 12,
+                    borderBottomWidth: 1,
+                    borderColor: colors.border,
+                  }}
+                >
+                  <View style={authStyles.row}>
+                    <AuthText kind="heading">{meal}</AuthText>
+                    <View style={{ flexDirection: 'row' }}>
+                      {items.length > 0 && (
+                        <IconButton
+                          label={`${meal} actions`}
+                          name={{ ios: 'ellipsis', android: 'more_horiz', web: 'more_horiz' }}
+                          disabled={action.locked}
+                          onPress={() => setMealMenu(meal)}
+                        />
+                      )}
+                      <IconButton
+                        name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }}
+                        label={`Add to ${meal}`}
                         disabled={action.locked}
-                        onPress={() => {
-                          setEdit(log);
-                          setQuantity(String(log.quantity));
-                          setRemove(null);
-                        }}
-                      />
-                      <AuthLink
-                        title={`Delete ${log.food_name}`}
-                        disabled={action.locked}
-                        onPress={() => {
-                          setRemove({ table: 'food_logs', id: log.id });
-                          setEdit(null);
-                        }}
+                        onPress={() => open('search', meal)}
                       />
                     </View>
                   </View>
-                ))}
-                {items.length > 0 && (
-                  <View style={authStyles.choices}>
-                    <AuthLink
-                      title={`Save ${meal} as meal`}
+                  {items.length > 0 && (
+                    <>
+                      <AuthText>{nutritionLabel(totalNutrition(items), unit)}</AuthText>
+                    </>
+                  )}
+                  {!items.length && <AuthText>No foods logged.</AuthText>}
+                  {items.map((log) => (
+                    <ActionRow
+                      key={log.id}
+                      title={log.food_name}
+                      detail={
+                        formatNumber(log.quantity) +
+                        ' × ' +
+                        log.portion_label +
+                        ' · ' +
+                        nutritionLabel(log, unit)
+                      }
                       disabled={action.locked}
-                      onPress={() => {
-                        setSavingMeal(meal);
-                        setMealName('');
-                      }}
+                      onPress={() => setFoodMenu(log)}
                     />
-                    <AuthLink
-                      title={`Repeat ${meal}`}
-                      disabled={action.locked}
-                      onPress={() => copy({ date: data.date, meal, destMeal: meal })}
-                    />
-                  </View>
-                )}
-              </AuthCard>
-            );
-          })}
+                  ))}
+                </View>
+              );
+            })}
+          </AuthCard>
           {edit && (
-            <AuthCard>
+            <ActionSheet
+              title="Edit food entry"
+              visible
+              onClose={() => {
+                if (!action.locked) setEdit(null);
+              }}
+            >
               <AuthText kind="heading">Edit {edit.food_name}</AuthText>
               <AuthText>
                 Original nutrition and portion retained: {edit.portion_label}. To choose another
@@ -271,10 +266,17 @@ export function DiaryScreen({ userId, onOpen }: { userId: string; onOpen: OpenNu
                 disabled={action.locked}
                 onPress={() => setEdit(null)}
               />
-            </AuthCard>
+              <SaveFeedback action={action} />
+            </ActionSheet>
           )}
           {remove && (
-            <AuthCard>
+            <ActionSheet
+              title="Delete entry"
+              visible
+              onClose={() => {
+                if (!action.locked) setRemove(null);
+              }}
+            >
               <AuthText>
                 Delete this {remove.table === 'food_logs' ? 'food' : 'water'} entry?
               </AuthText>
@@ -299,10 +301,17 @@ export function DiaryScreen({ userId, onOpen }: { userId: string; onOpen: OpenNu
                 disabled={action.locked}
                 onPress={() => setRemove(null)}
               />
-            </AuthCard>
+              <SaveFeedback action={action} />
+            </ActionSheet>
           )}
           {savingMeal && (
-            <AuthCard>
+            <ActionSheet
+              title="Save meal"
+              visible
+              onClose={() => {
+                if (!action.locked) setSavingMeal(null);
+              }}
+            >
               <AuthText kind="heading">Save {savingMeal}</AuthText>
               <AuthInput
                 label="Saved meal name"
@@ -334,24 +343,17 @@ export function DiaryScreen({ userId, onOpen }: { userId: string; onOpen: OpenNu
                 disabled={action.locked}
                 onPress={() => setSavingMeal(null)}
               />
-            </AuthCard>
+              <SaveFeedback action={action} />
+            </ActionSheet>
           )}
-          <AuthButton
-            title="Copy yesterday"
-            outlined
-            disabled={action.locked}
-            onPress={() => copy({ date: previousDate(data.date) })}
-          />
-          <AuthLink
-            title="Copy another meal or day"
-            disabled={action.locked}
-            onPress={() => {
-              setCopyOpen(!copyOpen);
-              setCopyDate(previousDate(data.date));
-            }}
-          />
           {copyOpen && (
-            <AuthCard>
+            <ActionSheet
+              title="Copy food entries"
+              visible
+              onClose={() => {
+                if (!action.locked) setCopyOpen(false);
+              }}
+            >
               <AuthInput
                 label="Copy from date (YYYY-MM-DD)"
                 value={copyDate}
@@ -404,9 +406,27 @@ export function DiaryScreen({ userId, onOpen }: { userId: string; onOpen: OpenNu
                   )
                 }
               />
-            </AuthCard>
+              <SaveFeedback action={action} />
+            </ActionSheet>
           )}
           <AuthCard>
+            <ActionRow
+              title="Hydration"
+              detail={
+                formatNumber(data.water.reduce((sum, row) => sum + row.amount_ml, 0)) +
+                (data.targets ? ' / ' + formatNumber(data.targets.water_ml) : '') +
+                ' ml'
+              }
+              onPress={() => setWaterOpen(true)}
+            />
+          </AuthCard>
+          <ActionSheet
+            title="Hydration"
+            visible={waterOpen}
+            onClose={() => {
+              if (!action.locked) setWaterOpen(false);
+            }}
+          >
             <AuthText kind="heading">Hydration</AuthText>
             <AuthText>
               {formatNumber(data.water.reduce((sum, row) => sum + row.amount_ml, 0))} ml{' '}
@@ -465,14 +485,114 @@ export function DiaryScreen({ userId, onOpen }: { userId: string; onOpen: OpenNu
                 <AuthLink
                   title={`Delete water ${formatNumber(row.amount_ml)} ml`}
                   disabled={action.locked}
-                  onPress={() => setRemove({ table: 'water_logs', id: row.id })}
+                  onPress={() => {
+                    setWaterOpen(false);
+                    setRemove({ table: 'water_logs', id: row.id });
+                  }}
                 />
               </View>
             ))}
-          </AuthCard>
+            <SaveFeedback action={action} />
+          </ActionSheet>
         </>
       )}
-      <SaveFeedback action={action} />
+      <ActionSheet
+        title="Food options"
+        visible={optionsOpen}
+        onClose={() => {
+          if (!action.locked) setOptionsOpen(false);
+        }}
+      >
+        <View style={authStyles.choices}>
+          <AuthLink
+            title="Daily targets"
+            disabled={action.locked}
+            onPress={() => open('targets')}
+          />
+          <AuthLink title="Custom foods" disabled={action.locked} onPress={() => open('custom')} />
+          <AuthLink title="Recipes" disabled={action.locked} onPress={() => open('recipes')} />
+          <AuthLink title="Saved meals" disabled={action.locked} onPress={() => open('saved')} />
+        </View>
+        <AuthButton
+          title="Copy yesterday"
+          outlined
+          disabled={action.locked}
+          onPress={() => {
+            if (data) copy({ date: previousDate(data.date) });
+          }}
+        />
+        <AuthLink
+          title="Copy another meal or day"
+          disabled={action.locked}
+          onPress={() => {
+            setOptionsOpen(false);
+            setCopyOpen(!copyOpen);
+            if (data) setCopyDate(previousDate(data.date));
+          }}
+        />
+        <SaveFeedback action={action} />
+      </ActionSheet>
+      <ActionSheet
+        title={mealMenu ?? 'Meal actions'}
+        visible={!!mealMenu}
+        onClose={() => {
+          if (!action.locked) setMealMenu(null);
+        }}
+      >
+        <ActionRow
+          title={mealMenu ? 'Save ' + mealMenu + ' as meal' : 'Save as meal'}
+          disabled={action.locked}
+          onPress={() => {
+            setSavingMeal(mealMenu);
+            setMealName('');
+            setMealMenu(null);
+          }}
+        />
+        <ActionRow
+          title={mealMenu ? 'Repeat ' + mealMenu : 'Repeat meal'}
+          disabled={action.locked}
+          onPress={() => {
+            if (data && mealMenu) copy({ date: data.date, meal: mealMenu, destMeal: mealMenu });
+          }}
+        />
+        <ActionRow
+          title="Copy from another day"
+          disabled={action.locked}
+          onPress={() => {
+            setCopyOpen(true);
+            setCopyMeal(mealMenu);
+            if (data) setCopyDate(previousDate(data.date));
+            setMealMenu(null);
+          }}
+        />
+        <SaveFeedback action={action} />
+      </ActionSheet>
+      <ActionSheet
+        title={foodMenu?.food_name ?? 'Food entry'}
+        visible={!!foodMenu}
+        onClose={() => setFoodMenu(null)}
+      >
+        <ActionRow
+          title={foodMenu ? 'Edit ' + foodMenu.food_name : 'Edit entry'}
+          disabled={action.locked}
+          onPress={() => {
+            setEdit(foodMenu);
+            setQuantity(String(foodMenu?.quantity));
+            setFoodMenu(null);
+          }}
+        />
+        <ActionRow
+          title={foodMenu ? 'Delete ' + foodMenu.food_name : 'Delete entry'}
+          disabled={action.locked}
+          onPress={() => {
+            if (foodMenu) setRemove({ table: 'food_logs', id: foodMenu.id });
+            setFoodMenu(null);
+          }}
+        />
+      </ActionSheet>
+      {!edit && !remove && !savingMeal && !copyOpen && !mealMenu && !waterOpen && !optionsOpen && (
+        <SaveFeedback action={action} />
+      )}
     </AuthFrame>
   );
 }

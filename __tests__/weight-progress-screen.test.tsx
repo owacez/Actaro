@@ -33,17 +33,20 @@ test('weight progress uses saved units, shows actual dates/gaps and validates da
   expect(screen.getByRole('image').props.accessibilityLabel).toContain('Blank positions');
   expect(screen.getByText(/Latest 176.4 lb/)).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Change weight dates' }));
-  await fireEvent.changeText(
-    screen.getByLabelText('Weight progress start (YYYY-MM-DD)'),
-    '2026-10-15',
-  );
+  await fireEvent.press(screen.getByRole('button', { name: 'From: 2026-09-15' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Next month' }));
+  await fireEvent.press(screen.getByRole('button', { name: '2026-10-14' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'To: 2026-10-14' }));
+  await fireEvent.press(screen.getByRole('button', { name: '2026-10-13' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Apply weight dates' }));
-  expect(screen.getByText('Start date must be on or before the end date.')).toBeTruthy();
+  expect(
+    screen.getAllByText('Start date must be on or before the end date.').length,
+  ).toBeGreaterThan(0);
   expect(bodyService.progress).toHaveBeenCalledTimes(1);
-  await fireEvent.changeText(
-    screen.getByLabelText('Weight progress start (YYYY-MM-DD)'),
-    '2026-10-01',
-  );
+  await fireEvent.press(screen.getByRole('button', { name: 'From: 2026-10-14' }));
+  await fireEvent.press(screen.getByRole('button', { name: '2026-10-01' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'To: 2026-10-13' }));
+  await fireEvent.press(screen.getByRole('button', { name: '2026-10-14' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Apply weight dates' }));
   await waitFor(() =>
     expect(bodyService.progress).toHaveBeenLastCalledWith(owner, {
