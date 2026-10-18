@@ -3,6 +3,8 @@ import { getSupabase } from '@/lib/supabase/client';
 import { validExerciseId } from '@/features/exercises/exercise-service';
 import { displayWeight } from './workout-model';
 import { parsePerformance, type SessionDraft } from './session-model';
+import { profileService } from '@/features/profile/profile-service';
+import { localNutritionDate, nutritionDate } from '@/features/nutrition/nutrition-model';
 async function owner(expected: string) {
   const { data, error } = await getSupabase().auth.getUser();
   if (error || data.user?.id !== expected)
@@ -10,6 +12,28 @@ async function owner(expected: string) {
 }
 export type HistoryFilters = { offset: number; query: string; mode: 'timed' | 'log_only' | null };
 export const historyService = {
+  async calendar(userId: string, selectedMonth?: string) {
+    await owner(userId);
+    const preferences = await profileService.getPreferences(userId);
+    const today = localNutritionDate(preferences.time_zone),
+      month = selectedMonth || today.slice(0, 7);
+    const from = nutritionDate(month + '-01');
+    const next = new Date(from + 'T12:00:00Z');
+    next.setUTCMonth(next.getUTCMonth() + 1);
+    const { data, error } = await getSupabase()
+      .from('workout_sessions')
+      .select('id,name,local_date,mode,duration_seconds')
+      .eq('user_id', userId)
+      .eq('status', 'completed')
+      .gte('local_date', from)
+      .lt('local_date', next.toISOString().slice(0, 10))
+      .order('local_date')
+      .limit(501);
+    if (error || !data) throw new Error('Unable to load the workout calendar. Retry.');
+    if (data.length > 500)
+      throw new Error('This month exceeds the calendar display limit. Use detailed history.');
+    return { month, today, rows: data };
+  },
   async list(userId: string, filters: HistoryFilters) {
     await owner(userId);
     const [history, preference] = await Promise.all([

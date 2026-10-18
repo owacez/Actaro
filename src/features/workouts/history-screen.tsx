@@ -22,6 +22,9 @@ import { sessionStore } from './session-store';
 import { sessionPayload, timerText, emptyPerformance, type SessionDraft } from './session-model';
 import { displayWeight } from './workout-model';
 import { exerciseRecords, trainingVolume } from './training-metrics';
+import { WorkoutCalendar } from './workout-calendar';
+import { RecordLoadFeedback, useRecords } from '@/hooks/use-records';
+import { ScreenHeader, Segments, ActionRow } from '@/components/product-ui';
 type Page = Awaited<ReturnType<typeof historyService.list>>;
 export function HistoryScreen({
   userId,
@@ -36,6 +39,15 @@ export function HistoryScreen({
   onOpen: (id: string) => void;
   onEquipment: () => void;
 }) {
+  const [view, setView] = useState<'calendar' | 'list'>('calendar');
+  const [month, setMonth] = useState(''),
+    [selectedDay, setSelectedDay] = useState('');
+  const calendarLoad = useCallback(
+    async () => (id || view !== 'calendar' ? null : historyService.calendar(userId, month)),
+    [id, view, userId, month],
+  );
+  const calendar = useRecords(calendarLoad),
+    refreshCalendar = calendar.refresh;
   const [page, setPage] = useState<Page | null>(null),
     [filters, setFilters] = useState<HistoryFilters>({ offset: 0, query: '', mode: null }),
     [search, setSearch] = useState('');
@@ -86,6 +98,10 @@ export function HistoryScreen({
   useFocusEffect(
     useCallback(() => {
       if (id) return;
+      if (view === 'calendar') {
+        refreshCalendar();
+        return;
+      }
       const request = ++generation.current;
       void historyService
         .list(userId, filters)
@@ -104,7 +120,7 @@ export function HistoryScreen({
       return () => {
         generation.current = request + 1;
       };
-    }, [userId, id, filters]),
+    }, [userId, id, filters, view, refreshCalendar]),
   );
   function refresh(next: HistoryFilters) {
     setLoading(true);
@@ -239,15 +255,24 @@ export function HistoryScreen({
     })) ?? [],
   );
   return (
-    <AuthFrame>
+    <AuthFrame header={<ScreenHeader title={id ? 'Recorded workout' : 'Workout history'} />}>
       <AuthLink
         title={id ? '← Workout history' : '← My workouts'}
         disabled={busy}
         onPress={() => (dirty || frozen ? setDiscard(true) : onBack())}
       />
-      <AuthText kind="heading">{id ? 'Recorded workout' : 'Workout history'}</AuthText>
+      {!id && (
+        <Segments
+          options={[
+            { value: 'calendar', label: 'Calendar' },
+            { value: 'list', label: 'History' },
+          ]}
+          value={view}
+          onChange={setView}
+        />
+      )}
       {error && <AuthNotice error>{error}</AuthNotice>}
-      {loading ? (
+      {loading && (id || view === 'list') ? (
         <AuthLoading>Loading workout history…</AuthLoading>
       ) : id ? (
         draft ? (
@@ -442,6 +467,47 @@ export function HistoryScreen({
         ) : (
           <AuthButton title="Retry recorded workout" onPress={reload} />
         )
+      ) : view === 'calendar' ? (
+        <>
+          <RecordLoadFeedback {...calendar} retry={calendar.refresh} />
+          {calendar.data && (
+            <>
+              <AuthText>{calendar.data.rows.length} completed workouts this month</AuthText>
+              <WorkoutCalendar
+                month={calendar.data.month}
+                today={calendar.data.today}
+                dates={calendar.data.rows.map((row) => row.local_date)}
+                selected={selectedDay}
+                onMonth={(value) => {
+                  setMonth(value);
+                  setSelectedDay('');
+                }}
+                onSelect={setSelectedDay}
+              />
+              <AuthText kind="heading">{selectedDay || 'Select a day'}</AuthText>
+              {selectedDay && !calendar.data.rows.some((row) => row.local_date === selectedDay) && (
+                <AuthText>No completed workouts on this date.</AuthText>
+              )}
+              {calendar.data.rows
+                .filter((row) => row.local_date === selectedDay)
+                .map((row) => (
+                  <ActionRow
+                    key={row.id}
+                    title={row.name}
+                    detail={
+                      row.mode === 'timed'
+                        ? timerText((row.duration_seconds ?? 0) * 1000)
+                        : 'Log Only'
+                    }
+                    onPress={() => onOpen(row.id)}
+                  />
+                ))}
+              <AuthText kind="muted">
+                Select History for detailed session totals, search, editing and deletion.
+              </AuthText>
+            </>
+          )}
+        </>
       ) : (
         <>
           <AuthText>

@@ -4,6 +4,7 @@ import type { Database } from '@/lib/supabase/database.types';
 import { historyService } from '@/features/workouts/history-service';
 import { recoveryService } from '@/features/workouts/recovery-service';
 import { sessionFixture, sessionOwner } from './helpers/session-fixture';
+import { nutritionContext } from './helpers/nutrition-fixture';
 jest.mock('expo-crypto', () => ({ randomUUID: () => '00000000-0000-4000-8000-000000000007' }));
 const user: User = {
   id: sessionOwner,
@@ -27,6 +28,31 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockClient = client();
   jest.spyOn(mockClient.auth, 'getUser').mockResolvedValue({ data: { user }, error: null });
+});
+
+test('workout calendar reads the entire selected month with ownership and completion filters', async () => {
+  mockFetch.mockImplementation(async (input) =>
+    String(input).includes('/user_preferences')
+      ? response({ ...nutritionContext().preferences, user_id: sessionOwner })
+      : response([
+          {
+            id: sessionFixture().id,
+            name: 'Completed',
+            local_date: '2024-02-29',
+            mode: 'log_only',
+            duration_seconds: null,
+          },
+        ]),
+  );
+  const result = await historyService.calendar(sessionOwner, '2024-02');
+  expect(result.rows).toHaveLength(1);
+  const request = mockFetch.mock.calls.find(([input]) =>
+    String(input).includes('/workout_sessions'),
+  );
+  const params = new URL(String(request?.[0])).searchParams;
+  expect(params.get('user_id')).toBe('eq.' + sessionOwner);
+  expect(params.get('status')).toBe('eq.completed');
+  expect(params.getAll('local_date')).toEqual(['gte.2024-02-01', 'lt.2024-03-01']);
 });
 test('history sends real search/mode/page filters and returns the saved display unit', async () => {
   mockFetch.mockImplementation(async (url) =>

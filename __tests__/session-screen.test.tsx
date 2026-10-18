@@ -35,6 +35,7 @@ test('Log Only completes sets, controls independent rest and preserves frozen fa
   );
   await screen.findByRole('button', { name: 'Complete set 1' });
   expect(screen.queryByRole('button', { name: 'Pause workout timer' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit set 1' }));
   await fireEvent.changeText(screen.getByLabelText('Reps · set 1'), '10');
   await fireEvent.press(screen.getByRole('button', { name: 'Complete set 1' }));
   await screen.findByText('1:30');
@@ -67,6 +68,7 @@ test('pause/resume, add/remove, empty completion and cancellation remain real ac
   await screen.findByRole('button', { name: 'Resume workout timer' });
   await fireEvent.press(screen.getByRole('button', { name: 'Add set' }));
   await screen.findByRole('button', { name: 'Complete set 2' });
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit set 2' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Remove set 2' }));
   expect(screen.queryByRole('button', { name: 'Complete set 2' })).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Finish workout' }));

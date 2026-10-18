@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AppState, Pressable, Text, TextInput, View } from 'react-native';
+import { AppState, View } from 'react-native';
 import { randomUUID } from 'expo-crypto';
 import {
   AuthButton,
@@ -13,6 +13,7 @@ import {
   authStyles,
 } from '@/features/auth/auth-components';
 import { NavigationSurface, ScreenHeader, Meter, IconButton } from '@/components/product-ui';
+import { SetLogRow } from './set-log-row';
 import { ProgressMetrics } from '@/features/progress/progress-components';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
@@ -251,11 +252,12 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
       ),
     }));
   }
-  function done(position: number, time: number) {
+  function done(position: number, time: number, complete: boolean) {
     const previous = current.current;
     if (!previous || previous.status !== 'active') return;
     const entry = previous.exercises[index],
       set = entry.sets[position];
+    if (!!set.completedAt === complete) return;
     if (!set.completedAt) {
       try {
         workoutPayload(
@@ -273,7 +275,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
       }
     }
     setError(null);
-    const completing = !set.completedAt;
+    const completing = complete;
     change((value) => ({
       ...value,
       rest: completing
@@ -396,7 +398,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
       }
     >
       <AuthLink title="← My workouts (workout kept)" disabled={busy} onPress={onBack} />
-      <AuthText kind="heading">{summary ? 'Workout summary' : draft.name}</AuthText>
+      {summary && <AuthText kind="heading">Workout summary</AuthText>}
       {error && <AuthNotice error>{error}</AuthNotice>}
       {storageError && (
         <>
@@ -500,126 +502,68 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
               />
             </>
           )}
-          <AuthText>
-            Exercise {index + 1} of {draft.exercises.length} ·{' '}
-            {draft.mode === 'timed' ? 'Timed Workout' : 'Log Only'}
-          </AuthText>
           <ExerciseImage
             key={exercise.imageUrl}
             url={exercise.imageUrl}
             label={`${exercise.name} technique`}
-            size={112}
+            large
+            size={200}
           />
-          <AuthText kind="eyebrow">{exercise.name}</AuthText>
+          <AuthText kind="heading">{exercise.name}</AuthText>
           <AuthText>{exercise.metadata}</AuthText>
-          <AuthText>
-            Previous:{' '}
-            {exercise.performance.previous.length
-              ? exercise.performance.previous
-                  .map(
-                    (set) =>
-                      `${set.reps} × ${displayWeight(set.weightKg, draft.unit) || 'unknown'} ${draft.unit}`,
-                  )
-                  .join(', ')
-              : 'No previous completed sets'}
-          </AuthText>
           <AuthText>
             Best load:{' '}
             {exercise.performance.heaviestKg === null
               ? 'No recorded load'
               : `${displayWeight(exercise.performance.heaviestKg, draft.unit)} ${draft.unit}`}
           </AuthText>
-          <AuthText>
-            Adjust prefilled targets to your actual results, then mark each set Done.
-          </AuthText>
-          <View style={{ flexDirection: 'row', gap: 6 }}>
-            <View style={{ width: 25 }}>
-              <AuthText>Set</AuthText>
-            </View>
-            <View style={{ flex: 1 }}>
-              <AuthText>Previous</AuthText>
-            </View>
-            <View style={{ width: 58 }}>
-              <AuthText>{draft.unit}</AuthText>
-            </View>
-            <View style={{ width: 50 }}>
-              <AuthText>Reps</AuthText>
-            </View>
-            <View style={{ width: 45 }}>
-              <AuthText>Done</AuthText>
-            </View>
-          </View>
+          <AuthText>Swipe right to log. Swipe left to undo. Edit to adjust reps or load.</AuthText>
           {exercise.sets.map((set, position) => (
-            <View
+            <SetLogRow
               key={set.id}
-              style={{
-                gap: 4,
-                padding: 6,
-                borderRadius: 16,
-                backgroundColor: set.completedAt ? colors.volt + '24' : 'transparent',
+              number={position + 1}
+              reps={set.reps}
+              weight={set.weight}
+              unit={draft.unit}
+              completed={!!set.completedAt}
+              previous={
+                exercise.performance.previous[position]
+                  ? exercise.performance.previous[position].reps +
+                    ' x ' +
+                    (displayWeight(exercise.performance.previous[position].weightKg, draft.unit) ||
+                      '?') +
+                    ' ' +
+                    draft.unit
+                  : 'No previous set'
+              }
+              onLog={() => {
+                done(position, Date.now(), true);
+              }}
+              onUndo={() => {
+                done(position, Date.now(), false);
               }}
             >
-              <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
-                <View style={{ width: 25 }}>
-                  <AuthText>{position + 1}</AuthText>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <AuthText>
-                    {exercise.performance.previous[position]
-                      ? `${exercise.performance.previous[position].reps} × ${displayWeight(exercise.performance.previous[position].weightKg, draft.unit) || '?'}`
-                      : '—'}
-                  </AuthText>
-                </View>
-                {(['weight', 'reps'] as const).map((field) => (
-                  <TextInput
-                    key={field}
-                    value={set[field]}
-                    accessibilityLabel={`${field === 'weight' ? `Weight (${draft.unit})` : 'Reps'} · set ${position + 1}`}
-                    keyboardType={field === 'weight' ? 'decimal-pad' : 'number-pad'}
-                    maxLength={10}
-                    style={{
-                      width: field === 'weight' ? 58 : 50,
-                      minHeight: 44,
-                      padding: 6,
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                      borderRadius: 8,
-                      color: colors.text,
-                      backgroundColor: colors.surface,
-                      fontFamily: 'Inter_400Regular',
-                      fontSize: 16,
-                    }}
-                    onChangeText={(value) => setField(position, field, value)}
-                  />
-                ))}
-                <View style={{ width: 45 }}>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={`${set.completedAt ? 'Unmark' : 'Complete'} set ${position + 1}`}
-                    accessibilityState={{ selected: !!set.completedAt }}
-                    onPress={() => done(position, Date.now())}
-                    style={{
-                      minHeight: 44,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: 8,
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                      backgroundColor: set.completedAt ? colors.volt : colors.surface,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: set.completedAt ? '#111311' : colors.text,
-                        fontSize: 14,
-                        fontFamily: 'Inter_500Medium',
-                      }}
-                    >
-                      {set.completedAt ? '✓' : 'Done'}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
+              {(['weight', 'reps', 'rpe', 'notes'] as const).map((field) => (
+                <AuthInput
+                  key={field}
+                  label={
+                    field === 'weight'
+                      ? `Weight (${draft.unit}) · set ${position + 1}`
+                      : field === 'reps'
+                        ? `Reps · set ${position + 1}`
+                        : field.toUpperCase() + ' · set ' + (position + 1)
+                  }
+                  value={set[field]}
+                  keyboardType={
+                    field === 'weight' || field === 'rpe'
+                      ? 'decimal-pad'
+                      : field === 'reps'
+                        ? 'number-pad'
+                        : 'default'
+                  }
+                  onChangeText={(value) => setField(position, field, value)}
+                />
+              ))}
               <AuthLink
                 title={`Remove set ${position + 1}`}
                 disabled={exercise.sets.length === 1}
@@ -634,7 +578,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
                   }))
                 }
               />
-            </View>
+            </SetLogRow>
           ))}
           <AuthButton
             title="Add set"

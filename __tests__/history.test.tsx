@@ -17,7 +17,7 @@ jest.mock('expo-router', () => ({
   },
 }));
 jest.mock('@/features/workouts/history-service', () => ({
-  historyService: { list: jest.fn(), load: jest.fn(), remove: jest.fn() },
+  historyService: { calendar: jest.fn(), list: jest.fn(), load: jest.fn(), remove: jest.fn() },
 }));
 jest.mock('@/features/workouts/session-service', () => ({ sessionService: { save: jest.fn() } }));
 const history = jest.mocked(historyService),
@@ -36,6 +36,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   history.load.mockResolvedValue(recorded());
   history.list.mockResolvedValue({ rows: [], more: false, unit: 'kg' });
+  history.calendar.mockResolvedValue({ month: '2026-10', today: '2026-10-18', rows: [] });
   history.remove.mockResolvedValue(undefined);
   service.save.mockResolvedValue(2);
 });
@@ -67,6 +68,35 @@ test('history edits recalculate actual volume and freeze failed save payload unt
   await screen.findByLabelText('Reps · exercise 1 set 1');
   expect(screen.getByLabelText('Reps · exercise 1 set 1').props.value).toBe('10');
 });
+
+test('calendar marks actual workout dates and defers detailed-history requests until History is selected', async () => {
+  const onOpen = jest.fn();
+  history.calendar.mockResolvedValue({
+    month: '2026-10',
+    today: '2026-10-18',
+    rows: [
+      {
+        id: recorded().id,
+        name: 'Test workout',
+        local_date: '2026-10-14',
+        mode: 'log_only',
+        duration_seconds: null,
+      },
+    ],
+  });
+  await render(
+    <FeedbackTestRoot>
+      <HistoryScreen {...props} onOpen={onOpen} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByRole('button', { name: '2026-10-14: workout completed' });
+  expect(history.list).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: '2026-10-14: workout completed' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Test workout' }));
+  expect(onOpen).toHaveBeenCalledWith(recorded().id);
+  await fireEvent.press(screen.getByRole('button', { name: 'History' }));
+  await waitFor(() => expect(history.list).toHaveBeenCalledTimes(1));
+});
 test('delete is confirmed and uses the displayed revision; filters are genuine server filters', async () => {
   const row = recorded();
   history.list
@@ -96,6 +126,7 @@ test('delete is confirmed and uses the displayed revision; filters are genuine s
       <HistoryScreen {...props} />
     </FeedbackTestRoot>,
   );
+  await fireEvent.press(screen.getByRole('button', { name: 'History' }));
   await screen.findByRole('button', { name: 'Delete recorded Test workout' });
   await fireEvent.press(screen.getByRole('button', { name: 'Delete recorded Test workout' }));
   expect(history.remove).not.toHaveBeenCalled();
