@@ -264,6 +264,15 @@ Show:
 
 Bodyweight and Steps/Activity should have strong first-class placement.
 
+Steps decision (2026-10-18): no manual step-entry UI or read/review/save button.
+After Motion permission, automatically read iPhone full-day steps on app
+launch/resume and update the visible count while foregrounded. Throttle cloud
+writes and replace the date's total rather than adding counts. Step targets live
+in Steps & activity. Expo Go cannot deliver background pedometer events; catch
+up from Core Motion history when the app returns. Android/web show synced
+records without inventing a full-day sensor total. Existing historical manual
+records and optional distance entry are retained; Health integrations stay v2.0.
+
 ## 7.2 Recent Run / Activity Preview
 
 When running data exists, the Today activity area may show a compact recent-run card with:
@@ -369,7 +378,7 @@ Recommended media fields:
 Presentation:
 
 - Exercise list: small monochrome/neutral thumbnail
-- Active workout: compact 100–140px technique media
+- Active workout: centered full-width rectangular technique media, about 200px tall (user testing revision, 2026-10-18); keep logging controls within easy reach
 - Exercise detail: larger start/peak poses and instructions
 
 Do not use large hero imagery in the logging flow.
@@ -512,7 +521,15 @@ Support:
 
 ## 9.4 Set Logging
 
-Fast table-style logging:
+Fast set logging (user testing revision, 2026-10-18):
+
+- Planned sets, reps and load remain prefilled from the workout.
+- Swipe a set right to log it; swipe a completed set left to unlog it, preserving the planned row.
+- Accessible buttons offer the same actions. Repeated log gestures must not toggle a completed set off.
+- Edit exposes actual reps/load, optional RPE/notes and removal; Add set remains available. Explicit removal is separate from undoing completion.
+- Workout history opens on a month calendar marked from completed sessions. History opens the detailed searchable list and its edit/delete controls.
+
+The detailed fields remain available:
 
 ```text
 SET | PREVIOUS | WEIGHT | REPS | DONE
@@ -783,6 +800,11 @@ Support quantity and daily target.
 
 # 12. Habits
 
+User testing revision (2026-10-18): date fields use calendar controls and reminder
+times use a time picker. Confirmed quick completions update the visible habit in
+place with a short completion animation that respects Reduce Motion; no success
+is shown before the write is acknowledged. Explain habit types in everyday terms.
+
 Habit types:
 
 - Boolean
@@ -813,6 +835,10 @@ Scheduled rest/non-action days should not break progress.
 ---
 
 # 13. Goals
+
+Explain that habits are repeated actions while goals measure outcomes from saved
+records. Show the source record value, target and starting value clearly, with an
+action to open the relevant logging section. Missing evidence remains unknown.
 
 Goal categories:
 
@@ -1174,6 +1200,14 @@ Do not scatter raw Supabase queries throughout React components.
 - TanStack Query for server state
 - Zustand only where justified
 - React local state where sufficient
+
+User-requested caching (2026-10-18): bounded memory-only read reuse for 60 seconds,
+concurrent-request deduplication and visible-data retention during refresh.
+Keys include authorization, query parameters, headers and read-RPC input; writes
+and auth changes invalidate reads. Remote authentication is not TTL-cached.
+Explicit refresh bypasses cached reads. This is not the v1.5 offline sync queue,
+and must not retain another account's view or overwrite acknowledged edits with
+an older in-flight response.
 
 ## 19.5 Exercise Library Architecture
 

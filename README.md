@@ -203,7 +203,7 @@ expire automatically; hovering or focusing the web notification pauses dismissal
 | Habits                      | Five habit types, schedules, dated target settings, logging, history and configurable motivation.                                  |
 | Goals                       | Body, training, activity, nutrition and habit targets; progress from recorded facts, editing and deletion/restoration.             |
 | Body records                | Dated bodyweight and named measurements, unit conversion, editing and deletion.                                                    |
-| Steps & activity            | Manual steps/distance, daily target and history; iPhone pedometer read/review/save with permission.                                |
+| Steps & activity            | Automatic iPhone steps after Motion permission, live foreground count, daily target, synced history and optional distance.         |
 | Nutrition                   | Daily targets, food search, portion preview, four meal groups, diary editing/copying and hydration.                                |
 | Custom foods / Recipes      | Private label foods, food-specific portions, ingredient recipes, servings and cooked-weight logging.                               |
 | Saved meals                 | Create from a logged meal, log its snapshot to another meal/date or delete the saved template.                                     |
@@ -414,9 +414,10 @@ exercise/working-set preview with an explicit duration estimate. **Start Workout
 then offers **Timed Workout** or **Log Only**. Both open the dedicated set logger.
 Search results and Exercise Detail also offer **Log exercise** without a template.
 
-Adjust actual weight/reps and mark **Done** for each performed set. Blank weight
-means unknown; zero means no added external load. Add/remove sets and move between
-exercises. The independent rest timer starts after Done; pause/resume, skip and
+Swipe a set **right to log**, **left to undo** a logged set, or use its completion
+button. Planned reps/load are prefilled. **Edit set** exposes actual reps/load,
+RPE/notes and removal; **Add set** remains available. Blank weight means unknown;
+zero means no added external load. The independent rest timer starts after logging; pause/resume, skip and
 ±15 seconds work in both modes. Only Timed has a total duration timer.
 
 The active draft is saved under your account on this device. **Resume saved
@@ -426,8 +427,9 @@ optional note. Failed network saves keep a frozen local copy for the same-ID ret
 they are not reported as saved. **Done** clears the acknowledged device copy.
 Cancel asks before discarding an unfinished draft. Advanced multi-device offline
 sync is v1.5; recovery requires the same signed-in account and intact app storage.
-Open **My workouts → Workout history** to search by name, filter Timed/Log Only
-and reopen completed logs. Edit actual weights/reps, optional RPE/notes, add/remove
+Open **My workouts → Workout history** for a month calendar of completed sessions.
+Tap a marked day to open its workouts; select **History** to search by name,
+filter Timed/Log Only and reopen completed logs. Edit actual weights/reps, optional RPE/notes, add/remove
 sets or exercises, then **Save recorded workout**. New history sets use the
 original finish instant as their reported completion time. Mode/start/timezone stay
 fixed. Invalid values block Save; stale edits cannot overwrite a newer revision.
@@ -529,9 +531,10 @@ summarizes the same saved records. It refreshes when opened and has a manual
 refresh action; no sample health data is shown.
 
 - Habits support boolean, numeric, duration (minutes), weekly frequency and
-  avoidance. Choose scheduled weekdays, dates and an optional reminder time.
-  Reminder times display as due inside the app; OS notification delivery is a
-  later quality-phase task. Start date/type/unit/time zone are fixed after
+  avoidance. The editor uses friendly type descriptions, calendar dates and a
+  native time picker (a time input on web). Confirmed quick checks update in place
+  with a brief animation; failed saves keep the original retry. Enable optional
+  device alerts through habit reminders in Preferences. Start date/type/unit/time zone are fixed after
   creation. Target/schedule edits take effect from today, preserving prior dates.
   Rest days and partial first/last weeks do not create false consistency misses.
   An avoidance value of zero must be explicitly recorded.
@@ -545,15 +548,28 @@ refresh action; no sample health data is shown.
 - Body records store kg/cm and daily activity stores steps/km, displaying your
   saved unit preferences. Saving the same date/measurement replaces its value.
   Edit/delete recorded entries from history; goals recalculate from the records.
-- Set a daily steps target explicitly. On iPhone, **Read iPhone steps for today**
-  requests Motion permission and reads since midnight in your saved time zone.
-  Review the count, then save. A sensor reading replaces that day's steps; it
-  does not add to a manual count or another phone. Android/web support manual
-  daily totals because foreground sensor updates are not full-day totals.
-  Permission denial or unavailable sensing retains the manual option.
+- **Steps & activity** contains your daily step target. After Motion permission,
+  iPhone steps load automatically from midnight in your saved time zone, update
+  while the app is open and catch up when you return. There is no manual step
+  entry or read/save button. Cloud writes are limited to changed totals, normally
+  at most once per minute, with a best-effort flush when leaving the app. This
+  replaces the date's total; it never adds multiple device totals. Expo Go does
+  not deliver pedometer events in the background. Android/web show synced history;
+  unsupported/denied sensing is explained without fabricating zero steps.
 
-After pulling this update, run `npm ci` for the SDK-compatible `expo-sensors`
-dependency, then start Expo Go using the commands above. No new API key or paid
+Habits are actions you repeat; goals are outcomes measured from those saved
+records. Goal cards show the actual source value and provide a shortcut to update
+the relevant records. You do not manually mark a goal complete.
+
+Recent server reads are reused in memory for up to 60 seconds, including reference
+data and signed image URLs. Matching concurrent requests share one network call.
+Confirmed writes/auth changes invalidate reads; explicit refresh forces a new
+read. Existing records stay visible during background refresh. Authentication
+verification remains remote and uncached. This cache does not persist health
+data to disk or implement an offline mutation queue.
+
+After pulling this update, run `npm ci` for the SDK-compatible sensors and native
+time picker, then start Expo Go using the commands above. No new API key or paid
 service is required. Hosted migrations are already applied to the connected
 project. A different Supabase project needs the committed migrations applied
 before using these screens. Native builds and physical sensor QA remain deferred.

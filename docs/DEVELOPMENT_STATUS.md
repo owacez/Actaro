@@ -1,6 +1,6 @@
 # Actaro — Development Status
 
-Updated: 2026-10-17 (America/Los_Angeles).
+Updated: 2026-10-18 (America/Los_Angeles).
 
 ## Overall
 
@@ -8,10 +8,17 @@ Updated: 2026-10-17 (America/Los_Angeles).
 - Release Completion: **100% active implementation (27 / 27 weight); personal beta DEFERRED (6 weight)**
 - Previous Releases: **v0.1 active development and v0.2–v0.6 functional scopes DONE (100%); retained acceptance DEFERRED**
 - Current Phase: **Phase 6; seven implementation/review tasks DONE, task 6.6 Personal Beta DEFERRED**
-- Current Focus: User-requested header reconciliation implemented and locally verified; user visual/device review next. No v1.0 approval or future-release implementation.
+- Current Focus: User testing refinements: automatic iPhone steps, cached reads, habit/goal clarity, workout calendar and swipe logging. Implementation and local verification are DONE; physical-device acceptance remains DEFERRED. No v1.0 approval or future-release implementation.
 - Status: **DONE — active v0.9 development; full beta/release acceptance DEFERRED**
 - Blockers: No remaining authorized implementation blocker. Dependency advisories, disabled leaked-password protection, exact visual/device checks and native-build acceptance remain documented release-review findings. They are not claimed passed or waived.
 - Approval boundary: The user authorized completing v0.9, retaining the earlier instruction that device acceptance, personal testing and v1.0 release approval happen afterward. No paid service or native/EAS build was used.
+
+Testing feedback (2026-10-18): **DONE** for implementation/local verification.
+314 tests, all-platform JavaScript export and 28 isolated sample-data browser captures passed.
+Touch swipe log/undo and cached tab return were verified with zero live Supabase calls.
+See [the acceptance/evidence checklist](TESTING_FEEDBACK_2026-10-18.md). These are
+core testing refinements with unchanged plan weights; remaining device acceptance
+is still DEFERRED. No database migration, cloud build, paid service or new API key.
 
 Core redesign (2026-10-17): **DONE** for implementation/local verification — Chalk/Carbon foundations,
 Today/Train/Food/Progress/You navigation, Quick log, compact records, sheets,
