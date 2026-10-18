@@ -90,22 +90,23 @@ test('body editor saves a real dated value; an uncertain write freezes inputs an
     jest.mocked(bodyService.save).mock.calls[0],
   );
 });
-test('activity distinguishes blank/invalid inputs from explicit zero and permits correction', async () => {
+test('steps are read-only, distance saves preserve sensor totals, and the daily target stays in this section', async () => {
   jest
     .mocked(activityService.save)
-    .mockRejectedValueOnce(new RecordRequestError('Enter steps or distance.'))
+    .mockRejectedValueOnce(new RecordRequestError('Enter distance.'))
     .mockResolvedValueOnce(undefined);
   await render(
     <FeedbackTestRoot>
       <ActivityScreen userId={owner} onBack={jest.fn()} />
     </FeedbackTestRoot>,
   );
-  await screen.findByLabelText('Daily steps');
-  await fireEvent.press(screen.getByRole('button', { name: 'Save steps and distance' }));
-  await screen.findByText('Enter steps or distance.');
-  expect(screen.getByLabelText('Daily steps').props.editable).toBe(true);
-  await fireEvent.changeText(screen.getByLabelText('Daily steps'), '0');
-  await fireEvent.press(screen.getByRole('button', { name: 'Save steps and distance' }));
-  await screen.findByText('Activity saved');
-  expect(activityService.save).toHaveBeenLastCalledWith(owner, day, '0', '', 'km', 'UTC', 'manual');
+  await screen.findByLabelText('Daily steps target');
+  expect(screen.queryByLabelText('Daily steps')).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Read iPhone steps for today' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Save distance' }));
+  await screen.findByText('Enter distance.');
+  await fireEvent.changeText(screen.getByLabelText('Daily distance (km, optional)'), '0');
+  await fireEvent.press(screen.getByRole('button', { name: 'Save distance' }));
+  await screen.findByText('Distance saved');
+  expect(activityService.save).toHaveBeenLastCalledWith(owner, day, '', '0', 'km', 'UTC');
 });

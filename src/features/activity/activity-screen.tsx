@@ -23,30 +23,24 @@ import { activityService } from './activity-service';
 import { WeekStrip } from '@/components/date-picker';
 import { ScreenHeader } from '@/components/product-ui';
 import { NumberStepper } from '@/components/number-stepper';
-import { readTodaySteps } from './pedometer-service';
+import { useDeviceSteps } from './step-provider';
 export function ActivityScreen({ userId, onBack }: { userId: string; onBack: () => void }) {
   const [date, setDate] = useState<string>(),
     [offset, setOffset] = useState(0),
-    [steps, setSteps] = useState(''),
     [distance, setDistance] = useState(''),
     [target, setTarget] = useState(''),
-    [source, setSource] = useState<'manual' | 'ios_pedometer'>('manual'),
-    [sensorBusy, setSensorBusy] = useState(false),
-    [sensorError, setSensorError] = useState<string | null>(null),
     [remove, setRemove] = useState<string | null>(null);
   const load = useCallback(
     () => activityService.load(userId, date, offset),
     [userId, date, offset],
   );
   const onLoaded = useCallback((data: Awaited<ReturnType<typeof activityService.load>>) => {
-    setSteps(data.current?.steps === null || !data.current ? '' : String(data.current.steps));
     setDistance(
       data.current?.distance_km === null || !data.current
         ? ''
         : String(data.current.distance_km * unitFactor(data.preferences.distance_unit)),
     );
     setTarget(data.target ? String(data.target.steps_target) : '');
-    setSource(data.current?.steps_source === 'ios_pedometer' ? 'ios_pedometer' : 'manual');
   }, []);
   const resource = useRecords(load, onLoaded),
     action = useRecordAction(),
@@ -56,27 +50,14 @@ export function ActivityScreen({ userId, onBack }: { userId: string; onBack: () 
       refresh();
     }, [refresh]),
   );
+  const device = useDeviceSteps();
   const data = resource.data,
-    locked = action.locked || sensorBusy;
-  async function sensor() {
-    if (!data) return;
-    setSensorBusy(true);
-    setSensorError(null);
-    try {
-      const result = await readTodaySteps(data.preferences.time_zone);
-      if (result.day !== data.day)
-        throw new Error('The day changed. Open today before importing steps.');
-      setSteps(String(result.steps));
-      setSource('ios_pedometer');
-    } catch (error) {
-      setSensorError(error instanceof Error ? error.message : 'Sensor count unavailable.');
-    } finally {
-      setSensorBusy(false);
-    }
-  }
+    locked = action.locked;
+  const live = device?.reading?.day === data?.day ? device?.reading : null;
+  const count = live?.steps ?? data?.current?.steps;
   return (
     <AuthFrame header={<ScreenHeader title="Steps and activity" />}>
-      <AuthLink title="← More" disabled={locked} onPress={onBack} />
+      <AuthLink title="← You" disabled={locked} onPress={onBack} />
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {data && !resource.loading && (
         <>
@@ -90,84 +71,34 @@ export function ActivityScreen({ userId, onBack }: { userId: string; onBack: () 
               }
               setDate(selected);
               setOffset(0);
-              setSensorError(null);
             }}
           />
-          <NumberStepper
-            large
-            step={100}
-            max={1000000}
-            label="Daily steps"
-            value={steps}
-            disabled={locked}
-            onChange={(text) => {
-              setSteps(text);
-              setSource('manual');
-            }}
-          />
-          <AuthInput
-            label={`Daily distance (${data.preferences.distance_unit}, optional)`}
-            value={distance}
-            keyboardType="decimal-pad"
-            editable={!locked}
-            onChangeText={setDistance}
-          />
-          <AuthText>
-            Blank means not recorded. An explicit 0 records a zero. Save replaces this date’s
-            totals; it never adds two phones or manual and sensor counts together.
-          </AuthText>
-          {Platform.OS === 'ios' && data.day === data.today ? (
-            <>
-              <AuthButton
-                title="Read iPhone steps for today"
-                outlined
-                busy={sensorBusy}
-                disabled={locked}
-                onPress={() => void sensor()}
-              />
-              <AuthText>
-                Reads steps since midnight in {data.preferences.time_zone}. Review the count, then
-                save it. The app does not collect steps in the background.
-              </AuthText>
-            </>
-          ) : (
-            <AuthText>
-              Manual daily totals are supported here. Android foreground sensor updates cannot
-              provide a reliable full-day count; advanced sensing and health integrations are
-              deferred.
+          <AuthCard>
+            <AuthText kind="eyebrow">{live ? 'LIVE IPHONE STEPS' : 'RECORDED STEPS'}</AuthText>
+            <AuthText kind="metric">
+              {count === null || count === undefined ? '—' : formatNumber(count)}
             </AuthText>
-          )}
-          {sensorError && <AuthNotice error>{sensorError}</AuthNotice>}
-          <AuthText>
-            Steps source: {source === 'ios_pedometer' ? 'iPhone pedometer' : 'manual'}
-          </AuthText>
-          <AuthButton
-            title="Save steps and distance"
-            busy={action.busy}
-            disabled={locked}
-            onPress={() =>
-              void action.run(
-                () =>
-                  activityService.save(
-                    userId,
-                    data.day,
-                    steps,
-                    distance,
-                    data.preferences.distance_unit,
-                    data.preferences.time_zone,
-                    source,
-                  ),
-                'Activity saved',
-                resource.refresh,
-              )
-            }
-          />
-          <AuthInput
+            <AuthText>
+              {live
+                ? 'Updates automatically while Actaro is open. Catches up when you return.'
+                : Platform.OS === 'ios'
+                  ? 'Motion & Fitness access enables automatic tracking.'
+                  : 'Synced iPhone totals appear here. Full-day sensing is unavailable on this platform.'}
+            </AuthText>
+            {device?.error && <AuthNotice>{device.error}</AuthNotice>}
+            <AuthText kind="muted">
+              Daily boundary: midnight in {data.preferences.time_zone}.
+            </AuthText>
+          </AuthCard>
+          <AuthText kind="heading">Your daily target</AuthText>
+          <AuthText>Choose the number of steps you want to reach each day.</AuthText>
+          <NumberStepper
+            step={1000}
+            max={1000000}
             label="Daily steps target"
             value={target}
-            keyboardType="number-pad"
-            editable={!locked}
-            onChangeText={setTarget}
+            disabled={locked}
+            onChange={setTarget}
           />
           <AuthButton
             title="Save steps target"
@@ -182,6 +113,40 @@ export function ActivityScreen({ userId, onBack }: { userId: string; onBack: () 
               )
             }
           />
+          <AuthCard>
+            <AuthText kind="heading">Other distance</AuthText>
+            <AuthText>
+              Optional distance for the selected date. Saving it keeps your automatic step total.
+            </AuthText>
+            <AuthInput
+              label={`Daily distance (${data.preferences.distance_unit}, optional)`}
+              value={distance}
+              keyboardType="decimal-pad"
+              editable={!locked}
+              onChangeText={setDistance}
+            />
+            <AuthButton
+              title="Save distance"
+              outlined
+              busy={action.busy}
+              disabled={locked}
+              onPress={() =>
+                void action.run(
+                  () =>
+                    activityService.save(
+                      userId,
+                      data.day,
+                      '',
+                      distance,
+                      data.preferences.distance_unit,
+                      data.preferences.time_zone,
+                    ),
+                  'Distance saved',
+                  resource.refresh,
+                )
+              }
+            />
+          </AuthCard>
           <AuthText kind="heading">Recorded activity</AuthText>
           {!data.history.length && <AuthNotice>No activity recorded yet.</AuthNotice>}
           {data.history.map((row) => (
@@ -201,7 +166,7 @@ export function ActivityScreen({ userId, onBack }: { userId: string; onBack: () 
               </AuthText>
               <View style={authStyles.choices}>
                 <AuthLink
-                  title={`Edit activity ${row.local_date}`}
+                  title={`View activity ${row.local_date}`}
                   disabled={locked}
                   onPress={() => {
                     setDate(row.local_date);
@@ -219,6 +184,12 @@ export function ActivityScreen({ userId, onBack }: { userId: string; onBack: () 
           {remove && (
             <AuthCard>
               <AuthText>Delete the recorded totals for {remove}?</AuthText>
+              {remove === data.today && (
+                <AuthText>
+                  Automatic tracking can recreate the current step total from iPhone Motion.
+                  Historical records are not re-imported.
+                </AuthText>
+              )}
               <AuthButton
                 title="Confirm activity deletion"
                 disabled={locked}

@@ -21,10 +21,19 @@ import { formatNumber, energy, localNutritionDate } from '@/features/nutrition/n
 import { weightSummary, unitFactor, goalUnit } from '@/features/body/body-model';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { habitService } from '@/features/habits/habit-service';
-import { habitToday, habitValue, habitVersion, habitReached } from '@/features/habits/habit-model';
+import {
+  habitToday,
+  habitValue,
+  habitVersion,
+  habitReached,
+  acknowledgedHabitLog,
+} from '@/features/habits/habit-model';
+import { CompletionMark } from '@/components/completion-mark';
 import { nutritionService } from '@/features/nutrition/nutrition-service';
 import { todayService } from './today-service';
+import { useDeviceSteps } from '@/features/activity/step-provider';
 export function TodayScreen({ userId }: { userId: string }) {
+  const deviceSteps = useDeviceSteps();
   const load = useCallback(() => todayService.load(userId), [userId]),
     resource = useRecords(load),
     action = useRecordAction(),
@@ -46,7 +55,10 @@ export function TodayScreen({ userId }: { userId: string }) {
     return () => clearInterval(timer);
   }, [zone, today, refresh]);
   const weight = data ? weightSummary(data.body.weights, data.context.today) : null,
-    steps = data?.activity.current?.steps ?? null,
+    steps =
+      deviceSteps?.reading && deviceSteps.reading.day === today
+        ? deviceSteps.reading.steps
+        : (data?.activity.current?.steps ?? null),
     target = data?.activity.target?.steps_target ?? null,
     unit = data?.body.preferences.weight_unit ?? 'kg';
   const titleDate = today
@@ -64,8 +76,8 @@ export function TodayScreen({ userId }: { userId: string }) {
             <IconButton
               label="Refresh Today"
               name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }}
-              onPress={refresh}
-              disabled={resource.loading || action.locked}
+              onPress={resource.reload}
+              disabled={resource.loading || resource.refreshing || action.locked}
             />
           }
         />
@@ -125,7 +137,7 @@ export function TodayScreen({ userId }: { userId: string }) {
                       : formatNumber(Math.max(0, target - steps)) + ' to go'}
                 </AuthText>
                 {steps !== null && target !== null && <Meter value={steps} target={target} />}
-                <AuthLink title="Log steps & activity" onPress={() => router.push('/activity')} />
+                <AuthLink title="Steps & target" onPress={() => router.push('/activity')} />
               </AuthCard>
             </View>
           </View>
@@ -285,7 +297,29 @@ export function TodayScreen({ userId }: { userId: string }) {
                               '',
                             ),
                           'Habit logged',
-                          refresh,
+                          () =>
+                            resource.updateData((current) => {
+                              const habits = current.habits.map((row) =>
+                                row.id === habit.id
+                                  ? acknowledgedHabitLog(
+                                      row,
+                                      date,
+                                      habit.kind === 'boolean' ? 1 : 0,
+                                    )
+                                  : row,
+                              );
+                              return {
+                                ...current,
+                                habits,
+                                completedHabits: habits.filter((row) =>
+                                  habitReached(
+                                    row,
+                                    habitValue(row, habitToday(row)),
+                                    habitVersion(row, habitToday(row))?.target ?? 0,
+                                  ),
+                                ).length,
+                              };
+                            }),
                         );
                       else
                         router.push({
@@ -300,10 +334,12 @@ export function TodayScreen({ userId }: { userId: string }) {
                       backgroundColor: done ? colors.text : colors.fill,
                     }}
                   >
-                    <Text style={{ color: done ? colors.background : colors.text, fontSize: 13 }}>
-                      {done ? '✓ ' : '+ '}
-                      {habit.name}
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <CompletionMark done={done} label="Done" />
+                      <Text style={{ color: done ? colors.background : colors.text, fontSize: 13 }}>
+                        {habit.name}
+                      </Text>
+                    </View>
                   </Pressable>
                 );
               })}

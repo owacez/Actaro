@@ -14,6 +14,7 @@ import { AuthFeedbackProvider } from '@/features/auth/auth-feedback';
 import { AppThemeProvider } from '@/features/profile/theme-provider';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { ReminderCoordinator } from '@/features/notifications/reminder-coordinator';
+import { StepProvider } from '@/features/activity/step-provider';
 export { ScreenErrorBoundary as ErrorBoundary } from '@/components/screen-error-boundary';
 
 void SplashScreen.preventAutoHideAsync();
@@ -82,7 +83,12 @@ function AccountTheme() {
     <AppThemeProvider userId={recovery ? undefined : session?.user.id}>
       <AuthFeedbackProvider>
         <ReminderCoordinator userId={recovery ? undefined : session?.user.id} />
-        <AuthRoutes />
+        <StepProvider
+          key={session?.user.id ?? 'signed-out'}
+          userId={recovery ? undefined : session?.user.id}
+        >
+          <AuthRoutes />
+        </StepProvider>
       </AuthFeedbackProvider>
     </AppThemeProvider>
   );

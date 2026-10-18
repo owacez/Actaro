@@ -46,5 +46,18 @@ test('denied, unavailable and Android sources fall back truthfully without readi
   pedometer.isAvailableAsync.mockResolvedValue(false);
   await expect(readTodaySteps('UTC')).rejects.toThrow('unavailable');
   Object.defineProperty(Platform, 'OS', { value: 'android', configurable: true });
-  await expect(readTodaySteps('UTC')).rejects.toThrow('manually');
+  await expect(readTodaySteps('UTC')).rejects.toThrow('synced history');
+});
+
+test('previously denied motion access is not prompted again on each automatic read', async () => {
+  pedometer.getPermissionsAsync.mockResolvedValue({
+    ...permission,
+    granted: false,
+    status: PermissionStatus.DENIED,
+    canAskAgain: true,
+  });
+  await expect(readTodaySteps('UTC')).rejects.toThrow('not granted');
+  await expect(readTodaySteps('UTC')).rejects.toThrow('not granted');
+  expect(pedometer.requestPermissionsAsync).not.toHaveBeenCalled();
+  expect(pedometer.getStepCountAsync).not.toHaveBeenCalled();
 });
