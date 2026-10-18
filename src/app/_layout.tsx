@@ -59,7 +59,7 @@ function AuthRoutes() {
         <Stack.Screen name="workouts/splits" />
         <Stack.Screen name="workouts/plans" />
         <Stack.Screen name="workouts/start" />
-        <Stack.Screen name="workouts/session" />
+        <Stack.Screen name="workouts/session" options={{ fullScreenGestureEnabled: false }} />
         <Stack.Screen name="workouts/history" />
         <Stack.Screen name="workouts/training" />
         <Stack.Screen name="workouts/recovery" />

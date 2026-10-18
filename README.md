@@ -427,11 +427,19 @@ zero means no added external load. The independent rest timer starts after loggi
 ±15 seconds work in both modes. Only Timed has a total duration timer.
 
 The active draft is saved under your account on this device. **Resume saved
-workout** recovers it; leaving the screen keeps it. Finish saves only completed
+workout** recovers it. In-app back or native back offers **Save as draft**,
+**Discard workout** or **Continue workout**. Saving a draft waits for local
+storage and pauses clocks; failures keep the workout open. It does not finish
+or upload the session. On iPhone, start navigation back at the screen edge;
+swiping within the card only logs/undoes a set. Small vertical/release drift is
+tolerated; pulling the card back near the center cancels the swipe.
+Expo Router 57's web browser-history Back can bypass the dialog; automatic local
+draft recovery still applies. Use the in-app back link for the three choices.
+Finish saves only completed
 sets atomically, then shows real volume, duration (Timed only), records and your
 optional note. Failed network saves keep a frozen local copy for the same-ID retry;
 they are not reported as saved. **Done** clears the acknowledged device copy.
-Cancel asks before discarding an unfinished draft. Advanced multi-device offline
+Cancel opens the same draft/discard/continue choices. Advanced multi-device offline
 sync is v1.5; recovery requires the same signed-in account and intact app storage.
 Open **My workouts → Workout history** for a month calendar of completed sessions.
 Tap a marked day to open its workouts; select **History** to search by name,

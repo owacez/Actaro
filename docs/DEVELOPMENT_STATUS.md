@@ -4,6 +4,44 @@ Updated: 2026-10-18 (America/Los_Angeles).
 
 ## Overall
 
+Workout swipe/exit correction (2026-10-18): **DONE** for implementation/local
+verification; physical iPhone edge-back/gesture acceptance remains **DEFERRED**.
+Card travel now follows its measured width rather than stopping at 90px. A
+deliberate drag commits with small vertical/release drift; pulling back near the
+center cancels. Once claimed, a horizontal gesture resists scroll takeover;
+vertical scrolling and explicit edit/log/undo buttons remain available.
+
+The workout route disables full-screen native back gestures (enabled by default
+on iOS 26), retaining edge back. Native removal uses the installed SDK 57
+`expo-router/react-navigation` prevention hook. Native/in-app back and Cancel
+offer Save as draft, Discard workout and Continue workout. Draft save pauses
+clocks and awaits queued device storage; discard awaits local deletion. Failures
+keep the dialog/screen open. Neither action nor undo finishes/uploads a workout.
+Saved history is untouched. No dependency, migration or release-weight change.
+
+Known web limitation: an actual browser `history.back()` bypassed the SDK 57
+screen-removal listener in the isolated regression. The in-app back link provides
+all three choices; automatic draft recovery still applies to browser navigation.
+Browser-history dialog parity is **DEFERRED** and is not claimed verified.
+
+Verification: `npm.cmd run check` **PASS**, strict TypeScript/lint/format,
+321 Jest tests in 64 suites plus six dataset tests. Regressions cover swipe drift,
+deliberate cancellation/termination, undo without navigation/server finish,
+removal callback cancellation, failed local save/discard, acknowledgement before
+exit and paused draft clocks. `npm.cmd exec -- expo export --platform all
+--output-dir .actaro-tools/workout-gestures-export` **PASS**, 39 routes and
+iOS/Android/web JavaScript bundles. The isolated
+`node --env-file=.env .actaro-tools/check-workout-gestures-browser.mjs` **PASS**
+after allowing the local headless browser outside sandbox process restrictions:
+nine sample-data captures, left-log/right-undo, tap-edit, in-app back dialog,
+draft save/resume, discard, narrow/dark layout and zero live Supabase calls.
+`node .actaro-tools/check-workout-gestures-artifacts.mjs` **PASS**, 147 artifacts
+exclude the privileged key. The dialog capture was visually reviewed.
+
+Next three checks: on iPhone drag a card with slight vertical drift and undo;
+edge-back then Continue; edge-back then Save as draft/resume and Discard.
+Native device acceptance and v1.0 release approval remain deferred.
+
 Guided set logging (2026-10-18): **DONE** for implementation/local verification.
 The user's newer interaction direction supersedes the previous right-to-log flow:
 left swipe logs the entire card, right swipe undoes. One planned set is shown by

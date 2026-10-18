@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Pressable, ScrollView, View } from 'react-native';
 import { randomUUID } from 'expo-crypto';
+import { useNavigation } from 'expo-router';
+import { usePreventRemove, type NavigationAction } from 'expo-router/react-navigation';
 import {
   AuthButton,
   AuthCard,
@@ -12,7 +14,13 @@ import {
   AuthText,
   authStyles,
 } from '@/features/auth/auth-components';
-import { NavigationSurface, ScreenHeader, Meter, IconButton } from '@/components/product-ui';
+import {
+  NavigationSurface,
+  ScreenHeader,
+  Meter,
+  IconButton,
+  ActionSheet,
+} from '@/components/product-ui';
 import { SetLogRow } from './set-log-row';
 import { ProgressMetrics } from '@/features/progress/progress-components';
 import { useAppTheme } from '@/features/profile/theme-context';
@@ -43,6 +51,25 @@ function FinishWorkoutButton({
   );
 }
 
+function SaveDraftButton({
+  busy,
+  disabled,
+  onSave,
+}: {
+  busy: boolean;
+  disabled: boolean;
+  onSave: (time: number) => Promise<void>;
+}) {
+  return (
+    <AuthButton
+      title="Save as draft"
+      busy={busy}
+      disabled={disabled}
+      onPress={() => void onSave(Date.now())}
+    />
+  );
+}
+
 export function SessionScreen({ userId, onBack }: { userId: string; onBack: () => void }) {
   const [draft, setDraft] = useState<SessionDraft | null>(null),
     current = useRef<SessionDraft | null>(null);
@@ -56,11 +83,29 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
     [now, setNow] = useState(Date.now);
   const [showAllSets, setShowAllSets] = useState(false);
   const [focusedSet, setFocusedSet] = useState<{ exerciseId: string; setId: string } | null>(null);
+  const [exitOpen, setExitOpen] = useState(false),
+    [exitApproved, setExitApproved] = useState(false),
+    [exitAction, setExitAction] = useState<NavigationAction | null>(null);
+  const navigation = useNavigation();
   const alive = useRef(true),
     pending = useRef(false),
     revision = useRef(0);
   const { colors } = useAppTheme(),
     { notify } = useAuthFeedback();
+  usePreventRemove(
+    !exitApproved && (loading || (!!draft && draft.status !== 'saved')),
+    ({ data }) => {
+      if (pending.current) return;
+      setExitAction(data.action);
+      setExitOpen(true);
+    },
+  );
+  // Wait for removal prevention to be disabled before repeating the confirmed action.
+  useEffect(() => {
+    if (!exitApproved) return;
+    if (exitAction) navigation.dispatch(exitAction);
+    else onBack();
+  }, [exitApproved, exitAction, navigation, onBack]);
   useEffect(() => {
     alive.current = true;
     return () => {
@@ -160,7 +205,10 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
     setError(null);
     try {
       await sessionStore.discard(userId);
-      if (alive.current) onBack();
+      if (alive.current) {
+        setExitOpen(false);
+        setExitApproved(true);
+      }
     } catch {
       if (alive.current) setError('Unable to clear this device draft. Retry.');
     } finally {
@@ -168,15 +216,66 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
       if (alive.current) setBusy(false);
     }
   }
+  async function saveDraft(time: number) {
+    const previous = current.current;
+    if (!previous || pending.current) return;
+    pending.current = true;
+    setBusy(true);
+    setError(null);
+    try {
+      await persist(
+        previous.status === 'active'
+          ? {
+              ...previous,
+              clock: pauseClock(previous.clock, time),
+              rest: previous.rest ? pauseClock(previous.rest, time) : null,
+            }
+          : previous,
+      );
+      if (alive.current) {
+        setExitOpen(false);
+        setExitApproved(true);
+      }
+    } catch {
+      if (alive.current) setError('Draft could not be saved on this device. Stay here and retry.');
+    } finally {
+      pending.current = false;
+      if (alive.current) setBusy(false);
+    }
+  }
+  function continueWorkout() {
+    if (pending.current) return;
+    setExitOpen(false);
+    setExitAction(null);
+  }
+  const exitDialog = exitOpen && (
+    <ActionSheet title="Leave workout?" visible onClose={continueWorkout}>
+      <AuthText>
+        Save a draft on this device to resume later. Discard removes the local copy only; saved
+        history is kept.
+      </AuthText>
+      {error && <AuthNotice error>{error}</AuthNotice>}
+      <SaveDraftButton busy={busy} disabled={loading || !draft} onSave={saveDraft} />
+      <AuthButton
+        title="Discard workout"
+        outlined
+        disabled={busy || loading}
+        onPress={() => void leave()}
+      />
+      <AuthButton title="Continue workout" outlined disabled={busy} onPress={continueWorkout} />
+    </ActionSheet>
+  );
   if (loading)
     return (
       <AuthFrame>
         <AuthLoading>Restoring workout…</AuthLoading>
+        {exitDialog}
       </AuthFrame>
     );
   if (!draft)
     return (
       <AuthFrame>
+        {exitDialog}
         <AuthLink title="← My workouts" onPress={onBack} />
         <AuthText kind="heading">Saved workout</AuthText>
         {error ? (
@@ -215,6 +314,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
   if (!exercise)
     return (
       <AuthFrame>
+        {exitDialog}
         <AuthNotice error>Exercise unavailable. Reopen the saved workout.</AuthNotice>
       </AuthFrame>
     );
@@ -420,9 +520,20 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
         ) : undefined
       }
     >
-      <AuthLink title="← My workouts (workout kept)" disabled={busy} onPress={onBack} />
+      {exitDialog}
+      <AuthLink
+        title="← My workouts"
+        disabled={busy}
+        onPress={() => {
+          if (draft.status === 'saved') onBack();
+          else {
+            setExitAction(null);
+            setExitOpen(true);
+          }
+        }}
+      />
       {summary && <AuthText kind="heading">Workout summary</AuthText>}
-      {error && <AuthNotice error>{error}</AuthNotice>}
+      {error && !exitOpen && <AuthNotice error>{error}</AuthNotice>}
       {storageError && (
         <>
           <AuthNotice error>Unable to save on this device. Keep the app open and retry.</AuthNotice>
@@ -720,16 +831,13 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
               onPress={() => setIndex((value) => value + 1)}
             />
           </View>
-          <AuthLink title="Cancel workout" onPress={() => setDiscard(true)} />
-          {discard && (
-            <>
-              <AuthText>
-                Discard this local workout and its unsaved sets? It will not be added to history.
-              </AuthText>
-              <AuthButton title="Keep workout" outlined onPress={() => setDiscard(false)} />
-              <AuthButton title="Discard workout" busy={busy} onPress={() => void leave()} />
-            </>
-          )}
+          <AuthLink
+            title="Cancel workout"
+            onPress={() => {
+              setExitAction(null);
+              setExitOpen(true);
+            }}
+          />
         </>
       )}
     </AuthFrame>

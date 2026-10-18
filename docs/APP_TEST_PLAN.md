@@ -143,28 +143,28 @@ Do not repeatedly request links during a cooldown; report rate limits as a block
 
 ### Pass C — strength training (v0.3)
 
-| ID  | Feature / action                                                    | Expected result                                                                                                   |
-| --- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| C01 | Create a named workout with two exercises                           | Set planned sets, reps, load, rest and optional RPE/notes; save/reopen matches                                    |
-| C02 | Reorder/remove exercises; add/remove sets; discard an edit          | Saved order/targets are correct; discard leaves the saved template unchanged                                      |
-| C03 | Add a library exercise to an existing workout                       | Draft includes it; only Save makes the change permanent                                                           |
-| C04 | Create a seven-day split with workout/rest assignments              | Every weekday retains its assignment; one active split feeds Today's plan                                         |
-| C05 | Edit/switch/delete a split or delete an assigned template           | Existing history survives; missing assignments are explained                                                      |
-| C06 | Filter/preview/adopt a training plan                                | Actual exercises/schedule shown; adoption creates editable private workouts/split                                 |
-| C07 | Start a workout and inspect pre-start preview                       | Exercises and planned sets match; estimate is clearly an estimate                                                 |
-| C08 | Start Timed; pause/resume; background and return                    | Total timer behaves correctly and excludes paused time                                                            |
-| C09 | Start Log Only, including direct Log exercise                       | Set logging works without a total workout timer                                                                   |
-| C10 | Inspect image; swipe left to log, right to undo; tap to edit        | Uncropped image without white frame; one set advances at a time, bars update, right swipe restores the undone set |
-| C11 | Edit set reps/load/RPE/notes; add/remove sets; change exercise      | Actual values persist; Show all sets expands the list, bars revisit sets, manual completion buttons also work     |
-| C12 | Complete a set; pause/resume/skip rest; adjust ±15 seconds          | Independent rest timer follows controls in both modes                                                             |
-| C13 | Leave and resume; fully reopen with an active workout               | Same account recovers the device draft and its completed sets                                                     |
-| C14 | Finish with one completed and one uncompleted set                   | Summary/history include only completed sets; real totals, optional note and duration are correct                  |
-| C15 | Finish while offline, then reconnect and retry                      | No false saved message; acknowledged retry creates one session, not duplicates                                    |
-| C16 | Cancel an unfinished workout                                        | Confirmation allows keeping it; confirmed cancellation removes the draft                                          |
-| C17 | Workout history: previous/current month, marked date and empty date | Only completed sessions mark dates; selected day opens the correct records                                        |
-| C18 | History tab: search, Timed/Log Only filter, pagination              | Detailed records remain available and open correctly                                                              |
-| C19 | Edit/delete a recorded session, then revisit totals/records         | Changes persist; history, volume and PR facts recalculate; templates remain                                       |
-| C20 | Training summary and recovery check                                 | Frequency/volume/muscle allocation reflect logs; energy/soreness/sleep and optional stress/notes save/reopen      |
+| ID  | Feature / action                                                                               | Expected result                                                                                                               |
+| --- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| C01 | Create a named workout with two exercises                                                      | Set planned sets, reps, load, rest and optional RPE/notes; save/reopen matches                                                |
+| C02 | Reorder/remove exercises; add/remove sets; discard an edit                                     | Saved order/targets are correct; discard leaves the saved template unchanged                                                  |
+| C03 | Add a library exercise to an existing workout                                                  | Draft includes it; only Save makes the change permanent                                                                       |
+| C04 | Create a seven-day split with workout/rest assignments                                         | Every weekday retains its assignment; one active split feeds Today's plan                                                     |
+| C05 | Edit/switch/delete a split or delete an assigned template                                      | Existing history survives; missing assignments are explained                                                                  |
+| C06 | Filter/preview/adopt a training plan                                                           | Actual exercises/schedule shown; adoption creates editable private workouts/split                                             |
+| C07 | Start a workout and inspect pre-start preview                                                  | Exercises and planned sets match; estimate is clearly an estimate                                                             |
+| C08 | Start Timed; pause/resume; background and return                                               | Total timer behaves correctly and excludes paused time                                                                        |
+| C09 | Start Log Only, including direct Log exercise                                                  | Set logging works without a total workout timer                                                                               |
+| C10 | Inspect image; swipe left/right with slight vertical drift; pull back near center; tap to edit | Drag follows the card, slight drift tolerates completion, returning to center cancels; undo stays in the active workout       |
+| C11 | Edit set reps/load/RPE/notes; add/remove sets; change exercise                                 | Actual values persist; Show all sets expands the list, bars revisit sets, manual completion buttons also work                 |
+| C12 | Complete a set; pause/resume/skip rest; adjust ±15 seconds                                     | Independent rest timer follows controls in both modes                                                                         |
+| C13 | Use native edge-back/in-app back; Save as draft; resume and reopen                             | Three-choice dialog; local save pauses clocks and preserves sets; resume recovers the same draft without finishing            |
+| C14 | Finish with one completed and one uncompleted set                                              | Summary/history include only completed sets; real totals, optional note and duration are correct                              |
+| C15 | Finish while offline, then reconnect and retry                                                 | No false saved message; acknowledged retry creates one session, not duplicates                                                |
+| C16 | Back/Cancel: Continue workout, then Discard workout; simulate storage failure                  | Continue stays; discard removes only device draft after acknowledgement; storage failure keeps dialog open and history intact |
+| C17 | Workout history: previous/current month, marked date and empty date                            | Only completed sessions mark dates; selected day opens the correct records                                                    |
+| C18 | History tab: search, Timed/Log Only filter, pagination                                         | Detailed records remain available and open correctly                                                                          |
+| C19 | Edit/delete a recorded session, then revisit totals/records                                    | Changes persist; history, volume and PR facts recalculate; templates remain                                                   |
+| C20 | Training summary and recovery check                                                            | Frequency/volume/muscle allocation reflect logs; energy/soreness/sleep and optional stress/notes save/reopen                  |
 
 Useful calculation: two completed sets of 8 reps at 10 kg give 16 reps and
 160 kg external volume. Blank load is unknown and excluded from known-load volume;

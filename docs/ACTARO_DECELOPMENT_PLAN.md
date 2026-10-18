@@ -646,6 +646,11 @@ At minimum, an active session should survive:
 
 Full offline sync is later.
 
+User testing revision (2026-10-18): native/in-app back offers save draft,
+discard or continue. Save waits for local storage and pauses clocks; storage
+failure keeps the workout open. Card undo cannot finish/navigate. Keep native
+back at the screen edge to avoid stealing horizontal set gestures. No weight change.
+
 ### v0.3 Acceptance Criteria
 
 - Workout is a dedicated route

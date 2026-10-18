@@ -1,10 +1,21 @@
 import { afterEach, beforeEach, expect, jest, test } from '@jest/globals';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { SessionScreen } from '@/features/workouts/session-screen';
 import { sessionStore } from '@/features/workouts/session-store';
 import { sessionService } from '@/features/workouts/session-service';
 import { FeedbackTestRoot } from './helpers/feedback-root';
 import { sessionFixture, sessionOwner } from './helpers/session-fixture';
+let mockPreventRemove = false;
+let mockRemoval: (options: { data: { action: { type: string } } }) => void = () => {};
+const mockDispatch = jest.fn();
+const mockNavigation = { dispatch: mockDispatch };
+jest.mock('expo-router', () => ({ useNavigation: () => mockNavigation }));
+jest.mock('expo-router/react-navigation', () => ({
+  usePreventRemove: (prevent: boolean, callback: typeof mockRemoval) => {
+    mockPreventRemove = prevent;
+    mockRemoval = callback;
+  },
+}));
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
 jest.mock('expo-crypto', () => ({ randomUUID: () => '00000000-0000-4000-8000-000000000007' }));
 jest.mock('@/features/workouts/session-store', () => ({
@@ -16,6 +27,7 @@ const store = jest.mocked(sessionStore),
   onBack = jest.fn();
 beforeEach(() => {
   jest.clearAllMocks();
+  mockPreventRemove = false;
   store.read.mockResolvedValue(sessionFixture());
   store.write.mockResolvedValue(undefined);
   store.discard.mockResolvedValue(undefined);
@@ -114,6 +126,9 @@ test('three planned sets advance one at a time, support undo, and expand only on
   await fireEvent.press(screen.getByRole('button', { name: 'Undo last set' }));
   await screen.findByRole('button', { name: 'Complete set 1' });
   expect(screen.getByText('0 of 3 sets logged')).toBeTruthy();
+  expect(onBack).not.toHaveBeenCalled();
+  expect(mockDispatch).not.toHaveBeenCalled();
+  expect(service.save).not.toHaveBeenCalled();
   for (const number of [1, 2, 3]) {
     await fireEvent.press(screen.getByRole('button', { name: `Complete set ${number}` }));
   }
@@ -129,4 +144,55 @@ test('three planned sets advance one at a time, support undo, and expand only on
   expect(screen.queryByRole('button', { name: 'Unmark set 2' })).toBeNull();
   const saved = store.write.mock.calls.at(-1)?.[0];
   expect(saved?.exercises[0].sets.map((set) => !!set.completedAt)).toEqual([true, true, true]);
+});
+
+test('system back opens a choice, cancel stays, and saving a draft waits for local acknowledgement', async () => {
+  const fixture = sessionFixture();
+  store.read.mockResolvedValue(fixture);
+  await render(
+    <FeedbackTestRoot>
+      <SessionScreen userId={sessionOwner} onBack={onBack} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByRole('button', { name: 'Complete set 1' });
+  expect(mockPreventRemove).toBe(true);
+  await act(() => mockRemoval({ data: { action: { type: 'GO_BACK' } } }));
+  await screen.findByText('Leave workout?');
+  await fireEvent.press(screen.getByRole('button', { name: 'Continue workout' }));
+  expect(screen.queryByText('Leave workout?')).toBeNull();
+  expect(mockDispatch).not.toHaveBeenCalled();
+  await act(() => mockRemoval({ data: { action: { type: 'GO_BACK' } } }));
+  store.write.mockRejectedValueOnce(new Error('disk full'));
+  await fireEvent.press(screen.getByRole('button', { name: 'Save as draft' }));
+  await screen.findByText('Draft could not be saved on this device. Stay here and retry.');
+  expect(mockDispatch).not.toHaveBeenCalled();
+  expect(mockPreventRemove).toBe(true);
+  await fireEvent.press(screen.getByRole('button', { name: 'Save as draft' }));
+  await waitFor(() => expect(mockDispatch).toHaveBeenCalledWith({ type: 'GO_BACK' }));
+  expect(mockPreventRemove).toBe(false);
+  const saved = store.write.mock.calls.at(-1)?.[0];
+  expect(saved?.status).toBe('active');
+  expect(saved?.clock.runningSince).toBeNull();
+  expect(saved?.exercises).toEqual(fixture.exercises);
+  expect(service.save).not.toHaveBeenCalled();
+  expect(store.discard).not.toHaveBeenCalled();
+});
+
+test('the back link uses the same dialog and discard failure cannot navigate or finish', async () => {
+  await render(
+    <FeedbackTestRoot>
+      <SessionScreen userId={sessionOwner} onBack={onBack} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByRole('button', { name: 'Complete set 1' });
+  await fireEvent.press(screen.getByRole('button', { name: '← My workouts' }));
+  await screen.findByText('Leave workout?');
+  store.discard.mockRejectedValueOnce(new Error('disk error'));
+  await fireEvent.press(screen.getByRole('button', { name: 'Discard workout' }));
+  await screen.findByText('Unable to clear this device draft. Retry.');
+  expect(onBack).not.toHaveBeenCalled();
+  expect(mockPreventRemove).toBe(true);
+  await fireEvent.press(screen.getByRole('button', { name: 'Discard workout' }));
+  await waitFor(() => expect(onBack).toHaveBeenCalledTimes(1));
+  expect(service.save).not.toHaveBeenCalled();
 });

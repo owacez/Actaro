@@ -36,34 +36,64 @@ export function SetLogRow({
 }>) {
   const [editing, setEditing] = useState(false);
   const [offset] = useState(() => new Animated.Value(0));
+  const [width, setWidth] = useState(320);
   const { colors } = useAppTheme();
-  const actions = useRef({ completed, undoAvailable, onLog, onUndo });
+  const actions = useRef({ completed, undoAvailable, onLog, onUndo, width });
   useLayoutEffect(() => {
-    actions.current = { completed, undoAvailable, onLog, onUndo };
-  }, [completed, undoAvailable, onLog, onUndo]);
+    actions.current = { completed, undoAvailable, onLog, onUndo, width };
+  }, [completed, undoAvailable, onLog, onUndo, width]);
   // Keep the responder alive across timer renders, including during a drag.
   const [pan, setPan] = useState<PanResponderInstance | null>(null);
   useLayoutEffect(() => {
-    const reset = () => offset.setValue(0);
+    let furthest = 0;
+    const reset = () => {
+      furthest = 0;
+      Animated.spring(offset, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 180,
+        friction: 22,
+      }).start();
+    };
+    const horizontal = (_: unknown, gesture: { dx: number; dy: number }) =>
+      Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.1;
     setPan(
       PanResponder.create({
-        onMoveShouldSetPanResponder: (_, gesture) =>
-          Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.5,
-        onPanResponderMove: (_, gesture) =>
-          offset.setValue(Math.max(-90, Math.min(90, gesture.dx))),
+        onMoveShouldSetPanResponderCapture: horizontal,
+        onMoveShouldSetPanResponder: horizontal,
+        onPanResponderGrant: () => {
+          offset.stopAnimation();
+          furthest = 0;
+        },
+        onPanResponderTerminationRequest: () => false,
+        onPanResponderMove: (_, gesture) => {
+          if (Math.abs(gesture.dx) > Math.abs(furthest)) furthest = gesture.dx;
+          const travel = Math.max(90, actions.current.width - 32);
+          offset.setValue(Math.max(-travel, Math.min(travel, gesture.dx)));
+        },
         onPanResponderRelease: (_, gesture) => {
           const current = actions.current;
-          if (gesture.dx <= -72 && !current.completed) current.onLog();
-          if (gesture.dx >= 72 && current.undoAvailable) current.onUndo();
+          const threshold = Math.max(90, Math.min(140, current.width * 0.32));
+          const committed =
+            Math.abs(gesture.dx) >= threshold ||
+            (Math.abs(furthest) >= threshold &&
+              gesture.dx * furthest > 0 &&
+              Math.abs(gesture.dx) >= threshold * 0.7);
+          if (committed && gesture.dx < 0 && !current.completed) current.onLog();
+          if (committed && gesture.dx > 0 && current.undoAvailable) current.onUndo();
           reset();
         },
         onPanResponderTerminate: reset,
       }),
     );
+    return () => offset.stopAnimation();
   }, [offset]);
   return (
     <View style={{ gap: 8 }}>
-      <View style={{ borderRadius: 20, overflow: 'hidden', backgroundColor: colors.fill }}>
+      <View
+        onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
+        style={{ borderRadius: 20, overflow: 'hidden', backgroundColor: colors.fill }}
+      >
         <View
           pointerEvents="none"
           accessible={false}

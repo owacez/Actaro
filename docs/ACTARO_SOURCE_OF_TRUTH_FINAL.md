@@ -529,6 +529,8 @@ Fast set logging (user testing revision, 2026-10-18):
 - Set progress bars below the technique/description change color after logging and let users revisit any set. Show all sets reveals the complete list; it stays hidden by default.
 - Tapping the card opens its actual-value editor. Keep explicit edit/log/undo buttons for accessibility and non-touch use.
 - Accessible buttons offer the same actions. Repeated log gestures must not toggle a completed set off.
+- The card follows a deliberate horizontal drag, tolerates small vertical/release drift and cancels when pulled back near its starting point. Undo must never finish or leave the workout.
+- Native back and in-app back offer Save as draft, Discard workout and Continue workout. Saving waits for device storage, pauses clocks and preserves performed sets without finishing the session. Failed storage keeps the screen open. Reserve native back for the screen edge so it cannot compete with card undo.
 - Edit exposes actual reps/load, optional RPE/notes and removal; Add set remains available. Explicit removal is separate from undoing completion.
 - Workout history opens on a month calendar marked from completed sessions. History opens the detailed searchable list and its edit/delete controls.
 
