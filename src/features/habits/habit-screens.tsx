@@ -5,6 +5,9 @@ import { View } from 'react-native';
 import { ScreenHeader, ActionSheet, IconButton } from '@/components/product-ui';
 import { NumberStepper } from '@/components/number-stepper';
 import { RecordCalendar } from '@/components/record-calendar';
+import { DatePicker } from '@/components/date-picker';
+import { TimePicker } from '@/components/time-picker';
+import { CompletionMark } from '@/components/completion-mark';
 import {
   AuthButton,
   AuthCard,
@@ -30,6 +33,8 @@ import {
 } from '@/features/nutrition/nutrition-model';
 import {
   habitActive,
+  habitTypeInfo,
+  acknowledgedHabitLog,
   habitConsistency,
   habitKinds,
   habitPayload,
@@ -61,7 +66,7 @@ function Progress({ record, today }: { record: HabitRecord; today: string }) {
     mode = habitVersion(record, today)?.motivation;
   if (mode === 'none') return null;
   return (
-    <AuthText>
+    <AuthText kind="muted">
       {mode === 'streak'
         ? `${result.atLeast ? '≥' : ''}${result.streak} scheduled ${record.kind === 'frequency' ? 'week' : 'day'} streak`
         : mode === 'weekly'
@@ -71,8 +76,7 @@ function Progress({ record, today }: { record: HabitRecord; today: string }) {
           : result.percentage === null
             ? 'No closed or completed actions yet'
             : `${formatNumber(result.percentage)}% recent completion`}{' '}
-      · History window: 90 dates. Rest days and open periods are excluded; partial frequency weeks
-      are excluded.
+      · Rest days are excluded.
     </AuthText>
   );
 }
@@ -107,6 +111,10 @@ export function HabitsScreen({
   return (
     <AuthFrame header={<ScreenHeader title="Habits" />}>
       <AuthLink title="← You" disabled={action.locked} onPress={onBack} />
+      <AuthText>
+        Habits are actions you repeat. Choose a schedule, then check off or record what you did.
+        Goals measure outcomes from your saved records.
+      </AuthText>
       <AuthButton title="Create habit" disabled={action.locked} onPress={() => onOpen('edit')} />
       <View style={authStyles.choices}>
         <AuthChoice
@@ -150,10 +158,26 @@ export function HabitsScreen({
               active = habitActive(record, today);
             return (
               <AuthCard key={record.id}>
-                <AuthText kind="heading">{record.name}</AuthText>
+                <View style={authStyles.row}>
+                  <View style={{ flex: 1 }}>
+                    <AuthText kind="heading">{record.name}</AuthText>
+                  </View>
+                  <CompletionMark done={habitReached(record, value, version?.target ?? 0)} />
+                  <IconButton
+                    label={`Manage ${record.name}`}
+                    name={{ ios: 'ellipsis', android: 'more_horiz', web: 'more_horiz' }}
+                    disabled={action.locked}
+                    onPress={() => setMenu(record.id)}
+                  />
+                </View>
                 <AuthText>
-                  {record.kind} · {record.kind === 'frequency' ? 'weekly target' : 'daily target'}{' '}
-                  {formatNumber(version?.target ?? 0)} {record.unit} · {record.time_zone}
+                  {record.kind === 'boolean'
+                    ? 'Check off once'
+                    : `${formatNumber(version?.target ?? 0)} ${record.unit} ${record.kind === 'frequency' ? 'per week' : 'per scheduled day'}`}
+                  {record.kind === 'avoidance' ? ' or fewer' : ''}
+                </AuthText>
+                <AuthText kind="muted">
+                  {version?.weekdays.map((day) => weekdays[day - 1]).join(' · ')}
                 </AuthText>
                 <AuthText>
                   {record.start_date > today
@@ -174,48 +198,63 @@ export function HabitsScreen({
                   <AuthText>Reminder time {version.reminder_time}</AuthText>
                 )}
                 <View style={authStyles.choices}>
-                  {active && (
+                  {active && (scheduled || record.kind === 'frequency') && (
                     <>
                       {record.kind === 'boolean' && (
-                        <AuthLink
-                          title={`Mark ${record.name} done`}
+                        <AuthButton
+                          title={value === 1 ? 'Done for today' : 'Mark done'}
+                          accessibilityLabel={`Mark ${record.name} done`}
+                          outlined
                           disabled={action.locked || value === 1}
                           onPress={() =>
                             void action.run(
                               () => habitService.log(userId, record.id, today, 1, ''),
                               'Habit logged',
-                              refresh,
+                              () =>
+                                resource.updateData((data) => ({
+                                  ...data,
+                                  rows: data.rows.map((row) =>
+                                    row.id === record.id
+                                      ? acknowledgedHabitLog(row, today, 1)
+                                      : row,
+                                  ),
+                                })),
                             )
                           }
                         />
                       )}
                       {record.kind === 'avoidance' && (
-                        <AuthLink
-                          title={`No occurrences: ${record.name}`}
+                        <AuthButton
+                          title="No occurrences"
+                          accessibilityLabel={`No occurrences: ${record.name}`}
+                          outlined
                           disabled={action.locked || value === 0}
                           onPress={() =>
                             void action.run(
                               () => habitService.log(userId, record.id, today, 0, ''),
                               'Habit logged',
-                              refresh,
+                              () =>
+                                resource.updateData((data) => ({
+                                  ...data,
+                                  rows: data.rows.map((row) =>
+                                    row.id === record.id
+                                      ? acknowledgedHabitLog(row, today, 0)
+                                      : row,
+                                  ),
+                                })),
                             )
                           }
                         />
                       )}
                       <AuthLink
-                        title={`Log ${record.name}`}
+                        title="Add or edit log"
+                        accessibilityLabel={`Log ${record.name}`}
                         disabled={action.locked}
                         onPress={() => onOpen('log', record.id, today)}
                       />
                     </>
                   )}
                 </View>
-                <IconButton
-                  label={`Manage ${record.name}`}
-                  name={{ ios: 'ellipsis', android: 'more_horiz', web: 'more_horiz' }}
-                  disabled={action.locked}
-                  onPress={() => setMenu(record.id)}
-                />
                 <ActionSheet
                   title={record.name}
                   visible={menu === record.id}
@@ -392,7 +431,7 @@ export function HabitEditor({
             {habitKinds.map((kind) => (
               <AuthChoice
                 key={kind}
-                title={kind}
+                title={habitTypeInfo[kind].label}
                 selected={form.kind === kind}
                 disabled={action.locked || !!habitId}
                 onPress={() =>
@@ -413,6 +452,7 @@ export function HabitEditor({
               />
             ))}
           </View>
+          <AuthText>{habitTypeInfo[form.kind].detail}</AuthText>
           {form.kind === 'numeric' && (
             <AuthInput
               label="Tracking unit"
@@ -460,29 +500,43 @@ export function HabitEditor({
               />
             ))}
           </View>
-          <AuthInput
-            label="Start date (YYYY-MM-DD)"
+          <DatePicker
+            label="Start date"
             value={form.start}
-            editable={!action.locked && !habitId}
-            onChangeText={(start) => setForm((current) => ({ ...current, start }))}
+            disabled={action.locked || !!habitId}
+            onChange={(start) => setForm((current) => ({ ...current, start }))}
           />
-          <AuthInput
-            label="End date (optional YYYY-MM-DD)"
+          <DatePicker
+            label="End date (optional)"
             value={form.end}
-            editable={!action.locked}
-            onChangeText={(end) => setForm((current) => ({ ...current, end }))}
+            referenceDate={form.start}
+            disabled={action.locked}
+            onChange={(end) => setForm((current) => ({ ...current, end }))}
           />
+          {!!form.end && (
+            <AuthLink
+              title="No end date"
+              disabled={action.locked}
+              onPress={() => setForm((current) => ({ ...current, end: '' }))}
+            />
+          )}
           <AuthText>
             Schedule time zone: {form.zone}. Type, unit, start and time zone stay fixed after
             creation. Target/schedule edits apply from today; earlier results keep their earlier
             settings.
           </AuthText>
-          <AuthInput
-            label="Reminder time (optional HH:MM)"
+          <TimePicker
             value={form.reminder}
-            editable={!action.locked}
-            onChangeText={(reminder) => setForm((current) => ({ ...current, reminder }))}
+            disabled={action.locked}
+            onChange={(reminder) => setForm((current) => ({ ...current, reminder }))}
           />
+          {!!form.reminder && (
+            <AuthLink
+              title="No reminder"
+              disabled={action.locked}
+              onPress={() => setForm((current) => ({ ...current, reminder: '' }))}
+            />
+          )}
           <AuthText>
             Shown as due in the app on scheduled days. Enable device alerts in Preferences → Manage
             habit reminders.

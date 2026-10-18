@@ -1,6 +1,6 @@
 import { beforeEach, expect, jest, test } from '@jest/globals';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import { HabitEditor, HabitLogScreen } from '@/features/habits/habit-screens';
+import { HabitsScreen, HabitEditor, HabitLogScreen } from '@/features/habits/habit-screens';
 import { habitService } from '@/features/habits/habit-service';
 import { profileService } from '@/features/profile/profile-service';
 import type { HabitRecord } from '@/features/habits/habit-model';
@@ -13,8 +13,19 @@ jest.mock('@/features/profile/profile-service', () => ({
   profileService: { getPreferences: jest.fn() },
 }));
 jest.mock('@/features/habits/habit-service', () => ({
-  habitService: { load: jest.fn(), save: jest.fn(), log: jest.fn(), removeLog: jest.fn() },
+  habitService: {
+    list: jest.fn(),
+    load: jest.fn(),
+    save: jest.fn(),
+    log: jest.fn(),
+    removeLog: jest.fn(),
+  },
 }));
+jest.mock('@react-native-community/datetimepicker', () => {
+  const React = jest.requireActual<typeof import('react')>('react');
+  const { View } = jest.requireActual<typeof import('react-native')>('react-native');
+  return (props: object) => React.createElement(View, { ...props, testID: 'native-time-picker' });
+});
 const service = jest.mocked(habitService),
   owner = nutritionContext().preferences.user_id;
 const record: HabitRecord = {
@@ -49,6 +60,11 @@ beforeEach(() => {
   service.load.mockResolvedValue({ record, today: '2026-10-14', until: '2026-10-14' });
   service.save.mockResolvedValue(undefined);
   service.log.mockResolvedValue(undefined);
+  service.list.mockResolvedValue({
+    preferences: nutritionContext().preferences,
+    today: '2026-10-14',
+    rows: [record],
+  });
 });
 test('creation requires a name and persists the chosen type/schedule/reminder/motivation', async () => {
   const saved = jest.fn();
@@ -61,9 +77,17 @@ test('creation requires a name and persists the chosen type/schedule/reminder/mo
   await fireEvent.press(screen.getByRole('button', { name: 'Save habit' }));
   expect(service.save).not.toHaveBeenCalled();
   await fireEvent.changeText(screen.getByLabelText('Habit name'), 'Read');
-  await fireEvent.press(screen.getByRole('button', { name: 'duration' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Minutes' }));
   await fireEvent.changeText(screen.getByLabelText('Daily target (minutes)'), '20');
-  await fireEvent.changeText(screen.getByLabelText('Reminder time (optional HH:MM)'), '18:30');
+  await fireEvent.press(screen.getByRole('button', { name: 'Reminder time: Not set' }));
+  await fireEvent(
+    screen.getByTestId('native-time-picker'),
+    'valueChange',
+    {},
+    new Date(2000, 0, 1, 18, 30),
+  );
+  if (screen.queryByRole('button', { name: 'Done' }))
+    await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
   await fireEvent.press(screen.getByRole('button', { name: 'None' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Save habit' }));
   await waitFor(() => expect(saved).toHaveBeenCalled());
@@ -77,6 +101,24 @@ test('creation requires a name and persists the chosen type/schedule/reminder/mo
       reminder: '18:30',
     }),
   );
+});
+
+test('a quick habit completion stays visible and updates in place only after an acknowledged retry', async () => {
+  service.log.mockRejectedValueOnce(new Error('offline')).mockResolvedValue(undefined);
+  await render(
+    <FeedbackTestRoot>
+      <HabitsScreen userId={owner} onBack={jest.fn()} onOpen={jest.fn()} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByRole('button', { name: 'No occurrences: Avoidance habit' });
+  await fireEvent.press(screen.getByRole('button', { name: 'No occurrences: Avoidance habit' }));
+  await screen.findByRole('button', { name: 'Retry saved request' });
+  expect(screen.queryByText('Target met')).toBeNull();
+  expect(screen.queryByText('Loading your records…')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Retry saved request' }));
+  await screen.findByText('Target met');
+  expect(service.list).toHaveBeenCalledTimes(1);
+  expect(service.log.mock.calls[1]).toEqual(service.log.mock.calls[0]);
 });
 test('unlogged avoidance stays blank; explicit zero logs with a stable failed-save retry', async () => {
   service.log.mockRejectedValueOnce(new Error('network'));

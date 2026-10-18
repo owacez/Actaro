@@ -11,6 +11,54 @@ export type HabitLog = Database['public']['Tables']['habit_logs']['Row'];
 export type HabitRecord = Habit & { habit_versions: HabitVersion[]; habit_logs: HabitLog[] };
 export const habitKinds = ['boolean', 'numeric', 'duration', 'frequency', 'avoidance'] as const;
 export type HabitKind = (typeof habitKinds)[number];
+export const habitTypeInfo = {
+  boolean: { label: 'Check off', detail: 'A simple done/not done action, such as stretching.' },
+  numeric: {
+    label: 'Count or amount',
+    detail: 'Track a daily amount, such as glasses of water or pages read.',
+  },
+  duration: {
+    label: 'Minutes',
+    detail: 'Record time spent each day, such as 20 minutes of reading.',
+  },
+  frequency: {
+    label: 'Times per week',
+    detail: 'Aim for a total number of occurrences from Monday to Sunday.',
+  },
+  avoidance: {
+    label: 'Limit a habit',
+    detail: 'Stay at or below a daily limit. Log zero when there were no occurrences.',
+  },
+};
+
+// Patch only after the server acknowledges the date-keyed log; never optimistic success.
+export function acknowledgedHabitLog(
+  record: HabitRecord,
+  date: string,
+  value: number,
+  notes = '',
+): HabitRecord {
+  const version = habitVersion(record, date);
+  if (!version) return record;
+  const old = record.habit_logs.find((log) => log.local_date === date);
+  const now = new Date().toISOString();
+  return {
+    ...record,
+    habit_logs: [
+      ...record.habit_logs.filter((log) => log.local_date !== date),
+      {
+        habit_id: record.id,
+        user_id: record.user_id,
+        local_date: date,
+        value,
+        notes,
+        version_id: version.id,
+        created_at: old?.created_at ?? now,
+        updated_at: now,
+      },
+    ],
+  };
+}
 export const motivationModes = [
   { key: 'streak', label: 'Streaks' },
   { key: 'weekly', label: 'Weekly consistency' },

@@ -122,6 +122,7 @@ export function AuthInput({
 
 export function AuthButton({
   title,
+  accessibilityLabel,
   onPress,
   busy = false,
   disabled = false,
@@ -129,6 +130,7 @@ export function AuthButton({
   selected,
 }: {
   title: string;
+  accessibilityLabel?: string;
   onPress: () => void;
   busy?: boolean;
   disabled?: boolean;
@@ -140,7 +142,7 @@ export function AuthButton({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={title}
+      accessibilityLabel={accessibilityLabel ?? title}
       accessibilityState={{ disabled: disabled || busy, busy, selected }}
       disabled={disabled || busy}
       onPress={onPress}

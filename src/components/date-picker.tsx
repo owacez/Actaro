@@ -16,15 +16,19 @@ export function DatePicker({
   max,
   label = 'Choose date',
   disabled = false,
+  referenceDate,
 }: {
   value: string;
   onChange: (date: string) => void;
   max?: string;
   label?: string;
   disabled?: boolean;
+  referenceDate?: string;
 }) {
+  const [today] = useState(() => iso(new Date()));
+  const anchor = value || referenceDate || today;
   const [open, setOpen] = useState(false),
-    [month, setMonth] = useState(value.slice(0, 7)),
+    [month, setMonth] = useState(anchor.slice(0, 7)),
     { colors } = useAppTheme();
   const start = asDate(month + '-01'),
     offset = (start.getDay() + 6) % 7,
@@ -35,11 +39,11 @@ export function DatePicker({
   return (
     <>
       <AuthButton
-        title={label + ': ' + value}
+        title={label + ': ' + (value || 'Not set')}
         outlined
         disabled={disabled}
         onPress={() => {
-          setMonth(value.slice(0, 7));
+          setMonth(anchor.slice(0, 7));
           setOpen(true);
         }}
       />

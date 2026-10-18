@@ -2,7 +2,8 @@ import { useCallback, useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import { Meter, ScreenHeader } from '@/components/product-ui';
 import { useAppTheme } from '@/features/profile/theme-context';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { DatePicker } from '@/components/date-picker';
 import { randomUUID } from 'expo-crypto';
 import {
   AuthButton,
@@ -54,7 +55,18 @@ export function GoalsScreen({
   );
   return (
     <AuthFrame header={<ScreenHeader title="Goals" />}>
-      <AuthLink title="← More" disabled={action.locked} onPress={onBack} />
+      <AuthLink title="← You" disabled={action.locked} onPress={onBack} />
+      <AuthCard>
+        <AuthText kind="heading">A goal measures your progress</AuthText>
+        <AuthText>
+          Choose an outcome, such as 3 workouts a week or a target bodyweight. Keep logging in
+          Train, Food, Steps, Body records or Habits; your goal updates from those records
+          automatically.
+        </AuthText>
+        <AuthText kind="muted">
+          A habit is the action you repeat. A goal is the result you want to reach.
+        </AuthText>
+      </AuthCard>
       <AuthButton title="Create goal" disabled={action.locked} onPress={() => onEdit()} />
       <View style={authStyles.choices}>
         <AuthChoice
@@ -90,18 +102,16 @@ export function GoalsScreen({
                   {goal.direction === 'at_most' ? 'At most' : 'At least'}{' '}
                   {formatNumber(goal.target * factor)} {unit}
                 </AuthText>
-                <AuthText>
-                  {result.status} ·{' '}
-                  {result.percentage === null
-                    ? 'Progress unavailable'
-                    : formatNumber(result.percentage) + '%'}{' '}
-                  ·{' '}
+                <AuthText kind="metric">
                   {result.value === null
                     ? 'Not recorded'
                     : formatNumber(result.value * factor) + ' ' + unit}
                 </AuthText>
-                <AuthText kind="metric">
-                  {result.percentage === null ? '—' : formatNumber(result.percentage) + '%'}
+                <AuthText>
+                  {result.status}
+                  {result.percentage === null
+                    ? ''
+                    : ' · ' + formatNumber(result.percentage) + '% from your starting value'}
                 </AuthText>
                 {result.percentage !== null && (
                   <Meter value={result.percentage} target={100} color={colors.accent} />
@@ -117,6 +127,26 @@ export function GoalsScreen({
                   </AuthText>
                 )}
                 <View style={authStyles.choices}>
+                  {!archived && (
+                    <AuthLink
+                      title={`Update records for ${goal.name}`}
+                      disabled={action.locked}
+                      onPress={() => {
+                        const category = metricInfo(goal.metric).category;
+                        router.push(
+                          category === 'Body'
+                            ? '/body'
+                            : category === 'Training'
+                              ? '/workouts'
+                              : category === 'Activity'
+                                ? '/activity'
+                                : category === 'Nutrition'
+                                  ? '/nutrition'
+                                  : '/habits',
+                        );
+                      }}
+                    />
+                  )}
                   {!archived && (
                     <AuthLink
                       title={`Edit goal ${goal.name}`}
@@ -170,10 +200,10 @@ export function GoalsScreen({
           })}
         </>
       )}
-      <AuthNotice>
-        Running distance, pace and event goals arrive with v1.2. Daily manual distance is supported
-        now. A target being met today does not lock future daily or weekly results.
-      </AuthNotice>
+      <AuthText kind="muted">
+        Daily and weekly goals use the current period. Meeting a target today does not complete
+        future days or weeks.
+      </AuthText>
       <RecordSaveFeedback action={action} />
     </AuthFrame>
   );
@@ -446,6 +476,10 @@ export function GoalEditor({
               onChangeText={(measurement) => setForm((current) => ({ ...current, measurement }))}
             />
           )}
+          <AuthText>
+            Your baseline is where you started; your target is where you want to get. Actual
+            progress comes from your saved records, not from editing these two values.
+          </AuthText>
           <AuthInput
             label={`Baseline (${unit})`}
             value={form.baseline}
@@ -485,18 +519,26 @@ export function GoalEditor({
               onChangeText={(tolerance) => setForm((current) => ({ ...current, tolerance }))}
             />
           )}
-          <AuthInput
-            label="Goal start date (YYYY-MM-DD)"
+          <DatePicker
+            label="Goal start date"
             value={form.start}
-            editable={!action.locked}
-            onChangeText={(start) => setForm((current) => ({ ...current, start }))}
+            disabled={action.locked}
+            onChange={(start) => setForm((current) => ({ ...current, start }))}
           />
-          <AuthInput
-            label="Goal target date (optional YYYY-MM-DD)"
+          <DatePicker
+            label="Goal target date (optional)"
             value={form.end}
-            editable={!action.locked}
-            onChangeText={(end) => setForm((current) => ({ ...current, end }))}
+            referenceDate={form.start}
+            disabled={action.locked}
+            onChange={(end) => setForm((current) => ({ ...current, end }))}
           />
+          {!!form.end && (
+            <AuthLink
+              title="No target date"
+              disabled={action.locked}
+              onPress={() => setForm((current) => ({ ...current, end: '' }))}
+            />
+          )}
           <AuthText>
             Schedule time zone: {form.zone}. Daily and weekly goals read their current period; a
             past target date freezes the source date at that deadline. Edit targets freely; source
