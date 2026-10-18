@@ -16,7 +16,7 @@ jest.mock('@/features/goals/goal-service', () => ({
   goalService: { load: jest.fn(), save: jest.fn() },
 }));
 jest.mock('@/features/body/body-service', () => ({
-  bodyService: { history: jest.fn(), save: jest.fn(), remove: jest.fn() },
+  bodyService: { history: jest.fn(), form: jest.fn(), save: jest.fn(), remove: jest.fn() },
 }));
 jest.mock('@/features/activity/activity-service', () => ({
   activityService: { load: jest.fn(), save: jest.fn(), target: jest.fn(), remove: jest.fn() },
@@ -27,6 +27,22 @@ const owner = nutritionContext().preferences.user_id,
 beforeEach(() => {
   jest.clearAllMocks();
   const preferences = nutritionContext().preferences;
+  jest.mocked(bodyService.form).mockResolvedValue({
+    preferences,
+    today: day,
+    day,
+    weight: null,
+    height: null,
+    profile: {
+      id: owner,
+      display_name: null,
+      sex: null,
+      date_of_birth: null,
+      location: null,
+      created_at: '',
+      updated_at: '',
+    },
+  });
   jest.mocked(goalService.load).mockResolvedValue({ preferences, today: day, goal: null });
   jest
     .mocked(bodyService.history)
@@ -69,7 +85,7 @@ test('goal editor validates baseline/direction and saves the measurable target w
     }),
   );
 });
-test('body editor saves a real dated value; an uncertain write freezes inputs and exact retry', async () => {
+test('additional measurements still save a dated value; an uncertain write freezes inputs and exact retry', async () => {
   jest
     .mocked(bodyService.save)
     .mockRejectedValueOnce(new Error('Offline'))
@@ -79,11 +95,12 @@ test('body editor saves a real dated value; an uncertain write freezes inputs an
       <BodyScreen userId={owner} onBack={jest.fn()} />
     </FeedbackTestRoot>,
   );
-  await screen.findByLabelText('Bodyweight (kg)');
-  await fireEvent.changeText(screen.getByLabelText('Bodyweight (kg)'), '79');
+  await fireEvent.press(await screen.findByRole('button', { name: 'Add another measurement' }));
+  await screen.findByLabelText('Measurement (cm)');
+  await fireEvent.changeText(screen.getByLabelText('Measurement (cm)'), '79');
   await fireEvent.press(screen.getByRole('button', { name: 'Save body record' }));
   await screen.findByRole('button', { name: 'Retry saved request' });
-  expect(screen.getByLabelText('Bodyweight (kg)').props.editable).toBe(false);
+  expect(screen.getByLabelText('Measurement (cm)').props.editable).toBe(false);
   await fireEvent.press(screen.getByRole('button', { name: 'Retry saved request' }));
   await screen.findByText('Body record saved');
   expect(jest.mocked(bodyService.save).mock.calls[1]).toEqual(

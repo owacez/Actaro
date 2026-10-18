@@ -126,9 +126,10 @@ export function GoalsScreen({
                     This shows logged intake so far, not proof of a complete day’s diet.
                   </AuthText>
                 )}
-                <View style={authStyles.choices}>
+                <View style={{ gap: 8 }}>
                   {!archived && (
-                    <AuthLink
+                    <AuthButton
+                      outlined
                       title={`Update records for ${goal.name}`}
                       disabled={action.locked}
                       onPress={() => {
@@ -148,13 +149,15 @@ export function GoalsScreen({
                     />
                   )}
                   {!archived && (
-                    <AuthLink
+                    <AuthButton
+                      outlined
                       title={`Edit goal ${goal.name}`}
                       disabled={action.locked}
                       onPress={() => onEdit(goal.id)}
                     />
                   )}
-                  <AuthLink
+                  <AuthButton
+                    outlined
                     title={`${archived ? 'Restore' : 'Delete'} goal ${goal.name}`}
                     disabled={action.locked}
                     onPress={() =>

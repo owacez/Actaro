@@ -2,12 +2,54 @@ import { getSupabase } from '@/lib/supabase/client';
 import { recordResult, requireOwner, recordInput, RecordRequestError } from '@/lib/owned-data';
 import { profileService } from '@/features/profile/profile-service';
 import { localNutritionDate, nutritionDate } from '@/features/nutrition/nutrition-model';
-import { canonicalInput } from './body-model';
+import { canonicalInput, bodyFormPayload, type BodyForm } from './body-model';
 import { weightPeriod, type WeightPoint } from './weight-progress-model';
 import { progressRange, type ProgressPreset } from '@/features/progress/progress-period';
 import { progressPages } from '@/features/progress/progress-service';
 export type BodyKind = 'weight' | 'measurement';
 export const bodyService = {
+  async form(userId: string, date?: string) {
+    const [profile, preferences] = await Promise.all([
+      profileService.getProfile(userId),
+      profileService.getPreferences(userId),
+    ]);
+    const today = localNutritionDate(preferences.time_zone),
+      day = date ? nutritionDate(date) : today;
+    if (day > today) throw new Error('Cannot log a future date.');
+    const [weight, height] = await Promise.all([
+      getSupabase()
+        .from('body_weights')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('local_date', day)
+        .maybeSingle(),
+      getSupabase()
+        .from('body_measurements')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('measurement', 'height')
+        .eq('local_date', day)
+        .maybeSingle(),
+    ]);
+    if (weight.error || height.error) throw new Error('Body values unavailable. Retry.');
+    return { profile, preferences, today, day, weight: weight.data, height: height.data };
+  },
+  async saveForm(
+    userId: string,
+    form: BodyForm,
+    preferences: Parameters<typeof bodyFormPayload>[1],
+  ) {
+    const payload = recordInput(() =>
+      bodyFormPayload(form, preferences, localNutritionDate(preferences.time_zone)),
+    );
+    await requireOwner(userId);
+    const { data, error } = await getSupabase().rpc('save_body_form', {
+      p_user_id: userId,
+      ...payload,
+    });
+    if (recordResult(data, error) !== payload.p_date)
+      throw new Error('Body form save was not acknowledged. Retry.');
+  },
   async progress(
     userId: string,
     period?: { from: string; to: string },

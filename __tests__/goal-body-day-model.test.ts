@@ -7,7 +7,14 @@ import {
   type Goal,
   type GoalForm,
 } from '@/features/goals/goal-model';
-import { canonicalInput, unitFactor, weightSummary } from '@/features/body/body-model';
+import {
+  canonicalInput,
+  unitFactor,
+  weightSummary,
+  bodyFormPayload,
+  type BodyForm,
+} from '@/features/body/body-model';
+import { nutritionContext } from './helpers/nutrition-fixture';
 const form: GoalForm = {
   name: 'Lose weight',
   metric: 'body_weight',
@@ -22,6 +29,42 @@ const form: GoalForm = {
   exerciseId: '',
   measurement: '',
 };
+test('body form converts weight/height, trims location and keeps blank measurements absent', () => {
+  const body: BodyForm = {
+    date: '2026-10-18',
+    weight: '220.46226218487757',
+    height: '70',
+    sex: 'male',
+    birthDate: '1995-02-14',
+    location: ' Example City ',
+    notes: '',
+  };
+  const preferences = { ...nutritionContext().preferences, weight_unit: 'lb', length_unit: 'in' };
+  expect(bodyFormPayload(body, preferences, '2026-10-18')).toMatchObject({
+    p_weight: 100,
+    p_height: 177.8,
+    p_location: 'Example City',
+    p_sex: 'male',
+    p_date_of_birth: '1995-02-14',
+  });
+  expect(
+    bodyFormPayload(
+      { ...body, weight: '', height: '', birthDate: '', sex: '', location: '' },
+      preferences,
+      '2026-10-18',
+    ),
+  ).toEqual({ p_date: body.date, p_zone: preferences.time_zone, p_notes: '' });
+  for (const patch of [
+    { birthDate: '2026-10-19' },
+    { birthDate: '1995-02-30' },
+    { date: '2026-10-19' },
+    { weight: '0' },
+    { height: '-1' },
+    { sex: 'invalid' },
+    { location: 'a'.repeat(121) },
+  ])
+    expect(() => bodyFormPayload({ ...body, ...patch }, preferences, '2026-10-18')).toThrow();
+});
 const goal: Goal = {
   ...goalPayload(form),
   id: 'goal',

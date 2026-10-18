@@ -2,7 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Text } from 'react-native';
 import { useAppTheme } from '@/features/profile/theme-context';
 
-export function CompletionMark({ done, label = 'Completed' }: { done: boolean; label?: string }) {
+export function CompletionMark({
+  done,
+  label = 'Completed',
+  pendingLabel = 'Not logged',
+}: {
+  done: boolean;
+  label?: string;
+  pendingLabel?: string;
+}) {
   const [scale] = useState(() => new Animated.Value(1));
   const previous = useRef(done);
   const { colors } = useAppTheme();
@@ -42,7 +50,7 @@ export function CompletionMark({ done, label = 'Completed' }: { done: boolean; l
           fontFamily: 'Inter_500Medium',
         }}
       >
-        {done ? '✓ ' + label : 'Not yet'}
+        {done ? '✓ ' + label : pendingLabel}
       </Text>
     </Animated.View>
   );

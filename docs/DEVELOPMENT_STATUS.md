@@ -4,6 +4,49 @@ Updated: 2026-10-18 (America/Los_Angeles).
 
 ## Overall
 
+Body/goal/Today habit usability (2026-10-18): **DONE** for implementation/local
+verification; physical-device acceptance remains **DEFERRED**. Body records now
+opens a single form with weight, height, sex, date of birth (including year
+selection) and manual city/country. Weight/height remain dated kg/cm facts;
+optional personal details stay on the existing private profile. Blank dated
+values do not erase records. Additional named measurements, history editing,
+deletion and measurement goals remain supported without primary measurement tabs.
+
+Migration `20261018102713_unified_body_form.sql` is deployed and generated types
+are updated. Its owner-checked SECURITY INVOKER RPC saves profile and dated facts
+atomically under existing RLS. Local PostgreSQL and hosted rollback checks
+passed for replacement, blank preservation, constraints, failure rollback,
+foreign-owner rejection and anonymous denial. Zero fixture accounts remain.
+Security advisors reported only the previously recorded disabled leaked-password
+protection finding; no new database/RLS finding. Profile export already selects
+owned profile fields and includes the new details without a separate export path.
+
+Goal record/edit/delete/restore actions now use bounded buttons. Today displays
+all due habits with explicit check-off/occurrence buttons and an in-place
+amount/minutes/count editor. Weekly quick logs increment today's value, preserving
+notes; retries repeat the same date-keyed value. Confirmed updates patch Today
+without reloading its data. Shared habit status distinguishes unlogged,
+in-progress, over-limit, rest/future/deleted states and target met.
+
+Verification: `npm.cmd run check` **PASS**, strict TypeScript/lint/format,
+329 Jest tests in 66 suites plus six dataset tests (**335 total**).
+`node .actaro-tools/test-body-form.mjs` **PASS**; the same
+`supabase/tests/body_form.sql` checks passed on the hosted project inside a
+rolled-back transaction. `npm.cmd exec -- expo export --platform all --output-dir
+.actaro-tools/body-habits-export` **PASS**, 39 routes and iOS/Android/web bundles.
+`node --env-file=.env .actaro-tools/check-body-habits-browser.mjs` **PASS**, eight
+isolated sample-data captures/flows: form save, birth-year selection, one-tap
+completion, inline minutes and goal button borders, including narrow/dark
+layouts. Zero live Supabase calls from browser verification. Captures visually
+reviewed. `node .actaro-tools/check-body-habits-artifacts.mjs` **PASS**, 147
+artifacts exclude the privileged key. `git diff --check` **PASS**.
+README, canonical behavior/plan and the manual test guide are updated. No new
+package, service, API key, GPS permission or release weight was introduced.
+
+Next three device checks: save/reopen all body fields and a past-date record;
+use goal record/edit/delete/restore buttons; log and edit each habit type from
+Today, including a failed-save retry. v1.0 approval remains deferred.
+
 Workout swipe/exit correction (2026-10-18): **DONE** for implementation/local
 verification; physical iPhone edge-back/gesture acceptance remains **DEFERRED**.
 Card travel now follows its measured width rather than stopping at 90px. A
@@ -124,7 +167,7 @@ green result or a relaxed countdown assertion.
 - Release Completion: **100% active implementation (27 / 27 weight); personal beta DEFERRED (6 weight)**
 - Previous Releases: **v0.1 active development and v0.2–v0.6 functional scopes DONE (100%); retained acceptance DEFERRED**
 - Current Phase: **Phase 6; seven implementation/review tasks DONE, task 6.6 Personal Beta DEFERRED**
-- Current Focus: User testing refinements: automatic iPhone steps, cached reads, habit/goal clarity, workout calendar and swipe logging. Implementation and local verification are DONE; physical-device acceptance remains DEFERRED. No v1.0 approval or future-release implementation.
+- Current Focus: User testing refinements: unified body form, bounded goal buttons, Today habit logging and workout swipe/exit handling. Implementation and local verification are DONE; physical-device acceptance remains DEFERRED. No v1.0 approval or future-release implementation.
 - Status: **DONE — active v0.9 development; full beta/release acceptance DEFERRED**
 - Blockers: No remaining authorized implementation blocker. Dependency advisories, disabled leaked-password protection, exact visual/device checks and native-build acceptance remain documented release-review findings. They are not claimed passed or waived.
 - Approval boundary: The user authorized completing v0.9, retaining the earlier instruction that device acceptance, personal testing and v1.0 release approval happen afterward. No paid service or native/EAS build was used.

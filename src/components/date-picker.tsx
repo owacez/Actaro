@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { ActionSheet, IconButton } from './product-ui';
 import { AuthButton, AuthText } from '@/features/auth/auth-components';
 import { useAppTheme } from '@/features/profile/theme-context';
@@ -17,6 +17,7 @@ export function DatePicker({
   label = 'Choose date',
   disabled = false,
   referenceDate,
+  yearSelection = false,
 }: {
   value: string;
   onChange: (date: string) => void;
@@ -24,10 +25,12 @@ export function DatePicker({
   label?: string;
   disabled?: boolean;
   referenceDate?: string;
+  yearSelection?: boolean;
 }) {
   const [today] = useState(() => iso(new Date()));
   const anchor = value || referenceDate || today;
   const [open, setOpen] = useState(false),
+    [choosingYear, setChoosingYear] = useState(false),
     [month, setMonth] = useState(anchor.slice(0, 7)),
     { colors } = useAppTheme();
   const start = asDate(month + '-01'),
@@ -44,6 +47,7 @@ export function DatePicker({
         disabled={disabled}
         onPress={() => {
           setMonth(anchor.slice(0, 7));
+          setChoosingYear(false);
           setOpen(true);
         }}
       />
@@ -56,59 +60,96 @@ export function DatePicker({
             name={{ ios: 'chevron.left', android: 'chevron_left', web: 'chevron_left' }}
             onPress={() => shift(-1)}
           />
-          <AuthText kind="heading">
-            {start.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-          </AuthText>
+          {yearSelection ? (
+            <AuthButton
+              title={start.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+              accessibilityLabel="Choose birth year"
+              outlined
+              onPress={() => setChoosingYear((value) => !value)}
+            />
+          ) : (
+            <AuthText kind="heading">
+              {start.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+            </AuthText>
+          )}
           <IconButton
             label="Next month"
             name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }}
             onPress={() => shift(1)}
           />
         </View>
-        <View style={{ flexDirection: 'row' }}>
-          {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
-            <Text key={i} style={{ width: '14.2857%', color: colors.muted, textAlign: 'center' }}>
-              {day}
-            </Text>
-          ))}
-        </View>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-          {Array.from({ length: offset + count }, (_, i) => {
-            const day = i - offset + 1,
-              date = month + '-' + String(day).padStart(2, '0'),
-              selected = date === value,
-              unavailable = !!max && date > max;
-            return day < 1 ? (
-              <View key={i} style={{ width: '14.2857%', height: 44 }} />
-            ) : (
-              <Pressable
-                key={i}
-                accessibilityRole="button"
-                accessibilityLabel={date}
-                accessibilityState={{ selected, disabled: unavailable }}
-                hitSlop={2}
-                disabled={unavailable}
-                onPress={() => {
-                  onChange(date);
-                  setOpen(false);
-                }}
-                style={{
-                  width: '14.2857%',
-                  minHeight: 44,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 12,
-                  backgroundColor: selected ? colors.text : 'transparent',
-                  opacity: unavailable ? 0.4 : 1,
-                }}
-              >
-                <Text style={{ color: selected ? colors.background : colors.text, fontSize: 14 }}>
+        {choosingYear ? (
+          <ScrollView style={{ maxHeight: 300 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {Array.from(
+                { length: Number((max ?? today).slice(0, 4)) - 1900 + 1 },
+                (_, index) => Number((max ?? today).slice(0, 4)) - index,
+              ).map((year) => (
+                <AuthButton
+                  key={year}
+                  title={String(year)}
+                  outlined
+                  onPress={() => {
+                    setMonth(String(year) + month.slice(4));
+                    setChoosingYear(false);
+                  }}
+                />
+              ))}
+            </View>
+          </ScrollView>
+        ) : (
+          <>
+            <View style={{ flexDirection: 'row' }}>
+              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+                <Text
+                  key={i}
+                  style={{ width: '14.2857%', color: colors.muted, textAlign: 'center' }}
+                >
                   {day}
                 </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+              ))}
+            </View>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {Array.from({ length: offset + count }, (_, i) => {
+                const day = i - offset + 1,
+                  date = month + '-' + String(day).padStart(2, '0'),
+                  selected = date === value,
+                  unavailable = !!max && date > max;
+                return day < 1 ? (
+                  <View key={i} style={{ width: '14.2857%', height: 44 }} />
+                ) : (
+                  <Pressable
+                    key={i}
+                    accessibilityRole="button"
+                    accessibilityLabel={date}
+                    accessibilityState={{ selected, disabled: unavailable }}
+                    hitSlop={2}
+                    disabled={unavailable}
+                    onPress={() => {
+                      onChange(date);
+                      setOpen(false);
+                    }}
+                    style={{
+                      width: '14.2857%',
+                      minHeight: 44,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 12,
+                      backgroundColor: selected ? colors.text : 'transparent',
+                      opacity: unavailable ? 0.4 : 1,
+                    }}
+                  >
+                    <Text
+                      style={{ color: selected ? colors.background : colors.text, fontSize: 14 }}
+                    >
+                      {day}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </>
+        )}
       </ActionSheet>
     </>
   );

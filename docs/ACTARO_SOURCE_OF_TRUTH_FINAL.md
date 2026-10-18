@@ -809,6 +809,10 @@ User testing revision (2026-10-18): date fields use calendar controls and remind
 times use a time picker. Confirmed quick completions update the visible habit in
 place with a short completion animation that respects Reduce Motion; no success
 is shown before the write is acknowledged. Explain habit types in everyday terms.
+Today offers a visible one-tap check-off/occurrence button and an in-place sheet
+for amounts, minutes, limits and edits. Weekly occurrence quick logs increment
+today's value, not the whole week's total. Distinguish not logged, in progress,
+over-limit, rest/future days and target met; do not use an unexplained "Not yet".
 
 Habit types:
 
@@ -844,6 +848,8 @@ Scheduled rest/non-action days should not break progress.
 Explain that habits are repeated actions while goals measure outcomes from saved
 records. Show the source record value, target and starting value clearly, with an
 action to open the relevant logging section. Missing evidence remains unknown.
+Goal record/edit/delete/restore actions use visibly bounded buttons, separate
+from explanatory text.
 
 Goal categories:
 
@@ -889,6 +895,14 @@ Goal categories:
 
 - Weight
 - Body measurements
+
+User testing revision (2026-10-18): Body records opens one form for optional
+weight, height, sex, date of birth and city/country text. The log date applies
+only to weight/height; other details are private editable profile fields, with
+no location permission or inferred measurements. Save is atomic. Blank dated
+measurements preserve existing records; explicit history deletion remains.
+Named measurements and their history/goals remain available through an optional
+additional-measurement editor, without separate primary logging tabs.
 
 ## 14.2 Nutrition
 

@@ -15,6 +15,9 @@ jest.mock('@/features/profile/account-security-service', () => ({
 }));
 const service = jest.mocked(profileService);
 const profile: Profile = {
+  sex: null,
+  date_of_birth: null,
+  location: null,
   id: 'test-user-a',
   display_name: 'Athlete',
   created_at: '2026-01-01T00:00:00Z',

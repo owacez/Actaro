@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { randomUUID } from 'expo-crypto';
 import {
@@ -20,7 +20,6 @@ import {
 import { formatNumber, energy, localNutritionDate } from '@/features/nutrition/nutrition-model';
 import { weightSummary, unitFactor, goalUnit } from '@/features/body/body-model';
 import { useAppTheme } from '@/features/profile/theme-context';
-import { habitService } from '@/features/habits/habit-service';
 import {
   habitToday,
   habitValue,
@@ -28,7 +27,7 @@ import {
   habitReached,
   acknowledgedHabitLog,
 } from '@/features/habits/habit-model';
-import { CompletionMark } from '@/components/completion-mark';
+import { TodayHabit } from './today-habit';
 import { nutritionService } from '@/features/nutrition/nutrition-service';
 import { todayService } from './today-service';
 import { useDeviceSteps } from '@/features/activity/step-provider';
@@ -272,77 +271,32 @@ export function TodayScreen({ userId }: { userId: string }) {
             <AuthText>
               Habits · {data.completedHabits} of {data.habits.length}
             </AuthText>
-            <View style={authStyles.choices}>
-              {data.habits.slice(0, 4).map((habit) => {
-                const date = habitToday(habit),
-                  version = habitVersion(habit, date),
-                  value = habitValue(habit, date),
-                  done = !!version && habitReached(habit, value, version.target);
-                return (
-                  <Pressable
-                    key={habit.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Log habit ${habit.name}`}
-                    accessibilityState={{ disabled: action.locked }}
-                    disabled={action.locked}
-                    onPress={() => {
-                      if (!done && (habit.kind === 'boolean' || habit.kind === 'avoidance'))
-                        void action.run(
-                          () =>
-                            habitService.log(
-                              userId,
-                              habit.id,
-                              date,
-                              habit.kind === 'boolean' ? 1 : 0,
-                              '',
-                            ),
-                          'Habit logged',
-                          () =>
-                            resource.updateData((current) => {
-                              const habits = current.habits.map((row) =>
-                                row.id === habit.id
-                                  ? acknowledgedHabitLog(
-                                      row,
-                                      date,
-                                      habit.kind === 'boolean' ? 1 : 0,
-                                    )
-                                  : row,
-                              );
-                              return {
-                                ...current,
-                                habits,
-                                completedHabits: habits.filter((row) =>
-                                  habitReached(
-                                    row,
-                                    habitValue(row, habitToday(row)),
-                                    habitVersion(row, habitToday(row))?.target ?? 0,
-                                  ),
-                                ).length,
-                              };
-                            }),
-                        );
-                      else
-                        router.push({
-                          pathname: '/habits/manage',
-                          params: { view: 'log', id: habit.id, date },
-                        });
-                    }}
-                    style={{
-                      minHeight: 44,
-                      padding: 12,
-                      borderRadius: 24,
-                      backgroundColor: done ? colors.text : colors.fill,
-                    }}
-                  >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <CompletionMark done={done} label="Done" />
-                      <Text style={{ color: done ? colors.background : colors.text, fontSize: 13 }}>
-                        {habit.name}
-                      </Text>
-                    </View>
-                  </Pressable>
-                );
-              })}
+            <View style={{ gap: 20 }}>
+              {data.habits.map((habit) => (
+                <TodayHabit
+                  key={habit.id}
+                  userId={userId}
+                  habit={habit}
+                  onLogged={(date, value, notes) =>
+                    resource.updateData((current) => {
+                      const habits = current.habits.map((row) =>
+                        row.id === habit.id ? acknowledgedHabitLog(row, date, value, notes) : row,
+                      );
+                      return {
+                        ...current,
+                        habits,
+                        completedHabits: habits.filter((row) =>
+                          habitReached(
+                            row,
+                            habitValue(row, habitToday(row)),
+                            habitVersion(row, habitToday(row))?.target ?? 0,
+                          ),
+                        ).length,
+                      };
+                    })
+                  }
+                />
+              ))}
             </View>
             {!data.habits.length && <AuthText>No scheduled habits today.</AuthText>}
             <AuthLink title="Manage all habits" onPress={() => router.push('/habits')} />
@@ -394,7 +348,7 @@ export function TodayScreen({ userId }: { userId: string }) {
                 </View>
               );
             })}
-            <AuthLink title="Manage all goals" onPress={() => router.push('/goals')} />
+            <AuthButton outlined title="Manage all goals" onPress={() => router.push('/goals')} />
           </AuthCard>
         </>
       )}

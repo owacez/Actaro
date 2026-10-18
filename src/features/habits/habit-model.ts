@@ -111,6 +111,24 @@ export function habitValue(habit: HabitRecord, date: string, notBefore?: string)
 export function habitReached(habit: HabitRecord, value: number | null, target: number) {
   return value !== null && (habit.kind === 'avoidance' ? value <= target : value >= target);
 }
+export function habitStatusLabel(habit: HabitRecord, date: string) {
+  const version = habitVersion(habit, date),
+    value = habitValue(habit, date);
+  if (habit.archived) return 'Deleted';
+  if (date < habit.start_date) return 'Starts ' + habit.start_date;
+  if (!habitActive(habit, date)) return 'Ended';
+  if (habit.kind !== 'frequency' && !version?.weekdays.includes(isoWeekday(date)))
+    return 'Rest day';
+  if (habitReached(habit, value, version?.target ?? 0))
+    return habit.kind === 'boolean' ? 'Done today' : 'Target met';
+  if (habit.kind === 'frequency')
+    return habit.habit_logs.some((log) => log.local_date >= monday(date) && log.local_date <= date)
+      ? 'In progress this week'
+      : 'Not logged this week';
+  if (value === null) return 'Not logged today';
+  if (habit.kind === 'boolean') return 'Not done today';
+  return habit.kind === 'avoidance' ? 'Over daily limit' : 'In progress';
+}
 export type HabitPeriod = {
   date: string;
   end: string;

@@ -786,6 +786,12 @@ Types:
 
 ## 4.9 Bodyweight Logging — Weight 3
 
+User testing revision (2026-10-18): one body form combines dated weight/height
+and optional private sex, birth date and city/country. Atomic save preserves
+blank dated values; existing named measurements/history remain accessible.
+Today quick habit logging and explicit goal action buttons refine tasks 4.3,
+4.8 and 4.11; explanatory status replaces "Not yet". No release-weight change.
+
 ## 4.10 Steps Foundation — Weight 3
 
 Use the simplest reliable supported source available at this stage.

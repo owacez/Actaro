@@ -39,6 +39,7 @@ import {
   habitKinds,
   habitPayload,
   habitReached,
+  habitStatusLabel,
   habitToday,
   habitValue,
   habitVersion,
@@ -162,7 +163,15 @@ export function HabitsScreen({
                   <View style={{ flex: 1 }}>
                     <AuthText kind="heading">{record.name}</AuthText>
                   </View>
-                  <CompletionMark done={habitReached(record, value, version?.target ?? 0)} />
+                  <CompletionMark
+                    done={
+                      active &&
+                      (!!scheduled || record.kind === 'frequency') &&
+                      habitReached(record, value, version?.target ?? 0)
+                    }
+                    pendingLabel={habitStatusLabel(record, today)}
+                    label={record.kind === 'boolean' ? 'Done today' : 'Target met'}
+                  />
                   <IconButton
                     label={`Manage ${record.name}`}
                     name={{ ios: 'ellipsis', android: 'more_horiz', web: 'more_horiz' }}

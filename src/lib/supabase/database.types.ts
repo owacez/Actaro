@@ -919,20 +919,29 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string;
+          date_of_birth: string | null;
           display_name: string | null;
           id: string;
+          location: string | null;
+          sex: string | null;
           updated_at: string;
         };
         Insert: {
           created_at?: string;
+          date_of_birth?: string | null;
           display_name?: string | null;
           id: string;
+          location?: string | null;
+          sex?: string | null;
           updated_at?: string;
         };
         Update: {
           created_at?: string;
+          date_of_birth?: string | null;
           display_name?: string | null;
           id?: string;
+          location?: string | null;
+          sex?: string | null;
           updated_at?: string;
         };
         Relationships: [];
@@ -1677,6 +1686,20 @@ export type Database = {
           p_steps?: number;
           p_user_id: string;
           p_zone?: string;
+        };
+        Returns: string;
+      };
+      save_body_form: {
+        Args: {
+          p_date: string;
+          p_date_of_birth?: string;
+          p_height?: number;
+          p_location?: string;
+          p_notes?: string;
+          p_sex?: string;
+          p_user_id: string;
+          p_weight?: number;
+          p_zone: string;
         };
         Returns: string;
       };

@@ -5,6 +5,7 @@ import {
   habitReached,
   habitPayload,
   habitValue,
+  habitStatusLabel,
   reminderDue,
   type HabitRecord,
 } from '@/features/habits/habit-model';
@@ -46,6 +47,22 @@ function log(record: HabitRecord, date: string, value: number) {
     updated_at: date,
   });
 }
+test('habit status distinguishes missing reports, progress, rest days and exceeded limits', () => {
+  const record = habit();
+  expect(habitStatusLabel(record, '2026-10-12')).toBe('Not logged today');
+  expect(habitStatusLabel(record, '2026-10-11')).toBe('Rest day');
+  expect(habitStatusLabel(record, '2026-10-01')).toBe('Starts 2026-10-05');
+  log(record, '2026-10-12', 10);
+  expect(habitStatusLabel(record, '2026-10-12')).toBe('In progress');
+  record.kind = 'avoidance';
+  record.habit_versions[0].target = 2;
+  expect(habitStatusLabel(record, '2026-10-12')).toBe('Over daily limit');
+  record.kind = 'frequency';
+  record.habit_logs = [];
+  expect(habitStatusLabel(record, '2026-10-12')).toBe('Not logged this week');
+  log(record, '2026-10-12', 1);
+  expect(habitStatusLabel(record, '2026-10-12')).toBe('In progress this week');
+});
 test('rest days and an open unlogged day do not break a scheduled streak', () => {
   const record = habit();
   for (const day of ['2026-10-08', '2026-10-09']) log(record, day, 20);

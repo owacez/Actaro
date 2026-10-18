@@ -562,6 +562,16 @@ refresh action; no sample health data is shown.
 - Body records store kg/cm and daily activity stores steps/km, displaying your
   saved unit preferences. Saving the same date/measurement replaces its value.
   Edit/delete recorded entries from history; goals recalculate from the records.
+  The main body form combines weight, height, optional sex/date of birth and
+  city/country. Weight/height use the log date; other fields stay on your private
+  profile. Blank measurements preserve existing dated values. Save is atomic.
+  **Add another measurement** retains named measurements without primary tabs.
+- Today habits have visible **Mark done** / **Log one occurrence** buttons and
+  an in-place amount/minutes/count editor. Weekly quick logs add one to today's
+  count; editing replaces today's value. Existing notes are retained. Status
+  distinguishes **Not logged today**, **In progress**, **Over daily limit** and
+  **Target met**, rather than an unexplained "Not yet". Goal actions now use
+  bounded buttons separate from their descriptions.
 - **Steps & activity** contains your daily step target. After Motion permission,
   iPhone steps load automatically from midnight in your saved time zone, update
   while the app is open and catch up when you return. There is no manual step

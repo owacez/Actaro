@@ -195,20 +195,20 @@ preserved; they are not recomputed from the macro formula.
 
 ### Pass E — habits, goals, body, activity and Today (v0.5)
 
-| ID  | Feature / action                                                             | Expected result                                                                            |
-| --- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| E01 | Create each of the five habit types using the examples above                 | Correct input, units, schedule and target comparison                                       |
-| E02 | Choose start/end dates and reminder time; clear optional fields              | Calendar/time controls, no free-text date/time requirement; values survive reopen          |
-| E03 | Complete a scheduled Check off habit from Habits and Today                   | Confirmed completion updates in place with a brief animation; no whole-page blanking       |
-| E04 | Edit/remove a dated log; inspect habit history and rest days                 | Correct history/consistency; explicit zero and no report remain distinct                   |
-| E05 | Change target/schedule/motivation; archive/restore habit                     | Dated changes do not rewrite older targets; chosen feedback and archived lists work        |
-| E06 | Create/edit/delete/restore goals; test all 13 sources above                  | Actual source value, baseline, target, direction and percentage are understandable         |
-| E07 | Test a future start, missing records and passed target date                  | Honest Not started / No recorded data / Target date passed states as appropriate           |
-| E08 | Body records: save/replace/edit/delete weight and a named measurement        | Date/unit handling and history are correct; same date/name replaces rather than duplicates |
-| E09 | iPhone: grant Motion once; open app, walk, leave and return                  | Automatic daily steps, live foreground updates and catch-up; no manual read/save button    |
-| E10 | Deny Motion; open Steps & activity; set daily target; save optional distance | Useful permission guidance, target in the same section and no fabricated step count        |
-| E11 | Compare Today cards with their source screens                                | Weight, steps, food totals, planned workout, habit/goal and training/recovery facts agree  |
-| E12 | Quick log: use food, water, weight and other offered shortcuts               | Opens the correct actual logging flow; dismissing does not save fictional data             |
+| ID  | Feature / action                                                                                                                          | Expected result                                                                                                                           |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| E01 | Create each of the five habit types using the examples above                                                                              | Correct input, units, schedule and target comparison                                                                                      |
+| E02 | Choose start/end dates and reminder time; clear optional fields                                                                           | Calendar/time controls, no free-text date/time requirement; values survive reopen                                                         |
+| E03 | From Today: tap Mark done, Log one occurrence, or log minutes/amount/count                                                                | No navigation needed; confirmed updates stay in place; edit today’s value in a sheet; status distinguishes missing/in-progress/over-limit |
+| E04 | Edit/remove a dated log; inspect habit history and rest days                                                                              | Correct history/consistency; explicit zero and no report remain distinct                                                                  |
+| E05 | Change target/schedule/motivation; archive/restore habit                                                                                  | Dated changes do not rewrite older targets; chosen feedback and archived lists work                                                       |
+| E06 | Create/edit/delete/restore goals; test all 13 sources above                                                                               | Actual source value, baseline, target, direction and percentage are understandable                                                        |
+| E07 | Test a future start, missing records and passed target date                                                                               | Honest Not started / No recorded data / Target date passed states as appropriate                                                          |
+| E08 | Body form: weight, height, sex, birth date/year picker and location; change date; save/reopen; additional measurement/history edit/delete | Weight/height use log date; personal details persist independently; blank measurements preserve history; one atomic save, no duplicates   |
+| E09 | iPhone: grant Motion once; open app, walk, leave and return                                                                               | Automatic daily steps, live foreground updates and catch-up; no manual read/save button                                                   |
+| E10 | Deny Motion; open Steps & activity; set daily target; save optional distance                                                              | Useful permission guidance, target in the same section and no fabricated step count                                                       |
+| E11 | Compare Today cards with their source screens                                                                                             | Weight, steps, food totals, planned workout, habit/goal and training/recovery facts agree                                                 |
+| E12 | Quick log: use food, water, weight and other offered shortcuts                                                                            | Opens the correct actual logging flow; dismissing does not save fictional data                                                            |
 
 Steps use iPhone Motion history, not Apple Health/Watch aggregation. Expo Go does
 not continuously deliver steps while backgrounded: test catch-up after returning.

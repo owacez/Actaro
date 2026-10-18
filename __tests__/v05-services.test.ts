@@ -4,6 +4,7 @@ import type { Database } from '@/lib/supabase/database.types';
 import { activityService } from '@/features/activity/activity-service';
 import { bodyService } from '@/features/body/body-service';
 import { goalService } from '@/features/goals/goal-service';
+import { nutritionContext } from './helpers/nutrition-fixture';
 const owner = '05000000-0000-4000-8000-000000000001',
   user: User = {
     id: owner,
@@ -61,6 +62,40 @@ test('body values normalize to canonical units and invalid forms remain correcta
   await expect(
     bodyService.save(owner, 'weight', '2026-10-14', 'no', 'kg', 'UTC', '', ''),
   ).rejects.toMatchObject({ retryable: false });
+});
+test('the combined form sends one atomic RPC, checks acknowledgement and blocks an account change', async () => {
+  const form = {
+    date: '2026-10-14',
+    weight: '80',
+    height: '180',
+    sex: 'female',
+    birthDate: '1995-01-15',
+    location: ' Example City ',
+    notes: '',
+  };
+  mockFetch.mockResolvedValue(response(form.date));
+  await bodyService.saveForm(owner, form, nutritionContext().preferences);
+  expect(mockFetch).toHaveBeenCalledTimes(1);
+  expect(String(mockFetch.mock.calls[0][0])).toContain('/rpc/save_body_form');
+  expect(JSON.parse(String(mockFetch.mock.calls[0][1]?.body))).toMatchObject({
+    p_user_id: owner,
+    p_weight: 80,
+    p_height: 180,
+    p_sex: 'female',
+    p_date_of_birth: '1995-01-15',
+    p_location: 'Example City',
+  });
+  mockFetch.mockResolvedValue(response('2026-10-13'));
+  await expect(bodyService.saveForm(owner, form, nutritionContext().preferences)).rejects.toThrow(
+    'acknowledged',
+  );
+  jest
+    .spyOn(mockClient.auth, 'getUser')
+    .mockResolvedValue({ data: { user: { ...user, id: 'another' } }, error: null });
+  await expect(bodyService.saveForm(owner, form, nutritionContext().preferences)).rejects.toThrow(
+    'account',
+  );
+  expect(mockFetch).toHaveBeenCalledTimes(2);
 });
 test('account changes block body/activity writes and goal source reads', async () => {
   jest

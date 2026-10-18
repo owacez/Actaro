@@ -2,12 +2,12 @@ import { useCallback, useState } from 'react';
 import { View } from 'react-native';
 import { NumberStepper } from '@/components/number-stepper';
 import { DatePicker } from '@/components/date-picker';
-import { ScreenHeader } from '@/components/product-ui';
+import { ScreenHeader, ActionSheet } from '@/components/product-ui';
+import { BodyFormEditor } from './body-form';
 import { useFocusEffect } from 'expo-router';
 import {
   AuthButton,
   AuthCard,
-  AuthChoice,
   AuthFrame,
   AuthInput,
   AuthLink,
@@ -25,7 +25,9 @@ import { formatNumber, nutritionDate } from '@/features/nutrition/nutrition-mode
 import { bodyService, type BodyKind } from './body-service';
 import { unitFactor } from './body-model';
 export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => void }) {
-  const [kind, setKind] = useState<BodyKind>('weight'),
+  const [kind, setKind] = useState<BodyKind>('measurement'),
+    [editOpen, setEditOpen] = useState(false),
+    [formVersion, setFormVersion] = useState(0),
     [offset, setOffset] = useState(0),
     [until, setUntil] = useState<string>(),
     [historyInput, setHistoryInput] = useState(''),
@@ -76,7 +78,11 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
             notes,
           ),
         'Body record saved',
-        resource.refresh,
+        () => {
+          setEditOpen(false);
+          setFormVersion((value) => value + 1);
+          resource.refresh();
+        },
       );
     } catch (error) {
       action.setError(error instanceof Error ? error.message : 'Check your inputs.');
@@ -88,65 +94,71 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {data && !resource.loading && (
         <>
-          <View style={authStyles.choices}>
-            {(['weight', 'measurement'] as const).map((item) => (
-              <AuthChoice
-                key={item}
-                title={item === 'weight' ? 'Bodyweight' : 'Measurements'}
-                selected={kind === item}
-                disabled={action.locked}
-                onPress={() => {
-                  setKind(item);
-                  setValue('');
-                  setNotes('');
-                  setRemove(null);
-                }}
-              />
-            ))}
-          </View>
-          <DatePicker
-            label="Body record date"
-            value={date || data.today}
-            max={data.today}
-            disabled={action.locked}
-            onChange={setDate}
-          />
-          {kind === 'measurement' && (
-            <AuthInput
-              label="Measurement name"
-              value={name}
-              editable={!action.locked}
-              maxLength={80}
-              onChangeText={setName}
-            />
-          )}
-          <NumberStepper
-            large
-            step={0.1}
-            max={kind === 'weight' ? 1500 : 1000}
-            label={kind === 'weight' ? `Bodyweight (${unit})` : `Measurement (${unit})`}
-            value={value}
-            disabled={action.locked}
-            onChange={setValue}
-          />
-          <AuthInput
-            label="Body record note (optional)"
-            value={notes}
-            multiline
-            maxLength={2000}
-            editable={!action.locked}
-            onChangeText={setNotes}
-          />
-          <AuthText>
-            One weight and one value per named measurement per date. Saving the same date replaces
-            its recorded value. Measurements also support your body goals.
-          </AuthText>
+          <BodyFormEditor key={formVersion} userId={userId} onSaved={resource.refresh} />
           <AuthButton
-            title="Save body record"
-            busy={action.busy}
+            title="Add another measurement"
+            outlined
             disabled={action.locked}
-            onPress={save}
+            onPress={() => {
+              setKind('measurement');
+              setValue('');
+              setNotes('');
+              setDate(data.today);
+              setEditOpen(true);
+            }}
           />
+          <ActionSheet
+            title={kind === 'weight' ? 'Edit weight record' : 'Body measurement'}
+            visible={editOpen}
+            onClose={() => {
+              if (!action.locked) setEditOpen(false);
+            }}
+          >
+            <DatePicker
+              label="Body record date"
+              value={date || data.today}
+              max={data.today}
+              disabled={action.locked}
+              onChange={setDate}
+            />
+            {kind === 'measurement' && (
+              <AuthInput
+                label="Measurement name"
+                value={name}
+                editable={!action.locked}
+                maxLength={80}
+                onChangeText={setName}
+              />
+            )}
+            <NumberStepper
+              large
+              step={0.1}
+              max={kind === 'weight' ? 1500 : 1000}
+              label={kind === 'weight' ? `Bodyweight (${unit})` : `Measurement (${unit})`}
+              value={value}
+              disabled={action.locked}
+              onChange={setValue}
+            />
+            <AuthInput
+              label="Body record note (optional)"
+              value={notes}
+              multiline
+              maxLength={2000}
+              editable={!action.locked}
+              onChangeText={setNotes}
+            />
+            <AuthText>
+              One weight and one value per named measurement per date. Saving the same date replaces
+              its recorded value. Measurements also support your body goals.
+            </AuthText>
+            <AuthButton
+              title="Save body record"
+              busy={action.busy}
+              disabled={action.locked}
+              onPress={save}
+            />
+            <RecordSaveFeedback action={action} />
+          </ActionSheet>
           <AuthText kind="heading">Recorded history</AuthText>
           <AuthInput
             label="Body history ending date (YYYY-MM-DD)"
@@ -169,60 +181,62 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
               }
             }}
           />
-          {kind === 'weight' &&
-            data.weights.map((row) => (
-              <AuthCard key={row.local_date}>
-                <AuthText kind="heading">
-                  {row.local_date} ·{' '}
-                  {formatNumber(row.weight_kg * unitFactor(data.preferences.weight_unit))}{' '}
-                  {data.preferences.weight_unit}
-                </AuthText>
-                {row.notes && <AuthText>{row.notes}</AuthText>}
-                <AuthLink
-                  title={`Edit weight ${row.local_date}`}
-                  disabled={action.locked}
-                  onPress={() => {
-                    setDate(row.local_date);
-                    setValue(String(row.weight_kg * unitFactor(data.preferences.weight_unit)));
-                    setNotes(row.notes ?? '');
-                  }}
-                />
-                <AuthLink
-                  title={`Delete weight ${row.local_date}`}
-                  disabled={action.locked}
-                  onPress={() => setRemove({ kind: 'weight', date: row.local_date, name: '' })}
-                />
-              </AuthCard>
-            ))}
-          {kind === 'measurement' &&
-            data.measurements.map((row) => (
-              <AuthCard key={row.measurement + row.local_date}>
-                <AuthText kind="heading">
-                  {row.local_date} · {row.measurement}:{' '}
-                  {formatNumber(row.value_cm * unitFactor(data.preferences.length_unit))}{' '}
-                  {data.preferences.length_unit}
-                </AuthText>
-                {row.notes && <AuthText>{row.notes}</AuthText>}
-                <AuthLink
-                  title={`Edit ${row.measurement} ${row.local_date}`}
-                  disabled={action.locked}
-                  onPress={() => {
-                    setDate(row.local_date);
-                    setName(row.measurement);
-                    setValue(String(row.value_cm * unitFactor(data.preferences.length_unit)));
-                    setNotes(row.notes ?? '');
-                  }}
-                />
-                <AuthLink
-                  title={`Delete ${row.measurement} ${row.local_date}`}
-                  disabled={action.locked}
-                  onPress={() =>
-                    setRemove({ kind: 'measurement', date: row.local_date, name: row.measurement })
-                  }
-                />
-              </AuthCard>
-            ))}
-          {(kind === 'weight' ? data.weights : data.measurements).length === 0 && (
+          {data.weights.map((row) => (
+            <AuthCard key={row.local_date}>
+              <AuthText kind="heading">
+                {row.local_date} ·{' '}
+                {formatNumber(row.weight_kg * unitFactor(data.preferences.weight_unit))}{' '}
+                {data.preferences.weight_unit}
+              </AuthText>
+              {row.notes && <AuthText>{row.notes}</AuthText>}
+              <AuthLink
+                title={`Edit weight ${row.local_date}`}
+                disabled={action.locked}
+                onPress={() => {
+                  setKind('weight');
+                  setEditOpen(true);
+                  setDate(row.local_date);
+                  setValue(String(row.weight_kg * unitFactor(data.preferences.weight_unit)));
+                  setNotes(row.notes ?? '');
+                }}
+              />
+              <AuthLink
+                title={`Delete weight ${row.local_date}`}
+                disabled={action.locked}
+                onPress={() => setRemove({ kind: 'weight', date: row.local_date, name: '' })}
+              />
+            </AuthCard>
+          ))}
+          {data.measurements.map((row) => (
+            <AuthCard key={row.measurement + row.local_date}>
+              <AuthText kind="heading">
+                {row.local_date} · {row.measurement}:{' '}
+                {formatNumber(row.value_cm * unitFactor(data.preferences.length_unit))}{' '}
+                {data.preferences.length_unit}
+              </AuthText>
+              {row.notes && <AuthText>{row.notes}</AuthText>}
+              <AuthLink
+                title={`Edit ${row.measurement} ${row.local_date}`}
+                disabled={action.locked}
+                onPress={() => {
+                  setDate(row.local_date);
+                  setKind('measurement');
+                  setEditOpen(true);
+                  setName(row.measurement);
+                  setValue(String(row.value_cm * unitFactor(data.preferences.length_unit)));
+                  setNotes(row.notes ?? '');
+                }}
+              />
+              <AuthLink
+                title={`Delete ${row.measurement} ${row.local_date}`}
+                disabled={action.locked}
+                onPress={() =>
+                  setRemove({ kind: 'measurement', date: row.local_date, name: row.measurement })
+                }
+              />
+            </AuthCard>
+          ))}
+          {data.weights.length === 0 && data.measurements.length === 0 && (
             <AuthNotice>No body records in this page. Log a value to begin.</AuthNotice>
           )}
           {remove && (
@@ -263,14 +277,14 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
             <AuthLink
               title="Older body records"
               disabled={
-                action.locked || (kind === 'weight' ? data.weights : data.measurements).length < 30
+                action.locked || (data.weights.length < 30 && data.measurements.length < 30)
               }
               onPress={() => setOffset((current) => current + 30)}
             />
           </View>
         </>
       )}
-      <RecordSaveFeedback action={action} />
+      {!editOpen && <RecordSaveFeedback action={action} />}
     </AuthFrame>
   );
 }

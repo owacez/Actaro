@@ -24,6 +24,9 @@ const user: User = {
   created_at: '2026-01-01T00:00:00Z',
 };
 const profile: Profile = {
+  sex: null,
+  date_of_birth: null,
+  location: null,
   id: owner,
   display_name: null,
   created_at: user.created_at,
