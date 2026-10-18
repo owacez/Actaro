@@ -29,6 +29,9 @@ not authorize completing the rest of v0.1.
 
 ## Local development
 
+For a feature-by-feature walkthrough, examples explaining habits versus goals,
+and expected results, use the [manual app test plan](docs/APP_TEST_PLAN.md).
+
 ### Requirements
 
 - Install [Node.js 24 LTS with npm](https://nodejs.org/en/download), then reopen

@@ -4,6 +4,19 @@ Updated: 2026-10-18 (America/Los_Angeles).
 
 ## Overall
 
+Manual testing guide: **DONE** for documentation. [App test plan](APP_TEST_PLAN.md)
+maps implemented core features to numbered actions and expected results, including
+all five habit types and 13 goal sources. User test outcomes remain unrecorded;
+no device acceptance, release weight or v1.0 approval changes are implied.
+Documentation verification: 81 unique test IDs and all three local guide links
+passed; formatting and `git diff --check` passed. `npm.cmd run check` passed
+TypeScript/lint/format, then reported 307 Jest passes and one existing rest-timer
+assertion failure (`session-screen.test.tsx:41`, expected `1:30`, observed countdown
+already at `1:28`). A focused x64-Node rerun reproduced the assertion failure.
+The six dataset tests passed separately. This documentation task changes no app
+or test code; the timer test needs a deterministic-clock follow-up, not a false
+green result or a relaxed countdown assertion.
+
 - Current Release: **v0.9 — Quality & Personal Beta**
 - Release Completion: **100% active implementation (27 / 27 weight); personal beta DEFERRED (6 weight)**
 - Previous Releases: **v0.1 active development and v0.2–v0.6 functional scopes DONE (100%); retained acceptance DEFERRED**
