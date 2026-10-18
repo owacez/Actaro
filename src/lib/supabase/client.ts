@@ -7,6 +7,7 @@ import { AppState, Platform, type AppStateStatus } from 'react-native';
 import { readSupabaseConfiguration } from './config';
 import type { Database } from './database.types';
 import { installNativePkceCrypto } from './pkce-crypto';
+import { cachedSupabaseFetch } from './read-cache';
 
 function createSupabaseClient() {
   installNativePkceCrypto();
@@ -17,6 +18,7 @@ function createSupabaseClient() {
   );
 
   return createClient<Database>(config.url, config.publishableKey, {
+    global: { fetch: cachedSupabaseFetch(config.url) },
     auth: {
       flowType: 'pkce',
       ...(Platform.OS !== 'web' ? { storage: AsyncStorage } : {}),

@@ -59,6 +59,7 @@ describe('Supabase client lifecycle', () => {
         'https://example-project.supabase.co',
         'sb_publishable_test_configuration_only',
         {
+          global: { fetch: expect.any(Function) },
           auth: {
             storage,
             flowType: 'pkce',
@@ -93,6 +94,7 @@ describe('Supabase client lifecycle', () => {
     expect(startSupabaseSessionRefresh()).toBeUndefined();
     expect(listen).not.toHaveBeenCalled();
     expect(createClient).toHaveBeenCalledWith(expect.any(String), expect.any(String), {
+      global: { fetch: expect.any(Function) },
       auth: {
         flowType: 'pkce',
         autoRefreshToken: true,

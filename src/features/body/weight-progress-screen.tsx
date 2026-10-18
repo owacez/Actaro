@@ -95,8 +95,8 @@ export function WeightProgressScreen({
               <IconButton
                 label="Refresh weight progress"
                 name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }}
-                disabled={resource.loading}
-                onPress={refresh}
+                disabled={resource.loading || resource.refreshing}
+                onPress={resource.reload}
               />
               <IconButton
                 label={editingDates ? 'Hide weight dates' : 'Change weight dates'}

@@ -94,8 +94,8 @@ export function ProgressPanel<T extends ProgressRange & { today: string }>({
               <IconButton
                 label="Refresh progress"
                 name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }}
-                disabled={resource.loading}
-                onPress={refresh}
+                disabled={resource.loading || resource.refreshing}
+                onPress={resource.reload}
               />
               <IconButton
                 label="Change dates"

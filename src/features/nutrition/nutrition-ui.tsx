@@ -12,6 +12,7 @@ import {
 import { useAppTheme } from '@/features/profile/theme-context';
 import { NumberStepper } from '@/components/number-stepper';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
+import { clearReadCache } from '@/lib/supabase/read-cache';
 import {
   foodUnits,
   energy,
@@ -28,6 +29,7 @@ export function useNutritionLoad<T>(
   onLoaded?: (data: T) => void,
   errorMessage = 'Unable to load nutrition. Retry.',
 ) {
+  const generation = useRef(0);
   const [result, setResult] = useState<{
       source: typeof load;
       version: number;
@@ -37,21 +39,22 @@ export function useNutritionLoad<T>(
     [version, setVersion] = useState(0);
   useEffect(() => {
     let active = true;
+    const request = ++generation.current;
     void load()
       .then((value) => {
-        if (active) {
+        if (active && request === generation.current) {
           onLoaded?.(value);
           setResult({ source: load, version, data: value, error: null });
         }
       })
       .catch(() => {
-        if (active) {
-          setResult({
+        if (active && request === generation.current) {
+          setResult((previous) => ({
             source: load,
             version,
-            data: null,
+            data: previous?.source === load ? previous.data : null,
             error: errorMessage,
-          });
+          }));
         }
       });
     return () => {
@@ -59,12 +62,31 @@ export function useNutritionLoad<T>(
     };
   }, [load, version, onLoaded, errorMessage]);
   const refresh = useCallback(() => setVersion((value) => value + 1), []);
-  const loading = !result || result.source !== load || result.version !== version;
+  const reload = useCallback(() => {
+    clearReadCache();
+    refresh();
+  }, [refresh]);
+  const current = result?.source === load ? result : null;
+  const loading = !current || (current.data === null && current.version !== version);
+  const updateData = useCallback(
+    (update: (value: T) => T) => {
+      generation.current++;
+      setResult((previous) =>
+        previous?.source === load && previous.data !== null
+          ? { ...previous, version, data: update(previous.data) }
+          : previous,
+      );
+    },
+    [load, version],
+  );
   return {
-    data: loading ? null : result.data,
-    error: loading ? null : result.error,
+    data: current?.data ?? null,
+    error: loading ? null : (current?.error ?? null),
     loading,
+    refreshing: !!current && current.version !== version,
     refresh,
+    reload,
+    updateData,
   };
 }
 export function useNutritionAction() {

@@ -16,6 +16,7 @@ import {
 } from '@/features/auth/auth-components';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { ExerciseImage } from './exercise-image';
+import { clearReadCache } from '@/lib/supabase/read-cache';
 import {
   exerciseService,
   type CatalogEntry,
@@ -87,6 +88,7 @@ export function LibraryScreen({
     setFilters((current) => ({ ...current, offset: 0, ...patch }));
   }
   function refresh() {
+    clearReadCache();
     generation.current += 1;
     setError(null);
     setLoading(true);

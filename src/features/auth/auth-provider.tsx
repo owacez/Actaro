@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 
 import { getSupabase, startSupabaseSessionRefresh } from '@/lib/supabase/client';
+import { clearReadCache } from '@/lib/supabase/read-cache';
 
 type AuthContextValue = {
   session: Session | null;
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         const {
           data: { subscription },
         } = client.auth.onAuthStateChange((event, nextSession) => {
+          clearReadCache();
           if (!active) return;
           receivedEvent = true;
           setSession(nextSession);
