@@ -9,12 +9,14 @@ export function ExerciseImage({
   large = false,
   size: requestedSize,
   onRetry,
+  framed = true,
 }: {
   url: string | null;
   label: string;
   large?: boolean;
   size?: number;
   onRetry?: () => void;
+  framed?: boolean;
 }) {
   const [failed, setFailed] = useState<string | null>(null);
   const { colors } = useAppTheme();
@@ -22,12 +24,14 @@ export function ExerciseImage({
   return (
     <View
       style={{
-        width: large ? '100%' : size,
+        width: large && framed ? '100%' : size,
+        maxWidth: '100%',
         height: size,
+        alignSelf: framed ? undefined : 'center',
         borderRadius: 14,
-        borderWidth: 1,
+        borderWidth: framed ? 1 : 0,
         borderColor: colors.border,
-        backgroundColor: colors.surface,
+        backgroundColor: framed ? colors.surface : 'transparent',
         overflow: 'hidden',
         alignItems: 'center',
         justifyContent: 'center',

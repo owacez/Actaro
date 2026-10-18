@@ -1,5 +1,12 @@
 import { useLayoutEffect, useRef, useState, type PropsWithChildren } from 'react';
-import { Animated, PanResponder, Text, View, type PanResponderInstance } from 'react-native';
+import {
+  Animated,
+  PanResponder,
+  Pressable,
+  Text,
+  View,
+  type PanResponderInstance,
+} from 'react-native';
 import { AuthLink, AuthText, authStyles } from '@/features/auth/auth-components';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { CompletionMark } from '@/components/completion-mark';
@@ -12,6 +19,7 @@ export function SetLogRow({
   unit,
   previous,
   completed,
+  undoAvailable = completed,
   onLog,
   onUndo,
   children,
@@ -22,16 +30,17 @@ export function SetLogRow({
   unit: string;
   previous: string;
   completed: boolean;
+  undoAvailable?: boolean;
   onLog: () => void;
   onUndo: () => void;
 }>) {
   const [editing, setEditing] = useState(false);
   const [offset] = useState(() => new Animated.Value(0));
   const { colors } = useAppTheme();
-  const actions = useRef({ completed, onLog, onUndo });
+  const actions = useRef({ completed, undoAvailable, onLog, onUndo });
   useLayoutEffect(() => {
-    actions.current = { completed, onLog, onUndo };
-  }, [completed, onLog, onUndo]);
+    actions.current = { completed, undoAvailable, onLog, onUndo };
+  }, [completed, undoAvailable, onLog, onUndo]);
   // Keep the responder alive across timer renders, including during a drag.
   const [pan, setPan] = useState<PanResponderInstance | null>(null);
   useLayoutEffect(() => {
@@ -44,8 +53,8 @@ export function SetLogRow({
           offset.setValue(Math.max(-90, Math.min(90, gesture.dx))),
         onPanResponderRelease: (_, gesture) => {
           const current = actions.current;
-          if (gesture.dx >= 72 && !current.completed) current.onLog();
-          if (gesture.dx <= -72 && current.completed) current.onUndo();
+          if (gesture.dx <= -72 && !current.completed) current.onLog();
+          if (gesture.dx >= 72 && current.undoAvailable) current.onUndo();
           reset();
         },
         onPanResponderTerminate: reset,
@@ -69,46 +78,48 @@ export function SetLogRow({
             alignItems: 'center',
           }}
         >
-          <Text style={{ color: colors.text }}>Log →</Text>
-          <Text style={{ color: colors.text }}>← Undo</Text>
+          <Text style={{ color: colors.text }}>Undo →</Text>
+          <Text style={{ color: colors.text }}>← Log</Text>
         </View>
         <Animated.View
           {...pan?.panHandlers}
-          accessibilityHint="Swipe right to log this set. Swipe left to undo a completed set. Buttons provide the same actions."
+          accessibilityHint="Swipe left to log. Swipe right to undo. Tap the card to edit. Buttons provide the same actions."
           style={{
             transform: [{ translateX: offset }],
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 10,
-            padding: 12,
             backgroundColor: colors.surface,
             borderWidth: 1,
             borderColor: completed ? colors.success : colors.border,
             borderRadius: 20,
           }}
         >
-          <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
-            <AuthText kind="muted">
-              SET {number} · {completed ? 'LOGGED' : 'READY'}
-            </AuthText>
-            <AuthText kind="heading">
-              {reps || '—'} reps · {weight || '—'} {unit}
-            </AuthText>
-            <AuthText kind="muted">Previous: {previous}</AuthText>
-          </View>
-          <IconButton
-            label={`${completed ? 'Unmark' : 'Complete'} set ${number}`}
-            name={
-              completed
-                ? { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }
-                : {
-                    ios: 'arrow.right.circle',
-                    android: 'arrow_circle_right',
-                    web: 'arrow_circle_right',
-                  }
-            }
-            onPress={completed ? onUndo : onLog}
-          />
+          <Pressable
+            accessible={false}
+            onPress={() => setEditing((value) => !value)}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12 }}
+          >
+            <View style={{ flex: 1, minWidth: 0, gap: 4, paddingVertical: 8 }}>
+              <AuthText kind="muted">
+                SET {number} · {completed ? 'LOGGED' : 'READY'}
+              </AuthText>
+              <AuthText kind="heading">
+                {reps || '—'} reps · {weight || '—'} {unit}
+              </AuthText>
+              <AuthText kind="muted">Previous: {previous}</AuthText>
+            </View>
+            <IconButton
+              label={`${completed ? 'Unmark' : 'Complete'} set ${number}`}
+              name={
+                completed
+                  ? { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }
+                  : {
+                      ios: 'arrow.left.circle',
+                      android: 'arrow_circle_left',
+                      web: 'arrow_circle_left',
+                    }
+              }
+              onPress={completed ? onUndo : onLog}
+            />
+          </Pressable>
         </Animated.View>
       </View>
       <View style={authStyles.row}>

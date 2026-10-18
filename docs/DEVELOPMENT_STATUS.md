@@ -4,6 +4,41 @@ Updated: 2026-10-18 (America/Los_Angeles).
 
 ## Overall
 
+Guided set logging (2026-10-18): **DONE** for implementation/local verification.
+The user's newer interaction direction supersedes the previous right-to-log flow:
+left swipe logs the entire card, right swipe undoes. One planned set is shown by
+default; a valid log advances to the next unfinished set. From a ready card,
+right swipe undoes the most recently logged set and returns to it. Selecting a
+completed card undoes that card instead. Tapping opens the existing actual-value
+editor, and explicit edit/log/undo buttons remain accessible.
+
+Selectable progress bars below the image/description change to the existing
+completion color. Show all sets expands the full list; Hide other sets returns
+to one card. All-complete stays reviewable and does not auto-finish the workout.
+Add selects the new set; removal retains a valid selection. Technique media is
+centered, uncropped and frameless at 224px, removing the white side gutters.
+Local persistence, validation, rest/session clocks and server-save rules remain.
+No dependency, database, RLS, private-data, paid-service or release-weight change.
+
+Verification: `npm.cmd run check` **PASS** (strict TypeScript/lint/format,
+318 Jest tests in 64 suites plus six dataset tests). New regression checks cover
+directional/idempotent swipes, vertical-scroll rejection, card-tap editing,
+invalid-input non-advancement, three-set progression/undo, progress selection,
+list expansion/collapse and persisted completion. Seven isolated browser captures
+passed with real touch input, decoded images, light/dark/narrow layouts, three
+persisted completions and zero live Supabase/external requests. Physical iPhone
+gesture feel remains **DEFERRED**; no native/cloud build was launched.
+`npm.cmd exec -- expo export --platform all --output-dir .actaro-tools/guided-sets-export`
+**PASS** for the final source: 39 routes plus iOS/Android/web JavaScript bundles.
+`node --env-file=.env .actaro-tools/check-guided-sets-browser.mjs` **PASS** on that
+export (seven captures, 24 intercepted fixture requests, zero live calls).
+`node .actaro-tools/check-guided-sets-artifacts.mjs` **PASS**: 147 artifacts exclude
+the privileged Supabase key. `git diff --check` **PASS**.
+
+Next three device checks: log/undo three planned sets; tap/edit and revisit sets
+through progress bars/Show all sets; reopen the draft and check the frameless
+image plus preserved actual values. Core acceptance and v1.0 approval stay deferred.
+
 Workout image correction (2026-10-18): **DONE** for implementation/local
 verification; iPhone retest **DEFERRED**. Direct exercise start now falls back to
 the available pose instead of requiring `start`. Read-only hosted checks found

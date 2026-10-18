@@ -417,8 +417,11 @@ exercise/working-set preview with an explicit duration estimate. **Start Workout
 then offers **Timed Workout** or **Log Only**. Both open the dedicated set logger.
 Search results and Exercise Detail also offer **Log exercise** without a template.
 
-Swipe a set **right to log**, **left to undo** a logged set, or use its completion
-button. Planned reps/load are prefilled. **Edit set** exposes actual reps/load,
+One set card appears at a time. Swipe **left to log**, **right to undo**, or use
+the completion button. Logging advances to the next unfinished set; swiping right
+from a ready card returns to and undoes the last logged set. Tap the card to edit.
+Progress bars show each set's status and let you revisit it; **Show all sets**
+reveals the full list. Planned reps/load are prefilled. **Edit set** exposes actual reps/load,
 RPE/notes and removal; **Add set** remains available. Blank weight means unknown;
 zero means no added external load. The independent rest timer starts after logging; pause/resume, skip and
 ±15 seconds work in both modes. Only Timed has a total duration timer.

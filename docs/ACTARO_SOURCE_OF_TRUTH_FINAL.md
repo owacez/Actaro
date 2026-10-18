@@ -378,7 +378,7 @@ Recommended media fields:
 Presentation:
 
 - Exercise list: small monochrome/neutral thumbnail
-- Active workout: centered full-width rectangular technique media, about 200px tall (user testing revision, 2026-10-18); keep logging controls within easy reach
+- Active workout: centered uncropped technique media, about 224px square, without a white frame or side gutters (guided-set revision, 2026-10-18); keep logging controls within easy reach
 - Exercise detail: larger start/peak poses and instructions
 
 Do not use large hero imagery in the logging flow.
@@ -524,7 +524,10 @@ Support:
 Fast set logging (user testing revision, 2026-10-18):
 
 - Planned sets, reps and load remain prefilled from the workout.
-- Swipe a set right to log it; swipe a completed set left to unlog it, preserving the planned row.
+- Show one planned set card at a time. Swipe the whole card left to log; swipe right to undo. This supersedes the earlier right-to-log direction.
+- Logging advances to the next unfinished set. From a ready card, right swipe undoes the most recently logged set and returns to it; a selected completed card undoes that set. Undo preserves the planned row.
+- Set progress bars below the technique/description change color after logging and let users revisit any set. Show all sets reveals the complete list; it stays hidden by default.
+- Tapping the card opens its actual-value editor. Keep explicit edit/log/undo buttons for accessibility and non-touch use.
 - Accessible buttons offer the same actions. Repeated log gestures must not toggle a completed set off.
 - Edit exposes actual reps/load, optional RPE/notes and removal; Add set remains available. Explicit removal is separate from undoing completion.
 - Workout history opens on a month calendar marked from completed sessions. History opens the detailed searchable list and its edit/delete controls.
@@ -556,7 +559,7 @@ Compact technique image
 Exercise name + muscle/equipment
 Previous performance
 Best performance / PR
-Set table
+Current set card + set progress; Show all sets when needed
 Rest timer when active
 Previous / Next exercise
 Finish workout

@@ -57,16 +57,49 @@ test('horizontal swipe logs/undoes while vertical scroll and short gestures do n
   };
   await release(30);
   expect(log).not.toHaveBeenCalled();
-  await release(90);
-  expect(log).toHaveBeenCalledTimes(1);
-  await release(90);
+  await release(-90);
   expect(log).toHaveBeenCalledTimes(1);
   await release(-90);
+  expect(log).toHaveBeenCalledTimes(1);
+  await release(90);
   expect(undo).toHaveBeenCalledTimes(1);
   expect(screen.queryByText('Manual controls')).toBeNull();
-  await fireEvent.press(screen.getByRole('button', { name: 'Edit set 1' }));
+  await fireEvent.press(screen.getByText('8 reps · 20 kg'));
   expect(screen.getByText('Manual controls')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Close editor for set 1' }));
+  expect(screen.queryByText('Manual controls')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit set 1' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Complete set 1' }));
   expect(log).toHaveBeenCalledTimes(2);
   expect(PanResponder.create).toHaveBeenCalledTimes(1);
 }, 15000);
+
+test('right swipe on the next ready card can undo the previous logged set', async () => {
+  let handlers: PanResponderCallbacks = {};
+  jest.spyOn(PanResponder, 'create').mockImplementation((config) => {
+    handlers = config;
+    return { panHandlers: {} };
+  });
+  const undo = jest.fn();
+  await render(
+    <FeedbackTestRoot>
+      <SetLogRow
+        number={2}
+        reps="8"
+        weight="20"
+        unit="kg"
+        previous=""
+        completed={false}
+        undoAvailable
+        onLog={() => {}}
+        onUndo={undo}
+      />
+    </FeedbackTestRoot>,
+  );
+  const release = handlers.onPanResponderRelease;
+  if (!release) throw Error('Release handler missing');
+  await act(() => {
+    Reflect.apply(release, null, [{}, { dx: 90, dy: 0 }]);
+  });
+  expect(undo).toHaveBeenCalledTimes(1);
+});

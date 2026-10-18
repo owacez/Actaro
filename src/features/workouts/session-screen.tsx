@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AppState, View } from 'react-native';
+import { AppState, Pressable, ScrollView, View } from 'react-native';
 import { randomUUID } from 'expo-crypto';
 import {
   AuthButton,
@@ -54,6 +54,8 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
     [index, setIndex] = useState(0),
     [query, setQuery] = useState(0),
     [now, setNow] = useState(Date.now);
+  const [showAllSets, setShowAllSets] = useState(false);
+  const [focusedSet, setFocusedSet] = useState<{ exerciseId: string; setId: string } | null>(null);
   const alive = useRef(true),
     pending = useRef(false),
     revision = useRef(0);
@@ -216,6 +218,21 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
         <AuthNotice error>Exercise unavailable. Reopen the saved workout.</AuthNotice>
       </AuthFrame>
     );
+  const chosen =
+    focusedSet?.exerciseId === exercise.id
+      ? exercise.sets.findIndex((set) => set.id === focusedSet.setId)
+      : -1;
+  const firstReady = exercise.sets.findIndex((set) => !set.completedAt);
+  const activeSet = chosen >= 0 ? chosen : firstReady >= 0 ? firstReady : exercise.sets.length - 1;
+  const loggedSets = exercise.sets.filter((set) => set.completedAt).length;
+  const lastLoggedSet = exercise.sets.reduce(
+    (last, set, position) =>
+      set.completedAt && (last < 0 || set.completedAt >= (exercise.sets[last].completedAt ?? ''))
+        ? position
+        : last,
+    -1,
+  );
+  const undoSet = exercise.sets[activeSet].completedAt ? activeSet : lastLoggedSet;
   const remaining = draft.rest ? Math.max(0, draft.restDuration - elapsed(draft.rest, now)) : 0;
   const summary = draft.status === 'saved' ? sessionPayload(draft) : null;
   const totals = summary
@@ -254,7 +271,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
   }
   function done(position: number, time: number, complete: boolean) {
     const previous = current.current;
-    if (!previous || previous.status !== 'active') return;
+    if (!previous || previous.status !== 'active' || pending.current) return;
     const entry = previous.exercises[index],
       set = entry.sets[position];
     if (!!set.completedAt === complete) return;
@@ -297,6 +314,12 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
           : item,
       ),
     }));
+    const next = complete
+      ? (entry.sets.find((row, at) => at > position && !row.completedAt) ??
+        entry.sets.find((row, at) => at !== position && !row.completedAt) ??
+        set)
+      : set;
+    setFocusedSet({ exerciseId: entry.id, setId: next.id });
   }
   function adjustRest(seconds: number) {
     change((value) => ({
@@ -508,7 +531,8 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
             url={exercise.imageUrl}
             label={`${exercise.name} technique`}
             large
-            size={200}
+            size={224}
+            framed={false}
           />
           <AuthText kind="heading">{exercise.name}</AuthText>
           <AuthText>{exercise.metadata}</AuthText>
@@ -518,74 +542,124 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
               ? 'No recorded load'
               : `${displayWeight(exercise.performance.heaviestKg, draft.unit)} ${draft.unit}`}
           </AuthText>
-          <AuthText>Swipe right to log. Swipe left to undo. Edit to adjust reps or load.</AuthText>
-          {exercise.sets.map((set, position) => (
-            <SetLogRow
-              key={set.id}
-              number={position + 1}
-              reps={set.reps}
-              weight={set.weight}
-              unit={draft.unit}
-              completed={!!set.completedAt}
-              previous={
-                exercise.performance.previous[position]
-                  ? exercise.performance.previous[position].reps +
-                    ' x ' +
-                    (displayWeight(exercise.performance.previous[position].weightKg, draft.unit) ||
-                      '?') +
-                    ' ' +
-                    draft.unit
-                  : 'No previous set'
-              }
-              onLog={() => {
-                done(position, Date.now(), true);
-              }}
-              onUndo={() => {
-                done(position, Date.now(), false);
-              }}
-            >
-              {(['weight', 'reps', 'rpe', 'notes'] as const).map((field) => (
-                <AuthInput
-                  key={field}
-                  label={
-                    field === 'weight'
-                      ? `Weight (${draft.unit}) · set ${position + 1}`
-                      : field === 'reps'
-                        ? `Reps · set ${position + 1}`
-                        : field.toUpperCase() + ' · set ' + (position + 1)
-                  }
-                  value={set[field]}
-                  keyboardType={
-                    field === 'weight' || field === 'rpe'
-                      ? 'decimal-pad'
-                      : field === 'reps'
-                        ? 'number-pad'
-                        : 'default'
-                  }
-                  onChangeText={(value) => setField(position, field, value)}
+          <ScrollView horizontal contentContainerStyle={{ flexGrow: 1, gap: 6 }}>
+            {exercise.sets.map((set, position) => (
+              <Pressable
+                key={set.id}
+                accessibilityRole="button"
+                accessibilityLabel={`View set ${position + 1}, ${set.completedAt ? 'logged' : 'not logged'}`}
+                accessibilityState={{ selected: position === activeSet }}
+                onPress={() => setFocusedSet({ exerciseId: exercise.id, setId: set.id })}
+                style={{ flex: 1, minWidth: 28, minHeight: 44, justifyContent: 'center', gap: 4 }}
+              >
+                <View
+                  style={{
+                    height: 6,
+                    borderRadius: 3,
+                    backgroundColor: set.completedAt ? colors.volt : colors.fill,
+                    borderWidth: position === activeSet ? 1 : 0,
+                    borderColor: colors.text,
+                  }}
                 />
-              ))}
-              <AuthLink
-                title={`Remove set ${position + 1}`}
-                disabled={exercise.sets.length === 1}
-                onPress={() =>
-                  change((value) => ({
-                    ...value,
-                    exercises: value.exercises.map((entry, at) =>
-                      at === index
-                        ? { ...entry, sets: entry.sets.filter((_, place) => place !== position) }
-                        : entry,
-                    ),
-                  }))
-                }
-              />
-            </SetLogRow>
-          ))}
+                <AuthText kind="muted">{position + 1}</AuthText>
+              </Pressable>
+            ))}
+          </ScrollView>
+          <View style={authStyles.row}>
+            <AuthText kind="eyebrow">
+              {loggedSets} of {exercise.sets.length} sets logged
+            </AuthText>
+            <AuthLink
+              title={showAllSets ? 'Hide other sets' : 'Show all sets'}
+              onPress={() => setShowAllSets((value) => !value)}
+            />
+          </View>
+          <AuthText>Swipe left to log. Right to undo. Tap the card to edit.</AuthText>
+          {loggedSets === exercise.sets.length && (
+            <AuthText>
+              All sets logged. Continue to the next exercise or finish your workout.
+            </AuthText>
+          )}
+          {!showAllSets && undoSet >= 0 && (
+            <AuthLink title="Undo last set" onPress={() => done(undoSet, now, false)} />
+          )}
+          {exercise.sets.map(
+            (set, position) =>
+              (showAllSets || position === activeSet) && (
+                <SetLogRow
+                  key={set.id}
+                  number={position + 1}
+                  reps={set.reps}
+                  weight={set.weight}
+                  unit={draft.unit}
+                  completed={!!set.completedAt}
+                  undoAvailable={showAllSets ? !!set.completedAt : undoSet >= 0}
+                  previous={
+                    exercise.performance.previous[position]
+                      ? exercise.performance.previous[position].reps +
+                        ' x ' +
+                        (displayWeight(
+                          exercise.performance.previous[position].weightKg,
+                          draft.unit,
+                        ) || '?') +
+                        ' ' +
+                        draft.unit
+                      : 'No previous set'
+                  }
+                  onLog={() => {
+                    done(position, Date.now(), true);
+                  }}
+                  onUndo={() => {
+                    done(showAllSets ? position : undoSet, Date.now(), false);
+                  }}
+                >
+                  {(['weight', 'reps', 'rpe', 'notes'] as const).map((field) => (
+                    <AuthInput
+                      key={field}
+                      label={
+                        field === 'weight'
+                          ? `Weight (${draft.unit}) · set ${position + 1}`
+                          : field === 'reps'
+                            ? `Reps · set ${position + 1}`
+                            : field.toUpperCase() + ' · set ' + (position + 1)
+                      }
+                      value={set[field]}
+                      keyboardType={
+                        field === 'weight' || field === 'rpe'
+                          ? 'decimal-pad'
+                          : field === 'reps'
+                            ? 'number-pad'
+                            : 'default'
+                      }
+                      onChangeText={(value) => setField(position, field, value)}
+                    />
+                  ))}
+                  <AuthLink
+                    title={`Remove set ${position + 1}`}
+                    disabled={exercise.sets.length === 1}
+                    onPress={() =>
+                      change((value) => ({
+                        ...value,
+                        exercises: value.exercises.map((entry, at) =>
+                          at === index
+                            ? {
+                                ...entry,
+                                sets: entry.sets.filter((_, place) => place !== position),
+                              }
+                            : entry,
+                        ),
+                      }))
+                    }
+                  />
+                </SetLogRow>
+              ),
+          )}
           <AuthButton
             title="Add set"
             outlined
             disabled={exercise.sets.length >= 100}
-            onPress={() =>
+            onPress={() => {
+              const setId = randomUUID();
               change((value) => ({
                 ...value,
                 exercises: value.exercises.map((entry, at) =>
@@ -597,7 +671,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
                           {
                             ...blankSet(),
                             ...(entry.sets.at(-1) ?? {}),
-                            id: randomUUID(),
+                            id: setId,
                             completedAt: null,
                             rpe: '',
                           },
@@ -605,8 +679,9 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
                       }
                     : entry,
                 ),
-              }))
-            }
+              }));
+              setFocusedSet({ exerciseId: exercise.id, setId });
+            }}
           />
           <AuthInput
             label="Rest after a set (seconds)"

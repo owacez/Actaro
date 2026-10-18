@@ -573,6 +573,11 @@ Show:
 
 ## 2.6 Dedicated Active Workout — Weight 10
 
+User testing revision (2026-10-18): one set card at a time, left swipe to log,
+right swipe to undo, tap to edit, selectable completion bars and Show all sets.
+Automatic progression/undo preserve actual values and local recovery. Technique
+media is uncropped and frameless. This refines the same task; weights do not change.
+
 Must include:
 
 - Workout header

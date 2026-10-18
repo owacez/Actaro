@@ -1,5 +1,9 @@
 # Testing feedback implementation
 
+Subsequent guided-set revision: left swipe now logs and right swipe undoes;
+one card/progress bars/Show all sets supersede the initial list described below.
+See [current test steps](APP_TEST_PLAN.md) and Development Status for newer evidence.
+
 Updated: 2026-10-18 (America/Los_Angeles).
 
 Status: **DONE** for implementation and local verification; physical-device acceptance remains **DEFERRED**.
