@@ -257,6 +257,11 @@ DevTools Network can count `/rest/v1/` requests while preserving the log. Auth
 verification can still make requests; it has no 60-second TTL cache. Do not export
 or share unredacted network logs, which can contain credentials.
 
+For C10/C13, also test a single-pose exercise and a draft saved more than an hour
+ago. Its technique image should load on opening/resume without losing logged
+sets. If a temporary network error prevents loading, use **Retry image**; the
+preview retries its read and the active workout refreshes only its media.
+
 For reminders, web has no background notification delivery. Native reminders
 schedule up to 48 occurrences over the next seven calendar days and refresh on
 open/resume/edits. Notification delivery and native permission behavior need device

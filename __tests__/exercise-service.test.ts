@@ -91,6 +91,36 @@ test('empty search avoids a needless storage request', async () => {
   await expect(exerciseService.search(filters, owner)).resolves.toEqual([]);
   expect(mockFetch).toHaveBeenCalledTimes(1);
 });
+test.each(['start', 'main'] as const)(
+  'workout image resolves %s media by exercise ID',
+  async (pose) => {
+    const path = `${itemId}/${pose}.webp`;
+    mockFetch
+      .mockResolvedValueOnce(
+        response([
+          { storage_path: `${itemId}/main.webp`, pose: 'main' },
+          ...(pose === 'start' ? [{ storage_path: path, pose: 'start' }] : []),
+        ]),
+      )
+      .mockResolvedValueOnce(
+        response([{ path, signedURL: '/object/sign/exercise-media/fresh?token=test' }]),
+      );
+    expect(await exerciseService.image(itemId)).toContain('/object/sign/exercise-media/fresh');
+    const request = new URL(String(mockFetch.mock.calls[0][0]));
+    expect(request.pathname).toBe('/rest/v1/exercise_media');
+    expect(request.searchParams.get('exercise_id')).toBe(`eq.${itemId}`);
+    expect(JSON.parse(String(mockFetch.mock.calls[1][1]?.body)).paths).toEqual([path]);
+  },
+);
+test('workout image failure keeps provider diagnostics private and missing media avoids signing', async () => {
+  await expect(exerciseService.image('invalid')).rejects.toThrow('Check your connection');
+  expect(mockFetch).not.toHaveBeenCalled();
+  mockFetch.mockResolvedValueOnce(response([]));
+  await expect(exerciseService.image(itemId)).resolves.toBeNull();
+  expect(mockFetch).toHaveBeenCalledTimes(1);
+  mockFetch.mockResolvedValueOnce(response({ message: 'private diagnostic' }, 403));
+  await expect(exerciseService.image(itemId)).rejects.toThrow('Check your connection');
+});
 test('owned equipment operations reject a stale account before reads or writes', async () => {
   for (const request of [
     () => exerciseService.equipmentProfile(itemId),

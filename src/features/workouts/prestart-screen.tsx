@@ -14,6 +14,7 @@ import { ExerciseImage } from '@/features/exercises/exercise-image';
 import { prestartTotals, type SessionDraft } from './session-model';
 import { sessionService, type PreparedWorkout } from './session-service';
 import { sessionStore } from './session-store';
+import { clearReadCache } from '@/lib/supabase/read-cache';
 export function PrestartScreen({
   userId,
   templateId,
@@ -140,7 +141,14 @@ export function PrestartScreen({
             {prepared.exercises.map((exercise, index) => (
               <AuthCard key={exercise.id}>
                 <View style={{ flexDirection: 'row', gap: 12 }}>
-                  <ExerciseImage url={exercise.imageUrl} label={exercise.name} />
+                  <ExerciseImage
+                    url={exercise.imageUrl}
+                    label={exercise.name}
+                    onRetry={() => {
+                      clearReadCache();
+                      setQuery((value) => value + 1);
+                    }}
+                  />
                   <View style={{ flex: 1, gap: 6 }}>
                     <AuthText kind="eyebrow">
                       {index + 1}. {exercise.name}

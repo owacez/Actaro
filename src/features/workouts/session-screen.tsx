@@ -17,7 +17,7 @@ import { SetLogRow } from './set-log-row';
 import { ProgressMetrics } from '@/features/progress/progress-components';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
-import { ExerciseImage } from '@/features/exercises/exercise-image';
+import { WorkoutImage } from './workout-image';
 import { blankSet, displayWeight, workoutPayload } from './workout-model';
 import {
   elapsed,
@@ -502,8 +502,9 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
               />
             </>
           )}
-          <ExerciseImage
-            key={exercise.imageUrl}
+          <WorkoutImage
+            key={exercise.id}
+            exerciseId={exercise.exerciseId}
             url={exercise.imageUrl}
             label={`${exercise.name} technique`}
             large

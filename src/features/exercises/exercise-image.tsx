@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useAppTheme } from '@/features/profile/theme-context';
 
 export function ExerciseImage({
@@ -8,13 +8,15 @@ export function ExerciseImage({
   label,
   large = false,
   size: requestedSize,
+  onRetry,
 }: {
   url: string | null;
   label: string;
   large?: boolean;
   size?: number;
+  onRetry?: () => void;
 }) {
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<string | null>(null);
   const { colors } = useAppTheme();
   const size = requestedSize ?? (large ? 200 : 58);
   return (
@@ -31,7 +33,7 @@ export function ExerciseImage({
         justifyContent: 'center',
       }}
     >
-      {url && !failed ? (
+      {url && failed !== url ? (
         <Image
           source={url}
           accessibilityLabel={label}
@@ -39,8 +41,29 @@ export function ExerciseImage({
           cachePolicy="memory-disk"
           recyclingKey={url}
           style={{ width: '100%', height: '100%' }}
-          onError={() => setFailed(true)}
+          onError={() => setFailed(url)}
         />
+      ) : onRetry ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Retry image for ${label}`}
+          onPress={() => {
+            setFailed(null);
+            onRetry();
+          }}
+          style={{
+            width: '100%',
+            height: '100%',
+            minHeight: 44,
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 4,
+          }}
+        >
+          <Text style={{ color: colors.muted, fontSize: large ? 12 : 9, textAlign: 'center' }}>
+            {large ? 'Image unavailable. Tap to retry.' : 'Retry image'}
+          </Text>
+        </Pressable>
       ) : (
         <Text
           style={{
@@ -50,7 +73,7 @@ export function ExerciseImage({
             textAlign: 'center',
           }}
         >
-          {large ? 'Image unavailable. Refresh to retry.' : 'No image'}
+          {large ? 'Image unavailable.' : 'No image'}
         </Text>
       )}
     </View>

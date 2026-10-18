@@ -47,6 +47,20 @@ export async function mediaUrls(paths: string[]) {
 }
 
 export const exerciseService = {
+  image(id: string) {
+    return safe(async () => {
+      if (!validExerciseId(id)) throw new Error('Invalid exercise');
+      const { data, error } = await getSupabase()
+        .from('exercise_media')
+        .select('storage_path,pose')
+        .eq('exercise_id', id);
+      if (error || !data) throw new Error('Exercise media unavailable');
+      const media = data.find((item) => item.pose === 'start') ?? data[0];
+      if (!media) return null;
+      const urls = await mediaUrls([media.storage_path]);
+      return urls.get(media.storage_path) ?? null;
+    });
+  },
   catalogs() {
     return safe(async () => {
       const [muscles, equipment] = await Promise.all([

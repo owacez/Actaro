@@ -1,4 +1,4 @@
-import { beforeEach, expect, jest, test } from '@jest/globals';
+import { afterEach, beforeEach, expect, jest, test } from '@jest/globals';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { SessionScreen } from '@/features/workouts/session-screen';
 import { sessionStore } from '@/features/workouts/session-store';
@@ -21,7 +21,12 @@ beforeEach(() => {
   store.discard.mockResolvedValue(undefined);
   service.save.mockResolvedValue(1);
 });
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 test('Log Only completes sets, controls independent rest and preserves frozen failed saves for retry', async () => {
+  // Image resolution/rendering must not consume the first second of this assertion.
+  jest.spyOn(Date, 'now').mockReturnValue(Date.now());
   store.read.mockResolvedValue({
     ...sessionFixture(),
     mode: 'log_only',

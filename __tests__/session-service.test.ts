@@ -91,6 +91,41 @@ test('save uses canonical actual facts, owned deleted-template fallback and revi
   const lookup = new URL(String(mockFetch.mock.calls[0][0]));
   expect(lookup.searchParams.get('user_id')).toBe('eq.' + sessionOwner);
 });
+test.each(['start', 'main'] as const)(
+  'direct workout preparation retains the %s pose image',
+  async (pose) => {
+    const exercise = sessionFixture().exercises[0];
+    const path = `${exercise.exerciseId}/${pose}.webp`;
+    mockFetch.mockImplementation(async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname.includes('/storage/'))
+        return response([{ path, signedURL: '/object/sign/exercise-media/prepared?token=test' }]);
+      if (url.pathname.includes('/rpc/'))
+        return response([
+          {
+            exercise_id: exercise.exerciseId,
+            previous: [],
+            best: { heaviest_kg: null, estimated_1rm: null, reps_by_weight: {} },
+          },
+        ]);
+      if (url.pathname.endsWith('/user_preferences')) return response({ weight_unit: 'kg' });
+      const record = {
+        id: exercise.exerciseId,
+        name: exercise.name,
+        category: 'strength',
+        exercise_media: [{ storage_path: path, pose }],
+        exercise_muscles: [],
+        exercise_equipment: [],
+      };
+      return response(
+        url.searchParams.get('select')?.startsWith('id,category') ? [record] : record,
+      );
+    });
+    const prepared = await sessionService.prepare(sessionOwner, undefined, exercise.exerciseId);
+    expect(prepared.draft.exercises[0].imageUrl).toContain('/object/sign/exercise-media/prepared');
+    expect(prepared.exercises[0].imageUrl).toBe(prepared.draft.exercises[0].imageUrl);
+  },
+);
 test('stale revision errors retain the draft and expose no raw diagnostics', async () => {
   const fixture = sessionFixture();
   fixture.status = 'pending';

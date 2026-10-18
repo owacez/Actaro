@@ -4,6 +4,36 @@ Updated: 2026-10-18 (America/Los_Angeles).
 
 ## Overall
 
+Workout image correction (2026-10-18): **DONE** for implementation/local
+verification; iPhone retest **DEFERRED**. Direct exercise start now falls back to
+the available pose instead of requiring `start`. Read-only hosted checks found
+643 exercises, 1,138 media records/objects, zero missing objects, and 148 exercises
+without a start pose. The existing authenticated-only metadata/Storage policies
+remain unchanged. Both a main and a start WebP signed/downloaded successfully
+(HTTP 200); no accounts, personal records, imports or schema changes were needed.
+
+Active workouts now resolve the selected exercise's image on open/resume instead
+of relying on the one-hour URL persisted in an old draft. This uses the existing
+read cache, retains the previous image when offline, ignores late responses after
+exercise changes, and never rewrites performed sets or clocks. Preview and active
+images offer an actual retry action. Shared image failure state is URL-specific,
+so a refreshed URL can recover without remounting the screen.
+
+Verification: `npm.cmd run check` **PASS** (TypeScript/lint/format, 316 Jest tests
+in 64 suites plus six dataset tests); targeted media/service tests **18 PASS**.
+`npm.cmd exec -- expo export --platform all --output-dir .actaro-tools/workout-media-export`
+**PASS**, 39 routes and iOS/Android/web JavaScript bundles. Three isolated browser
+captures verified single-main preview/start and resumed expired-link replacement,
+including decoded image pixels and unchanged persisted reps/completion. Browser
+requests were intercepted fixtures, with zero live Supabase calls. Live checks
+above were limited to shared reference media; no email requests or private data.
+`git diff --check` **PASS**. The previously recorded rest-timer assertion below is
+resolved by pinning only its test wall clock; the app's timer behavior is unchanged.
+
+Next three device checks: start a single-main exercise directly; reopen an older
+saved workout and confirm its image loads with sets intact; disconnect/reconnect
+and use Retry image. Release weights and deferred release acceptance are unchanged.
+
 Manual testing guide: **DONE** for documentation. [App test plan](APP_TEST_PLAN.md)
 maps implemented core features to numbered actions and expected results, including
 all five habit types and 13 goal sources. User test outcomes remain unrecorded;

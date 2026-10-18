@@ -61,7 +61,9 @@ export const sessionService = {
             exerciseId,
             name: exercise.name,
             imageUrl:
-              exercise.exercise_media.find((media) => media.pose === 'start')?.imageUrl ?? null,
+              exercise.exercise_media.find((media) => media.pose === 'start')?.imageUrl ??
+              exercise.exercise_media[0]?.imageUrl ??
+              null,
             notes: '',
             sets: [blankSet()],
           },
