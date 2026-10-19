@@ -140,37 +140,37 @@ export function WorkoutsScreen({
             </AuthCard>
           )}
           {page?.rows.map((row) => (
-            <View key={row.id}>
-              <ActionRow
-                title={row.name}
-                detail={String(row.workout_template_exercises[0]?.count ?? 0) + ' exercises'}
-                icon={{ ios: 'dumbbell', android: 'fitness_center', web: 'fitness_center' }}
-                disabled={removing}
-                onPress={() => onEdit(row.id, row.name)}
-                trailing={
-                  !selecting ? (
-                    <View style={{ flexDirection: 'row' }}>
-                      {onStart && (
-                        <IconButton
-                          label={'Start ' + row.name}
-                          name={{ ios: 'play', android: 'play_arrow', web: 'play_arrow' }}
-                          disabled={removing}
-                          onPress={() => onStart(row.id)}
-                        />
-                      )}
-                      <IconButton
-                        label={'Delete ' + row.name}
-                        name={{ ios: 'trash', android: 'delete_outline', web: 'delete_outline' }}
-                        disabled={removing}
-                        onPress={() => {
-                          setSelected(row);
-                          setDeleteError(null);
-                        }}
-                      />
-                    </View>
-                  ) : undefined
-                }
-              />
+            <View key={row.id} style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <ActionRow
+                  title={row.name}
+                  detail={String(row.workout_template_exercises[0]?.count ?? 0) + ' exercises'}
+                  icon={{ ios: 'dumbbell', android: 'fitness_center', web: 'fitness_center' }}
+                  disabled={removing}
+                  onPress={() => onEdit(row.id, row.name)}
+                />
+              </View>
+              {!selecting && (
+                <View style={{ flexDirection: 'row' }}>
+                  {onStart && (
+                    <IconButton
+                      label={'Start ' + row.name}
+                      name={{ ios: 'play', android: 'play_arrow', web: 'play_arrow' }}
+                      disabled={removing}
+                      onPress={() => onStart(row.id)}
+                    />
+                  )}
+                  <IconButton
+                    label={'Delete ' + row.name}
+                    name={{ ios: 'trash', android: 'delete_outline', web: 'delete_outline' }}
+                    disabled={removing}
+                    onPress={() => {
+                      setSelected(row);
+                      setDeleteError(null);
+                    }}
+                  />
+                </View>
+              )}
             </View>
           ))}
           {(offset > 0 || page?.more) && (

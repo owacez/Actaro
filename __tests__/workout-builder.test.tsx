@@ -244,6 +244,53 @@ test('workout chooser opens the selected template and keeps deletion out of the 
   await fireEvent.press(screen.getByRole('button', { name: 'Create workout' }));
   expect(create).toHaveBeenCalledTimes(1);
 });
+
+test('workout edit, start and delete are separate accessible buttons with independent actions', async () => {
+  mocks.list.mockResolvedValue({
+    rows: [
+      {
+        id: workoutId,
+        name: 'Upper A',
+        updated_at: '2026-10-13',
+        workout_template_exercises: [{ count: 1 }],
+      },
+    ],
+    more: false,
+  });
+  const edit = jest.fn(),
+    start = jest.fn();
+  await render(
+    <FeedbackTestRoot>
+      <WorkoutsScreen
+        userId={userId}
+        onBack={() => {}}
+        onCreate={() => {}}
+        onEdit={edit}
+        onStart={start}
+      />
+    </FeedbackTestRoot>,
+  );
+  const startButton = await screen.findByRole('button', { name: 'Start Upper A' });
+  const deleteButton = screen.getByRole('button', { name: 'Delete Upper A' });
+  for (const button of [startButton, deleteButton]) {
+    // Native Pressable maps its host button to <button> on web. An action must
+    // never have a second host button ancestor (invalid DOM and hidden actions).
+    for (let parent = button.parent; parent; parent = parent.parent) {
+      if (typeof parent.type === 'string')
+        expect(parent.props.accessibilityRole).not.toBe('button');
+    }
+  }
+  await fireEvent.press(startButton);
+  expect(start).toHaveBeenCalledWith(workoutId);
+  expect(edit).not.toHaveBeenCalled();
+  await fireEvent.press(deleteButton);
+  await screen.findByText('Delete workout?');
+  expect(mocks.remove).not.toHaveBeenCalled();
+  expect(edit).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Keep workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Upper A' }));
+  expect(edit).toHaveBeenCalledWith(workoutId, 'Upper A');
+});
 test('converts pounds to canonical kilograms and preserves unknown versus zero weight', () => {
   const value = {
     ...draft,

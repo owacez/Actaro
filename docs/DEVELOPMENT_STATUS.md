@@ -1,8 +1,30 @@
 # Actaro — Development Status
 
-Updated: 2026-10-18 (America/Los_Angeles).
+Updated: 2026-10-19 (America/Los_Angeles).
 
 ## Overall
+
+Workout list web button correction (2026-10-19): **DONE** for implementation
+and local verification. The Start/Delete IconButtons were nested inside the
+ActionRow's Edit button. React Native Web maps these roles to actual buttons;
+the isolated pre-fix DOM probe found both nested buttons. The workout list now
+renders edit/start/delete as sibling controls. Other ActionRow callers were
+checked; the only other custom trailing content is a noninteractive food icon.
+Shared button semantics and click handling remain intact, and chooser mode
+continues to hide Start/Delete.
+
+Verification: `npm.cmd run check` **PASS**, strict TypeScript/lint/format,
+330 Jest tests in 66 suites plus six dataset tests (**336 total**). A regression
+checks accessible, non-nested controls, separate callbacks and delete confirmation;
+existing chooser, disabled/pending deletion and retry checks pass.
+`npm.cmd exec -- expo export --platform web --output-dir .actaro-tools/workout-row-export`
+**PASS**, 39 routes. `node --env-file=.env .actaro-tools/check-workout-row-browser.mjs`
+**PASS**: zero nested buttons, Start preview, Edit builder, Delete confirmation,
+cancel preserves the row, three light/narrow-dark captures and zero live Supabase
+calls. The narrow row capture was visually reviewed. `git diff --check` **PASS**.
+No dependency, schema, auth or release-weight change. Device acceptance remains
+deferred. Next three checks: reload Train on web; start/open a workout; cancel
+then confirm deletion of a disposable workout while preserving recorded history.
 
 Body/goal/Today habit usability (2026-10-18): **DONE** for implementation/local
 verification; physical-device acceptance remains **DEFERRED**. Body records now
