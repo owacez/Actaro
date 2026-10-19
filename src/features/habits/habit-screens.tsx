@@ -72,10 +72,10 @@ function Progress({ record, today }: { record: HabitRecord; today: string }) {
         ? `${result.atLeast ? '≥' : ''}${result.streak} scheduled ${record.kind === 'frequency' ? 'week' : 'day'} streak`
         : mode === 'weekly'
           ? result.lastWeekPercentage === null
-            ? 'No completed-week evidence yet'
+            ? 'Your weekly summary appears after a full week'
             : `${formatNumber(result.lastWeekPercentage)}% last full week`
           : result.percentage === null
-            ? 'No closed or completed actions yet'
+            ? 'Log scheduled days to see your consistency'
             : `${formatNumber(result.percentage)}% recent completion`}{' '}
       · Rest days are excluded.
     </AuthText>
@@ -113,8 +113,8 @@ export function HabitsScreen({
     <AuthFrame header={<ScreenHeader title="Habits" />}>
       <AuthLink title="← You" disabled={action.locked} onPress={onBack} />
       <AuthText>
-        Habits are actions you repeat. Choose a schedule, then check off or record what you did.
-        Goals measure outcomes from your saved records.
+        A habit is something you do regularly, such as stretching after training. Record it on
+        Today; this screen keeps your schedule and history.
       </AuthText>
       <AuthButton title="Create habit" disabled={action.locked} onPress={() => onOpen('edit')} />
       <View style={authStyles.choices}>
@@ -380,6 +380,8 @@ export function HabitEditor({
       motivation: 'weekly',
       reminder: '',
     });
+  const [showMoreKinds, setShowMoreKinds] = useState(false),
+    [showOptions, setShowOptions] = useState(false);
   const load = useCallback(async () => {
     const preferences = await profileService.getPreferences(userId),
       saved = habitId ? await habitService.load(userId, habitId) : null;
@@ -431,40 +433,56 @@ export function HabitEditor({
         <>
           <AuthInput
             label="Habit name"
+            placeholder="For example, read before bed"
             value={form.name}
             maxLength={120}
             editable={!action.locked}
             onChangeText={(name) => setForm((current) => ({ ...current, name }))}
           />
+          <AuthText kind="heading">How will you log it?</AuthText>
           <View style={authStyles.choices}>
-            {habitKinds.map((kind) => (
-              <AuthChoice
-                key={kind}
-                title={habitTypeInfo[kind].label}
-                selected={form.kind === kind}
-                disabled={action.locked || !!habitId}
-                onPress={() =>
-                  setForm((current) => ({
-                    ...current,
-                    kind,
-                    unit:
-                      kind === 'boolean'
-                        ? 'done'
-                        : kind === 'duration'
-                          ? 'minutes'
-                          : kind === 'numeric'
-                            ? 'units'
-                            : 'times',
-                    target: kind === 'avoidance' ? '0' : '1',
-                  }))
-                }
-              />
-            ))}
+            {habitKinds
+              .filter(
+                (kind) =>
+                  showMoreKinds ||
+                  ['boolean', 'numeric', 'duration'].includes(kind) ||
+                  form.kind === kind,
+              )
+              .map((kind) => (
+                <AuthChoice
+                  key={kind}
+                  title={habitTypeInfo[kind].label}
+                  selected={form.kind === kind}
+                  disabled={action.locked || !!habitId}
+                  onPress={() =>
+                    setForm((current) => ({
+                      ...current,
+                      kind,
+                      unit:
+                        kind === 'boolean'
+                          ? 'done'
+                          : kind === 'duration'
+                            ? 'minutes'
+                            : kind === 'numeric'
+                              ? ''
+                              : 'times',
+                      target: kind === 'avoidance' ? '0' : '1',
+                    }))
+                  }
+                />
+              ))}
           </View>
+          <AuthButton
+            title={showMoreKinds ? 'Fewer logging options' : 'More logging options'}
+            outlined
+            disabled={action.locked}
+            onPress={() => setShowMoreKinds((value) => !value)}
+          />
           <AuthText>{habitTypeInfo[form.kind].detail}</AuthText>
           {form.kind === 'numeric' && (
             <AuthInput
-              label="Tracking unit"
+              label="What are you counting?"
+              placeholder="For example, pages or glasses"
               value={form.unit}
               maxLength={40}
               editable={!action.locked && !habitId}
@@ -486,10 +504,15 @@ export function HabitEditor({
               onChangeText={(target) => setForm((current) => ({ ...current, target }))}
             />
           )}
-          <AuthText>
+          <AuthText kind="heading">
             {form.kind === 'frequency'
-              ? 'Log occurrence counts on any active date. Weekly targets use Monday–Sunday. Partial first/last weeks are excluded from consistency.'
-              : 'Choose your scheduled days. Rest and non-action days never break progress.'}
+              ? 'Which days should it appear on Today?'
+              : 'Which days will you do it?'}
+          </AuthText>
+          <AuthText kind="muted">
+            {form.kind === 'frequency'
+              ? 'Occurrences add up across Monday–Sunday, even when logged on other active dates.'
+              : 'Days you leave unselected are rest days, not failures.'}
           </AuthText>
           <View style={authStyles.choices}>
             {weekdays.map((day, index) => (
@@ -515,53 +538,69 @@ export function HabitEditor({
             disabled={action.locked || !!habitId}
             onChange={(start) => setForm((current) => ({ ...current, start }))}
           />
-          <DatePicker
-            label="End date (optional)"
-            value={form.end}
-            referenceDate={form.start}
+          <AuthButton
+            title={showOptions ? 'Hide optional settings' : 'Reminders and other options'}
+            outlined
             disabled={action.locked}
-            onChange={(end) => setForm((current) => ({ ...current, end }))}
+            onPress={() => setShowOptions((value) => !value)}
           />
-          {!!form.end && (
-            <AuthLink
-              title="No end date"
-              disabled={action.locked}
-              onPress={() => setForm((current) => ({ ...current, end: '' }))}
-            />
+          {!showOptions && (form.end || form.reminder) && (
+            <AuthText kind="muted">
+              {[form.end && 'Ends ' + form.end, form.reminder && 'Reminder ' + form.reminder]
+                .filter(Boolean)
+                .join(' · ')}
+            </AuthText>
           )}
-          <AuthText>
-            Schedule time zone: {form.zone}. Type, unit, start and time zone stay fixed after
-            creation. Target/schedule edits apply from today; earlier results keep their earlier
-            settings.
-          </AuthText>
-          <TimePicker
-            value={form.reminder}
-            disabled={action.locked}
-            onChange={(reminder) => setForm((current) => ({ ...current, reminder }))}
-          />
-          {!!form.reminder && (
-            <AuthLink
-              title="No reminder"
-              disabled={action.locked}
-              onPress={() => setForm((current) => ({ ...current, reminder: '' }))}
-            />
-          )}
-          <AuthText>
-            Shown as due in the app on scheduled days. Enable device alerts in Preferences → Manage
-            habit reminders.
-          </AuthText>
-          <AuthText kind="eyebrow">Progress style</AuthText>
-          <View style={authStyles.choices}>
-            {motivationModes.map((mode) => (
-              <AuthChoice
-                key={mode.key}
-                title={mode.label}
-                selected={form.motivation === mode.key}
+          {showOptions && (
+            <>
+              <DatePicker
+                label="End date (optional)"
+                value={form.end}
+                referenceDate={form.start}
                 disabled={action.locked}
-                onPress={() => setForm((current) => ({ ...current, motivation: mode.key }))}
+                onChange={(end) => setForm((current) => ({ ...current, end }))}
               />
-            ))}
-          </View>
+              {!!form.end && (
+                <AuthLink
+                  title="No end date"
+                  disabled={action.locked}
+                  onPress={() => setForm((current) => ({ ...current, end: '' }))}
+                />
+              )}
+              <AuthText>
+                Uses {form.zone}. Existing logs keep their original settings. Target and schedule
+                changes apply from today.
+              </AuthText>
+              <TimePicker
+                value={form.reminder}
+                disabled={action.locked}
+                onChange={(reminder) => setForm((current) => ({ ...current, reminder }))}
+              />
+              {!!form.reminder && (
+                <AuthLink
+                  title="No reminder"
+                  disabled={action.locked}
+                  onPress={() => setForm((current) => ({ ...current, reminder: '' }))}
+                />
+              )}
+              <AuthText>
+                Shown as due in the app on scheduled days. Enable device alerts in Preferences →
+                Manage habit reminders.
+              </AuthText>
+              <AuthText kind="eyebrow">How progress is shown</AuthText>
+              <View style={authStyles.choices}>
+                {motivationModes.map((mode) => (
+                  <AuthChoice
+                    key={mode.key}
+                    title={mode.label}
+                    selected={form.motivation === mode.key}
+                    disabled={action.locked}
+                    onPress={() => setForm((current) => ({ ...current, motivation: mode.key }))}
+                  />
+                ))}
+              </View>
+            </>
+          )}
           <AuthButton
             title="Save habit"
             disabled={action.locked || resource.data.saved?.record.archived}

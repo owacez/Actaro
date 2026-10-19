@@ -12,22 +12,28 @@ export type HabitRecord = Habit & { habit_versions: HabitVersion[]; habit_logs: 
 export const habitKinds = ['boolean', 'numeric', 'duration', 'frequency', 'avoidance'] as const;
 export type HabitKind = (typeof habitKinds)[number];
 export const habitTypeInfo = {
-  boolean: { label: 'Check off', detail: 'A simple done/not done action, such as stretching.' },
+  boolean: {
+    label: 'Just mark it done',
+    detail: 'Example: Stretch after training. Tap Mark done when you do it.',
+  },
   numeric: {
-    label: 'Count or amount',
-    detail: 'Track a daily amount, such as glasses of water or pages read.',
+    label: 'Enter an amount',
+    detail: 'Example: Read 10 pages. Enter how many pages you read; 10 meets your daily target.',
   },
   duration: {
-    label: 'Minutes',
-    detail: 'Record time spent each day, such as 20 minutes of reading.',
+    label: 'Track minutes',
+    detail:
+      'Example: Read for 20 minutes. Enter the minutes you spent; this does not start a timer.',
   },
   frequency: {
-    label: 'Times per week',
-    detail: 'Aim for a total number of occurrences from Monday to Sunday.',
+    label: 'Count times each week',
+    detail:
+      'Example: Practice 3 times a week. Each occurrence counts toward the Monday–Sunday total.',
   },
   avoidance: {
-    label: 'Limit a habit',
-    detail: 'Stay at or below a daily limit. Log zero when there were no occurrences.',
+    label: 'Stay below a limit',
+    detail:
+      'Example: At most 1 sugary drink a day. Enter the actual count, including zero; no entry is not a success.',
   },
 };
 

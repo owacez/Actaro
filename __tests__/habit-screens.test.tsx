@@ -77,8 +77,9 @@ test('creation requires a name and persists the chosen type/schedule/reminder/mo
   await fireEvent.press(screen.getByRole('button', { name: 'Save habit' }));
   expect(service.save).not.toHaveBeenCalled();
   await fireEvent.changeText(screen.getByLabelText('Habit name'), 'Read');
-  await fireEvent.press(screen.getByRole('button', { name: 'Minutes' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Track minutes' }));
   await fireEvent.changeText(screen.getByLabelText('Daily target (minutes)'), '20');
+  await fireEvent.press(screen.getByRole('button', { name: 'Reminders and other options' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Reminder time: Not set' }));
   await fireEvent(
     screen.getByTestId('native-time-picker'),
@@ -100,6 +101,36 @@ test('creation requires a name and persists the chosen type/schedule/reminder/mo
       motivation: 'none',
       reminder: '18:30',
     }),
+  );
+});
+
+test('less common habit logging remains available and hidden reminder values are preserved', async () => {
+  const saved = jest.fn();
+  await render(
+    <FeedbackTestRoot>
+      <HabitEditor userId={owner} onBack={jest.fn()} onSaved={saved} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByLabelText('Habit name');
+  expect(screen.queryByRole('button', { name: 'Count times each week' })).toBeNull();
+  await fireEvent.changeText(screen.getByLabelText('Habit name'), 'Practice');
+  await fireEvent.press(screen.getByRole('button', { name: 'More logging options' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Count times each week' }));
+  await fireEvent.changeText(screen.getByLabelText('Occurrences per week'), '3');
+  await fireEvent.press(screen.getByRole('button', { name: 'Fewer logging options' }));
+  expect(screen.getByRole('button', { name: 'Count times each week' })).toHaveProp(
+    'accessibilityState',
+    expect.objectContaining({ selected: true }),
+  );
+  await fireEvent.press(screen.getByRole('button', { name: 'Reminders and other options' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'None' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Hide optional settings' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Save habit' }));
+  await waitFor(() => expect(saved).toHaveBeenCalled());
+  expect(service.save).toHaveBeenCalledWith(
+    owner,
+    expect.any(String),
+    expect.objectContaining({ kind: 'frequency', target: '3', motivation: 'none' }),
   );
 });
 

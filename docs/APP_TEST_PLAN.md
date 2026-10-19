@@ -46,17 +46,21 @@ not create a habit, and checking off a "Drink water" habit does not create a
 hydration entry. The Food diary and hydration log remain the measured sources.
 A goal linked to a habit reads that habit's logs.
 
-### All five habit types
+### Ways to log a habit
 
 Open **You → Habits → Create habit**.
 
+The first three choices cover common habits. **More logging options** shows the
+weekly and limit choices. **Reminders and other options** contains end date,
+reminder and progress display settings; collapsing it preserves your entries.
+
 | Type shown in the app | Example test                     | Expected result                                                                        |
 | --------------------- | -------------------------------- | -------------------------------------------------------------------------------------- |
-| Check off             | "Stretch", scheduled today       | Mark done; it completes in place. Explicit not-done is different from no log           |
-| Count or amount       | "Read pages", target 10 pages    | Log 6: incomplete. Edit today's value to 10: target met                                |
-| Minutes               | "Read", target 20 minutes        | Log 15 then edit to 20; completion follows the saved minutes                           |
-| Times per week        | "Practice", target 3 occurrences | Record occurrences on dates this Monday–Sunday; the weekly total determines completion |
-| Limit a habit         | "Sugary drinks", limit 1 per day | Log 0 or 1: target met; log 2: not met. No entry must not silently count as zero       |
+| Just mark it done     | "Stretch", scheduled today       | Mark done; it completes in place. Explicit not-done is different from no log           |
+| Enter an amount       | "Read pages", target 10 pages    | Log 6: incomplete. Edit today's value to 10: target met                                |
+| Track minutes         | "Read", target 20 minutes        | Log 15 then edit to 20; completion follows the saved minutes                           |
+| Count times each week | "Practice", target 3 occurrences | Record occurrences on dates this Monday–Sunday; the weekly total determines completion |
+| Stay below a limit    | "Sugary drinks", limit 1 per day | Log 0 or 1: target met; log 2: not met. No entry must not silently count as zero       |
 
 For amounts/occurrences, editing a date replaces that date's value; it is not an
 automatic increment button. Dates outside the schedule are not failed days.
@@ -65,9 +69,13 @@ This changes the feedback presentation, not the underlying logs.
 
 ### All 13 goal types and their sources
 
-Open **You → Goals → Create goal**. Baseline means your starting value; target
-means the desired value. Choose the appropriate direction and dates. The target
-must improve from the baseline in that direction. Goals are not checked off by hand.
+Open **You → Goals → Create goal**. Starting value means where you begin; target
+means the desired value. Direction follows these values automatically; decreases
+are supported for weight, measurements and calories. The values must differ.
+**More goals** exposes all 13 choices; the selected choice stays visible when
+collapsed. The example explains where progress comes from. **Dates and other
+options** contains dates and metric-specific settings, preserving values when
+collapsed. Goals are not checked off by hand.
 
 | Goal                        | Records you must create to test it                                                                              |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------- |
@@ -94,7 +102,7 @@ Use the units shown in the goal form; these are fictional test values.
 per week, increasing. Finish two short test logs this week. Expect current value
 2 and about 67% progress. Merely creating two workout templates must not count.
 
-**Worked example C — habit:** create a Check off habit scheduled today, then a
+**Worked example C — habit:** create a Just mark it done habit scheduled today, then a
 Habit weekly completion goal linked to it, baseline 0%, target 100%, starting
 today. Mark the habit done. Return to Goals: progress comes from that log.
 To test a partly completed week, use a habit/start date covering several scheduled

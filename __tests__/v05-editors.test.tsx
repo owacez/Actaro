@@ -54,7 +54,7 @@ beforeEach(() => {
   jest.mocked(bodyService.save).mockResolvedValue(undefined);
   jest.mocked(activityService.save).mockResolvedValue(undefined);
 });
-test('goal editor validates baseline/direction and saves the measurable target with stable identity', async () => {
+test('goal editor validates a starting value and infers decreasing direction without another choice', async () => {
   const onBack = jest.fn();
   await render(
     <FeedbackTestRoot>
@@ -63,14 +63,14 @@ test('goal editor validates baseline/direction and saves the measurable target w
   );
   await screen.findByLabelText('Goal name');
   await fireEvent.changeText(screen.getByLabelText('Goal name'), 'Weight target');
-  await fireEvent.press(screen.getByRole('button', { name: 'Body' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Bodyweight' }));
-  await fireEvent.changeText(screen.getByLabelText('Baseline (kg)'), '80');
-  await fireEvent.changeText(screen.getByLabelText('Target (kg)'), '75');
+  await fireEvent.changeText(screen.getByLabelText('Starting value (kg)'), '80');
+  await fireEvent.changeText(screen.getByLabelText('Target (kg)'), '80');
   await fireEvent.press(screen.getByRole('button', { name: 'Save goal' }));
   expect(goalService.save).not.toHaveBeenCalled();
-  expect(screen.getByText(/Target must improve/)).toBeTruthy();
-  await fireEvent.press(screen.getByRole('button', { name: 'Decrease to at most' }));
+  expect(screen.getByText('Choose a target above your starting value.')).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Decrease to at most' })).toBeNull();
+  await fireEvent.changeText(screen.getByLabelText('Target (kg)'), '75');
   await fireEvent.press(screen.getByRole('button', { name: 'Save goal' }));
   await waitFor(() => expect(onBack).toHaveBeenCalled());
   expect(goalService.save).toHaveBeenCalledWith(
@@ -85,6 +85,41 @@ test('goal editor validates baseline/direction and saves the measurable target w
     }),
   );
 });
+test('more goals keeps a selected uncommon goal visible and preserves hidden optional settings', async () => {
+  const onBack = jest.fn();
+  await render(
+    <FeedbackTestRoot>
+      <GoalEditor userId={owner} onBack={onBack} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByLabelText('Goal name');
+  expect(screen.queryByRole('button', { name: 'Daily macro adherence' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'More goals' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Daily macro adherence' }));
+  await fireEvent.changeText(screen.getByLabelText('Goal name'), 'Nutrition consistency');
+  await fireEvent.press(screen.getByRole('button', { name: 'Dates and other options' }));
+  await fireEvent.changeText(screen.getByLabelText('Macro tolerance (%)'), '15');
+  await fireEvent.press(screen.getByRole('button', { name: 'Hide optional settings' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Fewer goals' }));
+  expect(screen.getByRole('button', { name: 'Daily macro adherence' })).toHaveProp(
+    'accessibilityState',
+    expect.objectContaining({ selected: true }),
+  );
+  expect(screen.queryByLabelText('Macro tolerance (%)')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Save goal' }));
+  await waitFor(() => expect(onBack).toHaveBeenCalled());
+  expect(goalService.save).toHaveBeenCalledWith(
+    owner,
+    expect.any(String),
+    expect.objectContaining({
+      metric: 'macro_adherence_day',
+      tolerance: '15',
+      target: '100',
+      start: day,
+    }),
+  );
+});
+
 test('additional measurements still save a dated value; an uncertain write freezes inputs and exact retry', async () => {
   jest
     .mocked(bodyService.save)

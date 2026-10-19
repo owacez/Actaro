@@ -27,6 +27,62 @@ export const goalMetrics = [
   },
 ] as const;
 export type GoalMetric = (typeof goalMetrics)[number]['key'];
+export const goalHelp: Record<GoalMetric, { example: string; source: string }> = {
+  body_weight: {
+    example: 'Go from 80 to 75 {unit}.',
+    source: 'Log weigh-ins in Body records. Your latest recorded weight updates this goal.',
+  },
+  body_measurement: {
+    example: 'Change a waist measurement from 90 to 85 {unit}.',
+    source: 'Log the same named measurement in Body records.',
+  },
+  workouts_week: {
+    example: 'Finish 3 workouts this week.',
+    source: 'Finish workouts in Train. Planned workouts and saved drafts do not count.',
+  },
+  lift_weight: {
+    example: 'Lift 40 {unit} on an exercise you choose.',
+    source: 'Log completed sets for the selected exercise in Train.',
+  },
+  exercise_pr: {
+    example: 'Improve your estimated one-rep maximum.',
+    source: 'Completed sets of 1–10 reps estimate your strength. This is not a tested maximum.',
+  },
+  steps_day: {
+    example: 'Reach 8,000 steps each day.',
+    source: 'Saved steps from Steps & activity update this goal.',
+  },
+  distance_day: {
+    example: 'Record 5 {unit} each day.',
+    source: 'Enter distance in Steps & activity. This does not track a GPS run.',
+  },
+  active_days_week: {
+    example: 'Be active on 3 different days this week.',
+    source: 'A finished workout or positive recorded steps/distance makes a day active.',
+  },
+  calories_day: {
+    example: 'Change your daily intake target from 2,500 to 2,200 {unit}.',
+    source: 'Log meals in Food. This uses recorded intake, not an automatic meal plan.',
+  },
+  protein_day: {
+    example: 'Log 100 g of protein each day.',
+    source: 'Log meals in Food. Their protein totals update this goal.',
+  },
+  macro_adherence_day: {
+    example: 'Meet your calorie, protein, carbohydrate and fat targets.',
+    source:
+      'Log food and set daily nutrition targets. The score compares all four totals within your chosen tolerance.',
+  },
+  habit_completion_week: {
+    example: 'Complete a selected habit on all its scheduled days this week.',
+    source:
+      'Log the selected habit. This optional goal reads its weekly completion; the habit already works on its own.',
+  },
+  habit_frequency_week: {
+    example: 'Record 3 occurrences of a selected habit this week.',
+    source: 'Log a Count times each week habit. This optional goal reads its weekly total.',
+  },
+};
 export type GoalForm = {
   name: string;
   metric: GoalMetric;
@@ -59,7 +115,11 @@ export function goalPayload(form: GoalForm) {
     (form.direction === 'at_least' && target <= baseline) ||
     (form.direction === 'at_most' && target >= baseline)
   )
-    throw new Error('Target must improve from the baseline in your chosen direction.');
+    throw new Error(
+      form.direction === 'at_most'
+        ? 'Choose a target below your starting value.'
+        : 'Choose a target above your starting value.',
+    );
   if (
     !['body_weight', 'body_measurement', 'calories_day'].includes(metric.key) &&
     form.direction !== 'at_least'

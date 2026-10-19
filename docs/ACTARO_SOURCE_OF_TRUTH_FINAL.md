@@ -816,6 +816,12 @@ over-limit, rest/future days and target met; do not use an unexplained "Not yet"
 
 Habit types:
 
+User testing clarification (2026-10-19): present logging choices in plain
+language with examples. Show the three common choices first and retain the
+weekly/limit choices under More logging options. Reminders and other optional
+settings may collapse without losing their values. These are presentation
+changes; all five kinds remain supported.
+
 - Boolean
 - Numeric
 - Duration
@@ -852,6 +858,13 @@ Goal record/edit/delete/restore actions use visibly bounded buttons, separate
 from explanatory text.
 
 Goal categories:
+
+User testing clarification (2026-10-19): show common outcomes first and retain
+all implemented metrics under More goals, without requiring category selection.
+Explain the source records for the selected outcome. Label the baseline Starting
+value and infer direction from starting/target values where decreases are
+supported. Optional dates/settings may collapse without losing their values.
+Habits are actions users record; goals calculate progress from saved records.
 
 ## Body
 

@@ -4,6 +4,29 @@ Updated: 2026-10-19 (America/Los_Angeles).
 
 ## Overall
 
+Habit/goal setup simplification (2026-10-19): **DONE** for implementation and
+local verification; physical-device acceptance remains **DEFERRED**. Habits show
+three plain-language logging choices with examples; More logging options retains
+all five kinds. Goals show four common choices, with all 13 available under More
+goals. Selected uncommon choices stay visible after collapsing the list. Removed
+the category/selection mismatch. Goals explain their source records, use Starting
+value instead of Baseline, and infer increasing/decreasing direction from the
+entered values. Optional settings retain their values when hidden. Existing
+persistence, validation and canonical units remain intact; no schema, dependency
+or release-weight change.
+
+Verification: `npm.cmd run check` **PASS**, strict TypeScript/lint/format,
+332 Jest tests in 66 suites plus six dataset tests (**338 total**).
+`npm.cmd exec -- expo export --platform web --output-dir .actaro-tools/habit-goal-clarity-export`
+**PASS**, 39 routes.
+`node --env-file=.env .actaro-tools/check-clarity-browser.mjs` **PASS**:
+habit/goal create and save, expanded choices, selection/settings preservation,
+eight sample-data captures including narrow dark layouts, zero live Supabase
+requests. Representative captures were visually reviewed. Next three device
+checks: create/log a minutes habit; create a weight or weekly-workout goal and
+update its source; edit an uncommon kind with optional settings and reopen it.
+v1.0 acceptance and deferred device checks remain unchanged.
+
 Workout list web button correction (2026-10-19): **DONE** for implementation
 and local verification. The Start/Delete IconButtons were nested inside the
 ActionRow's Edit button. React Native Web maps these roles to actual buttons;

@@ -784,6 +784,11 @@ Types:
 
 ## 4.8 Goal Progress — Weight 3
 
+User testing clarification (2026-10-19): simplify tasks 4.2 and 4.7 with
+plain-language examples, common choices first, More options for retained kinds,
+and collapsible optional settings. Goal setup explains the source record and
+uses Starting value with inferred direction. No release scope or weight change.
+
 ## 4.9 Bodyweight Logging — Weight 3
 
 User testing revision (2026-10-18): one body form combines dated weight/height

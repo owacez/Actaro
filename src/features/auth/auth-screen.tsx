@@ -273,12 +273,14 @@ export function AccountScreen() {
       <AuthCard>
         <ActionRow
           title="Habits"
+          detail="Actions you repeat and record"
           icon={{ ios: 'checkmark.square', android: 'check_box', web: 'check_box' }}
           disabled={busy}
           onPress={() => router.push('/habits')}
         />
         <ActionRow
           title="Goals"
+          detail="Targets updated from your logs"
           icon={{ ios: 'target', android: 'my_location', web: 'my_location' }}
           disabled={busy}
           onPress={() => router.push('/goals')}

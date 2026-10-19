@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View } from 'react-native';
 import { Meter, ScreenHeader } from '@/components/product-ui';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { router, useFocusEffect } from 'expo-router';
@@ -27,7 +27,14 @@ import { goalUnit, unitFactor, canonicalInput } from '@/features/body/body-model
 import { exerciseService } from '@/features/exercises/exercise-service';
 import { habitService } from '@/features/habits/habit-service';
 import { goalService } from './goal-service';
-import { goalMetrics, goalPayload, metricInfo, type GoalForm, type GoalMetric } from './goal-model';
+import {
+  goalMetrics,
+  goalHelp,
+  goalPayload,
+  metricInfo,
+  type GoalForm,
+  type GoalMetric,
+} from './goal-model';
 export function GoalsScreen({
   userId,
   onBack,
@@ -57,14 +64,14 @@ export function GoalsScreen({
     <AuthFrame header={<ScreenHeader title="Goals" />}>
       <AuthLink title="← You" disabled={action.locked} onPress={onBack} />
       <AuthCard>
-        <AuthText kind="heading">A goal measures your progress</AuthText>
+        <AuthText kind="heading">Choose a result you want to reach</AuthText>
         <AuthText>
-          Choose an outcome, such as 3 workouts a week or a target bodyweight. Keep logging in
-          Train, Food, Steps, Body records or Habits; your goal updates from those records
-          automatically.
+          Example: finish 3 workouts this week. Log and finish your workouts in Train; Actaro
+          updates this goal automatically. You do not check a goal off by hand.
         </AuthText>
         <AuthText kind="muted">
-          A habit is the action you repeat. A goal is the result you want to reach.
+          A habit is an action you record, such as stretching. You can use habits and goals
+          independently.
         </AuthText>
       </AuthCard>
       <AuthButton title="Create goal" disabled={action.locked} onPress={() => onEdit()} />
@@ -117,8 +124,9 @@ export function GoalsScreen({
                   <Meter value={result.percentage} target={100} color={colors.accent} />
                 )}
                 <AuthText>{result.detail}</AuthText>
+                <AuthText kind="muted">{goalHelp[metricInfo(goal.metric).key].source}</AuthText>
                 <AuthText>
-                  Baseline {formatNumber(goal.baseline * factor)} {unit} · {goal.start_date}
+                  Started at {formatNumber(goal.baseline * factor)} {unit} · {goal.start_date}
                   {goal.end_date ? ' → ' + goal.end_date : ' · No target date'}
                 </AuthText>
                 {goal.direction === 'at_most' && goal.metric === 'calories_day' && (
@@ -231,9 +239,16 @@ function HabitSource({
   );
   return (
     <AuthCard>
-      <AuthText kind="heading">Choose a habit</AuthText>
+      <AuthText kind="heading">Which existing habit should this goal follow?</AuthText>
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
-      {rows?.length === 0 && <AuthNotice>Create an active compatible habit first.</AuthNotice>}
+      {rows?.length === 0 && (
+        <AuthNotice>
+          {metric === 'habit_frequency_week'
+            ? 'Create a Count times each week habit first.'
+            : 'Create a habit that tracks daily completion first.'}{' '}
+          You can also track that habit without creating a separate goal.
+        </AuthNotice>
+      )}
       {rows?.map((row) => (
         <AuthChoice
           key={row.id}
@@ -334,7 +349,8 @@ export function GoalEditor({
   goalId?: string;
   onBack: () => void;
 }) {
-  const [category, setCategory] = useState('Training');
+  const [showMoreGoals, setShowMoreGoals] = useState(false),
+    [showOptions, setShowOptions] = useState(false);
   const [id] = useState(() => goalId ?? randomUUID()),
     [form, setForm] = useState<GoalForm>({
       name: '',
@@ -355,7 +371,6 @@ export function GoalEditor({
       if (g) {
         const metric = goalMetrics.find((item) => item.key === g.metric);
         if (!metric) throw new Error('Unsupported goal.');
-        setCategory(metric.category);
         const factor = unitFactor(goalUnit(g.metric, data.preferences));
         setForm({
           name: g.name,
@@ -381,8 +396,13 @@ export function GoalEditor({
   function save() {
     if (!data) return;
     try {
-      const canonical = {
+      const canonical: GoalForm = {
         ...form,
+        direction:
+          ['body_weight', 'body_measurement', 'calories_day'].includes(form.metric) &&
+          Number(form.target) < Number(form.baseline)
+            ? 'at_most'
+            : 'at_least',
         baseline: String(canonicalInput(form.baseline, unit, 1000000, true)),
         target: String(canonicalInput(form.target, unit)),
       };
@@ -401,58 +421,64 @@ export function GoalEditor({
         <>
           <AuthInput
             label="Goal name"
+            placeholder="For example, train three times a week"
             value={form.name}
             maxLength={120}
             editable={!action.locked}
             onChangeText={(name) => setForm((current) => ({ ...current, name }))}
           />
-          <AuthText kind="eyebrow">CATEGORY</AuthText>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              {['Body', 'Training', 'Activity', 'Nutrition', 'Habits'].map((value) => (
+          <AuthText kind="heading">What do you want to achieve?</AuthText>
+          <View style={authStyles.choices}>
+            {goalMetrics
+              .filter(
+                (metric) =>
+                  showMoreGoals ||
+                  ['workouts_week', 'body_weight', 'steps_day', 'protein_day'].includes(
+                    metric.key,
+                  ) ||
+                  form.metric === metric.key,
+              )
+              .map((metric) => (
                 <AuthChoice
-                  key={value}
-                  title={value}
-                  selected={category === value}
+                  key={metric.key}
+                  title={metric.label}
+                  selected={form.metric === metric.key}
                   disabled={action.locked}
-                  onPress={() => setCategory(value)}
+                  onPress={() =>
+                    setForm((current) =>
+                      current.metric === metric.key
+                        ? current
+                        : {
+                            ...current,
+                            metric: metric.key,
+                            baseline: '0',
+                            target:
+                              metric.unit === '%'
+                                ? '100'
+                                : metric.key === 'workouts_week' ||
+                                    metric.key === 'active_days_week'
+                                  ? '3'
+                                  : '1',
+                            direction: 'at_least',
+                            habitId: '',
+                            exerciseId: '',
+                          },
+                    )
+                  }
                 />
               ))}
-            </View>
-          </ScrollView>
-          {[category].map((category) => (
-            <View key={category}>
-              <AuthText kind="heading">{category}</AuthText>
-              <View style={authStyles.choices}>
-                {goalMetrics
-                  .filter((metric) => metric.category === category)
-                  .map((metric) => (
-                    <AuthChoice
-                      key={metric.key}
-                      title={metric.label}
-                      selected={form.metric === metric.key}
-                      disabled={action.locked}
-                      onPress={() =>
-                        setForm((current) => ({
-                          ...current,
-                          metric: metric.key,
-                          baseline: '0',
-                          target:
-                            metric.unit === '%'
-                              ? '100'
-                              : metric.key === 'active_days_week'
-                                ? '3'
-                                : '1',
-                          direction: 'at_least',
-                          habitId: '',
-                          exerciseId: '',
-                        }))
-                      }
-                    />
-                  ))}
-              </View>
-            </View>
-          ))}
+          </View>
+          <AuthButton
+            title={showMoreGoals ? 'Fewer goals' : 'More goals'}
+            outlined
+            disabled={action.locked}
+            onPress={() => setShowMoreGoals((value) => !value)}
+          />
+          <AuthCard>
+            <AuthText kind="heading">{metricInfo(form.metric).label}</AuthText>
+            <AuthText>Example: {goalHelp[form.metric].example.replaceAll('{unit}', unit)}</AuthText>
+            <AuthText>{goalHelp[form.metric].source}</AuthText>
+          </AuthCard>
           {form.metric.startsWith('habit_') && (
             <HabitSource
               userId={userId}
@@ -480,11 +506,11 @@ export function GoalEditor({
             />
           )}
           <AuthText>
-            Your baseline is where you started; your target is where you want to get. Actual
-            progress comes from your saved records, not from editing these two values.
+            Your starting value sets the beginning of the progress bar. Your target is the result
+            you want. These settings do not create a log.
           </AuthText>
           <AuthInput
-            label={`Baseline (${unit})`}
+            label={`Starting value (${unit})`}
             value={form.baseline}
             keyboardType="decimal-pad"
             editable={!action.locked}
@@ -497,56 +523,53 @@ export function GoalEditor({
             editable={!action.locked}
             onChangeText={(target) => setForm((current) => ({ ...current, target }))}
           />
-          {['body_weight', 'body_measurement', 'calories_day'].includes(form.metric) && (
-            <View style={authStyles.choices}>
-              <AuthChoice
-                title="Increase to at least"
-                selected={form.direction === 'at_least'}
-                disabled={action.locked}
-                onPress={() => setForm((current) => ({ ...current, direction: 'at_least' }))}
-              />
-              <AuthChoice
-                title="Decrease to at most"
-                selected={form.direction === 'at_most'}
-                disabled={action.locked}
-                onPress={() => setForm((current) => ({ ...current, direction: 'at_most' }))}
-              />
-            </View>
-          )}
-          {form.metric === 'macro_adherence_day' && (
-            <AuthInput
-              label="Macro tolerance (%)"
-              value={form.tolerance}
-              editable={!action.locked}
-              keyboardType="decimal-pad"
-              onChangeText={(tolerance) => setForm((current) => ({ ...current, tolerance }))}
-            />
-          )}
-          <DatePicker
-            label="Goal start date"
-            value={form.start}
-            disabled={action.locked}
-            onChange={(start) => setForm((current) => ({ ...current, start }))}
-          />
-          <DatePicker
-            label="Goal target date (optional)"
-            value={form.end}
-            referenceDate={form.start}
-            disabled={action.locked}
-            onChange={(end) => setForm((current) => ({ ...current, end }))}
-          />
-          {!!form.end && (
-            <AuthLink
-              title="No target date"
-              disabled={action.locked}
-              onPress={() => setForm((current) => ({ ...current, end: '' }))}
-            />
-          )}
-          <AuthText>
-            Schedule time zone: {form.zone}. Daily and weekly goals read their current period; a
-            past target date freezes the source date at that deadline. Edit targets freely; source
-            logs are never rewritten.
+          <AuthText kind="muted">
+            Starts {form.start}
+            {form.end ? ' · Ends ' + form.end : ' · No deadline'}
           </AuthText>
+          <AuthButton
+            title={showOptions ? 'Hide optional settings' : 'Dates and other options'}
+            outlined
+            disabled={action.locked}
+            onPress={() => setShowOptions((value) => !value)}
+          />
+          {showOptions && (
+            <>
+              {form.metric === 'macro_adherence_day' && (
+                <AuthInput
+                  label="Macro tolerance (%)"
+                  value={form.tolerance}
+                  editable={!action.locked}
+                  keyboardType="decimal-pad"
+                  onChangeText={(tolerance) => setForm((current) => ({ ...current, tolerance }))}
+                />
+              )}
+              <DatePicker
+                label="Goal start date"
+                value={form.start}
+                disabled={action.locked}
+                onChange={(start) => setForm((current) => ({ ...current, start }))}
+              />
+              <DatePicker
+                label="Goal target date (optional)"
+                value={form.end}
+                referenceDate={form.start}
+                disabled={action.locked}
+                onChange={(end) => setForm((current) => ({ ...current, end }))}
+              />
+              {!!form.end && (
+                <AuthLink
+                  title="No target date"
+                  disabled={action.locked}
+                  onPress={() => setForm((current) => ({ ...current, end: '' }))}
+                />
+              )}
+              <AuthText>
+                Uses {form.zone}. Daily targets start fresh each day and weekly targets each Monday.
+                A deadline stops evaluation at that date. Changing a target does not edit your logs.
+              </AuthText>
+            </>
+          )}
           <AuthButton
             title="Save goal"
             busy={action.busy}
