@@ -388,12 +388,17 @@ or keyboard; Previous/Next load 24 exercises per page. Refresh retries image loa
 ## Building and editing workouts
 
 Open **Train → Workouts → Create workout**. Enter a name, add exercises from
-the searchable library, and use **Edit** on a row to change its sets, targets,
-rest, optional RPE and notes. Exercises can be moved or removed; each exercise
+the searchable library using the result's **+** button. The picker keeps your
+search/filters open for multiple additions; added rows show a checkmark and set
+count. Use the **pencil** on an added result to change planned reps, weight,
+rest, optional RPE/notes, or change the **Planned sets** count in a sheet. **Done editing** returns
+to the same results. **Back to workout**, then **Save workout**, persists the
+draft. The builder's **Edit** button opens the same set editor.
+Exercises can be moved or removed; each exercise
 keeps at least one set in the editor. New selections start with three editable
 sets of eight reps and 90 seconds rest; these are planned targets, not logged results.
 
-You can also tap **Add to workout** in a Train → Library result’s actions or on Exercise
+You can also tap the **+** in a Train → Library result or **Add to workout** on Exercise
 Detail. Choose **Create workout** or one of your saved workouts. The real selected
 exercise is added to an editable draft; review its targets and tap **Save workout**
 to persist it. Discarding the draft leaves the saved workout unchanged. Returning

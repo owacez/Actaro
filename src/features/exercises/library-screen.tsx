@@ -38,6 +38,10 @@ export function LibraryScreen({
   onWorkouts,
   onAddToWorkout,
   onLogExercise,
+  onQuickAdd,
+  onEditSelection,
+  selectedExercises,
+  addDisabled = false,
 }: {
   userId: string;
   navigation?: ReactNode;
@@ -46,6 +50,10 @@ export function LibraryScreen({
   onWorkouts?: () => void;
   onAddToWorkout?: (id: string) => void;
   onLogExercise?: (id: string) => void;
+  onQuickAdd?: (exercise: ExerciseSummary) => void;
+  onEditSelection?: (id: string) => void;
+  selectedExercises?: { id: string; sets: number }[];
+  addDisabled?: boolean;
 }) {
   const { colors } = useAppTheme();
   const [query, setQuery] = useState('');
@@ -194,41 +202,72 @@ export function LibraryScreen({
             )}
           </View>
         }
-        renderItem={({ item }) => (
-          <View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`View ${item.name}`}
-              onPress={() => onOpen(item.id, item)}
-              style={({ pressed }) => [styles.row, pressed && { opacity: 0.65 }]}
-            >
-              <ExerciseImage
-                key={item.imageUrl ?? item.id}
-                url={item.imageUrl}
-                label={`${item.name} technique`}
-              />
-              <View style={{ flex: 1, gap: 4 }}>
-                <Text style={{ fontFamily: 'Inter_500Medium', fontSize: 14, color: colors.text }}>
-                  {item.name}
-                </Text>
-                <AuthText kind="muted">
-                  {item.muscles.join(', ')} · {item.equipment.join(', ') || 'No equipment'}
-                </AuthText>
-              </View>
-              {(onAddToWorkout || onLogExercise) && (
+        renderItem={({ item }) => {
+          const selected = selectedExercises?.find((exercise) => exercise.id === item.id);
+          return (
+            <View style={styles.row}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`View ${item.name}`}
+                onPress={() => onOpen(item.id, item)}
+                style={({ pressed }) => [styles.exercise, pressed && { opacity: 0.65 }]}
+              >
+                <ExerciseImage
+                  key={item.imageUrl ?? item.id}
+                  url={item.imageUrl}
+                  label={`${item.name} technique`}
+                />
+                <View style={{ flex: 1, gap: 4 }}>
+                  <Text style={{ fontFamily: 'Inter_500Medium', fontSize: 14, color: colors.text }}>
+                    {item.name}
+                  </Text>
+                  <AuthText kind="muted">
+                    {item.muscles.join(', ')} · {item.equipment.join(', ') || 'No equipment'}
+                  </AuthText>
+                  {selected && <AuthText kind="muted">Added · {selected.sets} sets</AuthText>}
+                </View>
+              </Pressable>
+              {(onQuickAdd || onAddToWorkout) && (
+                <IconButton
+                  label={selected ? `Added ${item.name}` : `Add ${item.name} to workout`}
+                  name={
+                    selected
+                      ? {
+                          ios: 'checkmark.circle.fill',
+                          android: 'check_circle',
+                          web: 'check_circle',
+                        }
+                      : {
+                          ios: 'plus.circle',
+                          android: 'add_circle_outline',
+                          web: 'add_circle_outline',
+                        }
+                  }
+                  disabled={!!selected || addDisabled}
+                  onPress={() => (onQuickAdd ? onQuickAdd(item) : onAddToWorkout?.(item.id))}
+                />
+              )}
+              {selected && onEditSelection && (
+                <IconButton
+                  label={`Edit ${item.name} sets`}
+                  name={{ ios: 'pencil', android: 'edit', web: 'edit' }}
+                  onPress={() => onEditSelection(item.id)}
+                />
+              )}
+              {onLogExercise && (
                 <IconButton
                   label={`Actions for ${item.name}`}
                   name={{
-                    ios: 'plus.circle',
-                    android: 'add_circle_outline',
-                    web: 'add_circle_outline',
+                    ios: 'ellipsis',
+                    android: 'more_horiz',
+                    web: 'more_horiz',
                   }}
                   onPress={() => setSelectedExercise(item)}
                 />
               )}
-            </Pressable>
-          </View>
-        )}
+            </View>
+          );
+        }}
         ListEmptyComponent={
           loading ? (
             <AuthLoading>Loading exercises…</AuthLoading>
@@ -313,5 +352,6 @@ const styles = StyleSheet.create({
   },
   header: { gap: 12 },
   chips: { flexDirection: 'row', gap: 8 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 76, paddingVertical: 8 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 76, paddingVertical: 8 },
+  exercise: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
 });

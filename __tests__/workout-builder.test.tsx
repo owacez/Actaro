@@ -3,7 +3,11 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-
 import { BuilderScreen } from '@/features/workouts/builder-screen';
 import { WorkoutsScreen } from '@/features/workouts/workouts-screen';
 import { workoutService } from '@/features/workouts/workout-service';
-import { exerciseService, type ExerciseDetail } from '@/features/exercises/exercise-service';
+import {
+  exerciseService,
+  type ExerciseDetail,
+  type ExerciseSummary,
+} from '@/features/exercises/exercise-service';
 import {
   blankSet,
   displayWeight,
@@ -49,19 +53,40 @@ jest.mock('expo-router', () => ({
 jest.mock('@/features/exercises/library-screen', () => ({
   LibraryScreen: ({
     onOpen,
+    onQuickAdd,
+    onEditSelection,
   }: {
     onOpen: (id: string, item: { id: string; name: string; imageUrl: null }) => void;
+    onQuickAdd?: (item: ExerciseSummary) => void;
+    onEditSelection?: (id: string) => void;
   }) => {
     const { AuthButton } = jest.requireActual<typeof import('@/features/auth/auth-components')>(
       '@/features/auth/auth-components',
     );
     return (
-      <AuthButton
-        title="Select real fixture exercise"
-        onPress={() =>
-          onOpen(exerciseId, { id: exerciseId, name: 'Fixture press', imageUrl: null })
-        }
-      />
+      <>
+        <AuthButton
+          title="Select real fixture exercise"
+          onPress={() =>
+            onOpen(exerciseId, { id: exerciseId, name: 'Fixture press', imageUrl: null })
+          }
+        />
+        <AuthButton
+          title="Quick add other fixture"
+          onPress={() =>
+            onQuickAdd?.({
+              ...selected,
+              difficulty: 'beginner',
+              imageUrl: null,
+              muscles: [],
+              equipment: [],
+              thumbnail_path: '',
+              total_count: 1,
+            })
+          }
+        />
+        <AuthButton title="Edit added fixture" onPress={() => onEditSelection?.(selectedId)} />
+      </>
     );
   },
 }));
@@ -331,13 +356,17 @@ test('new workout selects an exercise, validates and saves the entire draft', as
   await fireEvent.changeText(screen.getByLabelText('Workout name'), 'Upper A');
   await fireEvent.press(screen.getByRole('button', { name: '+ Add exercise' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Select real fixture exercise' }));
+  await fireEvent.press(screen.getByRole('button', { name: '← Back to workout' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Edit 1' }));
   await fireEvent.changeText(screen.getByLabelText('Reps · exercise 1 set 1'), '0');
+  await fireEvent.press(screen.getByRole('button', { name: 'Done editing' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
   await screen.findByText(/enter a whole number/);
   expect(mocks.save).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit 1' }));
   await fireEvent.changeText(screen.getByLabelText('Reps · exercise 1 set 1'), '10');
   await fireEvent.changeText(screen.getByLabelText('Weight (kg) · exercise 1 set 1'), '22.5');
+  await fireEvent.press(screen.getByRole('button', { name: 'Done editing' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
   await waitFor(() => expect(saved).toHaveBeenCalledTimes(1));
   expect(mocks.save).toHaveBeenCalledWith(
@@ -357,6 +386,60 @@ test('new workout selects an exercise, validates and saves the entire draft', as
       ],
     }),
     'kg',
+  );
+});
+test('quick additions stay in the picker, edit targets in place, and save once through the workout', async () => {
+  mocks.load.mockResolvedValue({ unit: 'lb', draft });
+  const saved = jest.fn();
+  await render(
+    <FeedbackTestRoot>
+      <BuilderScreen
+        userId={userId}
+        id={workoutId}
+        onBack={jest.fn()}
+        onSaved={saved}
+        onEquipment={jest.fn()}
+      />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByDisplayValue('Upper A');
+  await fireEvent.press(screen.getByRole('button', { name: '+ Add exercise' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Quick add other fixture' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Quick add other fixture' }));
+  expect(
+    screen.getByText('2 exercises in this draft. Return to the workout to save.'),
+  ).toBeTruthy();
+  expect(mocks.save).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit added fixture' }));
+  await fireEvent.changeText(screen.getByLabelText('Weight (lb) · exercise 2 set 1'), '45');
+  await fireEvent.changeText(screen.getByLabelText('Reps · exercise 2 set 1'), '12');
+  await fireEvent.changeText(screen.getByLabelText('Planned sets'), '101');
+  expect(screen.getByLabelText('Planned sets').props.value).toBe('3');
+  await fireEvent.changeText(screen.getByLabelText('Planned sets'), '4');
+  await fireEvent.press(screen.getByRole('button', { name: 'Done editing' }));
+  expect(screen.getByRole('button', { name: 'Quick add other fixture' })).toBeTruthy();
+  expect(mocks.load).toHaveBeenCalledTimes(1);
+  await fireEvent.press(screen.getByRole('button', { name: '← Back to workout' }));
+  expect(screen.getByText('4 sets')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
+  await waitFor(() => expect(saved).toHaveBeenCalledTimes(1));
+  expect(mocks.save).toHaveBeenCalledWith(
+    userId,
+    expect.objectContaining({
+      exercises: [
+        draft.exercises[0],
+        expect.objectContaining({
+          exerciseId: selectedId,
+          sets: [
+            expect.objectContaining({ weight: '45', reps: '12' }),
+            blankSet(),
+            blankSet(),
+            blankSet(),
+          ],
+        }),
+      ],
+    }),
+    'lb',
   );
 });
 test('loads saved workout, keeps a failed save draft and confirms discard', async () => {
@@ -498,7 +581,7 @@ test('orders exercises and adds/removes sets and exercises before saving', async
   await screen.findByText('2. Second press');
   await fireEvent.press(screen.getByRole('button', { name: 'Edit 2' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Move 2 up' }));
-  await screen.findByText('1. Second press');
+  expect(screen.getByRole('button', { name: 'Move 1 down' })).toBeEnabled();
   await fireEvent.press(screen.getByRole('button', { name: '+ Add set' }));
   await screen.findByText('Set 2');
   await fireEvent.press(screen.getByRole('button', { name: 'Remove set 2' }));

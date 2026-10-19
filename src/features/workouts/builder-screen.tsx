@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { randomUUID } from 'expo-crypto';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActionSheet } from '@/components/product-ui';
+import { NumberStepper } from '@/components/number-stepper';
 import { useAppTheme } from '@/features/profile/theme-context';
 import {
   AuthButton,
@@ -16,7 +18,7 @@ import {
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
 import { LibraryScreen } from '@/features/exercises/library-screen';
 import { ExerciseImage } from '@/features/exercises/exercise-image';
-import { exerciseService } from '@/features/exercises/exercise-service';
+import { exerciseService, type ExerciseSummary } from '@/features/exercises/exercise-service';
 import { workoutService } from './workout-service';
 import {
   blankSet,
@@ -169,22 +171,177 @@ export function BuilderScreen({
       if (request === generation.current) setSaving(false);
     }
   }
+
+  function addFromSearch(item: ExerciseSummary) {
+    setDraft((current) =>
+      current.exercises.length >= 100 ||
+      current.exercises.some((exercise) => exercise.exerciseId === item.id)
+        ? current
+        : {
+            ...current,
+            exercises: [...current.exercises, exerciseDraft(item.id, item.name, item.imageUrl)],
+          },
+    );
+    setError(null);
+  }
+  const editingIndex = draft.exercises.findIndex((item) => item.key === editing),
+    editingExercise = draft.exercises[editingIndex];
+  const targetEditor = (
+    <ActionSheet
+      title={editingExercise ? 'Edit ' + editingExercise.name : 'Edit exercise'}
+      visible={!!editingExercise}
+      onClose={() => setEditing(null)}
+    >
+      {editingExercise && (
+        <>
+          <NumberStepper
+            label="Planned sets"
+            value={String(editingExercise.sets.length)}
+            min={1}
+            max={100}
+            disabled={saving}
+            onChange={(value) => {
+              const count = Number(value);
+              if (!Number.isInteger(count) || count < 1 || count > 100) return;
+              changeExercise(editingExercise.key, (current) => ({
+                ...current,
+                sets: Array.from(
+                  { length: count },
+                  (_, index) => current.sets[index] ?? blankSet(),
+                ),
+              }));
+            }}
+          />
+          <View style={[authStyles.row, { flexWrap: 'wrap' }]}>
+            <AuthLink
+              title={`Move ${editingIndex + 1} up`}
+              disabled={saving || editingIndex === 0}
+              onPress={() => move(editingExercise.key, -1)}
+            />
+            <AuthLink
+              title={`Move ${editingIndex + 1} down`}
+              disabled={saving || editingIndex === draft.exercises.length - 1}
+              onPress={() => move(editingExercise.key, 1)}
+            />
+            <AuthLink
+              title={`Remove exercise ${editingIndex + 1}`}
+              disabled={saving}
+              onPress={() =>
+                setDraft((current) => ({
+                  ...current,
+                  exercises: current.exercises.filter((entry) => entry.key !== editingExercise.key),
+                }))
+              }
+            />
+          </View>
+          {editingExercise.sets.map((set, position) => (
+            <View key={position} style={{ gap: 8 }}>
+              <AuthText>Set {position + 1}</AuthText>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {(
+                  [
+                    ['reps', 'Reps'],
+                    ['weight', `Weight (${unit})`],
+                    ['rest', 'Rest (sec)'],
+                    ['rpe', 'RPE (optional)'],
+                  ] as const
+                ).map(([field, label]) => (
+                  <View key={field} style={{ flexBasis: '20%', flexGrow: 1 }}>
+                    <AuthInput
+                      label={
+                        field === 'weight'
+                          ? unit
+                          : field === 'rest'
+                            ? 'Rest'
+                            : field === 'rpe'
+                              ? 'RPE'
+                              : 'Reps'
+                      }
+                      accessibilityLabel={`${label} · exercise ${editingIndex + 1} set ${position + 1}`}
+                      value={set[field]}
+                      keyboardType={
+                        field === 'reps' || field === 'rest' ? 'number-pad' : 'decimal-pad'
+                      }
+                      editable={!saving}
+                      maxLength={12}
+                      onChangeText={(value) =>
+                        changeSet(editingExercise.key, position, field, value)
+                      }
+                    />
+                  </View>
+                ))}
+              </View>
+              <AuthInput
+                label={`Set note · exercise ${editingIndex + 1} set ${position + 1}`}
+                value={set.notes}
+                editable={!saving}
+                maxLength={2000}
+                onChangeText={(value) => changeSet(editingExercise.key, position, 'notes', value)}
+              />
+              <AuthLink
+                title={`Remove set ${position + 1}`}
+                disabled={saving || editingExercise.sets.length === 1}
+                onPress={() =>
+                  changeExercise(editingExercise.key, (current) => ({
+                    ...current,
+                    sets: current.sets.filter((_, i) => i !== position),
+                  }))
+                }
+              />
+            </View>
+          ))}
+          <AuthButton
+            title="+ Add set"
+            outlined
+            disabled={saving || editingExercise.sets.length >= 100}
+            onPress={() =>
+              changeExercise(editingExercise.key, (current) => ({
+                ...current,
+                sets: [...current.sets, blankSet()],
+              }))
+            }
+          />
+          <AuthInput
+            label={`Exercise note ${editingIndex + 1}`}
+            value={editingExercise.notes}
+            maxLength={2000}
+            editable={!saving}
+            onChangeText={(notes) =>
+              changeExercise(editingExercise.key, (current) => ({ ...current, notes }))
+            }
+          />
+        </>
+      )}
+      <AuthButton title="Done editing" onPress={() => setEditing(null)} />
+    </ActionSheet>
+  );
+
   if (picking)
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.background }}>
         <AuthLink title="← Back to workout" onPress={() => setPicking(false)} />
+        <AuthText>
+          {draft.exercises.length} exercises in this draft. Return to the workout to save.
+        </AuthText>
         <LibraryScreen
           userId={userId}
           onEquipment={onEquipment}
+          onQuickAdd={addFromSearch}
+          selectedExercises={draft.exercises.map((item) => ({
+            id: item.exerciseId,
+            sets: item.sets.length,
+          }))}
+          addDisabled={draft.exercises.length >= 100}
+          onEditSelection={(id) =>
+            setEditing(draft.exercises.find((item) => item.exerciseId === id)?.key ?? null)
+          }
           onOpen={(_, item) => {
-            setDraft((current) => ({
-              ...current,
-              exercises: [...current.exercises, exerciseDraft(item.id, item.name, item.imageUrl)],
-            }));
-            setPicking(false);
-            setError(null);
+            const existing = draft.exercises.find((exercise) => exercise.exerciseId === item.id);
+            if (existing) setEditing(existing.key);
+            else addFromSearch(item);
           }}
         />
+        {targetEditor}
       </SafeAreaView>
     );
   return (
@@ -261,106 +418,6 @@ export function BuilderScreen({
                   onPress={() => setEditing((current) => (current === item.key ? null : item.key))}
                 />
               </View>
-              {editing === item.key && (
-                <>
-                  <View style={authStyles.row}>
-                    <AuthLink
-                      title={`Move ${index + 1} up`}
-                      disabled={saving || index === 0}
-                      onPress={() => move(item.key, -1)}
-                    />
-                    <AuthLink
-                      title={`Move ${index + 1} down`}
-                      disabled={saving || index === draft.exercises.length - 1}
-                      onPress={() => move(item.key, 1)}
-                    />
-                    <AuthLink
-                      title={`Remove exercise ${index + 1}`}
-                      disabled={saving}
-                      onPress={() =>
-                        setDraft((current) => ({
-                          ...current,
-                          exercises: current.exercises.filter((entry) => entry.key !== item.key),
-                        }))
-                      }
-                    />
-                  </View>
-                  {item.sets.map((set, position) => (
-                    <View key={position} style={{ gap: 8 }}>
-                      <AuthText>Set {position + 1}</AuthText>
-                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                        {(
-                          [
-                            ['reps', 'Reps'],
-                            ['weight', `Weight (${unit})`],
-                            ['rest', 'Rest (sec)'],
-                            ['rpe', 'RPE (optional)'],
-                          ] as const
-                        ).map(([field, label]) => (
-                          <View key={field} style={{ flexBasis: '20%', flexGrow: 1 }}>
-                            <AuthInput
-                              label={
-                                field === 'weight'
-                                  ? unit
-                                  : field === 'rest'
-                                    ? 'Rest'
-                                    : field === 'rpe'
-                                      ? 'RPE'
-                                      : 'Reps'
-                              }
-                              accessibilityLabel={`${label} · exercise ${index + 1} set ${position + 1}`}
-                              value={set[field]}
-                              keyboardType={
-                                field === 'reps' || field === 'rest' ? 'number-pad' : 'decimal-pad'
-                              }
-                              editable={!saving}
-                              maxLength={12}
-                              onChangeText={(value) => changeSet(item.key, position, field, value)}
-                            />
-                          </View>
-                        ))}
-                      </View>
-                      <AuthInput
-                        label={`Set note · exercise ${index + 1} set ${position + 1}`}
-                        value={set.notes}
-                        editable={!saving}
-                        maxLength={2000}
-                        onChangeText={(value) => changeSet(item.key, position, 'notes', value)}
-                      />
-                      <AuthLink
-                        title={`Remove set ${position + 1}`}
-                        disabled={saving || item.sets.length === 1}
-                        onPress={() =>
-                          changeExercise(item.key, (current) => ({
-                            ...current,
-                            sets: current.sets.filter((_, i) => i !== position),
-                          }))
-                        }
-                      />
-                    </View>
-                  ))}
-                  <AuthButton
-                    title="+ Add set"
-                    outlined
-                    disabled={saving || item.sets.length >= 100}
-                    onPress={() =>
-                      changeExercise(item.key, (current) => ({
-                        ...current,
-                        sets: [...current.sets, blankSet()],
-                      }))
-                    }
-                  />
-                  <AuthInput
-                    label={`Exercise note ${index + 1}`}
-                    value={item.notes}
-                    maxLength={2000}
-                    editable={!saving}
-                    onChangeText={(notes) =>
-                      changeExercise(item.key, (current) => ({ ...current, notes }))
-                    }
-                  />
-                </>
-              )}
             </View>
           ))}
           <AuthText>
@@ -384,6 +441,7 @@ export function BuilderScreen({
           />
         </>
       )}
+      {targetEditor}
     </AuthFrame>
   );
 }

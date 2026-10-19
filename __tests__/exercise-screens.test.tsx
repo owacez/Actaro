@@ -66,8 +66,7 @@ test('library searches, paginates, filters and opens the actual exercise ID', as
   await screen.findByText('Fixture press');
   await fireEvent.press(screen.getByLabelText('View Fixture press'));
   expect(open).toHaveBeenCalledWith(itemId, summary);
-  await fireEvent.press(screen.getByRole('button', { name: 'Actions for Fixture press' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'Add to workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Add Fixture press to workout' }));
   expect(add).toHaveBeenCalledWith(itemId);
   expect(open).toHaveBeenCalledTimes(1);
   await fireEvent.changeText(screen.getByLabelText('Search exercises'), 'press');
@@ -91,6 +90,42 @@ test('library searches, paginates, filters and opens the actual exercise ID', as
       owner,
     ),
   );
+});
+test('quick add and edit are separate row buttons that preserve the search and avoid a detail fetch', async () => {
+  const add = jest.fn(),
+    edit = jest.fn(),
+    open = jest.fn();
+  const tree = (selectedExercises: { id: string; sets: number }[] = []) => (
+    <LibraryScreen
+      userId={owner}
+      onOpen={open}
+      onEquipment={() => {}}
+      onQuickAdd={add}
+      onEditSelection={edit}
+      selectedExercises={selectedExercises}
+    />
+  );
+  const view = await render(tree());
+  await screen.findByText('Fixture press');
+  await fireEvent.changeText(screen.getByLabelText('Search exercises'), 'press');
+  await fireEvent.press(screen.getByRole('button', { name: 'Search' }));
+  await waitFor(() => expect(mocks.search).toHaveBeenCalledTimes(2));
+  const button = screen.getByRole('button', { name: 'Add Fixture press to workout' });
+  for (let parent = button.parent; parent; parent = parent.parent)
+    if (typeof parent.type === 'string') expect(parent.props.accessibilityRole).not.toBe('button');
+  await fireEvent.press(button);
+  expect(add).toHaveBeenCalledWith(summary);
+  expect(open).not.toHaveBeenCalled();
+  expect(mocks.detail).not.toHaveBeenCalled();
+  await view.rerender(tree([{ id: itemId, sets: 4 }]));
+  expect(screen.getByLabelText('Search exercises').props.value).toBe('press');
+  expect(screen.getByRole('button', { name: 'Added Fixture press' })).toBeDisabled();
+  expect(screen.getByText('Added · 4 sets')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Added Fixture press' }));
+  expect(add).toHaveBeenCalledTimes(1);
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit Fixture press sets' }));
+  expect(edit).toHaveBeenCalledWith(itemId);
+  expect(mocks.search).toHaveBeenCalledTimes(2);
 });
 test('library shows recoverable errors and an honest empty result', async () => {
   mocks.search.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce([]);

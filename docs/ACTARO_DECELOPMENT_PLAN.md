@@ -545,6 +545,11 @@ Include:
 
 ## 2.2 Custom Workout Builder — Weight 6
 
+User testing revision (2026-10-19): quick-add multiple search results without
+closing the picker, retain query/filters, and edit planned sets/load in place.
+The existing workout save remains the persistence boundary. This refines the
+same builder task; no release-weight or schema change.
+
 - Create, reopen, edit and delete owned workout templates.
 - Template deletion preserves performed sessions/sets.
 - Exercise search/detail can add to a new or existing workout; no fake logging action.

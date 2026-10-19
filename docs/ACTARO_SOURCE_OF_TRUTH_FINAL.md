@@ -424,6 +424,14 @@ Later:
 
 ### Real-world workout management — confirmed 2026-10-12
 
+Exercise selection revision (2026-10-19): search-result quick-add buttons keep
+the workout picker, query and filters open for multiple additions. Added rows
+show set count and an edit action for the same planned set targets. Reuse the
+set editor in a sheet without leaving search; changes remain in the workout
+draft until Save workout. Quick add avoids accidental duplicate additions and
+respects the existing exercise/set limits. General-library Add opens the workout
+chooser directly; detail viewing and direct exercise logging remain available.
+
 - Create, reopen, edit and delete reusable workouts. Deleting a workout template
   removes planned targets but preserves recorded sessions and performed sets.
 - Create an editable seven-day training split, assigning workouts to days and

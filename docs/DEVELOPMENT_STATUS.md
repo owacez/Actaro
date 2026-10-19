@@ -4,6 +4,32 @@ Updated: 2026-10-19 (America/Los_Angeles).
 
 ## Overall
 
+Exercise quick-add and in-place targets (2026-10-19): **DONE** for implementation
+and local verification; physical-device acceptance **DEFERRED**. Result plus
+buttons add to the open workout draft without closing the picker. Query,
+filters and pagination stay mounted; added rows show set count, a disabled
+checkmark and an edit button. The existing per-set editor is shared in a sheet
+between search and the builder, with a top-level Planned sets counter and
+retained reps/load/rest/RPE/notes, ordering, removal and set limits. Resizing
+preserves retained set targets and validates the 1–100 range. Quick additions guard against duplicate taps and the
+100-exercise limit. General-library plus opens workout selection directly;
+view/detail and direct logging remain available. Row controls are siblings,
+avoiding nested web buttons. Save workout remains the owned atomic persistence
+boundary; adding/editing itself makes no write or exercise-detail fetch.
+
+Verification: focused exercise/builder checks **PASS**, 20 tests.
+`npm.cmd run check` **PASS**: strict TypeScript/lint/format, 338 Jest tests in
+66 suites plus six dataset tests (**344 total**).
+`npm.cmd exec -- expo export --platform web --output-dir .actaro-tools/quick-exercise-export`
+**PASS**, 39 routes.
+`node --env-file=.env .actaro-tools/check-quick-exercise-browser.mjs` **PASS**:
+six isolated sample-data captures/flows covering quick add, added-state editing,
+query retention with no search refetch, save/reopen targets, separate web row
+buttons and narrow/dark layout. Zero live Supabase calls. No dependency, schema
+or release-weight change. Next three device checks: quick-add several filtered
+results; edit load/reps and set count without leaving search; save/reopen and
+start the workout to check planned targets.
+
 Completed daily-log button (2026-10-19): **DONE** for implementation/local
 verification; device acceptance **DEFERRED**. Today disables the primary log
 button after completion, showing Done today for check-off/weekly habits and
