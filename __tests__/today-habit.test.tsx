@@ -60,7 +60,10 @@ test('one-tap completion waits for acknowledgement, retries identical input and 
   expect(service.log.mock.calls[1]).toEqual(service.log.mock.calls[0]);
   await view.rerender(tree(acknowledgedHabitLog(record, day, 1)));
   expect(screen.getByText('✓ Done today')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Log habit Read' })).toBeDisabled();
   await fireEvent.press(screen.getByRole('button', { name: 'Log habit Read' }));
+  expect(service.log).toHaveBeenCalledTimes(2);
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit today’s log for Read' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Not done today' }));
   await waitFor(() => expect(logged).toHaveBeenLastCalledWith(day, 0, ''));
 });
@@ -80,7 +83,7 @@ test('amount/minutes entry stays on Today and requires an explicit value, includ
   await fireEvent.press(screen.getByRole('button', { name: 'Save today’s log' }));
   await waitFor(() => expect(logged).toHaveBeenCalledWith(day, 15, 'Afternoon'));
 });
-test('a weekly habit logs today once, then offers editing and undo rather than another increment', async () => {
+test('a completed weekly day disables logging while keeping a separate edit/undo action', async () => {
   const record = habit('frequency');
   const logged = jest.fn();
   const tree = (record: HabitRecord) => (
@@ -94,9 +97,43 @@ test('a weekly habit logs today once, then offers editing and undo rather than a
   await view.rerender(tree(acknowledgedHabitLog(record, day, 1, 'Original note')));
   expect(screen.getByText('✓ Done today')).toBeTruthy();
   expect(screen.getByText('1 days · Target 5 days this week')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Log habit Read' })).toBeDisabled();
   await fireEvent.press(screen.getByRole('button', { name: 'Log habit Read' }));
   expect(service.log).toHaveBeenCalledTimes(1);
+  expect(screen.queryByRole('button', { name: 'Not done today' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit today’s log for Read' }));
   expect(screen.queryByLabelText('Today’s value (times)')).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Not done today' }));
   await waitFor(() => expect(logged).toHaveBeenLastCalledWith(day, 0, 'Original note'));
+});
+test('a completed weekly habit can be logged again on the next day in its own time zone', async () => {
+  jest.useFakeTimers();
+  try {
+    jest.setSystemTime(new Date(day + 'T20:00:00Z'));
+    const record = acknowledgedHabitLog(habit('frequency'), day, 1);
+    record.time_zone = 'Asia/Karachi';
+    // Karachi is already on the next date; yesterday's log must not disable today.
+    const view = await render(
+      <FeedbackTestRoot>
+        <TodayHabit userId={owner} habit={record} onLogged={jest.fn()} />
+      </FeedbackTestRoot>,
+    );
+    expect(screen.getByRole('button', { name: 'Log habit Read' })).toBeEnabled();
+    record.time_zone = 'UTC';
+    await view.rerender(
+      <FeedbackTestRoot>
+        <TodayHabit userId={owner} habit={record} onLogged={jest.fn()} />
+      </FeedbackTestRoot>,
+    );
+    expect(screen.getByRole('button', { name: 'Log habit Read' })).toBeDisabled();
+    jest.setSystemTime(new Date(new Date(day + 'T20:00:00Z').getTime() + 86400000));
+    await view.rerender(
+      <FeedbackTestRoot>
+        <TodayHabit userId={owner} habit={record} onLogged={jest.fn()} />
+      </FeedbackTestRoot>,
+    );
+    expect(screen.getByRole('button', { name: 'Log habit Read' })).toBeEnabled();
+  } finally {
+    jest.useRealTimers();
+  }
 });

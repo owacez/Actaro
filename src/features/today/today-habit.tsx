@@ -73,7 +73,9 @@ export function TodayHabit({
       <AuthButton
         title={
           done
-            ? 'Edit today’s log'
+            ? dailyCheck
+              ? 'Done today'
+              : 'Target met'
             : habit.kind === 'boolean'
               ? 'Mark done'
               : habit.kind === 'frequency'
@@ -86,14 +88,14 @@ export function TodayHabit({
         }
         accessibilityLabel={`Log habit ${habit.name}`}
         outlined={done}
-        disabled={action.locked}
+        disabled={action.locked || done}
         onPress={() => {
           if (!done && habit.kind === 'boolean') save(1);
           else if (!done && habit.kind === 'frequency') save(1);
           else edit();
         }}
       />
-      {!done && log && (
+      {log && (
         <AuthButton
           title="Edit today’s log"
           accessibilityLabel={`Edit today’s log for ${habit.name}`}

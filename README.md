@@ -568,7 +568,8 @@ refresh action; no sample health data is shown.
   **Add another measurement** retains named measurements without primary tabs.
 - Today habits have visible **Mark done** / **Mark today done** buttons and
   an in-place amount/minutes/count editor. Weekly habits count distinct days,
-  once per date; subsequent taps open edit/undo. Their linked goals update after
+  once per date; the completed log button is disabled until the next eligible
+  day, with a separate edit/undo action. Their linked goals update after
   saving without reloading Today. Existing notes are retained. Status
   distinguishes **Not logged today**, **In progress**, **Over daily limit** and
   **Target met**, rather than an unexplained "Not yet". Goal actions now use

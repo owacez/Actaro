@@ -812,7 +812,9 @@ is shown before the write is acknowledged. Explain habit types in everyday terms
 Today offers a visible one-tap check-off button and an in-place sheet
 for amounts, minutes, limits and edits. Weekly habits count distinct positive
 logged dates (1–7 days per Monday–Sunday week), once per date. Logging today
-replaces its result with done/not done; subsequent taps open editing/undo.
+replaces its result with done/not done. After completion, disable the primary
+log button with Done today; keep edit/undo as a separate action. The daily log
+action becomes available on the next eligible date (user revision, 2026-10-19).
 This user correction (2026-10-19) supersedes same-day occurrence increments.
 Existing stored counts are retained, but each positive date contributes one
 day. Daily numeric habits remain available for repeated amounts/counts.

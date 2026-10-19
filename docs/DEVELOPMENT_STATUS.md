@@ -4,6 +4,20 @@ Updated: 2026-10-19 (America/Los_Angeles).
 
 ## Overall
 
+Completed daily-log button (2026-10-19): **DONE** for implementation/local
+verification; device acceptance **DEFERRED**. Today disables the primary log
+button after completion, showing Done today for check-off/weekly habits and
+Target met for measured habits. A separate Edit today's log action retains
+correction/undo. Pending/failed saves do not mark completion. The button becomes
+available on the next eligible day, using the habit's time zone and existing
+dashboard refresh. No new timer, request, dependency or schema change.
+`npm.cmd run check` **PASS**: strict TypeScript/lint/format, 336 Jest tests in
+66 suites plus six dataset tests (**342 total**). Regressions cover disabled
+presses making no write, separate editing/undo, next-day and time-zone behavior.
+Next three device checks: log today and inspect the disabled button; undo using
+Edit today's log; reopen tomorrow and confirm logging is available. Release
+weights and deferred v1.0 acceptance are unchanged.
+
 Weekly habit days and live linked-goal correction (2026-10-19): **DONE** for
 implementation/local verification; physical-device acceptance **DEFERRED**.
 Today previously patched the habit while leaving the linked goal result stale.
