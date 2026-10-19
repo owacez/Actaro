@@ -39,6 +39,8 @@ import {
   habitKinds,
   habitPayload,
   habitReached,
+  habitDoneToday,
+  habitUnit,
   habitStatusLabel,
   habitToday,
   habitValue,
@@ -167,10 +169,12 @@ export function HabitsScreen({
                     done={
                       active &&
                       (!!scheduled || record.kind === 'frequency') &&
-                      habitReached(record, value, version?.target ?? 0)
+                      habitDoneToday(record, today)
                     }
                     pendingLabel={habitStatusLabel(record, today)}
-                    label={record.kind === 'boolean' ? 'Done today' : 'Target met'}
+                    label={
+                      ['boolean', 'frequency'].includes(record.kind) ? 'Done today' : 'Target met'
+                    }
                   />
                   <IconButton
                     label={`Manage ${record.name}`}
@@ -182,7 +186,7 @@ export function HabitsScreen({
                 <AuthText>
                   {record.kind === 'boolean'
                     ? 'Check off once'
-                    : `${formatNumber(version?.target ?? 0)} ${record.unit} ${record.kind === 'frequency' ? 'per week' : 'per scheduled day'}`}
+                    : `${formatNumber(version?.target ?? 0)} ${habitUnit(record)} ${record.kind === 'frequency' ? 'per week' : 'per scheduled day'}`}
                   {record.kind === 'avoidance' ? ' or fewer' : ''}
                 </AuthText>
                 <AuthText kind="muted">
@@ -197,9 +201,11 @@ export function HabitsScreen({
                         ? 'Rest / non-action day'
                         : habitReached(record, value, version?.target ?? 0)
                           ? 'Target met'
-                          : value === null
-                            ? 'Not logged'
-                            : `${formatNumber(value)} recorded`}
+                          : record.kind === 'frequency' && habitDoneToday(record, today)
+                            ? 'Done today'
+                            : value === null
+                              ? 'Not logged'
+                              : `${formatNumber(value)} recorded`}
                   {reminderDue(record, now) ? ' · Reminder due' : ''}
                 </AuthText>
                 <Progress record={record} today={today} />
@@ -493,7 +499,7 @@ export function HabitEditor({
             <AuthInput
               label={
                 form.kind === 'frequency'
-                  ? 'Occurrences per week'
+                  ? 'Days per week (1–7)'
                   : form.kind === 'avoidance'
                     ? 'Maximum occurrences per scheduled day'
                     : `Daily target (${form.unit})`
@@ -511,7 +517,7 @@ export function HabitEditor({
           </AuthText>
           <AuthText kind="muted">
             {form.kind === 'frequency'
-              ? 'Occurrences add up across Monday–Sunday, even when logged on other active dates.'
+              ? 'Each date counts once across Monday–Sunday. These days control when it appears on Today; you can also log another day.'
               : 'Days you leave unselected are rest days, not failures.'}
           </AuthText>
           <View style={authStyles.choices}>
@@ -633,7 +639,9 @@ export function HabitLogScreen({
         const selected = requestedDate ?? data.today,
           log = data.record.habit_logs.find((log) => log.local_date === selected);
         setDate(selected);
-        setValue(log ? String(log.value) : '');
+        setValue(
+          log ? String(data.record.kind === 'frequency' ? Number(log.value > 0) : log.value) : '',
+        );
         setNotes(log?.notes ?? '');
       },
       [requestedDate],
@@ -665,7 +673,7 @@ export function HabitLogScreen({
           <AuthText kind="title">{resource.data.record.name}</AuthText>
           <AuthText>
             {resource.data.record.kind === 'frequency'
-              ? 'Enter the total occurrences for this date; repeat saves replace that date’s count.'
+              ? 'Mark this date done or not done. Each date counts once toward the weekly target; saving again does not add another day.'
               : 'Record the actual result. An unlogged date is never automatically marked complete.'}
           </AuthText>
           <AuthInput
@@ -674,7 +682,7 @@ export function HabitLogScreen({
             editable={!action.locked}
             onChangeText={setDate}
           />
-          {resource.data.record.kind === 'boolean' ? (
+          {['boolean', 'frequency'].includes(resource.data.record.kind) ? (
             <View style={authStyles.choices}>
               <AuthChoice
                 title="Done"
@@ -824,7 +832,7 @@ export function HabitHistoryScreen({
                   {period.partial ? ' · Partial week, excluded from consistency' : ''} ·{' '}
                   {period.value === null
                     ? 'Not logged'
-                    : `${formatNumber(period.value)} ${data.record.unit}`}{' '}
+                    : `${formatNumber(period.value)} ${habitUnit(data.record)}`}{' '}
                   / target {formatNumber(period.target)}
                 </AuthText>
                 {data.record.kind !== 'frequency' && !data.record.archived && (
@@ -839,7 +847,7 @@ export function HabitHistoryScreen({
                     .map((log) => (
                       <AuthLink
                         key={log.local_date}
-                        title={`Edit log ${log.local_date} (${formatNumber(log.value)} times)`}
+                        title={`Edit log ${log.local_date} (${log.value > 0 ? 'Done' : 'Not done'})`}
                         disabled={data.record.archived}
                         onPress={() => onOpen('log', habitId, log.local_date)}
                       />

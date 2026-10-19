@@ -1,5 +1,6 @@
 import {
   habitActive,
+  habitDoneToday,
   habitReached,
   habitToday,
   habitValue,
@@ -51,6 +52,7 @@ export function reminderPlan(userId: string, habits: HabitRecord[], now = new Da
         !version?.reminder_time ||
         !habitActive(habit, date) ||
         !version.weekdays.includes(isoWeekday(date)) ||
+        (habit.kind === 'frequency' && habitDoneToday(habit, date)) ||
         habitReached(habit, habitValue(habit, date), version.target)
       )
         continue;

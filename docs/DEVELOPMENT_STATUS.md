@@ -4,6 +4,33 @@ Updated: 2026-10-19 (America/Los_Angeles).
 
 ## Overall
 
+Weekly habit days and live linked-goal correction (2026-10-19): **DONE** for
+implementation/local verification; physical-device acceptance **DEFERRED**.
+Today previously patched the habit while leaving the linked goal result stale.
+Acknowledged writes now patch both from the same calculation used by the goal
+service, including start/end dates, week boundaries and completion percentages.
+No optimistic success, full-page reload or follow-up API read is needed.
+
+User-requested semantics: Count days each week / Habit days per week counts
+distinct positive dates, with targets 1–7. Marking today writes 1; repeated taps
+open edit/undo rather than adding occurrences. History editing uses done/not-done
+choices. Undo writes 0 and reduces the goal. Stored legacy counts remain intact,
+but contribute only one day per positive date. Daily numeric habits still support
+amounts/counts. Daily completion indicators and reminders respect today's log
+even before the weekly target is reached. Schema, RLS and dependencies unchanged.
+
+Verification: `npm.cmd run check` **PASS**, strict TypeScript/lint/format,
+335 Jest tests in 66 suites plus six dataset tests (**341 total**).
+`npm.cmd exec -- expo export --platform web --output-dir .actaro-tools/weekly-habit-export`
+**PASS**, 39 routes.
+`node --env-file=.env .actaro-tools/check-weekly-browser.mjs` **PASS**:
+six isolated sample-data captures, immediate linked day/completion-goal updates,
+repeat tap opens editing without a second write, undo, saved-value reopening,
+narrow/dark layout and no dashboard data reload. Zero live Supabase requests.
+No release-weight change. Next three device checks: log one day and confirm
+1/5 immediately; repeat tap then undo and confirm 0/5; reopen both screens and
+check a different historical date contributes only one more day.
+
 Habit/goal setup simplification (2026-10-19): **DONE** for implementation and
 local verification; physical-device acceptance remains **DEFERRED**. Habits show
 three plain-language logging choices with examples; More logging options retains

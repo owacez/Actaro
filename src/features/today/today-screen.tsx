@@ -20,17 +20,12 @@ import {
 import { formatNumber, energy, localNutritionDate } from '@/features/nutrition/nutrition-model';
 import { weightSummary, unitFactor, goalUnit } from '@/features/body/body-model';
 import { useAppTheme } from '@/features/profile/theme-context';
-import {
-  habitToday,
-  habitValue,
-  habitVersion,
-  habitReached,
-  acknowledgedHabitLog,
-} from '@/features/habits/habit-model';
+import { habitToday, habitDoneToday, acknowledgedHabitLog } from '@/features/habits/habit-model';
 import { TodayHabit } from './today-habit';
 import { nutritionService } from '@/features/nutrition/nutrition-service';
 import { todayService } from './today-service';
 import { useDeviceSteps } from '@/features/activity/step-provider';
+import { habitGoalFact, goalProgress } from '@/features/goals/goal-model';
 export function TodayScreen({ userId }: { userId: string }) {
   const deviceSteps = useDeviceSteps();
   const load = useCallback(() => todayService.load(userId), [userId]),
@@ -286,12 +281,22 @@ export function TodayScreen({ userId }: { userId: string }) {
                         ...current,
                         habits,
                         completedHabits: habits.filter((row) =>
-                          habitReached(
-                            row,
-                            habitValue(row, habitToday(row)),
-                            habitVersion(row, habitToday(row))?.target ?? 0,
-                          ),
+                          habitDoneToday(row, habitToday(row)),
                         ).length,
+                        goals: current.goals.map((result) => {
+                          const source = habits.find((row) => row.id === result.goal.habit_id);
+                          if (!source || source.id !== habit.id) return result;
+                          const fact = habitGoalFact(result.goal, source);
+                          return {
+                            ...result,
+                            ...fact,
+                            ...goalProgress(
+                              result.goal,
+                              fact.value,
+                              localNutritionDate(result.goal.time_zone),
+                            ),
+                          };
+                        }),
                       };
                     })
                   }

@@ -88,6 +88,11 @@ test('plans respect owner, rest/end dates, completion, future times and the earl
     },
   ];
   expect(reminderPlan(userId, [record], now)).toHaveLength(0);
+  record.kind = 'frequency';
+  record.habit_versions[0].target = 5;
+  expect(reminderPlan(userId, [record], now)).toHaveLength(0);
+  record.habit_logs[0].value = 0;
+  expect(reminderPlan(userId, [record], now)).toHaveLength(1);
   record.habit_logs = [];
   record.habit_versions[0].weekdays = [1];
   expect(reminderPlan(userId, [record], now)).toHaveLength(0);

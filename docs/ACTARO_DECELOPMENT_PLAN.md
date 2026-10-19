@@ -774,6 +774,12 @@ Types:
 
 ## 4.3 Habit Logging — Weight 3
 
+User correction (2026-10-19): weekly habits count distinct logged days, at most
+once per date, with done/edit/undo controls and a 1–7 day target. Preserve raw
+historical logs. Linked Today goals update after acknowledgement using the same
+calculation as a reload, without a full-page refresh or extra API reads. This
+refines tasks 4.3, 4.8 and 4.11; no release-weight change.
+
 ## 4.4 Habit History / Consistency — Weight 3
 
 ## 4.5 Motivation Mode — Weight 2

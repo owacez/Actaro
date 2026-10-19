@@ -112,13 +112,13 @@ test('less common habit logging remains available and hidden reminder values are
     </FeedbackTestRoot>,
   );
   await screen.findByLabelText('Habit name');
-  expect(screen.queryByRole('button', { name: 'Count times each week' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Count days each week' })).toBeNull();
   await fireEvent.changeText(screen.getByLabelText('Habit name'), 'Practice');
   await fireEvent.press(screen.getByRole('button', { name: 'More logging options' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'Count times each week' }));
-  await fireEvent.changeText(screen.getByLabelText('Occurrences per week'), '3');
+  await fireEvent.press(screen.getByRole('button', { name: 'Count days each week' }));
+  await fireEvent.changeText(screen.getByLabelText('Days per week (1–7)'), '3');
   await fireEvent.press(screen.getByRole('button', { name: 'Fewer logging options' }));
-  expect(screen.getByRole('button', { name: 'Count times each week' })).toHaveProp(
+  expect(screen.getByRole('button', { name: 'Count days each week' })).toHaveProp(
     'accessibilityState',
     expect.objectContaining({ selected: true }),
   );
@@ -171,4 +171,23 @@ test('unlogged avoidance stays blank; explicit zero logs with a stable failed-sa
   await waitFor(() => expect(back).toHaveBeenCalled());
   expect(service.log.mock.calls[1]).toEqual(service.log.mock.calls[0]);
   expect(service.log).toHaveBeenCalledWith(owner, record.id, '2026-10-14', 0, '');
+});
+test('weekly date logs use done/not-done choices and cannot enter a whole-week count', async () => {
+  service.load.mockResolvedValue({
+    record: { ...record, kind: 'frequency' },
+    today: '2026-10-14',
+    until: '2026-10-14',
+  });
+  const onBack = jest.fn();
+  await render(
+    <FeedbackTestRoot>
+      <HabitLogScreen userId={owner} habitId={record.id} onBack={onBack} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByRole('button', { name: 'Done' });
+  expect(screen.queryByLabelText('Logged value (times)')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Save habit log' }));
+  await waitFor(() => expect(onBack).toHaveBeenCalled());
+  expect(service.log).toHaveBeenCalledWith(owner, record.id, '2026-10-14', 1, '');
 });

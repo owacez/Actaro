@@ -1,7 +1,9 @@
 import type { Tables } from '@/lib/supabase/database.types';
+import { habitPeriods, habitValue, monday, type HabitRecord } from '@/features/habits/habit-model';
 import {
   numeric,
   nutritionDate,
+  localNutritionDate,
   nutrientKeys,
   type Nutrients,
 } from '@/features/nutrition/nutrition-model';
@@ -21,8 +23,8 @@ export const goalMetrics = [
   { key: 'habit_completion_week', label: 'Habit weekly completion', unit: '%', category: 'Habits' },
   {
     key: 'habit_frequency_week',
-    label: 'Habit weekly frequency',
-    unit: 'times',
+    label: 'Habit days per week',
+    unit: 'days',
     category: 'Habits',
   },
 ] as const;
@@ -79,8 +81,8 @@ export const goalHelp: Record<GoalMetric, { example: string; source: string }> =
       'Log the selected habit. This optional goal reads its weekly completion; the habit already works on its own.',
   },
   habit_frequency_week: {
-    example: 'Record 3 occurrences of a selected habit this week.',
-    source: 'Log a Count times each week habit. This optional goal reads its weekly total.',
+    example: 'Work out on 5 different days this week.',
+    source: 'Log a Count days each week habit. Each date counts once, even if edited repeatedly.',
   },
 };
 export type GoalForm = {
@@ -134,7 +136,10 @@ export function goalPayload(form: GoalForm) {
     throw new Error('This metric needs whole numbers.');
   if (metric.unit === '%' && Math.max(baseline, target) > 100)
     throw new Error('Percentages cannot exceed 100.');
-  if (metric.key === 'active_days_week' && Math.max(baseline, target) > 7)
+  if (
+    ['active_days_week', 'habit_frequency_week'].includes(metric.key) &&
+    Math.max(baseline, target) > 7
+  )
     throw new Error('A week has at most seven active days.');
   new Intl.DateTimeFormat('en', { timeZone: form.zone });
   const habit_id = metric.category === 'Habits' ? form.habitId || null : null,
@@ -176,6 +181,32 @@ export function goalProgress(goal: Goal, value: number | null, today: string) {
         : 'In progress',
     percentage: Math.min(100, Math.max(0, raw)),
     reached,
+  };
+}
+// The service and acknowledged Today updates use the same date-bounded calculation.
+export function habitGoalFact(
+  goal: Goal,
+  habit: HabitRecord,
+  today = localNutritionDate(goal.time_zone),
+) {
+  if (today < goal.start_date) return { value: null, detail: 'Starts ' + goal.start_date };
+  if (habit.archived)
+    return { value: null, detail: 'Source habit was deleted. Choose another active habit.' };
+  const date = goal.end_date && goal.end_date < today ? goal.end_date : today;
+  if (goal.metric === 'habit_frequency_week')
+    return {
+      value: habitValue(habit, date, goal.start_date),
+      detail: 'Distinct logged days this week through ' + date,
+    };
+  const periods = habitPeriods(habit, date, 7).filter(
+    (period) =>
+      period.date >= monday(date) && period.date >= goal.start_date && period.status !== 'rest',
+  );
+  return {
+    value: periods.length
+      ? (periods.filter((period) => period.status === 'done').length / periods.length) * 100
+      : null,
+    detail: 'Week-to-date scheduled-day completion; rest days excluded.',
   };
 }
 export function macroAdherence(total: Nutrients, targets: Nutrients | null, tolerance: number) {

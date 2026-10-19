@@ -54,16 +54,19 @@ The first three choices cover common habits. **More logging options** shows the
 weekly and limit choices. **Reminders and other options** contains end date,
 reminder and progress display settings; collapsing it preserves your entries.
 
-| Type shown in the app | Example test                     | Expected result                                                                        |
-| --------------------- | -------------------------------- | -------------------------------------------------------------------------------------- |
-| Just mark it done     | "Stretch", scheduled today       | Mark done; it completes in place. Explicit not-done is different from no log           |
-| Enter an amount       | "Read pages", target 10 pages    | Log 6: incomplete. Edit today's value to 10: target met                                |
-| Track minutes         | "Read", target 20 minutes        | Log 15 then edit to 20; completion follows the saved minutes                           |
-| Count times each week | "Practice", target 3 occurrences | Record occurrences on dates this Monday–Sunday; the weekly total determines completion |
-| Stay below a limit    | "Sugary drinks", limit 1 per day | Log 0 or 1: target met; log 2: not met. No entry must not silently count as zero       |
+| Type shown in the app | Example test                     | Expected result                                                                                             |
+| --------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Just mark it done     | "Stretch", scheduled today       | Mark done; it completes in place. Explicit not-done is different from no log                                |
+| Enter an amount       | "Read pages", target 10 pages    | Log 6: incomplete. Edit today's value to 10: target met                                                     |
+| Track minutes         | "Read", target 20 minutes        | Log 15 then edit to 20; completion follows the saved minutes                                                |
+| Count days each week  | "Work out", target 5 days        | Mark each workout date done once. Repeat taps open edit/undo; five logs on one date cannot become five days |
+| Stay below a limit    | "Sugary drinks", limit 1 per day | Log 0 or 1: target met; log 2: not met. No entry must not silently count as zero                            |
 
-For amounts/occurrences, editing a date replaces that date's value; it is not an
-automatic increment button. Dates outside the schedule are not failed days.
+For amounts, editing a date replaces that date's value. Weekly habits count
+distinct positive dates; an old saved count of five on one date contributes one
+day. They accept done/not-done choices and targets from 1–7. Historical dates
+can still be corrected; this is a self-reported log. Dates outside the schedule
+are not failed days.
 Choose a motivation display (Streaks, Weekly consistency, Completion %, or None).
 This changes the feedback presentation, not the underlying logs.
 
@@ -91,7 +94,7 @@ collapsed. Goals are not checked off by hand.
 | Daily protein               | Food diary entries for the evaluated day                                                                        |
 | Daily macro adherence       | Food diary plus that date's nutrition targets; evaluates calories/protein/carbs/fat within the chosen tolerance |
 | Habit weekly completion     | Select a habit; its scheduled-day completions this week, excluding rest days                                    |
-| Habit weekly frequency      | Select a habit; its recorded occurrences this week                                                              |
+| Habit days per week         | Select a Count days each week habit; distinct done dates in the current week, on/after the goal start           |
 
 **Worked example A — bodyweight:** create a goal with baseline 80 kg and target
 75 kg, decreasing, starting today. Record 79 kg today. Expect current value 79 kg
@@ -203,20 +206,20 @@ preserved; they are not recomputed from the macro formula.
 
 ### Pass E — habits, goals, body, activity and Today (v0.5)
 
-| ID  | Feature / action                                                                                                                          | Expected result                                                                                                                           |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| E01 | Create each of the five habit types using the examples above                                                                              | Correct input, units, schedule and target comparison                                                                                      |
-| E02 | Choose start/end dates and reminder time; clear optional fields                                                                           | Calendar/time controls, no free-text date/time requirement; values survive reopen                                                         |
-| E03 | From Today: tap Mark done, Log one occurrence, or log minutes/amount/count                                                                | No navigation needed; confirmed updates stay in place; edit today’s value in a sheet; status distinguishes missing/in-progress/over-limit |
-| E04 | Edit/remove a dated log; inspect habit history and rest days                                                                              | Correct history/consistency; explicit zero and no report remain distinct                                                                  |
-| E05 | Change target/schedule/motivation; archive/restore habit                                                                                  | Dated changes do not rewrite older targets; chosen feedback and archived lists work                                                       |
-| E06 | Create/edit/delete/restore goals; test all 13 sources above                                                                               | Actual source value, baseline, target, direction and percentage are understandable                                                        |
-| E07 | Test a future start, missing records and passed target date                                                                               | Honest Not started / No recorded data / Target date passed states as appropriate                                                          |
-| E08 | Body form: weight, height, sex, birth date/year picker and location; change date; save/reopen; additional measurement/history edit/delete | Weight/height use log date; personal details persist independently; blank measurements preserve history; one atomic save, no duplicates   |
-| E09 | iPhone: grant Motion once; open app, walk, leave and return                                                                               | Automatic daily steps, live foreground updates and catch-up; no manual read/save button                                                   |
-| E10 | Deny Motion; open Steps & activity; set daily target; save optional distance                                                              | Useful permission guidance, target in the same section and no fabricated step count                                                       |
-| E11 | Compare Today cards with their source screens                                                                                             | Weight, steps, food totals, planned workout, habit/goal and training/recovery facts agree                                                 |
-| E12 | Quick log: use food, water, weight and other offered shortcuts                                                                            | Opens the correct actual logging flow; dismissing does not save fictional data                                                            |
+| ID  | Feature / action                                                                                                                          | Expected result                                                                                                                                                              |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| E01 | Create each of the five habit types using the examples above                                                                              | Correct input, units, schedule and target comparison                                                                                                                         |
+| E02 | Choose start/end dates and reminder time; clear optional fields                                                                           | Calendar/time controls, no free-text date/time requirement; values survive reopen                                                                                            |
+| E03 | From Today: mark a daily/weekly habit done; edit/undo; log minutes/amount/count                                                           | After acknowledgement, the habit and linked goal update in place. Weekly repeat taps open editing and never add another day; undo reduces the goal. Reopen Goals and compare |
+| E04 | Edit/remove a dated log; inspect habit history and rest days                                                                              | Correct history/consistency; explicit zero and no report remain distinct                                                                                                     |
+| E05 | Change target/schedule/motivation; archive/restore habit                                                                                  | Dated changes do not rewrite older targets; chosen feedback and archived lists work                                                                                          |
+| E06 | Create/edit/delete/restore goals; test all 13 sources above                                                                               | Actual source value, baseline, target, direction and percentage are understandable                                                                                           |
+| E07 | Test a future start, missing records and passed target date                                                                               | Honest Not started / No recorded data / Target date passed states as appropriate                                                                                             |
+| E08 | Body form: weight, height, sex, birth date/year picker and location; change date; save/reopen; additional measurement/history edit/delete | Weight/height use log date; personal details persist independently; blank measurements preserve history; one atomic save, no duplicates                                      |
+| E09 | iPhone: grant Motion once; open app, walk, leave and return                                                                               | Automatic daily steps, live foreground updates and catch-up; no manual read/save button                                                                                      |
+| E10 | Deny Motion; open Steps & activity; set daily target; save optional distance                                                              | Useful permission guidance, target in the same section and no fabricated step count                                                                                          |
+| E11 | Compare Today cards with their source screens                                                                                             | Weight, steps, food totals, planned workout, habit/goal and training/recovery facts agree                                                                                    |
+| E12 | Quick log: use food, water, weight and other offered shortcuts                                                                            | Opens the correct actual logging flow; dismissing does not save fictional data                                                                                               |
 
 Steps use iPhone Motion history, not Apple Health/Watch aggregation. Expo Go does
 not continuously deliver steps while backgrounded: test catch-up after returning.

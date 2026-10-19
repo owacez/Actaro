@@ -7,8 +7,7 @@ import {
   habitActive,
   habitToday,
   habitVersion,
-  habitValue,
-  habitReached,
+  habitDoneToday,
   isoWeekday,
 } from '@/features/habits/habit-model';
 import { goalService } from '@/features/goals/goal-service';
@@ -66,9 +65,7 @@ export const todayService = {
       activity,
       habits: due,
       completedHabits: due.filter((habit) => {
-        const date = habitToday(habit),
-          version = habitVersion(habit, date);
-        return version && habitReached(habit, habitValue(habit, date), version.target);
+        return habitDoneToday(habit, habitToday(habit));
       }).length,
       goals: await goalService.facts(userId, goals.rows),
       training,

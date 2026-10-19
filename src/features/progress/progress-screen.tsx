@@ -20,6 +20,7 @@ import {
 } from './progress-components';
 import { periodDays, type ProgressPreset, type ProgressRange } from './progress-period';
 import { progressService } from './progress-service';
+import { habitUnit } from '@/features/habits/habit-model';
 
 const modules = [
   { key: 'weight', title: 'Body' },
@@ -395,7 +396,7 @@ function HabitResults({ data }: { data: Awaited<ReturnType<typeof progressServic
         entries={[...habit.periods].reverse().map((period) => ({
           key: period.date,
           title: period.date + (period.end !== period.date ? ' → ' + period.end : ''),
-          detail: `${period.status}${period.partial ? ' · partial/excluded' : ''} · ${period.value === null ? 'Not recorded' : formatNumber(period.value) + ' ' + habit.record.unit} / ${formatNumber(period.target)} target`,
+          detail: `${period.status}${period.partial ? ' · partial/excluded' : ''} · ${period.value === null ? 'Not recorded' : formatNumber(period.value) + ' ' + habitUnit(habit.record)} / ${formatNumber(period.target)} target`,
         }))}
       />
     </>

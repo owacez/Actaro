@@ -11,7 +11,8 @@ import {
   habitToday,
   habitVersion,
   habitValue,
-  habitReached,
+  habitDoneToday,
+  habitUnit,
   habitStatusLabel,
   logValue,
   type HabitRecord,
@@ -34,7 +35,8 @@ export function TodayHabit({
     version = habitVersion(habit, date);
   const log = habit.habit_logs.find((row) => row.local_date === date),
     value = habitValue(habit, date);
-  const done = !!version && habitReached(habit, value, version.target);
+  const done = !!version && habitDoneToday(habit, date),
+    dailyCheck = habit.kind === 'boolean' || habit.kind === 'frequency';
   function save(amount: number, note = log?.notes ?? '') {
     void action.run(
       () => habitService.log(userId, habit.id, date, amount, note),
@@ -59,14 +61,14 @@ export function TodayHabit({
         </View>
         <CompletionMark
           done={done}
-          label={habit.kind === 'boolean' ? 'Done today' : 'Target met'}
+          label={dailyCheck ? 'Done today' : 'Target met'}
           pendingLabel={habitStatusLabel(habit, date)}
         />
       </View>
       <AuthText kind="muted">
         {habit.kind === 'boolean'
           ? 'Check off once today'
-          : `${value === null ? 'No amount logged' : formatNumber(value) + ' ' + habit.unit} · ${habit.kind === 'avoidance' ? 'Limit' : 'Target'} ${formatNumber(version?.target ?? 0)} ${habit.unit} ${habit.kind === 'frequency' ? 'this week' : 'today'}`}
+          : `${value === null ? 'No amount logged' : formatNumber(value) + ' ' + habitUnit(habit)} · ${habit.kind === 'avoidance' ? 'Limit' : 'Target'} ${formatNumber(version?.target ?? 0)} ${habitUnit(habit)} ${habit.kind === 'frequency' ? 'this week' : 'today'}`}
       </AuthText>
       <AuthButton
         title={
@@ -75,7 +77,7 @@ export function TodayHabit({
             : habit.kind === 'boolean'
               ? 'Mark done'
               : habit.kind === 'frequency'
-                ? 'Log one occurrence'
+                ? 'Mark today done'
                 : habit.kind === 'duration'
                   ? 'Log minutes'
                   : habit.kind === 'avoidance'
@@ -87,7 +89,7 @@ export function TodayHabit({
         disabled={action.locked}
         onPress={() => {
           if (!done && habit.kind === 'boolean') save(1);
-          else if (!done && habit.kind === 'frequency') save((log?.value ?? 0) + 1);
+          else if (!done && habit.kind === 'frequency') save(1);
           else edit();
         }}
       />
@@ -111,10 +113,10 @@ export function TodayHabit({
         <AuthText>
           {date} ·{' '}
           {habit.kind === 'frequency'
-            ? 'Edit today’s occurrences, not the weekly total.'
+            ? 'Each date counts once. Undo today without changing other days.'
             : 'Update today’s log without leaving Today.'}
         </AuthText>
-        {habit.kind === 'boolean' ? (
+        {dailyCheck ? (
           <View style={{ gap: 8 }}>
             <AuthButton
               title="Done today"

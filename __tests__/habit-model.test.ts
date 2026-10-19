@@ -1,4 +1,5 @@
 import { expect, test } from '@jest/globals';
+import { habitGoalFact, goalProgress, type Goal } from '@/features/goals/goal-model';
 import {
   habitConsistency,
   habitPeriods,
@@ -6,6 +7,7 @@ import {
   habitPayload,
   habitValue,
   habitStatusLabel,
+  logValue,
   reminderDue,
   type HabitRecord,
 } from '@/features/habits/habit-model';
@@ -61,7 +63,7 @@ test('habit status distinguishes missing reports, progress, rest days and exceed
   record.habit_logs = [];
   expect(habitStatusLabel(record, '2026-10-12')).toBe('Not logged this week');
   log(record, '2026-10-12', 1);
-  expect(habitStatusLabel(record, '2026-10-12')).toBe('In progress this week');
+  expect(habitStatusLabel(record, '2026-10-12')).toBe('Done today');
 });
 test('rest days and an open unlogged day do not break a scheduled streak', () => {
   const record = habit();
@@ -97,18 +99,93 @@ test('dated target changes preserve previous periods and in-app reminders use th
   expect(reminderDue(record, new Date('2026-10-14T17:59:00Z'))).toBe(false);
   expect(reminderDue(record, new Date('2026-10-14T18:00:00Z'))).toBe(true);
 });
-test('frequency sums actual weekly counts, while partial and open weeks avoid false misses', () => {
+test('frequency counts distinct positive dates, including legacy counts, and keeps partial/open weeks honest', () => {
   const record = { ...habit(), kind: 'frequency', unit: 'times', start_date: '2026-10-07' };
   record.habit_versions[0].effective_from = '2026-10-07';
   record.habit_versions[0].target = 3;
   log(record, '2026-10-12', 2);
   log(record, '2026-10-13', 1);
-  expect(habitValue(record, '2026-10-14')).toBe(3);
+  log(record, '2026-10-14', 0);
+  expect(habitValue(record, '2026-10-14')).toBe(2);
   expect(habitValue(record, '2026-10-14', '2026-10-13')).toBe(1);
+  expect(habitConsistency(record, '2026-10-14').periods.at(-1)?.status).toBe('pending');
+  record.habit_logs[2].value = 1;
   const result = habitConsistency(record, '2026-10-14');
   expect(result.periods.find((p) => p.date === '2026-10-05')?.partial).toBe(true);
   expect(result.streak).toBe(1);
   expect(result.percentage).toBe(100);
+  expect(record.habit_logs[0].value).toBe(2);
+  expect(() => logValue(record, '5')).toThrow('A date counts once');
+  expect(logValue(record, '0')).toBe(0);
+  expect(logValue(record, '1')).toBe(1);
+});
+test('linked weekly goals count dates, update after replacement/undo and respect the goal window', () => {
+  const record = { ...habit(), kind: 'frequency', unit: 'times' };
+  const goal: Goal = {
+    id: 'goal',
+    user_id: record.user_id,
+    name: 'Train five days',
+    metric: 'habit_frequency_week',
+    baseline: 0,
+    target: 5,
+    direction: 'at_least',
+    tolerance: 10,
+    start_date: '2026-10-12',
+    end_date: null,
+    time_zone: 'UTC',
+    habit_id: record.id,
+    exercise_id: null,
+    measurement: null,
+    archived: false,
+    created_at: '',
+    updated_at: '',
+  };
+  log(record, '2026-10-11', 1); // Previous week.
+  log(record, '2026-10-12', 5); // Legacy count cannot become five days.
+  log(record, '2026-10-13', 0);
+  log(record, '2026-10-14', 1);
+  let fact = habitGoalFact(goal, record, '2026-10-12');
+  expect(fact.value).toBe(1);
+  expect(goalProgress(goal, fact.value, '2026-10-12').percentage).toBe(20);
+  record.habit_logs[1].value = 1;
+  expect(habitGoalFact(goal, record, '2026-10-12').value).toBe(1);
+  record.habit_logs[1].value = 0;
+  expect(habitGoalFact(goal, record, '2026-10-12').value).toBe(0);
+  fact = habitGoalFact({ ...goal, start_date: '2026-10-13' }, record, '2026-10-14');
+  expect(fact.value).toBe(1);
+  expect(habitGoalFact({ ...goal, end_date: '2026-10-13' }, record, '2026-10-14').value).toBe(0);
+  expect(habitGoalFact(goal, record, '2026-10-19').value).toBe(0);
+  expect(habitGoalFact(goal, record, '2026-10-10').value).toBeNull();
+  expect(habitGoalFact(goal, { ...record, archived: true }, '2026-10-14').value).toBeNull();
+});
+test('linked completion goals use the same scheduled-day calculation after an in-place log', () => {
+  const record = { ...habit(), kind: 'boolean', unit: 'done' };
+  record.habit_versions[0].target = 1;
+  const goal: Goal = {
+    id: 'goal',
+    user_id: record.user_id,
+    name: 'Stretch',
+    metric: 'habit_completion_week',
+    baseline: 0,
+    target: 100,
+    direction: 'at_least',
+    tolerance: 10,
+    start_date: '2026-10-12',
+    end_date: null,
+    time_zone: 'UTC',
+    habit_id: record.id,
+    exercise_id: null,
+    measurement: null,
+    archived: false,
+    created_at: '',
+    updated_at: '',
+  };
+  log(record, '2026-10-12', 1);
+  expect(habitGoalFact(goal, record, '2026-10-13').value).toBe(50);
+  log(record, '2026-10-13', 1);
+  expect(habitGoalFact(goal, record, '2026-10-13').value).toBe(100);
+  record.habit_logs[1].value = 0;
+  expect(habitGoalFact(goal, record, '2026-10-13').value).toBe(50);
 });
 test('form rejects missing schedule, fractional counts and invalid reminder/end dates', () => {
   const form = {
@@ -128,4 +205,5 @@ test('form rejects missing schedule, fractional counts and invalid reminder/end 
   expect(() => habitPayload({ ...form, target: '.5' })).toThrow();
   expect(() => habitPayload({ ...form, reminder: '25:00' })).toThrow();
   expect(() => habitPayload({ ...form, end: '2026-10-13' })).toThrow();
+  expect(() => habitPayload({ ...form, kind: 'frequency', target: '8' })).toThrow('1 and 7');
 });

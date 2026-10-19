@@ -244,7 +244,7 @@ function HabitSource({
       {rows?.length === 0 && (
         <AuthNotice>
           {metric === 'habit_frequency_week'
-            ? 'Create a Count times each week habit first.'
+            ? 'Create a Count days each week habit first.'
             : 'Create a habit that tracks daily completion first.'}{' '}
           You can also track that habit without creating a separate goal.
         </AuthNotice>

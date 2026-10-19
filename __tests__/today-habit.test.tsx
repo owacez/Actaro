@@ -27,7 +27,7 @@ function habit(kind = 'boolean'): HabitRecord {
         habit_id: '05200000-0000-4000-8000-000000000103',
         user_id: owner,
         effective_from: day,
-        target: kind === 'boolean' ? 1 : 20,
+        target: kind === 'boolean' ? 1 : kind === 'frequency' ? 5 : 20,
         weekdays: [1, 2, 3, 4, 5, 6, 7],
         end_date: null,
         motivation: 'none',
@@ -80,17 +80,23 @@ test('amount/minutes entry stays on Today and requires an explicit value, includ
   await fireEvent.press(screen.getByRole('button', { name: 'Save today’s log' }));
   await waitFor(() => expect(logged).toHaveBeenCalledWith(day, 15, 'Afternoon'));
 });
-test('a weekly one-tap log increments today only and retains an existing note', async () => {
-  let record = habit('frequency');
-  record = acknowledgedHabitLog(record, day, 2, 'Original note');
+test('a weekly habit logs today once, then offers editing and undo rather than another increment', async () => {
+  const record = habit('frequency');
   const logged = jest.fn();
-  await render(
+  const tree = (record: HabitRecord) => (
     <FeedbackTestRoot>
       <TodayHabit userId={owner} habit={record} onLogged={logged} />
-    </FeedbackTestRoot>,
+    </FeedbackTestRoot>
   );
+  const view = await render(tree(record));
   await fireEvent.press(screen.getByRole('button', { name: 'Log habit Read' }));
-  await waitFor(() =>
-    expect(service.log).toHaveBeenCalledWith(owner, record.id, day, 3, 'Original note'),
-  );
+  await waitFor(() => expect(logged).toHaveBeenCalledWith(day, 1, ''));
+  await view.rerender(tree(acknowledgedHabitLog(record, day, 1, 'Original note')));
+  expect(screen.getByText('✓ Done today')).toBeTruthy();
+  expect(screen.getByText('1 days · Target 5 days this week')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Log habit Read' }));
+  expect(service.log).toHaveBeenCalledTimes(1);
+  expect(screen.queryByLabelText('Today’s value (times)')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Not done today' }));
+  await waitFor(() => expect(logged).toHaveBeenLastCalledWith(day, 0, 'Original note'));
 });

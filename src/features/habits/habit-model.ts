@@ -26,9 +26,9 @@ export const habitTypeInfo = {
       'Example: Read for 20 minutes. Enter the minutes you spent; this does not start a timer.',
   },
   frequency: {
-    label: 'Count times each week',
+    label: 'Count days each week',
     detail:
-      'Example: Practice 3 times a week. Each occurrence counts toward the Monday–Sunday total.',
+      'Example: Work out on 5 different days a week. Each date counts once toward the Monday–Sunday total.',
   },
   avoidance: {
     label: 'Stay below a limit',
@@ -101,21 +101,32 @@ export function habitValue(habit: HabitRecord, date: string, notBefore?: string)
   if (habit.kind === 'frequency') {
     const from = monday(date),
       version = habitVersion(habit, date);
-    return habit.habit_logs
-      .filter(
-        (log) =>
-          log.local_date >= from &&
-          log.local_date <= date &&
-          log.local_date >= habit.start_date &&
-          (!notBefore || log.local_date >= notBefore) &&
-          (!version?.end_date || log.local_date <= version.end_date),
-      )
-      .reduce((sum, log) => sum + log.value, 0);
+    return new Set(
+      habit.habit_logs
+        .filter(
+          (log) =>
+            log.local_date >= from &&
+            log.local_date <= date &&
+            log.local_date >= habit.start_date &&
+            log.value > 0 &&
+            (!notBefore || log.local_date >= notBefore) &&
+            (!version?.end_date || log.local_date <= version.end_date),
+        )
+        .map((log) => log.local_date),
+    ).size;
   }
   return habit.habit_logs.find((log) => log.local_date === date)?.value ?? null;
 }
 export function habitReached(habit: HabitRecord, value: number | null, target: number) {
   return value !== null && (habit.kind === 'avoidance' ? value <= target : value >= target);
+}
+export function habitUnit(habit: HabitRecord) {
+  return habit.kind === 'frequency' ? 'days' : habit.unit;
+}
+export function habitDoneToday(habit: HabitRecord, date: string) {
+  return habit.kind === 'frequency'
+    ? habit.habit_logs.some((log) => log.local_date === date && log.value > 0)
+    : habitReached(habit, habitValue(habit, date), habitVersion(habit, date)?.target ?? 0);
 }
 export function habitStatusLabel(habit: HabitRecord, date: string) {
   const version = habitVersion(habit, date),
@@ -125,6 +136,7 @@ export function habitStatusLabel(habit: HabitRecord, date: string) {
   if (!habitActive(habit, date)) return 'Ended';
   if (habit.kind !== 'frequency' && !version?.weekdays.includes(isoWeekday(date)))
     return 'Rest day';
+  if (habit.kind === 'frequency' && habitDoneToday(habit, date)) return 'Done today';
   if (habitReached(habit, value, version?.target ?? 0))
     return habit.kind === 'boolean' ? 'Done today' : 'Target met';
   if (habit.kind === 'frequency')
@@ -165,17 +177,7 @@ export function habitPeriods(habit: HabitRecord, today: string, days = 90): Habi
       weekly &&
       (habit.start_date > start || (!!version.end_date && version.end_date < end) || start < from);
     const scheduled = weekly || version.weekdays.includes(isoWeekday(day));
-    const value = weekly
-      ? habit.habit_logs
-          .filter(
-            (log) =>
-              log.local_date >= start &&
-              log.local_date <= asOf &&
-              log.local_date >= habit.start_date &&
-              (!version.end_date || log.local_date <= version.end_date),
-          )
-          .reduce((sum, log) => sum + log.value, 0)
-      : habitValue(habit, day);
+    const value = habitValue(habit, weekly ? asOf : day);
     periods.push({
       date: start,
       end,
@@ -230,6 +232,7 @@ export function reminderDue(habit: HabitRecord, now = new Date()) {
     !version?.reminder_time ||
     !habitActive(habit, date) ||
     !version.weekdays.includes(isoWeekday(date)) ||
+    (habit.kind === 'frequency' && habitDoneToday(habit, date)) ||
     habitReached(habit, habitValue(habit, date), version.target)
   )
     return false;
@@ -263,6 +266,8 @@ export function habitPayload(form: HabitForm) {
       : numeric(form.target, 'target', 1000000, form.kind === 'avoidance');
   if (['frequency', 'avoidance'].includes(form.kind) && !Number.isInteger(target))
     throw new Error('Use a whole-number occurrence target.');
+  if (form.kind === 'frequency' && target > 7)
+    throw new Error('Choose between 1 and 7 days per week.');
   const unit =
     form.kind === 'boolean'
       ? 'done'
@@ -302,6 +307,8 @@ export function logValue(habit: HabitRecord, input: string) {
   const value = numeric(input, 'logged value', 1000000, true);
   if (habit.kind === 'boolean' && ![0, 1].includes(value))
     throw new Error('Choose Done or Not done.');
+  if (habit.kind === 'frequency' && ![0, 1].includes(value))
+    throw new Error('A date counts once. Choose Done or Not done.');
   if (['frequency', 'avoidance'].includes(habit.kind) && !Number.isInteger(value))
     throw new Error('Enter a whole-number count.');
   return value;

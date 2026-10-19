@@ -4,13 +4,20 @@ import { profileService } from '@/features/profile/profile-service';
 import { nutritionService } from '@/features/nutrition/nutrition-service';
 import { localNutritionDate, totalNutrition } from '@/features/nutrition/nutrition-model';
 import { habitService } from '@/features/habits/habit-service';
-import { habitPeriods, habitValue, monday } from '@/features/habits/habit-model';
+import { monday } from '@/features/habits/habit-model';
 import { parseOverview, shiftDate } from '@/features/workouts/training-overview';
 import { parsePerformance } from '@/features/workouts/session-model';
 import { dayStart } from '@/features/activity/day-model';
 import type { Database, Tables } from '@/lib/supabase/database.types';
 import type { TrainingOverview } from '@/features/workouts/training-overview';
-import { goalPayload, goalProgress, macroAdherence, type Goal, type GoalForm } from './goal-model';
+import {
+  goalPayload,
+  goalProgress,
+  habitGoalFact,
+  macroAdherence,
+  type Goal,
+  type GoalForm,
+} from './goal-model';
 export type GoalFact = { value: number | null; detail: string };
 export const goalService = {
   async list(userId: string, archived = false) {
@@ -159,23 +166,7 @@ export const goalService = {
         const { record } = await shared(habitCache, 'habit:' + goal.habit_id + ':' + date, () =>
           habitService.load(userId, goal.habit_id ?? '', date),
         );
-        if (record.archived)
-          return { value: null, detail: 'Source habit was deleted. Choose another active habit.' };
-        if (goal.metric === 'habit_frequency_week')
-          return {
-            value: habitValue(record, date, goal.start_date),
-            detail: 'Recorded occurrences this week through ' + date,
-          };
-        const periods = habitPeriods(record, date, 7).filter(
-          (period) =>
-            period.date >= from && period.date >= goal.start_date && period.status !== 'rest',
-        );
-        return {
-          value: periods.length
-            ? (periods.filter((period) => period.status === 'done').length / periods.length) * 100
-            : null,
-          detail: 'Week-to-date scheduled-day completion; rest days excluded.',
-        };
+        return habitGoalFact(goal, record, today);
       }
       if (['calories_day', 'protein_day', 'macro_adherence_day'].includes(goal.metric)) {
         const diary = await shared(nutritionCache, 'nutrition:' + date, () =>
