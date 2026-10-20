@@ -578,10 +578,12 @@ Show:
 
 ## 2.6 Dedicated Active Workout — Weight 10
 
-User testing revision (2026-10-18): one set card at a time, left swipe to log,
-right swipe to undo, tap to edit, selectable completion bars and Show all sets.
-Automatic progression/undo preserve actual values and local recovery. Technique
-media is uncropped and frameless. This refines the same task; weights do not change.
+User testing revision (2026-10-20): visible set table with direct weight/reps
+entry, highlighted current row, pinned Log set action and explicit row undo.
+This supersedes guided swipe cards. RPE/notes/removal stay in row options;
+rest settings and workout notes are secondary. Automatic progression preserves
+actual values, rest timers and local recovery. Technique media stays uncropped
+and frameless. This refines the same task; weights do not change.
 
 Must include:
 

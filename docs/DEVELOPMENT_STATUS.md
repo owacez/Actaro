@@ -4,6 +4,32 @@ Updated: 2026-10-20 (America/Los_Angeles).
 
 ## Overall
 
+Simplified active-workout set table (2026-10-20): **DONE** for implementation/local
+verification; physical-device acceptance **DEFERRED**. `session-screen.tsx` and
+`set-log-row.tsx` replace guided swipe cards with visible inline weight/reps,
+current-row highlighting, row completion/undo and a pinned Log set action.
+Logging advances to the next unfinished set; reviewing a completed row offers
+continuation without logging another row. Optional RPE/notes/removal stay in row
+options; rest settings and workout notes expand separately. Actual values,
+independent rest controls, frozen save retries and guarded draft recovery remain.
+No dependency, schema, API contract or release-weight change (v0.3 polish).
+
+Verification: focused session/row checks **PASS**, six tests. `npm.cmd run check`
+**PASS**: strict TypeScript/lint/format, 350 Jest tests in 67 suites plus six
+dataset tests (**356 total**); gesture-only tests were replaced by table-flow
+coverage. `npm.cmd exec -- expo export --platform web --output-dir .actaro-tools/set-table-export`
+**PASS**, 39 routes. `node --env-file=.env .actaro-tools/check-set-table-browser.mjs`
+**PASS**: seven fictional-data captures/flows covering direct edits, progression,
+undo, add/remove, optional fields, reload recovery and 320px dark/desktop layouts;
+zero live Supabase requests. `node .actaro-tools/check-set-table-artifacts.mjs`
+**PASS**, 86 artifacts exclude the privileged key. README, canonical set-logging
+spec/plan and APP_TEST_PLAN C10/C11 describe the revised flow.
+
+Next three acceptance actions: on iPhone, edit weight/reps with the numeric
+keyboard and log consecutive sets; check rest/undo and row options; save a draft,
+reopen and finish it. No implementation blocker; these device checks remain
+deferred with the user's wider acceptance pass. Release approval is unchanged.
+
 Daily-target calculator and simplified body records (2026-10-20): **DONE** for
 implementation/local verification. Manual targets remain available without extra body-data
 reads. The local 2023 DRI adult maintenance estimator prefills saved age and

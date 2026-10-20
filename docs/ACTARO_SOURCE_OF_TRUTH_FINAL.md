@@ -529,17 +529,16 @@ Support:
 
 ## 9.4 Set Logging
 
-Fast set logging (user testing revision, 2026-10-18):
+Fast set logging (user testing revision, 2026-10-20; supersedes guided swipe cards):
 
 - Planned sets, reps and load remain prefilled from the workout.
-- Show one planned set card at a time. Swipe the whole card left to log; swipe right to undo. This supersedes the earlier right-to-log direction.
-- Logging advances to the next unfinished set. From a ready card, right swipe undoes the most recently logged set and returns to it; a selected completed card undoes that set. Undo preserves the planned row.
-- Set progress bars below the technique/description change color after logging and let users revisit any set. Show all sets reveals the complete list; it stays hidden by default.
-- Tapping the card opens its actual-value editor. Keep explicit edit/log/undo buttons for accessibility and non-touch use.
-- Accessible buttons offer the same actions. Repeated log gestures must not toggle a completed set off.
-- The card follows a deliberate horizontal drag, tolerates small vertical/release drift and cancels when pulled back near its starting point. Undo must never finish or leave the workout.
-- Native back and in-app back offer Save as draft, Discard workout and Continue workout. Saving waits for device storage, pauses clocks and preserves performed sets without finishing the session. Failed storage keeps the screen open. Reserve native back for the screen edge so it cannot compete with card undo.
-- Edit exposes actual reps/load, optional RPE/notes and removal; Add set remains available. Explicit removal is separate from undoing completion.
+- Show all sets in a compact Set / Weight (preferred unit) / Reps table. Tap a number to replace it directly; no editor is required for basic logging.
+- Highlight the current/selected row. The pinned Log set action completes it and advances to the next unfinished set. Row check buttons log or undo that specific set.
+- Set progress bars and row numbers select any set. Logged rows stay visible. Selecting a completed row never logs another row or leaves the workout.
+- Undo preserves actual values and the planned row. Completing all sets offers the next exercise or Finish workout; it never finishes automatically.
+- Row options expose optional RPE/notes and removal. Add set remains available. Rest and workout notes expands secondary settings.
+- Keep previous performance for the selected set, independent rest controls, gym-friendly tap targets and accessible numeric fields. Blank load means unknown; zero means no added external load.
+- Native back and in-app back offer Save as draft, Discard workout and Continue workout. Saving waits for device storage, pauses clocks and preserves performed sets without finishing the session. Failed storage keeps the screen open.
 - Workout history opens on a month calendar marked from completed sessions. History opens the detailed searchable list and its edit/delete controls.
 
 The detailed fields remain available:
@@ -569,7 +568,8 @@ Compact technique image
 Exercise name + muscle/equipment
 Previous performance
 Best performance / PR
-Current set card + set progress; Show all sets when needed
+Set progress + compact editable set table
+Pinned Log set action; secondary set options
 Rest timer when active
 Previous / Next exercise
 Finish workout

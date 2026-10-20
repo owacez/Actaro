@@ -52,7 +52,6 @@ test('Log Only completes sets, controls independent rest and preserves frozen fa
   );
   await screen.findByRole('button', { name: 'Complete set 1' });
   expect(screen.queryByRole('button', { name: 'Pause workout timer' })).toBeNull();
-  await fireEvent.press(screen.getByRole('button', { name: 'Edit set 1' }));
   await fireEvent.changeText(screen.getByLabelText('Reps · set 1'), '10');
   await fireEvent.press(screen.getByRole('button', { name: 'Complete set 1' }));
   await screen.findByText('1:30');
@@ -97,7 +96,7 @@ test('pause/resume, add/remove, empty completion and cancellation remain real ac
   await waitFor(() => expect(store.discard).toHaveBeenCalledWith(sessionOwner));
 });
 
-test('three planned sets advance one at a time, support undo, and expand only on request', async () => {
+test('all planned rows stay visible, inline edits validate, primary logging advances and undo never leaves', async () => {
   jest.spyOn(Date, 'now').mockReturnValue(Date.now());
   const fixture = sessionFixture();
   fixture.exercises[0].sets = [1, 2, 3].map((number) => ({
@@ -111,39 +110,45 @@ test('three planned sets advance one at a time, support undo, and expand only on
     </FeedbackTestRoot>,
   );
   await screen.findByRole('button', { name: 'Complete set 1' });
-  expect(screen.queryByRole('button', { name: 'Complete set 2' })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Complete set 2' })).toBeTruthy();
   expect(screen.getByText('0 of 3 sets logged')).toBeTruthy();
-  await fireEvent.press(screen.getByRole('button', { name: 'Edit set 1' }));
   await fireEvent.changeText(screen.getByLabelText('Reps · set 1'), '');
-  await fireEvent.press(screen.getByRole('button', { name: 'Complete set 1' }));
-  expect(screen.queryByRole('button', { name: 'Complete set 2' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Log set 1' }));
+  expect(screen.getByRole('button', { name: 'Log set 1' })).toBeTruthy();
   expect(screen.getByText('0 of 3 sets logged')).toBeTruthy();
   await fireEvent.changeText(screen.getByLabelText('Reps · set 1'), '8');
-  await fireEvent.press(screen.getByRole('button', { name: 'Complete set 1' }));
-  await screen.findByRole('button', { name: 'Complete set 2' });
+  await fireEvent.changeText(screen.getByLabelText('Weight (kg) · set 1'), '22.5');
+  await fireEvent.press(screen.getByRole('button', { name: 'Log set 1' }));
+  await screen.findByRole('button', { name: 'Log set 2' });
   expect(screen.getByRole('button', { name: 'View set 1, logged' })).toBeTruthy();
   expect(screen.getByText('1 of 3 sets logged')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Undo last set' }));
-  await screen.findByRole('button', { name: 'Complete set 1' });
+  await screen.findByRole('button', { name: 'Log set 1' });
   expect(screen.getByText('0 of 3 sets logged')).toBeTruthy();
   expect(onBack).not.toHaveBeenCalled();
   expect(mockDispatch).not.toHaveBeenCalled();
   expect(service.save).not.toHaveBeenCalled();
   for (const number of [1, 2, 3]) {
-    await fireEvent.press(screen.getByRole('button', { name: `Complete set ${number}` }));
+    await fireEvent.press(screen.getByRole('button', { name: `Log set ${number}` }));
   }
   expect(screen.getByText('3 of 3 sets logged')).toBeTruthy();
   expect(screen.getByRole('button', { name: 'Unmark set 3' })).toBeTruthy();
-  expect(screen.queryByRole('button', { name: 'Unmark set 1' })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Unmark set 1' })).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'View set 1, logged' }));
   expect(screen.getByRole('button', { name: 'Unmark set 1' })).toBeTruthy();
-  await fireEvent.press(screen.getByRole('button', { name: 'Show all sets' }));
+  expect(screen.getByRole('button', { name: 'Finish workout' })).toBeTruthy();
+  await screen.findByRole('button', { name: 'Select set 1, logged' });
+  await fireEvent.press(screen.getByRole('button', { name: 'Select set 1, logged' }));
   for (const number of [1, 2, 3])
     expect(screen.getByRole('button', { name: `Unmark set ${number}` })).toBeTruthy();
-  await fireEvent.press(screen.getByRole('button', { name: 'Hide other sets' }));
-  expect(screen.queryByRole('button', { name: 'Unmark set 2' })).toBeNull();
   const saved = store.write.mock.calls.at(-1)?.[0];
   expect(saved?.exercises[0].sets.map((set) => !!set.completedAt)).toEqual([true, true, true]);
+  expect(saved?.exercises[0].sets[0].weight).toBe('22.5');
+  await fireEvent.press(screen.getByRole('button', { name: 'Unmark set 1' }));
+  await screen.findByRole('button', { name: 'Log set 1' });
+  await fireEvent.press(screen.getByRole('button', { name: 'View set 3, logged' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Continue to set 1' }));
+  expect(screen.getByRole('button', { name: 'Log set 1' })).toBeTruthy();
 });
 
 test('system back opens a choice, cancel stays, and saving a draft waits for local acknowledgement', async () => {

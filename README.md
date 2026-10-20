@@ -422,22 +422,23 @@ exercise/working-set preview with an explicit duration estimate. **Start Workout
 then offers **Timed Workout** or **Log Only**. Both open the dedicated set logger.
 Search results and Exercise Detail also offer **Log exercise** without a template.
 
-One set card appears at a time. Swipe **left to log**, **right to undo**, or use
-the completion button. Logging advances to the next unfinished set; swiping right
-from a ready card returns to and undoes the last logged set. Tap the card to edit.
-Progress bars show each set's status and let you revisit it; **Show all sets**
-reveals the full list. Planned reps/load are prefilled. **Edit set** exposes actual reps/load,
-RPE/notes and removal; **Add set** remains available. Blank weight means unknown;
-zero means no added external load. The independent rest timer starts after logging; pause/resume, skip and
-±15 seconds work in both modes. Only Timed has a total duration timer.
+The set table shows planned **weight** and **reps** for every set. Tap either
+number to replace it; the current row is highlighted. **Log set** stays at the
+bottom and advances to the next unfinished set. Row check buttons log/undo that
+specific set; undo preserves the entered values. Progress bars and set numbers
+select a row. Its options button opens optional RPE, notes and removal;
+**Add set** copies the last targets. **Rest and workout notes** expands secondary
+settings. Blank weight means unknown; zero means no added external load. Rest
+starts after logging, with pause/resume, skip and ±15 seconds controls.
+Only Timed has a total duration timer. All sets logged offers the next exercise
+or Finish workout; completion never finishes or leaves automatically.
 
 The active draft is saved under your account on this device. **Resume saved
 workout** recovers it. In-app back or native back offers **Save as draft**,
 **Discard workout** or **Continue workout**. Saving a draft waits for local
 storage and pauses clocks; failures keep the workout open. It does not finish
-or upload the session. On iPhone, start navigation back at the screen edge;
-swiping within the card only logs/undoes a set. Small vertical/release drift is
-tolerated; pulling the card back near the center cancels the swipe.
+or upload the session. On iPhone, start navigation back at the screen edge.
+Set logging uses direct inputs and buttons without competing swipe gestures.
 Expo Router 57's web browser-history Back can bypass the dialog; automatic local
 draft recovery still applies. Use the in-app back link for the three choices.
 Finish saves only completed

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AppState, Pressable, ScrollView, View } from 'react-native';
+import { AppState, Keyboard, Pressable, ScrollView, View } from 'react-native';
 import { randomUUID } from 'expo-crypto';
 import { useNavigation } from 'expo-router';
 import { usePreventRemove, type NavigationAction } from 'expo-router/react-navigation';
@@ -38,6 +38,7 @@ import {
 import { sessionStore } from './session-store';
 import { sessionService } from './session-service';
 import { exerciseRecords, trainingVolume } from './training-metrics';
+import { actaroLayout } from '@/constants/actaro-theme';
 
 function FinishWorkoutButton({
   busy,
@@ -70,6 +71,18 @@ function SaveDraftButton({
   );
 }
 
+function LogSetButton({ number, onLog }: { number: number; onLog: (time: number) => void }) {
+  return (
+    <AuthButton
+      title={`Log set ${number}`}
+      onPress={() => {
+        Keyboard.dismiss();
+        onLog(Date.now());
+      }}
+    />
+  );
+}
+
 export function SessionScreen({ userId, onBack }: { userId: string; onBack: () => void }) {
   const [draft, setDraft] = useState<SessionDraft | null>(null),
     current = useRef<SessionDraft | null>(null);
@@ -81,7 +94,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
     [index, setIndex] = useState(0),
     [query, setQuery] = useState(0),
     [now, setNow] = useState(Date.now);
-  const [showAllSets, setShowAllSets] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
   const [focusedSet, setFocusedSet] = useState<{ exerciseId: string; setId: string } | null>(null);
   const [exitOpen, setExitOpen] = useState(false),
     [exitApproved, setExitApproved] = useState(false),
@@ -332,7 +345,6 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
         : last,
     -1,
   );
-  const undoSet = exercise.sets[activeSet].completedAt ? activeSet : lastLoggedSet;
   const remaining = draft.rest ? Math.max(0, draft.restDuration - elapsed(draft.rest, now)) : 0;
   const summary = draft.status === 'saved' ? sessionPayload(draft) : null;
   const totals = summary
@@ -505,17 +517,44 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
                 ' OF ' +
                 String(draft.exercises.length)
           }
-          action={
-            !summary && draft.status === 'active' ? (
-              <FinishWorkoutButton busy={busy} onFinish={finish} />
-            ) : undefined
-          }
         />
       }
       footer={
-        !summary && draft.status === 'active' && draft.rest ? (
-          <NavigationSurface style={{ paddingHorizontal: 20, paddingBottom: 12 }}>
+        !summary && draft.status === 'active' ? (
+          <NavigationSurface
+            style={{
+              width: '100%',
+              maxWidth: actaroLayout.contentWidth,
+              alignSelf: 'center',
+              paddingHorizontal: 20,
+              paddingBottom: 12,
+              gap: 6,
+            }}
+          >
             {restPanel}
+            {exercise.sets[activeSet].completedAt ? (
+              firstReady >= 0 ? (
+                <AuthButton
+                  title={`Continue to set ${firstReady + 1}`}
+                  onPress={() =>
+                    setFocusedSet({ exerciseId: exercise.id, setId: exercise.sets[firstReady].id })
+                  }
+                />
+              ) : index < draft.exercises.length - 1 ? (
+                <AuthButton title="Next exercise" onPress={() => setIndex((value) => value + 1)} />
+              ) : (
+                <FinishWorkoutButton busy={busy} onFinish={finish} />
+              )
+            ) : (
+              <LogSetButton number={activeSet + 1} onLog={(time) => done(activeSet, time, true)} />
+            )}
+            {firstReady >= 0 || index < draft.exercises.length - 1 ? (
+              <AuthLink
+                title="Finish workout"
+                disabled={busy}
+                onPress={() => void finish(Date.now())}
+              />
+            ) : null}
           </NavigationSurface>
         ) : undefined
       }
@@ -647,7 +686,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
           />
           <AuthText kind="heading">{exercise.name}</AuthText>
           <AuthText>{exercise.metadata}</AuthText>
-          <AuthText>
+          <AuthText kind="muted">
             Best load:{' '}
             {exercise.performance.heaviestKg === null
               ? 'No recorded load'
@@ -680,91 +719,88 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
             <AuthText kind="eyebrow">
               {loggedSets} of {exercise.sets.length} sets logged
             </AuthText>
-            <AuthLink
-              title={showAllSets ? 'Hide other sets' : 'Show all sets'}
-              onPress={() => setShowAllSets((value) => !value)}
-            />
+            {lastLoggedSet >= 0 && (
+              <AuthLink title="Undo last set" onPress={() => done(lastLoggedSet, now, false)} />
+            )}
           </View>
-          <AuthText>Swipe left to log. Right to undo. Tap the card to edit.</AuthText>
+          <View
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 8 }}
+          >
+            <View style={{ width: 36 }}>
+              <AuthText kind="muted">Set</AuthText>
+            </View>
+            <View style={{ flex: 1, alignItems: 'center' }}>
+              <AuthText kind="muted">
+                {draft.unit === 'kg' ? 'Weight · kg' : 'Weight · lb'}
+              </AuthText>
+            </View>
+            <View style={{ flex: 1, alignItems: 'center' }}>
+              <AuthText kind="muted">Reps</AuthText>
+            </View>
+            <View style={{ width: 44 }} />
+          </View>
           {loggedSets === exercise.sets.length && (
             <AuthText>
               All sets logged. Continue to the next exercise or finish your workout.
             </AuthText>
           )}
-          {!showAllSets && undoSet >= 0 && (
-            <AuthLink title="Undo last set" onPress={() => done(undoSet, now, false)} />
-          )}
-          {exercise.sets.map(
-            (set, position) =>
-              (showAllSets || position === activeSet) && (
-                <SetLogRow
-                  key={set.id}
-                  number={position + 1}
-                  reps={set.reps}
-                  weight={set.weight}
-                  unit={draft.unit}
-                  completed={!!set.completedAt}
-                  undoAvailable={showAllSets ? !!set.completedAt : undoSet >= 0}
-                  previous={
-                    exercise.performance.previous[position]
-                      ? exercise.performance.previous[position].reps +
-                        ' x ' +
-                        (displayWeight(
-                          exercise.performance.previous[position].weightKg,
-                          draft.unit,
-                        ) || '?') +
-                        ' ' +
-                        draft.unit
-                      : 'No previous set'
-                  }
-                  onLog={() => {
-                    done(position, Date.now(), true);
-                  }}
-                  onUndo={() => {
-                    done(showAllSets ? position : undoSet, Date.now(), false);
-                  }}
-                >
-                  {(['weight', 'reps', 'rpe', 'notes'] as const).map((field) => (
-                    <AuthInput
-                      key={field}
-                      label={
-                        field === 'weight'
-                          ? `Weight (${draft.unit}) · set ${position + 1}`
-                          : field === 'reps'
-                            ? `Reps · set ${position + 1}`
-                            : field.toUpperCase() + ' · set ' + (position + 1)
-                      }
-                      value={set[field]}
-                      keyboardType={
-                        field === 'weight' || field === 'rpe'
-                          ? 'decimal-pad'
-                          : field === 'reps'
-                            ? 'number-pad'
-                            : 'default'
-                      }
-                      onChangeText={(value) => setField(position, field, value)}
-                    />
-                  ))}
-                  <AuthLink
-                    title={`Remove set ${position + 1}`}
-                    disabled={exercise.sets.length === 1}
-                    onPress={() =>
-                      change((value) => ({
-                        ...value,
-                        exercises: value.exercises.map((entry, at) =>
-                          at === index
-                            ? {
-                                ...entry,
-                                sets: entry.sets.filter((_, place) => place !== position),
-                              }
-                            : entry,
-                        ),
-                      }))
-                    }
-                  />
-                </SetLogRow>
-              ),
-          )}
+          {exercise.sets.map((set, position) => (
+            <SetLogRow
+              key={set.id}
+              number={position + 1}
+              reps={set.reps}
+              weight={set.weight}
+              unit={draft.unit}
+              completed={!!set.completedAt}
+              selected={position === activeSet}
+              onSelect={() => setFocusedSet({ exerciseId: exercise.id, setId: set.id })}
+              onChange={(field, value) => setField(position, field, value)}
+              previous={
+                exercise.performance.previous[position]
+                  ? exercise.performance.previous[position].reps +
+                    ' x ' +
+                    (displayWeight(exercise.performance.previous[position].weightKg, draft.unit) ||
+                      '?') +
+                    ' ' +
+                    draft.unit
+                  : 'No previous set'
+              }
+              onLog={() => {
+                done(position, Date.now(), true);
+              }}
+              onUndo={() => {
+                done(position, Date.now(), false);
+              }}
+            >
+              {(['rpe', 'notes'] as const).map((field) => (
+                <AuthInput
+                  key={field}
+                  label={field.toUpperCase() + ' · set ' + (position + 1)}
+                  value={set[field]}
+                  keyboardType={field === 'rpe' ? 'decimal-pad' : 'default'}
+                  maxLength={field === 'rpe' ? 4 : 2000}
+                  onChangeText={(value) => setField(position, field, value)}
+                />
+              ))}
+              <AuthLink
+                title={`Remove set ${position + 1}`}
+                disabled={exercise.sets.length === 1}
+                onPress={() =>
+                  change((value) => ({
+                    ...value,
+                    exercises: value.exercises.map((entry, at) =>
+                      at === index
+                        ? {
+                            ...entry,
+                            sets: entry.sets.filter((_, place) => place !== position),
+                          }
+                        : entry,
+                    ),
+                  }))
+                }
+              />
+            </SetLogRow>
+          ))}
           <AuthButton
             title="Add set"
             outlined
@@ -794,29 +830,37 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
               setFocusedSet({ exerciseId: exercise.id, setId });
             }}
           />
-          <AuthInput
-            label="Rest after a set (seconds)"
-            value={exercise.sets[0].rest}
-            keyboardType="number-pad"
-            maxLength={4}
-            onChangeText={(rest) =>
-              change((value) => ({
-                ...value,
-                exercises: value.exercises.map((entry, at) =>
-                  at === index
-                    ? { ...entry, sets: entry.sets.map((set) => ({ ...set, rest })) }
-                    : entry,
-                ),
-              }))
-            }
+          <AuthLink
+            title={showOptions ? 'Hide workout options' : 'Rest and workout notes'}
+            onPress={() => setShowOptions((value) => !value)}
           />
-          <AuthInput
-            label="Workout note (optional)"
-            multiline
-            maxLength={2000}
-            value={draft.notes}
-            onChangeText={(notes) => change((value) => ({ ...value, notes }))}
-          />
+          {showOptions && (
+            <>
+              <AuthInput
+                label="Rest after a set (seconds)"
+                value={exercise.sets[0].rest}
+                keyboardType="number-pad"
+                maxLength={4}
+                onChangeText={(rest) =>
+                  change((value) => ({
+                    ...value,
+                    exercises: value.exercises.map((entry, at) =>
+                      at === index
+                        ? { ...entry, sets: entry.sets.map((set) => ({ ...set, rest })) }
+                        : entry,
+                    ),
+                  }))
+                }
+              />
+              <AuthInput
+                label="Workout note (optional)"
+                multiline
+                maxLength={2000}
+                value={draft.notes}
+                onChangeText={(notes) => change((value) => ({ ...value, notes }))}
+              />
+            </>
+          )}
           <View style={authStyles.choices}>
             <AuthButton
               title="Previous exercise"
