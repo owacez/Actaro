@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import { FoodPortionScreen } from '@/features/nutrition/food-screen';
 import { CustomFoodScreen, RecipeScreen } from '@/features/nutrition/food-edit-screen';
 import { TargetsScreen } from '@/features/nutrition/targets-screen';
+import { bodyService } from '@/features/body/body-service';
 import { DiaryScreen } from '@/features/nutrition/diary-screen';
 import { nutritionService } from '@/features/nutrition/nutrition-service';
 import { FeedbackTestRoot } from './helpers/feedback-root';
@@ -10,6 +11,9 @@ import { nutritionContext, nutritionFood, nutritionOwner } from './helpers/nutri
 jest.mock('expo-crypto', () => ({ randomUUID: () => '04000000-0000-4000-8000-000000000009' }));
 jest.mock('expo-router', () => ({ useFocusEffect: jest.fn() }));
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
+jest.mock('@/features/body/body-service', () => ({
+  bodyService: { form: jest.fn(), saveForm: jest.fn() },
+}));
 jest.mock('@/features/nutrition/nutrition-service', () => ({
   nutritionService: {
     context: jest.fn(),
@@ -41,6 +45,39 @@ beforeEach(() => {
   service.search.mockResolvedValue([nutritionFood()]);
   service.log.mockResolvedValue(undefined);
   service.recipe.mockResolvedValue(undefined);
+  jest.mocked(bodyService.form).mockResolvedValue({
+    profile: {
+      id: nutritionOwner,
+      display_name: null,
+      sex: 'male',
+      date_of_birth: '1996-10-13',
+      location: null,
+      created_at: '',
+      updated_at: '',
+    },
+    preferences: nutritionContext().preferences,
+    day: '2026-10-13',
+    today: '2026-10-13',
+    weight: {
+      user_id: nutritionOwner,
+      local_date: '2026-10-12',
+      weight_kg: 80,
+      time_zone: 'UTC',
+      notes: null,
+      created_at: '',
+      updated_at: '',
+    },
+    height: {
+      user_id: nutritionOwner,
+      measurement: 'height',
+      local_date: '2026-09-01',
+      value_cm: 180,
+      time_zone: 'UTC',
+      notes: null,
+      created_at: '',
+      updated_at: '',
+    },
+  });
 });
 test('portion changes update live totals; failed save locks inputs and retries the original request', async () => {
   service.log.mockRejectedValueOnce(new Error('offline'));
@@ -150,6 +187,7 @@ test('targets validate before writing and kJ values normalize to kcal', async ()
     </FeedbackTestRoot>,
   );
   await screen.findByLabelText('Energy (kJ)');
+  expect(bodyService.form).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Save daily targets' }));
   expect(service.targets).not.toHaveBeenCalled();
   for (const [label, value] of [
@@ -163,6 +201,103 @@ test('targets validate before writing and kJ values normalize to kcal', async ()
   await fireEvent.press(screen.getByRole('button', { name: 'Save daily targets' }));
   await waitFor(() => expect(service.targets).toHaveBeenCalled());
   expect(service.targets.mock.calls[0][1].calories).toBeCloseTo(100);
+});
+test('calculation prefills saved imperial body details, preserves water, reviews before saving and converts kJ correctly', async () => {
+  const preferences = {
+    ...nutritionContext().preferences,
+    weight_unit: 'lb',
+    length_unit: 'in',
+    energy_unit: 'kJ' as const,
+  };
+  service.context.mockResolvedValue({ ...nutritionContext(), preferences });
+  const body = await bodyService.form(nutritionOwner);
+  jest.mocked(bodyService.form).mockClear().mockResolvedValue(body);
+  await render(
+    <FeedbackTestRoot>
+      <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByLabelText('Water (ml)');
+  await fireEvent.changeText(screen.getByLabelText('Water (ml)'), '1800');
+  await fireEvent.press(screen.getByRole('button', { name: 'Calculate from my details' }));
+  await screen.findByLabelText('Age (years)');
+  expect(screen.getByLabelText('Age (years)').props.value).toBe('30');
+  expect(Number(screen.getByLabelText('Calculation weight (lb)').props.value)).toBeCloseTo(
+    176.37,
+    2,
+  );
+  expect(Number(screen.getByLabelText('Calculation height (in)').props.value)).toBeCloseTo(
+    70.866,
+    2,
+  );
+  expect(screen.getByText('Saved weight: 2026-10-12 · Saved height: 2026-09-01')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Inactive' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Generate targets' }));
+  expect(screen.getByText(/Confirm the general adult/)).toBeTruthy();
+  expect(service.targets).not.toHaveBeenCalled();
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'This general adult estimate applies to me' }),
+  );
+  await fireEvent.press(screen.getByRole('button', { name: 'Generate targets' }));
+  expect(Number(screen.getByLabelText('Energy (kJ)').props.value)).toBeCloseTo(11506);
+  expect(screen.getByLabelText('Water (ml)').props.value).toBe('1800');
+  expect(service.targets).not.toHaveBeenCalled();
+  expect(bodyService.saveForm).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit calculation' }));
+  expect(screen.getByLabelText('Age (years)').props.value).toBe('30');
+  expect(bodyService.form).toHaveBeenCalledTimes(1);
+  await fireEvent.press(screen.getByRole('button', { name: 'Generate targets' }));
+  await fireEvent.changeText(screen.getByLabelText('Energy (kJ)'), '10460');
+  await fireEvent.press(screen.getByRole('button', { name: 'Save daily targets' }));
+  await waitFor(() =>
+    expect(service.targets).toHaveBeenCalledWith(nutritionOwner, {
+      calories: 2500,
+      protein: 138,
+      carbs: 344,
+      fat: 92,
+      water_ml: 1800,
+    }),
+  );
+});
+test('missing body inputs are entered in the calculator without guessing profile data or writing it', async () => {
+  const body = await bodyService.form(nutritionOwner);
+  jest
+    .mocked(bodyService.form)
+    .mockClear()
+    .mockResolvedValue({
+      ...body,
+      weight: null,
+      height: null,
+      profile: { ...body.profile, sex: 'prefer_not_to_say', date_of_birth: null },
+    });
+  await render(
+    <FeedbackTestRoot>
+      <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByLabelText('Energy (kcal)');
+  await fireEvent.press(screen.getByRole('button', { name: 'Calculate from my details' }));
+  await screen.findByLabelText('Age (years)');
+  expect(screen.getByLabelText('Age (years)').props.value).toBe('');
+  expect(screen.getByRole('button', { name: 'Male equation' })).toHaveProp(
+    'accessibilityState',
+    expect.objectContaining({ selected: false }),
+  );
+  for (const [field, value] of [
+    ['Age (years)', '30'],
+    ['Calculation weight (kg)', '80'],
+    ['Calculation height (cm)', '180'],
+  ])
+    await fireEvent.changeText(screen.getByLabelText(field), value);
+  await fireEvent.press(screen.getByRole('button', { name: 'Female equation' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Inactive' }));
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'This general adult estimate applies to me' }),
+  );
+  await fireEvent.press(screen.getByRole('button', { name: 'Generate targets' }));
+  expect(screen.getByLabelText('Energy (kcal)').props.value).toBe('2350');
+  expect(bodyService.saveForm).not.toHaveBeenCalled();
+  expect(service.targets).not.toHaveBeenCalled();
 });
 test('diary shows all four empty groups and hydration validates before logging', async () => {
   service.water.mockResolvedValue(undefined);

@@ -659,6 +659,17 @@ Avoid fake 0–100 precision.
 
 ## 11.1 Daily Targets
 
+User revision (2026-10-20): offer manual entry or a deterministic maintenance
+estimate using the 2023 adult DRI Estimated Energy Requirement equations.
+Prefill saved age/weight/height and show source dates. Missing inputs can be
+entered locally; a shared personal-details editor can save height, sex, birth
+date and location explicitly. Generation makes no write. Review/edit targets
+before Save; water remains user-set. A 20/50/30 protein/carbohydrate/fat split is
+an editable starting default within adult reference ranges, not individualized
+macro requirements. Keep manual entry for unsupported cases. Do not use BMI as
+a calorie-needs equation or silently apply weight-loss/gain adjustments.
+See `docs/TARGET_CALCULATION.md` for sources, bounds and calculation behavior.
+
 - Calories
 - Protein
 - Carbohydrates
@@ -922,6 +933,13 @@ Habits are actions users record; goals calculate progress from saved records.
 # 14. Progress & Analytics
 
 ## 14.1 Body
+
+User revision (2026-10-20) supersedes the unified daily form below: open on a
+dated weigh-in with an optional note. Height, sex, birth date and location live
+in a separate explicit personal-details editor, reused by the target calculator.
+Daily weight saves never update these details. Reuse the latest saved height;
+do not create another height record when it is unchanged. Keep history collapsed
+by default and retain measurement/history editing/deletion behind their controls.
 
 - Weight
 - Body measurements

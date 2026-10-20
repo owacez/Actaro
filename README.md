@@ -492,6 +492,15 @@ water goals. Energy follows your kcal/kJ preference. Changes take effect from
 today in your saved time zone; previous diary dates retain their earlier goals.
 Logging is available without setting targets.
 
+Choose **Enter manually** or **Calculate from my details**. Calculation uses the
+[2023 DRI adult maintenance equations](docs/TARGET_CALCULATION.md), prefilling
+age and your latest saved weight/height. Enter missing values locally or use
+**Edit saved personal details** to retain height, sex and birthday. Select usual
+activity and confirm applicability. **Generate targets** opens an editable
+preview; it does not save anything. Review energy/macros, enter your own water
+goal, then **Save daily targets**. Manual entry stays available for all users;
+the general calculator supports adults 19+ who are not pregnant/breastfeeding.
+
 Choose a diary date and **Add to Breakfast/Lunch/Dinner/Snacks**. Search the imported
 USDA catalog or choose Recent, Frequent, Favorites, Custom or Recipes. Select the
 food, its exact preparation/label and a serving unit. Enter a quantity or use the
@@ -567,9 +576,10 @@ refresh action; no sample health data is shown.
 - Body records store kg/cm and daily activity stores steps/km, displaying your
   saved unit preferences. Saving the same date/measurement replaces its value.
   Edit/delete recorded entries from history; goals recalculate from the records.
-  The main body form combines weight, height, optional sex/date of birth and
-  city/country. Weight/height use the log date; other fields stay on your private
-  profile. Blank measurements preserve existing dated values. Save is atomic.
+  The main body form is a dated weigh-in with an optional note. **Edit personal
+  details** separately manages height, sex, birthday and city/country. Daily
+  weight saves never change them. Latest height is reused and only logged again
+  when changed. **View history** opens dated records and their edit/delete controls.
   **Add another measurement** retains named measurements without primary tabs.
 - Today habits have visible **Mark done** / **Mark today done** buttons and
   an in-place amount/minutes/count editor. Weekly habits count distinct days,

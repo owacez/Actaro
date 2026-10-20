@@ -5,6 +5,7 @@ import { activityService } from '@/features/activity/activity-service';
 import { bodyService } from '@/features/body/body-service';
 import { goalService } from '@/features/goals/goal-service';
 import { nutritionContext } from './helpers/nutrition-fixture';
+import { profileService } from '@/features/profile/profile-service';
 const owner = '05000000-0000-4000-8000-000000000001',
   user: User = {
     id: owner,
@@ -62,6 +63,46 @@ test('body values normalize to canonical units and invalid forms remain correcta
   await expect(
     bodyService.save(owner, 'weight', '2026-10-14', 'no', 'kg', 'UTC', '', ''),
   ).rejects.toMatchObject({ retryable: false });
+});
+test('body form reuses latest saved height, and only the calculator opts into latest weight', async () => {
+  const prefs = jest
+    .spyOn(profileService, 'getPreferences')
+    .mockResolvedValue(nutritionContext().preferences);
+  const profile = jest.spyOn(profileService, 'getProfile').mockResolvedValue({
+    id: owner,
+    display_name: null,
+    sex: 'male',
+    date_of_birth: '1996-01-01',
+    location: null,
+    created_at: '',
+    updated_at: '',
+  });
+  mockFetch.mockImplementation(async () => response([]));
+  try {
+    await bodyService.form(owner, undefined, { latestWeight: true });
+    const requests = mockFetch.mock.calls.map(([url]) => new URL(String(url)));
+    expect(requests).toHaveLength(2);
+    for (const request of requests) {
+      expect(request.searchParams.get('user_id')).toBe('eq.' + owner);
+      expect(request.searchParams.get('local_date')).toMatch(/^lte\./);
+      expect(request.searchParams.get('order')).toBe('local_date.desc');
+      expect(request.searchParams.get('limit')).toBe('1');
+    }
+    mockFetch.mockClear();
+    await bodyService.form(owner, '2026-10-01');
+    const weight = new URL(
+      String(mockFetch.mock.calls.find(([url]) => String(url).includes('/body_weights'))?.[0]),
+    );
+    expect(weight.searchParams.get('local_date')).toBe('eq.2026-10-01');
+    const height = new URL(
+      String(mockFetch.mock.calls.find(([url]) => String(url).includes('/body_measurements'))?.[0]),
+    );
+    expect(height.searchParams.get('local_date')).toMatch(/^lte\./);
+    expect(height.searchParams.get('measurement')).toBe('eq.height');
+  } finally {
+    prefs.mockRestore();
+    profile.mockRestore();
+  }
 });
 test('the combined form sends one atomic RPC, checks acknowledgement and blocks an account change', async () => {
   const form = {

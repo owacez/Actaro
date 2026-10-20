@@ -1,16 +1,21 @@
 import { NumberStepper } from '@/components/number-stepper';
 import { ScreenHeader } from '@/components/product-ui';
 import { useCallback, useState } from 'react';
+import { Linking, View } from 'react-native';
 import {
   AuthButton,
+  AuthChoice,
   AuthFrame,
   AuthLink,
   AuthNotice,
   AuthText,
+  authStyles,
 } from '@/features/auth/auth-components';
 import { energy, numeric } from './nutrition-model';
 import { nutritionService } from './nutrition-service';
 import { LoadFeedback, SaveFeedback, useNutritionAction, useNutritionLoad } from './nutrition-ui';
+import { TargetCalculator } from './target-calculator';
+import { targetMacroUrl } from './target-estimate';
 export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () => void }) {
   const load = useCallback(async () => {
     const context = await nutritionService.context(userId),
@@ -22,6 +27,9 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
     [carbs, setCarbs] = useState(''),
     [fat, setFat] = useState(''),
     [water, setWater] = useState('');
+  const [mode, setMode] = useState<'manual' | 'calculated'>('manual'),
+    [reviewing, setReviewing] = useState(false),
+    [generated, setGenerated] = useState(false);
   const onLoaded = useCallback((value: Awaited<ReturnType<typeof load>>) => {
     if (value.targets) {
       const t = value.targets;
@@ -60,56 +68,117 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
   return (
     <AuthFrame header={<ScreenHeader title="Daily targets" />}>
       <AuthLink title="← Nutrition" disabled={action.locked} onPress={onBack} />
-      <AuthText kind="title">Daily targets</AuthText>
       <AuthNotice>
-        Set your own daily targets. These are tracking goals; Actaro does not prescribe calorie
-        intake. Macro targets can differ from label energy totals. Changes apply from today in your
-        saved time zone; previous dates retain their earlier targets.
+        Enter targets yourself or calculate an editable maintenance estimate. Changes apply from
+        today in your saved time zone; previous dates retain their earlier targets.
       </AuthNotice>
       <LoadFeedback {...resource} retry={resource.refresh} />
       {resource.data && !resource.loading && (
         <>
-          <NumberStepper
-            label={`Energy (${resource.data.preferences.energy_unit})`}
-            value={calories}
-            onChange={setCalories}
-            step={10}
-            disabled={action.locked}
-          />
-          <NumberStepper
-            label="Protein (g)"
-            value={protein}
-            onChange={setProtein}
-            step={10}
-            disabled={action.locked}
-          />
-          <NumberStepper
-            label="Carbohydrates (g)"
-            value={carbs}
-            onChange={setCarbs}
-            step={10}
-            disabled={action.locked}
-          />
-          <NumberStepper
-            label="Fat (g)"
-            value={fat}
-            onChange={setFat}
-            step={10}
-            disabled={action.locked}
-          />
-          <NumberStepper
-            label="Water (ml)"
-            value={water}
-            onChange={setWater}
-            step={10}
-            disabled={action.locked}
-          />
-          <AuthButton
-            title="Save daily targets"
-            busy={action.busy}
-            disabled={action.locked}
-            onPress={save}
-          />
+          <View style={authStyles.choices}>
+            <AuthChoice
+              title="Enter manually"
+              selected={mode === 'manual'}
+              disabled={action.locked}
+              onPress={() => setMode('manual')}
+            />
+            <AuthChoice
+              title="Calculate from my details"
+              selected={mode === 'calculated'}
+              disabled={action.locked}
+              onPress={() => {
+                setMode('calculated');
+                setReviewing(false);
+              }}
+            />
+          </View>
+          {mode === 'calculated' && (
+            <View style={{ display: reviewing ? 'none' : 'flex' }}>
+              <TargetCalculator
+                userId={userId}
+                preferences={resource.data.preferences}
+                disabled={action.locked}
+                onGenerated={(values) => {
+                  const preferences = resource.data?.preferences;
+                  if (!preferences) return;
+                  setCalories(String(energy(values.calories, preferences.energy_unit)));
+                  setProtein(String(values.protein));
+                  setCarbs(String(values.carbs));
+                  setFat(String(values.fat));
+                  setGenerated(true);
+                  setReviewing(true);
+                }}
+              />
+            </View>
+          )}
+          {(mode === 'manual' || reviewing) && (
+            <>
+              {generated && (
+                <>
+                  <AuthText kind="heading">Review your targets</AuthText>
+                  <AuthText>
+                    Generated energy estimates maintenance needs, rounded to 50 kcal. Macros start
+                    at 20% protein, 50% carbohydrate and 30% fat; these are editable defaults, not
+                    individually calculated requirements. Water stays as your own goal.
+                  </AuthText>
+                  <AuthLink
+                    title="About the macro starting split"
+                    disabled={action.locked}
+                    onPress={() => void Linking.openURL(targetMacroUrl)}
+                  />
+                  {mode === 'calculated' && (
+                    <AuthButton
+                      title="Edit calculation"
+                      outlined
+                      disabled={action.locked}
+                      onPress={() => setReviewing(false)}
+                    />
+                  )}
+                </>
+              )}
+              <NumberStepper
+                label={`Energy (${resource.data.preferences.energy_unit})`}
+                value={calories}
+                onChange={setCalories}
+                step={10}
+                disabled={action.locked}
+              />
+              <NumberStepper
+                label="Protein (g)"
+                value={protein}
+                onChange={setProtein}
+                step={10}
+                disabled={action.locked}
+              />
+              <NumberStepper
+                label="Carbohydrates (g)"
+                value={carbs}
+                onChange={setCarbs}
+                step={10}
+                disabled={action.locked}
+              />
+              <NumberStepper
+                label="Fat (g)"
+                value={fat}
+                onChange={setFat}
+                step={10}
+                disabled={action.locked}
+              />
+              <NumberStepper
+                label="Water (ml)"
+                value={water}
+                onChange={setWater}
+                step={10}
+                disabled={action.locked}
+              />
+              <AuthButton
+                title="Save daily targets"
+                busy={action.busy}
+                disabled={action.locked}
+                onPress={save}
+              />
+            </>
+          )}
         </>
       )}
       <SaveFeedback action={action} />

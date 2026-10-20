@@ -1,12 +1,12 @@
 import { beforeEach, expect, jest, test } from '@jest/globals';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import { BodyFormEditor } from '@/features/body/body-form';
+import { BodyFormEditor, BodyDetailsEditor } from '@/features/body/body-form';
 import { bodyService } from '@/features/body/body-service';
 import { FeedbackTestRoot } from './helpers/feedback-root';
 import { nutritionContext } from './helpers/nutrition-fixture';
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
 jest.mock('@/features/body/body-service', () => ({
-  bodyService: { form: jest.fn(), saveForm: jest.fn() },
+  bodyService: { form: jest.fn(), saveForm: jest.fn(), save: jest.fn() },
 }));
 const owner = nutritionContext().preferences.user_id;
 const loaded: Awaited<ReturnType<typeof bodyService.form>> = {
@@ -30,17 +30,18 @@ beforeEach(() => {
   jest.clearAllMocks();
   service.form.mockResolvedValue(loaded);
   service.saveForm.mockResolvedValue(undefined);
+  service.save.mockResolvedValue(undefined);
 });
-test('unified body form saves all fields atomically and retains the same request after failure', async () => {
+test('personal details save separately and retain the same request after failure', async () => {
   service.saveForm.mockRejectedValueOnce(new Error('offline'));
   const saved = jest.fn();
   await render(
     <FeedbackTestRoot>
-      <BodyFormEditor userId={owner} onSaved={saved} />
+      <BodyDetailsEditor userId={owner} onSaved={saved} />
     </FeedbackTestRoot>,
   );
-  await screen.findByLabelText('Weight (kg, optional)');
-  await fireEvent.changeText(screen.getByLabelText('Weight (kg, optional)'), '80');
+  await screen.findByLabelText('Height (cm, optional)');
+  expect(screen.queryByLabelText('Weight (kg)')).toBeNull();
   await fireEvent.changeText(screen.getByLabelText('Height (cm, optional)'), '180');
   await fireEvent.press(screen.getByRole('button', { name: 'Female' }));
   await fireEvent.changeText(
@@ -51,10 +52,10 @@ test('unified body form saves all fields atomically and retains the same request
   await fireEvent.press(screen.getByRole('button', { name: 'Choose birth year' }));
   await fireEvent.press(screen.getByRole('button', { name: '1995' }));
   await fireEvent.press(screen.getByRole('button', { name: '1995-01-15' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'Save body details' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Save personal details' }));
   await screen.findByRole('button', { name: 'Retry saved request' });
   expect(saved).not.toHaveBeenCalled();
-  expect(screen.getByLabelText('Weight (kg, optional)').props.value).toBe('80');
+  expect(screen.getByLabelText('Height (cm, optional)').props.value).toBe('180');
   await fireEvent.press(screen.getByRole('button', { name: 'Retry saved request' }));
   await waitFor(() => expect(saved).toHaveBeenCalledTimes(1));
   expect(service.saveForm.mock.calls[1]).toEqual(service.saveForm.mock.calls[0]);
@@ -62,7 +63,7 @@ test('unified body form saves all fields atomically and retains the same request
     owner,
     {
       date: '2026-10-18',
-      weight: '80',
+      weight: '',
       height: '180',
       sex: 'female',
       birthDate: '1995-01-15',
@@ -72,14 +73,15 @@ test('unified body form saves all fields atomically and retains the same request
     loaded.preferences,
   );
 });
-test('changing the log date loads that date’s values and retains unsaved personal details', async () => {
+test('daily logging hides personal inputs and changing date loads only that date’s weight', async () => {
   await render(
     <FeedbackTestRoot>
       <BodyFormEditor userId={owner} onSaved={jest.fn()} />
     </FeedbackTestRoot>,
   );
-  await screen.findByLabelText('Location (city/country, optional)');
-  await fireEvent.changeText(screen.getByLabelText('Location (city/country, optional)'), 'My city');
+  await screen.findByLabelText('Weight (kg)');
+  expect(screen.queryByLabelText('Location (city/country, optional)')).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Female' })).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Body log date: 2026-10-18' }));
   service.form.mockResolvedValue({
     ...loaded,
@@ -95,9 +97,69 @@ test('changing the log date loads that date’s values and retains unsaved perso
     },
   });
   await fireEvent.press(screen.getByRole('button', { name: '2026-10-17' }));
-  await waitFor(() =>
-    expect(screen.getByLabelText('Weight (kg, optional)').props.value).toBe('79'),
+  await waitFor(() => expect(screen.getByLabelText('Weight (kg)').props.value).toBe('79'));
+  await fireEvent.press(screen.getByRole('button', { name: 'Add a note' }));
+  await fireEvent.changeText(
+    screen.getByLabelText('Body record note (optional)'),
+    'Before breakfast',
   );
-  expect(screen.getByLabelText('Location (city/country, optional)').props.value).toBe('My city');
+  await fireEvent.press(screen.getByRole('button', { name: 'Hide note' }));
+  expect(screen.queryByLabelText('Body record note (optional)')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Save weigh-in' }));
+  await waitFor(() =>
+    expect(service.save).toHaveBeenCalledWith(
+      owner,
+      'weight',
+      '2026-10-17',
+      '79',
+      'kg',
+      'UTC',
+      '',
+      'Before breakfast',
+    ),
+  );
+  expect(service.saveForm).not.toHaveBeenCalled();
   expect(service.form).toHaveBeenCalledWith(owner, '2026-10-17');
+});
+test('saving personal details preserves an unsaved weigh-in and does not log unchanged height', async () => {
+  service.form.mockResolvedValue({
+    ...loaded,
+    height: {
+      user_id: owner,
+      measurement: 'height',
+      local_date: '2026-10-01',
+      value_cm: 180,
+      time_zone: 'UTC',
+      notes: null,
+      created_at: '',
+      updated_at: '',
+    },
+  });
+  service.saveForm.mockRejectedValueOnce(new Error('offline'));
+  await render(
+    <FeedbackTestRoot>
+      <BodyFormEditor userId={owner} onSaved={jest.fn()} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByLabelText('Weight (kg)');
+  await fireEvent.changeText(screen.getByLabelText('Weight (kg)'), '80');
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit personal details' }));
+  await screen.findByLabelText('Location (city/country, optional)');
+  await fireEvent.changeText(
+    screen.getByLabelText('Location (city/country, optional)'),
+    'Example City',
+  );
+  await fireEvent.press(screen.getByRole('button', { name: 'Save personal details' }));
+  await screen.findByRole('button', { name: 'Retry saved request' });
+  await fireEvent.press(screen.getByRole('button', { name: 'Dismiss Personal details' }));
+  expect(screen.getByLabelText('Location (city/country, optional)')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Retry saved request' }));
+  await screen.findByLabelText('Weight (kg)');
+  expect(screen.getByLabelText('Weight (kg)').props.value).toBe('80');
+  expect(service.saveForm).toHaveBeenCalledWith(
+    owner,
+    expect.objectContaining({ height: '', weight: '', location: 'Example City' }),
+    loaded.preferences,
+  );
+  expect(service.save).not.toHaveBeenCalled();
 });

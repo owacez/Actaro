@@ -25,6 +25,7 @@ import { formatNumber, nutritionDate } from '@/features/nutrition/nutrition-mode
 import { bodyService, type BodyKind } from './body-service';
 import { unitFactor } from './body-model';
 export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => void }) {
+  const [showHistory, setShowHistory] = useState(false);
   const [kind, setKind] = useState<BodyKind>('measurement'),
     [editOpen, setEditOpen] = useState(false),
     [formVersion, setFormVersion] = useState(0),
@@ -90,7 +91,7 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
   }
   return (
     <AuthFrame header={<ScreenHeader title="Body records" />}>
-      <AuthLink title="← More" disabled={action.locked} onPress={onBack} />
+      <AuthLink title="← You" disabled={action.locked} onPress={onBack} />
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {data && !resource.loading && (
         <>
@@ -159,129 +160,143 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
             />
             <RecordSaveFeedback action={action} />
           </ActionSheet>
-          <AuthText kind="heading">Recorded history</AuthText>
-          <AuthInput
-            label="Body history ending date (YYYY-MM-DD)"
-            value={historyInput || until || data.today}
-            editable={!action.locked}
-            onChangeText={setHistoryInput}
-          />
           <AuthButton
-            title="Open body history dates"
+            title={showHistory ? 'Hide history' : 'View history'}
             outlined
             disabled={action.locked}
-            onPress={() => {
-              try {
-                const day = nutritionDate(historyInput || until || data.today);
-                if (day > data.today) throw new Error('History cannot end in the future.');
-                setUntil(day);
-                setOffset(0);
-              } catch (error) {
-                action.setError(error instanceof Error ? error.message : 'Check the date.');
-              }
-            }}
+            onPress={() => setShowHistory((value) => !value)}
           />
-          {data.weights.map((row) => (
-            <AuthCard key={row.local_date}>
-              <AuthText kind="heading">
-                {row.local_date} ·{' '}
-                {formatNumber(row.weight_kg * unitFactor(data.preferences.weight_unit))}{' '}
-                {data.preferences.weight_unit}
-              </AuthText>
-              {row.notes && <AuthText>{row.notes}</AuthText>}
-              <AuthLink
-                title={`Edit weight ${row.local_date}`}
-                disabled={action.locked}
-                onPress={() => {
-                  setKind('weight');
-                  setEditOpen(true);
-                  setDate(row.local_date);
-                  setValue(String(row.weight_kg * unitFactor(data.preferences.weight_unit)));
-                  setNotes(row.notes ?? '');
-                }}
+          {showHistory && (
+            <>
+              <AuthText kind="heading">Recorded history</AuthText>
+              <AuthInput
+                label="Body history ending date (YYYY-MM-DD)"
+                value={historyInput || until || data.today}
+                editable={!action.locked}
+                onChangeText={setHistoryInput}
               />
-              <AuthLink
-                title={`Delete weight ${row.local_date}`}
-                disabled={action.locked}
-                onPress={() => setRemove({ kind: 'weight', date: row.local_date, name: '' })}
-              />
-            </AuthCard>
-          ))}
-          {data.measurements.map((row) => (
-            <AuthCard key={row.measurement + row.local_date}>
-              <AuthText kind="heading">
-                {row.local_date} · {row.measurement}:{' '}
-                {formatNumber(row.value_cm * unitFactor(data.preferences.length_unit))}{' '}
-                {data.preferences.length_unit}
-              </AuthText>
-              {row.notes && <AuthText>{row.notes}</AuthText>}
-              <AuthLink
-                title={`Edit ${row.measurement} ${row.local_date}`}
-                disabled={action.locked}
-                onPress={() => {
-                  setDate(row.local_date);
-                  setKind('measurement');
-                  setEditOpen(true);
-                  setName(row.measurement);
-                  setValue(String(row.value_cm * unitFactor(data.preferences.length_unit)));
-                  setNotes(row.notes ?? '');
-                }}
-              />
-              <AuthLink
-                title={`Delete ${row.measurement} ${row.local_date}`}
-                disabled={action.locked}
-                onPress={() =>
-                  setRemove({ kind: 'measurement', date: row.local_date, name: row.measurement })
-                }
-              />
-            </AuthCard>
-          ))}
-          {data.weights.length === 0 && data.measurements.length === 0 && (
-            <AuthNotice>No body records in this page. Log a value to begin.</AuthNotice>
-          )}
-          {remove && (
-            <AuthCard>
-              <AuthText>
-                Delete {remove.kind === 'weight' ? 'weight' : remove.name} on {remove.date}? Goals
-                will recalculate from remaining records.
-              </AuthText>
               <AuthButton
-                title="Confirm body deletion"
-                busy={action.busy}
+                title="Open body history dates"
+                outlined
                 disabled={action.locked}
-                onPress={() =>
-                  void action.run(
-                    () => bodyService.remove(userId, remove.kind, remove.date, remove.name),
-                    'Body record deleted',
-                    () => {
-                      setRemove(null);
-                      resource.refresh();
-                    },
-                  )
-                }
+                onPress={() => {
+                  try {
+                    const day = nutritionDate(historyInput || until || data.today);
+                    if (day > data.today) throw new Error('History cannot end in the future.');
+                    setUntil(day);
+                    setOffset(0);
+                  } catch (error) {
+                    action.setError(error instanceof Error ? error.message : 'Check the date.');
+                  }
+                }}
               />
-              <AuthLink
-                title="Keep body record"
-                disabled={action.locked}
-                onPress={() => setRemove(null)}
-              />
-            </AuthCard>
+              {data.weights.map((row) => (
+                <AuthCard key={row.local_date}>
+                  <AuthText kind="heading">
+                    {row.local_date} ·{' '}
+                    {formatNumber(row.weight_kg * unitFactor(data.preferences.weight_unit))}{' '}
+                    {data.preferences.weight_unit}
+                  </AuthText>
+                  {row.notes && <AuthText>{row.notes}</AuthText>}
+                  <AuthLink
+                    title={`Edit weight ${row.local_date}`}
+                    disabled={action.locked}
+                    onPress={() => {
+                      setKind('weight');
+                      setEditOpen(true);
+                      setDate(row.local_date);
+                      setValue(String(row.weight_kg * unitFactor(data.preferences.weight_unit)));
+                      setNotes(row.notes ?? '');
+                    }}
+                  />
+                  <AuthLink
+                    title={`Delete weight ${row.local_date}`}
+                    disabled={action.locked}
+                    onPress={() => setRemove({ kind: 'weight', date: row.local_date, name: '' })}
+                  />
+                </AuthCard>
+              ))}
+              {data.measurements.map((row) => (
+                <AuthCard key={row.measurement + row.local_date}>
+                  <AuthText kind="heading">
+                    {row.local_date} · {row.measurement}:{' '}
+                    {formatNumber(row.value_cm * unitFactor(data.preferences.length_unit))}{' '}
+                    {data.preferences.length_unit}
+                  </AuthText>
+                  {row.notes && <AuthText>{row.notes}</AuthText>}
+                  <AuthLink
+                    title={`Edit ${row.measurement} ${row.local_date}`}
+                    disabled={action.locked}
+                    onPress={() => {
+                      setDate(row.local_date);
+                      setKind('measurement');
+                      setEditOpen(true);
+                      setName(row.measurement);
+                      setValue(String(row.value_cm * unitFactor(data.preferences.length_unit)));
+                      setNotes(row.notes ?? '');
+                    }}
+                  />
+                  <AuthLink
+                    title={`Delete ${row.measurement} ${row.local_date}`}
+                    disabled={action.locked}
+                    onPress={() =>
+                      setRemove({
+                        kind: 'measurement',
+                        date: row.local_date,
+                        name: row.measurement,
+                      })
+                    }
+                  />
+                </AuthCard>
+              ))}
+              {data.weights.length === 0 && data.measurements.length === 0 && (
+                <AuthNotice>No body records in this page. Log a value to begin.</AuthNotice>
+              )}
+              {remove && (
+                <AuthCard>
+                  <AuthText>
+                    Delete {remove.kind === 'weight' ? 'weight' : remove.name} on {remove.date}?
+                    Goals will recalculate from remaining records.
+                  </AuthText>
+                  <AuthButton
+                    title="Confirm body deletion"
+                    busy={action.busy}
+                    disabled={action.locked}
+                    onPress={() =>
+                      void action.run(
+                        () => bodyService.remove(userId, remove.kind, remove.date, remove.name),
+                        'Body record deleted',
+                        () => {
+                          setRemove(null);
+                          resource.refresh();
+                        },
+                      )
+                    }
+                  />
+                  <AuthLink
+                    title="Keep body record"
+                    disabled={action.locked}
+                    onPress={() => setRemove(null)}
+                  />
+                </AuthCard>
+              )}
+              <View style={authStyles.row}>
+                <AuthLink
+                  title="Newer body records"
+                  disabled={action.locked || offset === 0}
+                  onPress={() => setOffset((current) => Math.max(0, current - 30))}
+                />
+                <AuthText>Page {offset / 30 + 1}</AuthText>
+                <AuthLink
+                  title="Older body records"
+                  disabled={
+                    action.locked || (data.weights.length < 30 && data.measurements.length < 30)
+                  }
+                  onPress={() => setOffset((current) => current + 30)}
+                />
+              </View>
+            </>
           )}
-          <View style={authStyles.row}>
-            <AuthLink
-              title="Newer body records"
-              disabled={action.locked || offset === 0}
-              onPress={() => setOffset((current) => Math.max(0, current - 30))}
-            />
-            <AuthText>Page {offset / 30 + 1}</AuthText>
-            <AuthLink
-              title="Older body records"
-              disabled={
-                action.locked || (data.weights.length < 30 && data.measurements.length < 30)
-              }
-              onPress={() => setOffset((current) => current + 30)}
-            />
-          </View>
         </>
       )}
       {!editOpen && <RecordSaveFeedback action={action} />}

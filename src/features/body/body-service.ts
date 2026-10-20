@@ -8,7 +8,7 @@ import { progressRange, type ProgressPreset } from '@/features/progress/progress
 import { progressPages } from '@/features/progress/progress-service';
 export type BodyKind = 'weight' | 'measurement';
 export const bodyService = {
-  async form(userId: string, date?: string) {
+  async form(userId: string, date?: string, options?: { latestWeight: boolean }) {
     const [profile, preferences] = await Promise.all([
       profileService.getProfile(userId),
       profileService.getPreferences(userId),
@@ -16,19 +16,20 @@ export const bodyService = {
     const today = localNutritionDate(preferences.time_zone),
       day = date ? nutritionDate(date) : today;
     if (day > today) throw new Error('Cannot log a future date.');
+    const weightQuery = getSupabase().from('body_weights').select('*').eq('user_id', userId);
     const [weight, height] = await Promise.all([
-      getSupabase()
-        .from('body_weights')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('local_date', day)
-        .maybeSingle(),
+      (options?.latestWeight
+        ? weightQuery.lte('local_date', day).order('local_date', { ascending: false }).limit(1)
+        : weightQuery.eq('local_date', day)
+      ).maybeSingle(),
       getSupabase()
         .from('body_measurements')
         .select('*')
         .eq('user_id', userId)
         .eq('measurement', 'height')
-        .eq('local_date', day)
+        .lte('local_date', today)
+        .order('local_date', { ascending: false })
+        .limit(1)
         .maybeSingle(),
     ]);
     if (weight.error || height.error) throw new Error('Body values unavailable. Retry.');

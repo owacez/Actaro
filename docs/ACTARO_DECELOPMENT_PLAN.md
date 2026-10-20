@@ -675,6 +675,12 @@ back at the screen edge to avoid stealing horizontal set gestures. No weight cha
 
 ## 3.2 Nutrition Targets — Weight 3
 
+User revision (2026-10-20): add an optional local 2023 DRI adult maintenance
+estimate beside manual entry, with saved-data prefill, missing-input entry and
+explicit review/save. Macro split defaults remain editable; water stays manual.
+Simplify task 4.9 into daily weigh-in versus separate personal details/history.
+This refines existing tasks; no release-weight or infrastructure change.
+
 ## 3.3 Food Database/Search — Weight 5
 
 Support:

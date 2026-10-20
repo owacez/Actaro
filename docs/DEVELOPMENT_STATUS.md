@@ -1,8 +1,36 @@
 # Actaro — Development Status
 
-Updated: 2026-10-19 (America/Los_Angeles).
+Updated: 2026-10-20 (America/Los_Angeles).
 
 ## Overall
+
+Daily-target calculator and simplified body records (2026-10-20): **DONE** for
+implementation/local verification. Manual targets remain available without extra body-data
+reads. The local 2023 DRI adult maintenance estimator prefills saved age and
+latest weight/height, accepts missing inputs, makes an editable calorie/macro
+preview and saves only on explicit request. Water remains user-set. Scope,
+sources and implementation bounds are in `docs/TARGET_CALCULATION.md`.
+
+Body records now separates dated weight/note from the shared personal-details
+editor. Daily saves do not update the profile. Unchanged height is not logged
+again, unsaved weigh-ins survive personal-detail saves, and history starts
+collapsed. Existing owned APIs, RLS, dated target history and measurement
+editing/deletion are reused; no schema or dependency change.
+`npm.cmd run check` **PASS**: strict TypeScript/lint/format, 352 Jest tests in
+67 suites plus six dataset tests (**358 total**). Coverage includes the eight
+published equations, birthday/leap-day boundaries, input guards, imperial/kJ
+conversion, separate saves, notes preservation, owner/date query bounds and retries.
+`npm.cmd exec -- expo export --platform web --output-dir .actaro-tools/targets-body-export`
+**PASS**, 39 routes.
+`node --env-file=.env .actaro-tools/check-targets-body-browser.mjs` **PASS**:
+ten fictional-data captures/flows covering separation, saved-data prefill,
+review/save/reopen, unsupported age and narrow/dark layouts, with zero live
+Supabase calls. Representative captures visually reviewed.
+`node .actaro-tools/check-targets-body-artifacts.mjs` **PASS**, 86 artifacts
+exclude the privileged key. `git diff --check` **PASS**.
+Physical-device acceptance remains **DEFERRED**; release weights are unchanged.
+Next three device checks: weigh-in versus personal save; generate and edit
+targets from saved/missing details; save/reopen targets in preferred units.
 
 Exercise quick-add and in-place targets (2026-10-19): **DONE** for implementation
 and local verification; physical-device acceptance **DEFERRED**. Result plus
