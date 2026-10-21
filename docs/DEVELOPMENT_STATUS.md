@@ -4,7 +4,8 @@ Updated: 2026-10-20 (America/Los_Angeles).
 
 ## Overall
 
-Email-confirmation return routing (2026-10-20): **IN_PROGRESS**. The user reports
+Email-confirmation return routing (2026-10-20): configuration correction **DONE**;
+fresh live acceptance **IN_PROGRESS**. The user reports
 the other tested app flows work, but email verification completes without a
 usable Safari return. Read-only invalid-token probes reproduce a native
 destination/configuration issue: current Expo Go LAN and configured standalone
@@ -18,16 +19,20 @@ already installed ignored x64 tools; the user's port-8081 server remains.
 Application URLs, credentials, auth validation and policies are unchanged.
 README and AUTH_TESTING now explain the verified diagnosis and exact-runtime
 configuration. The connected MCP cannot edit Auth configuration and no dashboard
-browser was available, so the user's dashboard save is pending; remote settings
-and live phone confirmation are **NOT** reported fixed.
+browser was available; the user saved the development Site URL and exact tunnel
+callbacks. Repeat invalid-token probes **PASS**: default/web callback go to the
+observed port-8081 callback, and both tunnel callback/recovery URLs are accepted
+exactly. The tunnel native manifest and iPhone loading page (`?platform=ios`)
+return HTTP 200. No live email was requested by the agent; a fresh phone
+confirmation and PKCE exchange remain unverified. The standalone `actaro://`
+allowlist is still a retained native-build configuration check.
 `npm.cmd run check` **PASS**: strict TypeScript/lint/format, 357 Jest tests in
 67 suites plus six dataset tests (**363 total**). These baseline checks do not
 establish live redirect acceptance or an iPhone launch.
 
-Next three actions: save the actual tunnel callbacks and development Site URL
-in Supabase; verify effective destinations with fresh invalid-token probes;
-open the tunnel in Expo Go and test one fresh confirmation on its initiating
-phone. Old email links retain their old target. Production URLs/native builds
+Next three actions: open the tunnel project in Expo Go; start one fresh
+confirmation and open it on the initiating phone; verify the confirmed screen
+and normal sign-in. Old email links retain their old target. Production URLs/native builds
 and release approval remain subject to the retained gates below.
 
 Swipeable Today habit cards and compact logged actions (2026-10-20): **DONE**

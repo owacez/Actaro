@@ -29,8 +29,9 @@ See [Supabase default sender restrictions](https://supabase.com/docs/guides/auth
 
 ### Verified redirect diagnosis (2026-10-20)
 
-Read-only probes of the development project used an intentionally invalid token,
-followed no redirect and sent no emails. Supabase returned HTTP 303:
+Before correction, read-only probes of the development project used an
+intentionally invalid token, followed no redirect and sent no emails. Supabase
+returned HTTP 303:
 
 | Requested destination                                        | Observed result                        |
 | ------------------------------------------------------------ | -------------------------------------- |
@@ -51,15 +52,19 @@ Keep the server running; avoid broad wildcards. Installed builds need the
 configured `actaro://` entries. Before deployment, use the actual deployed web
 origin for Site URL; no production domain is assumed here.
 
-The connected tools cannot edit hosted Auth configuration, and no browser was
-available for the dashboard. A user dashboard save and fresh live confirmation
-remain necessary. Successful invalid-token probes verify destination selection,
-not email delivery, PKCE exchange or an iPhone app launch.
+The user then saved the development Site URL and exact tunnel callback/recovery
+entries in the dashboard. Repeat probes **PASS**: the default goes to the web
+callback on port 8081, both tunnel destinations are accepted exactly, and the
+web callback remains accepted. The native tunnel manifest is reachable (HTTP
+200); the iPhone loading page requires `?platform=ios` when opening it directly.
+Fresh live confirmation remains pending. Successful invalid-token probes verify
+destination selection, not email delivery, PKCE exchange or an iPhone launch.
 
 In the Supabase dashboard, Authentication > URL Configuration, allow the exact
 URLs for the runtime you are testing. The connected MCP tools do not expose Auth
 configuration editing. The probes above verify specific effective destinations;
-the full allowlist and email templates have not been inspected or changed.
+the full allowlist and email templates have not been inspected through the
+dashboard tools. The user-applied URL correction above is verified by probes.
 
 - Development build using the existing `actaro` scheme:
   `actaro://auth/callback` and `actaro://auth/recovery`.
@@ -121,9 +126,9 @@ The final link follows the existing PKCE code-exchange flow.
 
 A redirect to `localhost:3000` is not an Expo Go callback. It is consistent with
 Supabase falling back to Site URL after rejecting/missing a requested redirect,
-or an overridden email template. The project's allowlist/templates have not
-been inspected or changed; MCP cannot edit these settings and browser automation
-failed to initialize.
+or an overridden email template. MCP cannot edit these settings and no browser
+was available. The user's subsequent tunnel allowlist correction is verified
+above; the complete allowlist/templates were not inspected through dashboard tools.
 
 The project's Auth health endpoint reports v2.197.0. That version's
 [redirect validation](https://github.com/supabase/auth/blob/v2.197.0/internal/utilities/request.go)
