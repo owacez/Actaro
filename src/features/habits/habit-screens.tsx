@@ -158,24 +158,37 @@ export function HabitsScreen({
                 )[0],
               value = habitValue(record, today),
               scheduled = version?.weekdays.includes(isoWeekday(today)),
-              active = habitActive(record, today);
+              active = habitActive(record, today),
+              logged = record.habit_logs.some((log) => log.local_date === today);
             return (
               <AuthCard key={record.id}>
                 <View style={authStyles.row}>
-                  <View style={{ flex: 1 }}>
+                  <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
                     <AuthText kind="heading">{record.name}</AuthText>
+                    <View style={{ alignSelf: 'flex-start' }}>
+                      <CompletionMark
+                        done={
+                          active &&
+                          (!!scheduled || record.kind === 'frequency') &&
+                          habitDoneToday(record, today)
+                        }
+                        pendingLabel={habitStatusLabel(record, today)}
+                        label={
+                          ['boolean', 'frequency'].includes(record.kind)
+                            ? 'Done today'
+                            : 'Target met'
+                        }
+                      />
+                    </View>
+                    {logged && record.kind !== 'boolean' && (
+                      <AuthText kind="muted">
+                        {formatNumber(value ?? 0)} {habitUnit(record)} ·{' '}
+                        {record.kind === 'avoidance' ? 'Limit' : 'Target'}{' '}
+                        {formatNumber(version?.target ?? 0)} {habitUnit(record)}{' '}
+                        {record.kind === 'frequency' ? 'this week' : 'today'}
+                      </AuthText>
+                    )}
                   </View>
-                  <CompletionMark
-                    done={
-                      active &&
-                      (!!scheduled || record.kind === 'frequency') &&
-                      habitDoneToday(record, today)
-                    }
-                    pendingLabel={habitStatusLabel(record, today)}
-                    label={
-                      ['boolean', 'frequency'].includes(record.kind) ? 'Done today' : 'Target met'
-                    }
-                  />
                   <IconButton
                     label={`Manage ${record.name}`}
                     name={{ ios: 'ellipsis', android: 'more_horiz', web: 'more_horiz' }}
@@ -183,93 +196,97 @@ export function HabitsScreen({
                     onPress={() => setMenu(record.id)}
                   />
                 </View>
-                <AuthText>
-                  {record.kind === 'boolean'
-                    ? 'Check off once'
-                    : `${formatNumber(version?.target ?? 0)} ${habitUnit(record)} ${record.kind === 'frequency' ? 'per week' : 'per scheduled day'}`}
-                  {record.kind === 'avoidance' ? ' or fewer' : ''}
-                </AuthText>
-                <AuthText kind="muted">
-                  {version?.weekdays.map((day) => weekdays[day - 1]).join(' · ')}
-                </AuthText>
-                <AuthText>
-                  {record.start_date > today
-                    ? 'Starts ' + record.start_date
-                    : !active
-                      ? 'Not active today'
-                      : !scheduled
-                        ? 'Rest / non-action day'
-                        : habitReached(record, value, version?.target ?? 0)
-                          ? 'Target met'
-                          : record.kind === 'frequency' && habitDoneToday(record, today)
-                            ? 'Done today'
-                            : value === null
-                              ? 'Not logged'
-                              : `${formatNumber(value)} recorded`}
-                  {reminderDue(record, now) ? ' · Reminder due' : ''}
-                </AuthText>
-                <Progress record={record} today={today} />
-                {version?.reminder_time && (
-                  <AuthText>Reminder time {version.reminder_time}</AuthText>
+                {!logged && (
+                  <>
+                    <AuthText>
+                      {record.kind === 'boolean'
+                        ? 'Check off once'
+                        : `${formatNumber(version?.target ?? 0)} ${habitUnit(record)} ${record.kind === 'frequency' ? 'per week' : 'per scheduled day'}`}
+                      {record.kind === 'avoidance' ? ' or fewer' : ''}
+                    </AuthText>
+                    <AuthText kind="muted">
+                      {version?.weekdays.map((day) => weekdays[day - 1]).join(' · ')}
+                    </AuthText>
+                    <AuthText>
+                      {record.start_date > today
+                        ? 'Starts ' + record.start_date
+                        : !active
+                          ? 'Not active today'
+                          : !scheduled
+                            ? 'Rest / non-action day'
+                            : habitReached(record, value, version?.target ?? 0)
+                              ? 'Target met'
+                              : record.kind === 'frequency' && habitDoneToday(record, today)
+                                ? 'Done today'
+                                : value === null
+                                  ? 'Not logged'
+                                  : `${formatNumber(value)} recorded`}
+                      {reminderDue(record, now) ? ' · Reminder due' : ''}
+                    </AuthText>
+                    <Progress record={record} today={today} />
+                    {version?.reminder_time && (
+                      <AuthText>Reminder time {version.reminder_time}</AuthText>
+                    )}
+                    <View style={authStyles.choices}>
+                      {active && (scheduled || record.kind === 'frequency') && (
+                        <>
+                          {record.kind === 'boolean' && (
+                            <AuthButton
+                              title={value === 1 ? 'Done for today' : 'Mark done'}
+                              accessibilityLabel={`Mark ${record.name} done`}
+                              outlined
+                              disabled={action.locked || value === 1}
+                              onPress={() =>
+                                void action.run(
+                                  () => habitService.log(userId, record.id, today, 1, ''),
+                                  'Habit logged',
+                                  () =>
+                                    resource.updateData((data) => ({
+                                      ...data,
+                                      rows: data.rows.map((row) =>
+                                        row.id === record.id
+                                          ? acknowledgedHabitLog(row, today, 1)
+                                          : row,
+                                      ),
+                                    })),
+                                )
+                              }
+                            />
+                          )}
+                          {record.kind === 'avoidance' && (
+                            <AuthButton
+                              title="No occurrences"
+                              accessibilityLabel={`No occurrences: ${record.name}`}
+                              outlined
+                              disabled={action.locked || value === 0}
+                              onPress={() =>
+                                void action.run(
+                                  () => habitService.log(userId, record.id, today, 0, ''),
+                                  'Habit logged',
+                                  () =>
+                                    resource.updateData((data) => ({
+                                      ...data,
+                                      rows: data.rows.map((row) =>
+                                        row.id === record.id
+                                          ? acknowledgedHabitLog(row, today, 0)
+                                          : row,
+                                      ),
+                                    })),
+                                )
+                              }
+                            />
+                          )}
+                          <AuthLink
+                            title="Add or edit log"
+                            accessibilityLabel={`Log ${record.name}`}
+                            disabled={action.locked}
+                            onPress={() => onOpen('log', record.id, today)}
+                          />
+                        </>
+                      )}
+                    </View>
+                  </>
                 )}
-                <View style={authStyles.choices}>
-                  {active && (scheduled || record.kind === 'frequency') && (
-                    <>
-                      {record.kind === 'boolean' && (
-                        <AuthButton
-                          title={value === 1 ? 'Done for today' : 'Mark done'}
-                          accessibilityLabel={`Mark ${record.name} done`}
-                          outlined
-                          disabled={action.locked || value === 1}
-                          onPress={() =>
-                            void action.run(
-                              () => habitService.log(userId, record.id, today, 1, ''),
-                              'Habit logged',
-                              () =>
-                                resource.updateData((data) => ({
-                                  ...data,
-                                  rows: data.rows.map((row) =>
-                                    row.id === record.id
-                                      ? acknowledgedHabitLog(row, today, 1)
-                                      : row,
-                                  ),
-                                })),
-                            )
-                          }
-                        />
-                      )}
-                      {record.kind === 'avoidance' && (
-                        <AuthButton
-                          title="No occurrences"
-                          accessibilityLabel={`No occurrences: ${record.name}`}
-                          outlined
-                          disabled={action.locked || value === 0}
-                          onPress={() =>
-                            void action.run(
-                              () => habitService.log(userId, record.id, today, 0, ''),
-                              'Habit logged',
-                              () =>
-                                resource.updateData((data) => ({
-                                  ...data,
-                                  rows: data.rows.map((row) =>
-                                    row.id === record.id
-                                      ? acknowledgedHabitLog(row, today, 0)
-                                      : row,
-                                  ),
-                                })),
-                            )
-                          }
-                        />
-                      )}
-                      <AuthLink
-                        title="Add or edit log"
-                        accessibilityLabel={`Log ${record.name}`}
-                        disabled={action.locked}
-                        onPress={() => onOpen('log', record.id, today)}
-                      />
-                    </>
-                  )}
-                </View>
                 <ActionSheet
                   title={record.name}
                   visible={menu === record.id}
@@ -278,6 +295,28 @@ export function HabitsScreen({
                   }}
                 >
                   <View style={{ gap: 8 }}>
+                    {logged && (
+                      <>
+                        <AuthText kind="muted">
+                          {version?.weekdays.map((day) => weekdays[day - 1]).join(' · ')}
+                        </AuthText>
+                        <Progress record={record} today={today} />
+                        {version?.reminder_time && (
+                          <AuthText>Reminder time {version.reminder_time}</AuthText>
+                        )}
+                        {!archived && active && (scheduled || record.kind === 'frequency') && (
+                          <AuthLink
+                            title="Edit today’s log"
+                            accessibilityLabel={`Edit today’s log for ${record.name}`}
+                            disabled={action.locked}
+                            onPress={() => {
+                              setMenu(null);
+                              onOpen('log', record.id, today);
+                            }}
+                          />
+                        )}
+                      </>
+                    )}
                     <AuthLink
                       title={`History: ${record.name}`}
                       disabled={action.locked}

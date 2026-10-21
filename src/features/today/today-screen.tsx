@@ -21,7 +21,7 @@ import { formatNumber, energy, localNutritionDate } from '@/features/nutrition/n
 import { weightSummary, unitFactor, goalUnit } from '@/features/body/body-model';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { habitToday, habitDoneToday, acknowledgedHabitLog } from '@/features/habits/habit-model';
-import { TodayHabit } from './today-habit';
+import { TodayHabits } from './today-habits';
 import { nutritionService } from '@/features/nutrition/nutrition-service';
 import { todayService } from './today-service';
 import { useDeviceSteps } from '@/features/activity/step-provider';
@@ -263,48 +263,40 @@ export function TodayScreen({ userId }: { userId: string }) {
             </View>
           </AuthCard>
           <AuthCard>
-            <AuthText>
-              Habits · {data.completedHabits} of {data.habits.length}
-            </AuthText>
-            <View style={{ gap: 20 }}>
-              {data.habits.map((habit) => (
-                <TodayHabit
-                  key={habit.id}
-                  userId={userId}
-                  habit={habit}
-                  onLogged={(date, value, notes) =>
-                    resource.updateData((current) => {
-                      const habits = current.habits.map((row) =>
-                        row.id === habit.id ? acknowledgedHabitLog(row, date, value, notes) : row,
-                      );
+            <TodayHabits
+              userId={userId}
+              habits={data.habits}
+              onLogged={(habitId, date, value, notes) =>
+                resource.updateData((current) => {
+                  const habits = current.habits.map((row) =>
+                    row.id === habitId ? acknowledgedHabitLog(row, date, value, notes) : row,
+                  );
+                  return {
+                    ...current,
+                    habits,
+                    completedHabits: habits.filter((row) => habitDoneToday(row, habitToday(row)))
+                      .length,
+                    goals: current.goals.map((result) => {
+                      const source = habits.find((row) => row.id === result.goal.habit_id);
+                      if (!source || source.id !== habitId) return result;
+                      const fact = habitGoalFact(result.goal, source);
                       return {
-                        ...current,
-                        habits,
-                        completedHabits: habits.filter((row) =>
-                          habitDoneToday(row, habitToday(row)),
-                        ).length,
-                        goals: current.goals.map((result) => {
-                          const source = habits.find((row) => row.id === result.goal.habit_id);
-                          if (!source || source.id !== habit.id) return result;
-                          const fact = habitGoalFact(result.goal, source);
-                          return {
-                            ...result,
-                            ...fact,
-                            ...goalProgress(
-                              result.goal,
-                              fact.value,
-                              localNutritionDate(result.goal.time_zone),
-                            ),
-                          };
-                        }),
+                        ...result,
+                        ...fact,
+                        ...goalProgress(
+                          result.goal,
+                          fact.value,
+                          localNutritionDate(result.goal.time_zone),
+                        ),
                       };
-                    })
-                  }
-                />
-              ))}
-            </View>
-            {!data.habits.length && <AuthText>No scheduled habits today.</AuthText>}
-            <AuthLink title="Manage all habits" onPress={() => router.push('/habits')} />
+                    }),
+                  };
+                })
+              }
+            />
+            {data.habits.length > 0 && (
+              <AuthText kind="muted">{data.completedHabits} completed today</AuthText>
+            )}
           </AuthCard>
           <AuthCard>
             <ActionRow

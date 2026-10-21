@@ -787,6 +787,16 @@ Types:
 
 ## 4.3 Habit Logging — Weight 3
 
+User UI correction (2026-10-20): after acknowledgement, Today and Habits show
+a compact horizontal result with a three-dot control for corrections/undo;
+no log/edit buttons remain below it. Partial/zero logs retain editable results.
+Failed or pending first logs retain their save/retry controls. Next eligible
+unlogged dates show the quick-log button again. No release-weight change.
+Today presents all scheduled habits as swipeable cards with Habit 1 of 3,
+bottom Log buttons before logging and Previous/Next alternatives. Logging keeps
+the selected card; swiping makes no record request. No management shortcut;
+management remains under You → Habits. This supersedes the intermediate list UI.
+
 User correction (2026-10-19): weekly habits count distinct logged days, at most
 once per date, with done/edit/undo controls and a 1–7 day target. Preserve raw
 historical logs. Linked Today goals update after acknowledgement using the same

@@ -4,6 +4,37 @@ Updated: 2026-10-20 (America/Los_Angeles).
 
 ## Overall
 
+Swipeable Today habit cards and compact logged actions (2026-10-20): **DONE**
+for implementation/local verification; physical-device acceptance **DEFERRED**.
+`today-habits.tsx` pages every already-loaded scheduled habit with Habit 1 of 3,
+horizontal swipes and Previous/Next buttons. `today-habit.tsx` places Log at the
+bottom before logging, then keeps the selected result with a three-dot editor/
+undo control. Partial amounts and explicit zero stay editable. Empty/single
+lists, changing counts, width changes and offscreen accessibility are covered.
+`today-screen.tsx` retains acknowledged in-place habit/goal updates and removes
+Manage all habits. Management remains under You → Habits; logged list entries
+also hide lower log/edit buttons, retaining schedule/history through their menu.
+No dependency, schema, new API read or release-weight change (v0.5 refinement).
+
+Verification: focused Today/Habits checks **PASS**, 16 tests.
+`npm.cmd run check` **PASS**: strict TypeScript/lint/format, 357 Jest tests in
+67 suites plus six dataset tests (**363 total**).
+`npm.cmd exec -- expo export --platform web --output-dir .actaro-tools/compact-habit-export`
+**PASS**, 39 routes. `node --env-file=.env .actaro-tools/check-habit-cards-browser.mjs`
+**PASS**: 11 fictional-data captures/flows covering actual swipes both ways,
+arrow boundaries, selection after save, explicit undo, partial logs, linked
+goals, resize/narrow dark/desktop layouts and You → Habits. Browsing cards adds
+no record reads; no full-page refresh after logging; zero live Supabase requests.
+README, canonical spec/plan and APP_TEST_PLAN document the final card flow.
+
+User report (2026-10-20): sign-in/sign-up, basic habit logging and step counts
+are working. This does not close unspecified deferred acceptance checks.
+Next three actions: verify the new card gestures/log/options on iPhone; test
+workout logging/draft recovery/history; test nutrition targets and diary totals.
+Then compare linked goals and Progress against those saved records. No current
+implementation blocker; personal beta/native acceptance and release approval
+remain deferred as recorded below.
+
 Simplified active-workout set table (2026-10-20): **DONE** for implementation/local
 verification; physical-device acceptance **DEFERRED**. `session-screen.tsx` and
 `set-log-row.tsx` replace guided swipe cards with visible inline weight/reps,

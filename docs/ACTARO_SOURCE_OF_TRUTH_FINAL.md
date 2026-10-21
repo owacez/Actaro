@@ -828,15 +828,22 @@ User testing revision (2026-10-18): date fields use calendar controls and remind
 times use a time picker. Confirmed quick completions update the visible habit in
 place with a short completion animation that respects Reduce Motion; no success
 is shown before the write is acknowledged. Explain habit types in everyday terms.
-Today offers a visible one-tap check-off button and an in-place sheet
-for amounts, minutes, limits and edits. Weekly habits count distinct positive
+Today lists all habits scheduled for the current date in horizontally swipeable
+cards, with Habit 1 of 3 at the top and a Log button at the bottom of each
+unlogged card. Previous/Next buttons provide a non-gesture alternative; swiping
+does not write or fetch records. Daily checks log in one tap; an in-place sheet
+handles amounts, minutes, limits and edits. Weekly habits count distinct positive
 logged dates (1–7 days per Monday–Sunday week), once per date. Logging today
-replaces its result with done/not done. After completion, disable the primary
-log button with Done today; keep edit/undo as a separate action. The daily log
-action becomes available on the next eligible date (user revision, 2026-10-19).
+replaces its result with done/not done. After an acknowledged log, replace the
+lower log/edit buttons with the result and one three-dot control on the right.
+It opens corrections/undo, including partial amounts and explicit zero. Today
+keeps the selected card after logging; the Habits list uses compact result rows.
+Keep schedule/history and management actions available through the list menu.
+The daily Log button returns on the next eligible date with no log (user revision, 2026-10-20).
+Today has no Manage all habits shortcut; management remains under You → Habits.
 This user correction (2026-10-19) supersedes same-day occurrence increments.
 Existing stored counts are retained, but each positive date contributes one
-day. Daily numeric habits remain available for repeated amounts/counts.
+day. Daily numeric totals remain editable through the three-dot control.
 Linked goal cards update in place only after an acknowledged save, using the
 same date-bounded calculation as a reload, without another API read.
 Distinguish not logged, in progress,

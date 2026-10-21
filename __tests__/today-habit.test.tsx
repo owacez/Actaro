@@ -4,6 +4,8 @@ import { TodayHabit } from '@/features/today/today-habit';
 import { habitService } from '@/features/habits/habit-service';
 import { acknowledgedHabitLog, type HabitRecord } from '@/features/habits/habit-model';
 import { FeedbackTestRoot } from './helpers/feedback-root';
+import { useState } from 'react';
+import { TodayHabits } from '@/features/today/today-habits';
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
 jest.mock('@/features/habits/habit-service', () => ({ habitService: { log: jest.fn() } }));
 const day = new Date().toISOString().slice(0, 10),
@@ -60,10 +62,10 @@ test('one-tap completion waits for acknowledgement, retries identical input and 
   expect(service.log.mock.calls[1]).toEqual(service.log.mock.calls[0]);
   await view.rerender(tree(acknowledgedHabitLog(record, day, 1)));
   expect(screen.getByText('✓ Done today')).toBeTruthy();
-  expect(screen.getByRole('button', { name: 'Log habit Read' })).toBeDisabled();
-  await fireEvent.press(screen.getByRole('button', { name: 'Log habit Read' }));
+  expect(screen.queryByRole('button', { name: 'Log habit Read' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Edit today’s log for Read' })).toBeNull();
   expect(service.log).toHaveBeenCalledTimes(2);
-  await fireEvent.press(screen.getByRole('button', { name: 'Edit today’s log for Read' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Options for Read' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Not done today' }));
   await waitFor(() => expect(logged).toHaveBeenLastCalledWith(day, 0, ''));
 });
@@ -83,7 +85,7 @@ test('amount/minutes entry stays on Today and requires an explicit value, includ
   await fireEvent.press(screen.getByRole('button', { name: 'Save today’s log' }));
   await waitFor(() => expect(logged).toHaveBeenCalledWith(day, 15, 'Afternoon'));
 });
-test('a completed weekly day disables logging while keeping a separate edit/undo action', async () => {
+test('a completed weekly day becomes a result row with only an options button for edit/undo', async () => {
   const record = habit('frequency');
   const logged = jest.fn();
   const tree = (record: HabitRecord) => (
@@ -97,11 +99,12 @@ test('a completed weekly day disables logging while keeping a separate edit/undo
   await view.rerender(tree(acknowledgedHabitLog(record, day, 1, 'Original note')));
   expect(screen.getByText('✓ Done today')).toBeTruthy();
   expect(screen.getByText('1 days · Target 5 days this week')).toBeTruthy();
-  expect(screen.getByRole('button', { name: 'Log habit Read' })).toBeDisabled();
-  await fireEvent.press(screen.getByRole('button', { name: 'Log habit Read' }));
+  expect(screen.queryByRole('button', { name: 'Log habit Read' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Dismiss notification' }));
+  expect(screen.getAllByRole('button')).toHaveLength(1);
   expect(service.log).toHaveBeenCalledTimes(1);
   expect(screen.queryByRole('button', { name: 'Not done today' })).toBeNull();
-  await fireEvent.press(screen.getByRole('button', { name: 'Edit today’s log for Read' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Options for Read' }));
   expect(screen.queryByLabelText('Today’s value (times)')).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Not done today' }));
   await waitFor(() => expect(logged).toHaveBeenLastCalledWith(day, 0, 'Original note'));
@@ -125,7 +128,8 @@ test('a completed weekly habit can be logged again on the next day in its own ti
         <TodayHabit userId={owner} habit={record} onLogged={jest.fn()} />
       </FeedbackTestRoot>,
     );
-    expect(screen.getByRole('button', { name: 'Log habit Read' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Log habit Read' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Options for Read' })).toBeTruthy();
     jest.setSystemTime(new Date(new Date(day + 'T20:00:00Z').getTime() + 86400000));
     await view.rerender(
       <FeedbackTestRoot>
@@ -136,4 +140,108 @@ test('a completed weekly habit can be logged again on the next day in its own ti
   } finally {
     jest.useRealTimers();
   }
+});
+
+test.each([
+  ['duration', 15],
+  ['duration', 20],
+  ['numeric', 0],
+  ['avoidance', 0],
+  ['boolean', 0],
+])(
+  'a logged %s value of %s keeps only options, including partial targets and explicit zero',
+  async (kind, amount) => {
+    const record = acknowledgedHabitLog(habit(String(kind)), day, Number(amount), 'Keep this note');
+    await render(
+      <FeedbackTestRoot>
+        <TodayHabit userId={owner} habit={record} onLogged={jest.fn()} />
+      </FeedbackTestRoot>,
+    );
+    expect(screen.queryByRole('button', { name: 'Log habit Read' })).toBeNull();
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+    await fireEvent.press(screen.getByRole('button', { name: 'Options for Read' }));
+    if (kind === 'boolean') expect(screen.getByRole('button', { name: 'Done today' })).toBeTruthy();
+    else {
+      expect(screen.getByLabelText(`Today’s value (${record.unit})`).props.value).toBe(
+        String(amount),
+      );
+      expect(screen.getByLabelText('Habit note (optional)').props.value).toBe('Keep this note');
+    }
+    expect(service.log).not.toHaveBeenCalled();
+  },
+);
+
+test('habit cards page by swipe or arrows, keep the selected result after logging, and resize', async () => {
+  const records = [1, 2, 3].map((number) => ({
+    ...habit(),
+    id: `habit-${number}`,
+    name: `Habit ${number}`,
+  }));
+  function Fixture() {
+    const [habits, setHabits] = useState(records);
+    return (
+      <TodayHabits
+        userId={owner}
+        habits={habits}
+        onLogged={(id, date, value, notes) => {
+          setHabits((rows) =>
+            rows.map((row) =>
+              row.id === id ? acknowledgedHabitLog(row, date, value, notes) : row,
+            ),
+          );
+        }}
+      />
+    );
+  }
+  await render(
+    <FeedbackTestRoot>
+      <Fixture />
+    </FeedbackTestRoot>,
+  );
+  await fireEvent(screen.getByTestId('habit-carousel'), 'layout', {
+    nativeEvent: { layout: { width: 300 } },
+  });
+  expect(screen.getByText('Habit 1 of 3')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Previous habit' })).toBeDisabled();
+  expect(screen.queryByRole('button', { name: 'Log habit Habit 2' })).toBeNull();
+  await fireEvent.scroll(screen.getByTestId('habit-cards'), {
+    nativeEvent: { contentOffset: { x: 300, y: 0 } },
+  });
+  expect(screen.getByText('Habit 2 of 3')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Next habit' }));
+  expect(screen.getByText('Habit 3 of 3')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Next habit' })).toBeDisabled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Log habit Habit 3' }));
+  await waitFor(() => expect(service.log).toHaveBeenCalledWith(owner, 'habit-3', day, 1, ''));
+  await screen.findByRole('button', { name: 'Options for Habit 3' });
+  expect(screen.getByText('Habit 3 of 3')).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Log habit Habit 3' })).toBeNull();
+  await fireEvent(screen.getByTestId('habit-carousel'), 'layout', {
+    nativeEvent: { layout: { width: 360 } },
+  });
+  expect(screen.getByText('Habit 3 of 3')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Previous habit' }));
+  expect(screen.getByRole('button', { name: 'Log habit Habit 2' })).toBeTruthy();
+});
+
+test('zero/one habit and a shrinking list have safe card counts and arrow boundaries', async () => {
+  const first = habit();
+  const second = { ...habit(), id: 'second', name: 'Second' };
+  const tree = (habits: HabitRecord[]) => (
+    <FeedbackTestRoot>
+      <TodayHabits userId={owner} habits={habits} onLogged={jest.fn()} />
+    </FeedbackTestRoot>
+  );
+  const view = await render(tree([]));
+  expect(screen.getByText('No scheduled habits today.')).toBeTruthy();
+  await view.rerender(tree([first, second]));
+  await fireEvent(screen.getByTestId('habit-carousel'), 'layout', {
+    nativeEvent: { layout: { width: 300 } },
+  });
+  await fireEvent.press(screen.getByRole('button', { name: 'Next habit' }));
+  expect(screen.getByText('Habit 2 of 2')).toBeTruthy();
+  await view.rerender(tree([first]));
+  expect(screen.getByText('Habit 1 of 1')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Next habit' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Previous habit' })).toBeDisabled();
 });

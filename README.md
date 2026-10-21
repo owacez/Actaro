@@ -582,10 +582,17 @@ refresh action; no sample health data is shown.
   weight saves never change them. Latest height is reused and only logged again
   when changed. **View history** opens dated records and their edit/delete controls.
   **Add another measurement** retains named measurements without primary tabs.
-- Today habits have visible **Mark done** / **Mark today done** buttons and
-  an in-place amount/minutes/count editor. Weekly habits count distinct days,
-  once per date; the completed log button is disabled until the next eligible
-  day, with a separate edit/undo action. Their linked goals update after
+- Today shows every scheduled habit in swipeable cards: **Habit 1 of 3** at
+  the top, with a **Log** button at the bottom of each unlogged card. Swipe
+  horizontally or use Previous/Next to browse; browsing makes no record request.
+  Daily/weekly buttons check off once; amount/minutes/count opens its editor.
+  Management remains under **You → Habits**, without a management link on Today.
+  Weekly habits count distinct days,
+  once per date. After logging, the selected Today card stays visible with its
+  result and a three-dot control for edits/undo; lower log/edit buttons disappear.
+  The Habits list uses compact result rows. Partial
+  amounts and explicit zero stay editable there. Quick log returns on the next
+  eligible unlogged date. Their linked goals update after
   saving without reloading Today. Existing notes are retained. Status
   distinguishes **Not logged today**, **In progress**, **Over daily limit** and
   **Target met**, rather than an unexplained "Not yet". Goal actions now use

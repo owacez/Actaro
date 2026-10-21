@@ -136,9 +136,10 @@ test('less common habit logging remains available and hidden reminder values are
 
 test('a quick habit completion stays visible and updates in place only after an acknowledged retry', async () => {
   service.log.mockRejectedValueOnce(new Error('offline')).mockResolvedValue(undefined);
+  const onOpen = jest.fn();
   await render(
     <FeedbackTestRoot>
-      <HabitsScreen userId={owner} onBack={jest.fn()} onOpen={jest.fn()} />
+      <HabitsScreen userId={owner} onBack={jest.fn()} onOpen={onOpen} />
     </FeedbackTestRoot>,
   );
   await screen.findByRole('button', { name: 'No occurrences: Avoidance habit' });
@@ -147,7 +148,14 @@ test('a quick habit completion stays visible and updates in place only after an 
   expect(screen.queryByText('Target met')).toBeNull();
   expect(screen.queryByText('Loading your records…')).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Retry saved request' }));
-  await screen.findByText('Target met');
+  await screen.findByText('✓ Target met');
+  expect(screen.queryByRole('button', { name: 'No occurrences: Avoidance habit' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Log Avoidance habit' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Manage Avoidance habit' }));
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Edit today’s log for Avoidance habit' }),
+  );
+  expect(onOpen).toHaveBeenCalledWith('log', record.id, expect.any(String));
   expect(service.list).toHaveBeenCalledTimes(1);
   expect(service.log.mock.calls[1]).toEqual(service.log.mock.calls[0]);
 });

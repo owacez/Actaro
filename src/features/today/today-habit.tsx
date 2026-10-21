@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { ActionSheet } from '@/components/product-ui';
+import { ActionSheet, IconButton } from '@/components/product-ui';
 import { CompletionMark } from '@/components/completion-mark';
 import { NumberStepper } from '@/components/number-stepper';
 import { AuthButton, AuthInput, AuthText } from '@/features/auth/auth-components';
@@ -54,54 +54,52 @@ export function TodayHabit({
     setOpen(true);
   }
   return (
-    <View style={{ gap: 10 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <View style={{ flex: 1, minWidth: 100 }}>
+    <View style={{ flex: 1, gap: 12, justifyContent: 'space-between' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
           <AuthText kind="heading">{habit.name}</AuthText>
+          <View style={{ alignSelf: 'flex-start' }}>
+            <CompletionMark
+              done={done}
+              label={dailyCheck ? 'Done today' : 'Target met'}
+              pendingLabel={habitStatusLabel(habit, date)}
+            />
+          </View>
+          {habit.kind !== 'boolean' && (
+            <AuthText kind="muted">
+              {`${value === null ? 'No amount logged' : formatNumber(value) + ' ' + habitUnit(habit)} · ${habit.kind === 'avoidance' ? 'Limit' : 'Target'} ${formatNumber(version?.target ?? 0)} ${habitUnit(habit)} ${habit.kind === 'frequency' ? 'this week' : 'today'}`}
+            </AuthText>
+          )}
+          {habit.kind === 'boolean' && !log && (
+            <AuthText kind="muted">Check off once today</AuthText>
+          )}
         </View>
-        <CompletionMark
-          done={done}
-          label={dailyCheck ? 'Done today' : 'Target met'}
-          pendingLabel={habitStatusLabel(habit, date)}
-        />
+        {log && (
+          <IconButton
+            label={`Options for ${habit.name}`}
+            name={{ ios: 'ellipsis', android: 'more_horiz', web: 'more_horiz' }}
+            disabled={action.locked}
+            onPress={edit}
+          />
+        )}
       </View>
-      <AuthText kind="muted">
-        {habit.kind === 'boolean'
-          ? 'Check off once today'
-          : `${value === null ? 'No amount logged' : formatNumber(value) + ' ' + habitUnit(habit)} · ${habit.kind === 'avoidance' ? 'Limit' : 'Target'} ${formatNumber(version?.target ?? 0)} ${habitUnit(habit)} ${habit.kind === 'frequency' ? 'this week' : 'today'}`}
-      </AuthText>
-      <AuthButton
-        title={
-          done
-            ? dailyCheck
-              ? 'Done today'
-              : 'Target met'
-            : habit.kind === 'boolean'
-              ? 'Mark done'
-              : habit.kind === 'frequency'
-                ? 'Mark today done'
-                : habit.kind === 'duration'
-                  ? 'Log minutes'
-                  : habit.kind === 'avoidance'
-                    ? 'Log today’s count'
-                    : 'Log amount'
-        }
-        accessibilityLabel={`Log habit ${habit.name}`}
-        outlined={done}
-        disabled={action.locked || done}
-        onPress={() => {
-          if (!done && habit.kind === 'boolean') save(1);
-          else if (!done && habit.kind === 'frequency') save(1);
-          else edit();
-        }}
-      />
-      {log && (
+      {!log && (
         <AuthButton
-          title="Edit today’s log"
-          accessibilityLabel={`Edit today’s log for ${habit.name}`}
-          outlined
+          title={
+            dailyCheck
+              ? 'Log habit'
+              : habit.kind === 'duration'
+                ? 'Log minutes'
+                : habit.kind === 'avoidance'
+                  ? 'Log today’s count'
+                  : 'Log amount'
+          }
+          accessibilityLabel={`Log habit ${habit.name}`}
           disabled={action.locked}
-          onPress={edit}
+          onPress={() => {
+            if (dailyCheck) save(1);
+            else edit();
+          }}
         />
       )}
       {!open && <RecordSaveFeedback action={action} />}
