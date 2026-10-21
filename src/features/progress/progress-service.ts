@@ -44,9 +44,10 @@ export async function progressPages<T>(
   } while (rows.length < expected);
   return rows;
 }
-async function progressContext(
+export async function progressContext(
   userId: string,
-  source: 'food_logs' | 'workout_sessions' | 'daily_activity' | 'habits' | 'summary',
+  source:
+    'food_logs' | 'workout_sessions' | 'daily_activity' | 'habits' | 'summary' | 'run_sessions',
   preset: ProgressPreset,
   custom?: ProgressRange,
 ) {

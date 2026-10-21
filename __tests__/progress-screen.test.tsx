@@ -6,6 +6,7 @@ import { FeedbackTestRoot } from './helpers/feedback-root';
 import { nutritionContext } from './helpers/nutrition-fixture';
 jest.mock('expo-router', () => ({ useFocusEffect: jest.fn() }));
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
+jest.mock('@/features/running/run-cards', () => ({ RunProgressScreen: () => null }));
 jest.mock('@/features/body/weight-progress-screen', () => ({
   WeightProgressScreen: ({ navigation }: { navigation: React.ReactNode }) => navigation,
 }));

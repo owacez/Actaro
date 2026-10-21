@@ -13,7 +13,9 @@ This is an Expo/React Native mobile application. Prioritize mobile-first pattern
   User-approved core redesign (2026-10-17): `docs/Actaro-v1-redesign.pdf` is the
   current visual authority, superseding the older atlas and visual foundation.
   It authorizes Chalk/Carbon, navigation-only glass, and Today/Train/Food/Progress/You
-  plus Quick log. Page 15 running is a v1.2 concept and stays unimplemented.
+  plus Quick log. On 2026-10-21 the user explicitly authorized implementing
+  page 15 running early, including background GPS. Native builds and physical
+  background acceptance remain deferred; this does not authorize other future releases.
   Read only relevant nodes when visual work is authorized. Never edit Figma
   without explicit authorization. Starter visuals are not Actaro design evidence.
 - User-approved Figma fallback: when MCP calls are exhausted, consult the local

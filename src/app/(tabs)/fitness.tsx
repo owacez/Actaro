@@ -5,10 +5,11 @@ import { PlansScreen } from '@/features/workouts/plans-screen';
 import { WorkoutsScreen } from '@/features/workouts/workouts-screen';
 import { useAuth } from '@/features/auth/auth-provider';
 import { LibraryScreen } from '@/features/exercises/library-screen';
+import { RunStartScreen } from '@/features/running/run-screen';
 
 export default function FitnessRoute() {
   const { session, recovery } = useAuth();
-  const [section, setSection] = useState<'workouts' | 'library' | 'plans'>('workouts');
+  const [section, setSection] = useState<'workouts' | 'library' | 'plans' | 'run'>('workouts');
   if (!session || recovery) return <Redirect href="/" />;
   const navigation = (
     <Segments
@@ -18,9 +19,20 @@ export default function FitnessRoute() {
         { value: 'workouts', label: 'Workouts' },
         { value: 'library', label: 'Library' },
         { value: 'plans', label: 'Plans' },
+        { value: 'run', label: 'Run' },
       ]}
     />
   );
+  if (section === 'run')
+    return (
+      <RunStartScreen
+        key={session.user.id}
+        userId={session.user.id}
+        navigation={navigation}
+        onStart={() => router.push('/runs/session')}
+        onHistory={() => router.push('/runs')}
+      />
+    );
   if (section === 'plans')
     return (
       <PlansScreen

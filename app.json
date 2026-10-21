@@ -28,6 +28,16 @@
     "plugins": [
       "expo-router",
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow Actaro to record your route while you run.",
+          "locationAlwaysAndWhenInUsePermission": "Allow Actaro to continue recording an active run when the screen is locked. Location recording stops when you pause, finish or discard the run.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
+      [
         "expo-sensors",
         {
           "motionPermission": "Allow Actaro to read today's step count for your activity log."

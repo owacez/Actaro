@@ -993,6 +993,59 @@ export type Database = {
           },
         ];
       };
+      run_sessions: {
+        Row: {
+          created_at: string;
+          distance_meters: number;
+          duration_seconds: number;
+          ended_at: string;
+          id: string;
+          local_date: string;
+          notes: string;
+          route: Json;
+          route_preview: Json;
+          started_at: string;
+          time_zone: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          distance_meters?: number;
+          duration_seconds: number;
+          ended_at: string;
+          id: string;
+          local_date: string;
+          notes?: string;
+          route: Json;
+          route_preview?: Json;
+          started_at: string;
+          time_zone: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          distance_meters?: number;
+          duration_seconds?: number;
+          ended_at?: string;
+          id?: string;
+          local_date?: string;
+          notes?: string;
+          route?: Json;
+          route_preview?: Json;
+          started_at?: string;
+          time_zone?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'run_sessions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       saved_meals: {
         Row: {
           created_at: string;
@@ -1678,6 +1731,8 @@ export type Database = {
         };
         Returns: string;
       };
+      run_route_distance: { Args: { p_route: Json }; Returns: number };
+      run_route_preview: { Args: { p_route: Json }; Returns: Json };
       save_activity: {
         Args: {
           p_date: string;

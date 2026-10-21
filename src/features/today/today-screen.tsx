@@ -26,6 +26,7 @@ import { nutritionService } from '@/features/nutrition/nutrition-service';
 import { todayService } from './today-service';
 import { useDeviceSteps } from '@/features/activity/step-provider';
 import { habitGoalFact, goalProgress } from '@/features/goals/goal-model';
+import { TodayRunCard } from '@/features/running/run-cards';
 export function TodayScreen({ userId }: { userId: string }) {
   const deviceSteps = useDeviceSteps();
   const load = useCallback(() => todayService.load(userId), [userId]),
@@ -135,6 +136,10 @@ export function TodayScreen({ userId }: { userId: string }) {
               </AuthCard>
             </View>
           </View>
+          <TodayRunCard
+            userId={userId}
+            unit={data.context.preferences.distance_unit === 'mi' ? 'mi' : 'km'}
+          />
           <View
             style={{
               backgroundColor: data.workout || data.session ? colors.accent : colors.surface,

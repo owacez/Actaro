@@ -300,7 +300,13 @@ account just to tick this test.
 
 ## 5. What is outside this core test scope
 
-Active minutes (v1.1), running/GPS (v1.2), advanced cross-metric analytics and
+Running/GPS was separately authorized early on 2026-10-21. Use the
+[running checklist](RUNNING_TESTING.md); background device acceptance remains deferred.
+For recipes, open Your recipes, create a recipe from measured ingredients, compare
+automatic totals/per-serving values, save, then explicitly log one portion into
+a chosen meal. Saving the recipe alone must not change the diary.
+
+Active minutes (v1.1), advanced cross-metric analytics and
 achievements (v1.3), food-photo AI (v1.4), full offline mutation sync (v1.5) and
 Apple Health/Health Connect/wearables (v2.0) are not implemented core features.
 Native/store builds and final release approval remain separate acceptance gates.

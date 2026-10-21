@@ -995,6 +995,13 @@ Determine what the target mobile platforms expose reliably.
 
 # Phase 9 — v1.2 Running / GPS
 
+User-approved execution exception (2026-10-21): begin this phase early, including
+background GPS implementation; defer native development builds and physical
+device acceptance. The original 48-weight baseline remains unchanged. Automated
+and browser evidence cannot close native lifecycle/permission acceptance. v1.0
+release approval, v1.1 Active Minutes and other future phases are not advanced by
+this exception. See `RUNNING_TESTING.md` and Development Status for exact evidence.
+
 ## 9.1 Location Permission Flow — Weight 3
 
 ## 9.2 Run Session Schema — Weight 4

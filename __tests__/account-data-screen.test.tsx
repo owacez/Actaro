@@ -12,6 +12,8 @@ jest.mock('@/features/profile/account-data-service', () => ({
 }));
 jest.mock('@/features/profile/share-export', () => ({ shareExport: jest.fn() }));
 jest.mock('@/features/workouts/session-store', () => ({ sessionStore: { discard: jest.fn() } }));
+jest.mock('@/features/running/run-store', () => ({ runStore: { read: async () => null } }));
+jest.mock('@/features/running/run-tracker', () => ({ runTracker: { discard: jest.fn() } }));
 jest.mock('@/features/notifications/reminder-service', () => ({
   reminderService: { owner: () => undefined, setOwner: jest.fn() },
 }));
@@ -85,6 +87,7 @@ test('an export finishing after account screen unmount cannot open a share sheet
       account: { id: 'owner', email: undefined, createdAt: '' },
       records: {},
       activeWorkout: null,
+      activeRun: null,
     }),
   );
   expect(shareExport).not.toHaveBeenCalled();

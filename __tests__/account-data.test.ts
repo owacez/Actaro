@@ -26,6 +26,7 @@ const makeClient = () =>
 let mockClient: ReturnType<typeof makeClient>;
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: () => mockClient }));
 jest.mock('@/features/workouts/session-store', () => ({ sessionStore: { read: jest.fn() } }));
+jest.mock('@/features/running/run-store', () => ({ runStore: { read: async () => null } }));
 beforeEach(() => {
   mockClient = makeClient();
   jest.spyOn(mockClient.auth, 'getUser').mockResolvedValue({ data: { user }, error: null });
@@ -49,9 +50,9 @@ beforeEach(() => {
       }),
   );
 });
-test('export covers all 28 owned tables with deterministic ordering, owner filters and no auth secrets', async () => {
+test('export covers all 29 owned tables with deterministic ordering, owner filters and no auth secrets', async () => {
   const result = await exportAccount(user.id);
-  expect(Object.keys(result.records)).toHaveLength(28);
+  expect(Object.keys(result.records)).toHaveLength(29);
   expect(Object.keys(result.records).sort()).toEqual(Object.keys(exportTables).sort());
   for (const [input] of mockFetch.mock.calls) {
     const url = new URL(String(input));

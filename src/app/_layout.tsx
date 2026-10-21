@@ -15,6 +15,7 @@ import { AppThemeProvider } from '@/features/profile/theme-provider';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { ReminderCoordinator } from '@/features/notifications/reminder-coordinator';
 import { StepProvider } from '@/features/activity/step-provider';
+import { RunCoordinator } from '@/features/running/run-coordinator';
 export { ScreenErrorBoundary as ErrorBoundary } from '@/components/screen-error-boundary';
 
 void SplashScreen.preventAutoHideAsync();
@@ -69,6 +70,9 @@ function AuthRoutes() {
         <Stack.Screen name="goals/manage" />
         <Stack.Screen name="body" />
         <Stack.Screen name="activity" />
+        <Stack.Screen name="runs/index" />
+        <Stack.Screen name="runs/session" options={{ fullScreenGestureEnabled: false }} />
+        <Stack.Screen name="runs/[id]" />
       </Stack.Protected>
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="explore" />
@@ -82,6 +86,7 @@ function AccountTheme() {
   return (
     <AppThemeProvider userId={recovery ? undefined : session?.user.id}>
       <AuthFeedbackProvider>
+        <RunCoordinator />
         <ReminderCoordinator userId={recovery ? undefined : session?.user.id} />
         <StepProvider
           key={session?.user.id ?? 'signed-out'}

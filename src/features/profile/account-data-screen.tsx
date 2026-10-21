@@ -11,6 +11,8 @@ import {
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
 import { getSupabase } from '@/lib/supabase/client';
 import { sessionStore } from '@/features/workouts/session-store';
+import { runStore } from '@/features/running/run-store';
+import { runTracker } from '@/features/running/run-tracker';
 import { reminderService } from '@/features/notifications/reminder-service';
 import { exportAccount, deleteOwnAccount } from './account-data-service';
 import { shareExport } from './share-export';
@@ -53,6 +55,10 @@ export function AccountDataScreen({ userId, onBack }: { userId: string; onBack: 
         setDeleted(true);
         // Server deletion is final even if this device cannot finish its local cleanup.
         const cleaned = await Promise.allSettled([
+          (async () => {
+            const run = await runStore.read(userId);
+            if (run) await runTracker.discard(userId, run.id);
+          })(),
           sessionStore.discard(userId),
           reminderService.owner() === userId
             ? reminderService.setOwner(undefined)
@@ -95,7 +101,8 @@ export function AccountDataScreen({ userId, onBack }: { userId: string; onBack: 
       />
       <AuthText>
         JSON includes your profile, preferences, workouts, nutrition, habits, goals and activity,
-        plus any active workout saved on this device. Avoid editing during export.
+        runs with private GPS routes, plus active workouts and runs saved on this device. Avoid
+        editing during export.
       </AuthText>
       <AuthText kind="heading">Delete account</AuthText>
       <AuthNotice>

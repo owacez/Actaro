@@ -2,6 +2,7 @@ import { getSupabase } from '@/lib/supabase/client';
 import { requireOwner } from '@/lib/owned-data';
 import { progressPages } from '@/features/progress/progress-service';
 import { sessionStore } from '@/features/workouts/session-store';
+import { runStore } from '@/features/running/run-store';
 import type { Database } from '@/lib/supabase/database.types';
 
 // Explicit allowlist: no auth tokens, shared catalogs, storage credentials or other owners.
@@ -34,6 +35,7 @@ export const exportTables = {
   body_measurements: ['local_date', 'measurement'],
   daily_activity: ['local_date'],
   activity_targets: ['user_id'],
+  run_sessions: ['id'],
 } as const satisfies Partial<{
   [
     K in keyof Database['public']['Tables']
@@ -59,13 +61,14 @@ export async function exportAccount(userId: string) {
     });
   }
   const activeWorkout = await sessionStore.read(userId);
+  const activeRun = await runStore.read(userId);
   await requireOwner(userId);
   return {
     format: 'actaro-export',
     version: 1,
     startedAt,
     completedAt: new Date().toISOString(),
-    note: 'Records collected during this interval, not a transactional backup. Avoid editing while exporting. Shared reference catalogs are excluded. Active workout is from this device only.',
+    note: 'Records collected during this interval, not a transactional backup. Avoid editing while exporting. Shared reference catalogs are excluded. Active workout and run are from this device only. Run routes contain private location data.',
     account: {
       id: userId,
       email: account.data.user.email,
@@ -73,6 +76,7 @@ export async function exportAccount(userId: string) {
     },
     records,
     activeWorkout,
+    activeRun,
   };
 }
 

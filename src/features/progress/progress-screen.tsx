@@ -21,6 +21,7 @@ import {
 import { periodDays, type ProgressPreset, type ProgressRange } from './progress-period';
 import { progressService } from './progress-service';
 import { habitUnit } from '@/features/habits/habit-model';
+import { RunProgressScreen } from '@/features/running/run-cards';
 
 const modules = [
   { key: 'weight', title: 'Body' },
@@ -29,6 +30,7 @@ const modules = [
   { key: 'strength', title: 'Strength' },
   { key: 'volume', title: 'Volume' },
   { key: 'steps', title: 'Activity' },
+  { key: 'runs', title: 'Running' },
   { key: 'habits', title: 'Habits' },
   { key: 'summary', title: 'Summary' },
 ] as const;
@@ -113,6 +115,7 @@ export function ProgressScreen({
   );
   if (module === 'weight')
     return <WeightProgressScreen userId={userId} onLog={onLog} navigation={navigation} />;
+  if (module === 'runs') return <RunProgressScreen userId={userId} navigation={navigation} />;
   return (
     <ProgressPanel
       key={module}

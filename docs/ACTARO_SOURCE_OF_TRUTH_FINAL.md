@@ -1082,6 +1082,15 @@ Active Minutes can feed:
 
 Running is a dedicated product area, designed now and implemented after the deterministic core.
 
+Execution exception approved by the user on 2026-10-21: implement running early,
+including background GPS support, with native development-build/device acceptance
+deferred. The first implementation records private routes, time, distance and pace;
+supports pause, review/save, history/detail and Today/Progress integration; and
+draws route outlines rather than street-map tiles. This does not authorize active
+minutes, inferred calories, running goals/events, wearables or advanced analytics.
+See `RUNNING_TESTING.md` for limits and the deferred checks. Core release approval
+remains separate.
+
 ## 16.1 Running Screens
 
 Design and later implement:

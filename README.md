@@ -490,7 +490,31 @@ editable owned workout templates and an active split; existing plans/workouts st
 Loads start unspecified. A failed request can be retried to recover the same copy.
 These seven strength templates are Actaro-authored starting points with general
 programming references, not endorsed prescriptions or logged results. Beginner
-Running remains deferred to the running release, v1.2.
+The Beginner Running training-plan family remains deferred; it is separate from
+the user-approved early GPS run tracker below.
+
+## Running (early v1.2 implementation)
+
+Open **Train → Run → Start run**. After granting location access, keep the app open
+for foreground tracking, pause/resume as needed, then **Stop → Review → Save run**.
+Saved runs appear in run history, Today and **Progress → Running**. History opens
+route details and confirmed deletion. Routes are private GPS outlines, without
+street-map tiles. No additional API key or paid map service is required.
+
+Start with the usual project-root commands:
+
+```sh
+npm install
+npm start -- --go
+```
+
+Expo Go and web support foreground testing only; leaving the app pauses recording.
+Background location support is configured for a future development build and
+needs physical-device verification. No native build was submitted. Recording
+stores points on the device, with no API call per GPS update; only explicit final
+save uploads the route. See [running tests and limitations](docs/RUNNING_TESTING.md)
+for permissions, privacy, offline retry and background acceptance. A different
+Supabase project also needs the committed running migrations.
 
 ## Manual nutrition (v0.4)
 
@@ -728,6 +752,9 @@ v0.9 Quality & Personal Beta → v1.0 Core Release.
 Future order: v1.1 Active Minutes → v1.2 Running & GPS → v1.3 Advanced Analytics
 & Achievements → v1.4 Food Photo AI → v1.5 Advanced Offline & Sync → v2.0 Health
 & Wearables. Retained unassigned/deferred work is tracked in Development Status.
+
+Exception: on 2026-10-21 the user approved beginning running early, with background
+GPS device testing deferred. This does not close v1.0 release approval or start v1.1.
 
 Initialization stops at review. Feature development requires explicit approval
 of the next small, independently verifiable task.

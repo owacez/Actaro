@@ -4,6 +4,45 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Running (2026-10-21): implementation and automated/browser verification **DONE**;
+physical GPS, permissions and background lifecycle acceptance **DEFERRED** by the
+user. Early v1.2 scope adds Train → Run, permission rationale, foreground/background
+tracking, account-bound local drafts, pause/resume, guarded back/discard,
+review/save/retry, private history/detail/deletion and Today/Progress metrics.
+Route outlines follow redesign page 15; no street-map service or new key is needed.
+
+Migrations `20261021070556_running_sessions.sql` and
+`20261021070938_running_route_previews.sql` are applied, with generated types.
+The owner-protected table validates bounded routes, derives distance/preview and
+cascades account deletion. Rollback-only SQL checks passed locally and on the
+hosted database without retained test accounts. No running-specific advisor finding;
+existing password-protection/index advisories are retained in
+[running testing](RUNNING_TESTING.md).
+
+Recording persists locally with **zero Supabase calls per GPS update**. Summaries
+use previews; Progress reads metrics; detail/export reads full coordinates.
+Account export includes runs/draft; confirmed deletion clears cloud and local data.
+Web/Expo Go pause when leaving the foreground. No native build, outdoor GPS,
+locked-screen or Android result is claimed. Browser fixtures passed 13 captures
+using fictional recipe/GPS data and zero live Supabase requests.
+
+Final verification: `npm.cmd run check` **PASS** (strict TypeScript, lint,
+formatting, 383 Jest tests in 73 suites plus six dataset tests: **389 total**).
+`npm.cmd exec -- expo export --platform web --output-dir .actaro-tools/running-export`
+**PASS**, 42 static routes. `git diff --check` **PASS**. The isolated Postgres
+runner also passed after aligning local migration filenames with hosted versions.
+An existing Metro watcher had stale route declarations after new routes were
+added; stopping that server and regenerating with the installed SDK helper fixed
+local validation, without route casts, disabled checks or dependency patches.
+
+The unchanged Phase 9 denominator is **48**. Seven fully verified non-device items
+earn **23/48 = 47.9167%** of full acceptance. Five hardware-dependent items have
+implemented/tested contracts but earn zero pending physical acceptance; no
+arbitrary partial credit is inferred. This measures full acceptance, not code
+written. Other release weights and v1.0 gates are unchanged. Current focus: finish
+this handoff. Next three checks: iPhone outdoor run and recipe portions; later
+development-build locked-screen GPS; Android permissions/lifecycle when available.
+
 Recipe UX (2026-10-21): implementation/local verification **DONE**; mobile
 acceptance **DEFERRED**. The recipe-only library separates creating/editing recipes
 from food-label entry and portion logging. Ingredient search/editing uses a sheet;
@@ -436,8 +475,9 @@ calendar controls and actual-data charts are implemented. TypeScript/lint/format
 293 Jest tests and six dataset tests passed; all-platform JavaScript export and
 16 isolated sample-data layout captures passed with zero live Supabase requests.
 See [coverage, retained differences and evidence](REDESIGN_IMPLEMENTATION.md).
-The new PDF supersedes the older atlas and visual palette. Page 15 running stays
-v1.2 and is not implemented. Release weights and deferred acceptance are unchanged.
+The new PDF supersedes the older atlas and visual palette. Page 15 running was
+originally deferred; the user authorized early implementation on 2026-10-21 as
+recorded above. Release weights and deferred acceptance are unchanged.
 
 Header reconciliation (2026-10-17): **DONE** for implementation/local verification.
 Removed the detached full-width white/glass header strip. Page headings now share
@@ -619,18 +659,18 @@ User-deferred device checks are separate, unweighted acceptance records; they ar
 | Phase 8 / 8.3    | Today Integration                      | v1.1    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §8.3.                                                                                                                       |
 | Phase 8 / 8.4    | Progress Integration                   | v1.1    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §8.4.                                                                                                                       |
 | Phase 8 / 8.5    | Accuracy / Messaging Review            | v1.1    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §8.5.                                                                                                                       |
-| Phase 9 / 9.1    | Location Permission Flow               | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.1.                                                                                                                       |
-| Phase 9 / 9.2    | Run Session Schema                     | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.2.                                                                                                                       |
-| Phase 9 / 9.3    | Run Start                              | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.3.                                                                                                                       |
-| Phase 9 / 9.4    | GPS Route Recording                    | v1.2    |      8 | NOT_STARTED |         0% | Requirements: canonical plan §9.4.                                                                                                                       |
-| Phase 9 / 9.5    | Active Run                             | v1.2    |      7 | NOT_STARTED |         0% | Requirements: canonical plan §9.5.                                                                                                                       |
-| Phase 9 / 9.6    | Distance / Pace Calculation            | v1.2    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §9.6.                                                                                                                       |
-| Phase 9 / 9.7    | Run Summary                            | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.7.                                                                                                                       |
-| Phase 9 / 9.8    | Route Thumbnail                        | v1.2    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §9.8.                                                                                                                       |
-| Phase 9 / 9.9    | Run History                            | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.9.                                                                                                                       |
-| Phase 9 / 9.10   | Run Detail                             | v1.2    |      3 | NOT_STARTED |         0% | Requirements: canonical plan §9.10.                                                                                                                      |
-| Phase 9 / 9.11   | Today Recent-Run Card                  | v1.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §9.11.                                                                                                                      |
-| Phase 9 / 9.12   | Progress Running Card                  | v1.2    |      2 | NOT_STARTED |         0% | Requirements: canonical plan §9.12.                                                                                                                      |
+| Phase 9 / 9.1    | Location Permission Flow               | v1.2    |      3 | IN_PROGRESS |         0% | Permission rationale/denial contracts tested; native system permission acceptance DEFERRED.                                                              |
+| Phase 9 / 9.2    | Run Session Schema                     | v1.2    |      4 | DONE        |       100% | Applied migrations, generated types, rollback-only ownership/constraint/cascade SQL checks PASS.                                                         |
+| Phase 9 / 9.3    | Run Start                              | v1.2    |      3 | IN_PROGRESS |         0% | Explicit start, GPS timeout, draft and browser flow verified; outdoor start acceptance DEFERRED.                                                         |
+| Phase 9 / 9.4    | GPS Route Recording                    | v1.2    |      8 | IN_PROGRESS |         0% | Local GPS queue, filters/bounds and account-isolation tests PASS; physical background GPS DEFERRED.                                                      |
+| Phase 9 / 9.5    | Active Run                             | v1.2    |      7 | IN_PROGRESS |         0% | Timer, pause/resume, guarded navigation and browser flow verified; native lifecycle acceptance DEFERRED.                                                 |
+| Phase 9 / 9.6    | Distance / Pace Calculation            | v1.2    |      5 | DONE        |       100% | Haversine, km/mi pace, pause gaps, noise and dateline tests PASS.                                                                                        |
+| Phase 9 / 9.7    | Run Summary                            | v1.2    |      4 | IN_PROGRESS |         0% | Review/frozen retry/save tests and browser flow PASS; native end-to-end acceptance DEFERRED.                                                             |
+| Phase 9 / 9.8    | Route Thumbnail                        | v1.2    |      4 | DONE        |       100% | Server-derived bounded previews and segmented SVG outline; SQL/browser PASS.                                                                             |
+| Phase 9 / 9.9    | Run History                            | v1.2    |      3 | DONE        |       100% | Owned paginated history with preview; browser/service checks PASS.                                                                                       |
+| Phase 9 / 9.10   | Run Detail                             | v1.2    |      3 | DONE        |       100% | Owned full-route detail and guarded deletion; SQL/service/browser flow verified.                                                                         |
+| Phase 9 / 9.11   | Today Recent-Run Card                  | v1.2    |      2 | DONE        |       100% | Recent/active draft card and owned detail navigation; UI/browser PASS.                                                                                   |
+| Phase 9 / 9.12   | Progress Running Card                  | v1.2    |      2 | DONE        |       100% | Shared periods, distance/time and distance-weighted average pace; UI/browser PASS.                                                                       |
 | Phase 10 / 10.1  | Performance Dashboard                  | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.1.                                                                                                                      |
 | Phase 10 / 10.2  | Training Block Comparison              | v1.3    |      4 | NOT_STARTED |         0% | Requirements: canonical plan §10.2.                                                                                                                      |
 | Phase 10 / 10.3  | Unified Timeline                       | v1.3    |      5 | NOT_STARTED |         0% | Requirements: canonical plan §10.3.                                                                                                                      |
@@ -674,7 +714,7 @@ User-deferred device checks are separate, unweighted acceptance records; they ar
 | Phase 6  | v0.9    | Quality & Personal Beta           |             33 |       100% | DONE        |
 | Phase 7  | v1.0    | Core Deterministic Release        |    — (9 gates) |         0% | NOT_STARTED |
 | Phase 8  | v1.1    | Active Minutes                    |             16 |         0% | NOT_STARTED |
-| Phase 9  | v1.2    | Running / GPS                     |             48 |         0% | NOT_STARTED |
+| Phase 9  | v1.2    | Running / GPS                     |             48 |   47.9167% | IN_PROGRESS |
 | Phase 10 | v1.3    | Advanced Analytics & Achievements |             26 |         0% | NOT_STARTED |
 | Phase 11 | v1.4    | Food Photo AI                     |             25 |         0% | NOT_STARTED |
 | Phase 12 | v1.5    | Advanced Offline / Sync           |             28 |         0% | NOT_STARTED |
