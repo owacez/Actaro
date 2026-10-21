@@ -30,7 +30,7 @@ const descriptions: Record<AuthMode, string> = {
   'sign-up': 'Training, food and progress in one place.',
   reset: 'We’ll send a secure reset link to your email.',
   verify:
-    'If your account needs verification, follow the email link on the device where you created it, then sign in.',
+    'Open the newest confirmation email in the same browser or app where you signed up. Already clicked it? Try signing in before requesting another email.',
   'update-password': 'Choose a new password for your account.',
 };
 const buttons: Record<AuthMode, string> = {
@@ -104,7 +104,15 @@ export function AuthScreen({ recovery = false }: { recovery?: boolean }) {
         notify('Password updated successfully.', 'success');
       }
     } catch (requestError) {
-      reportError(authErrorMessage(requestError));
+      if (
+        mode === 'sign-in' &&
+        typeof requestError === 'object' &&
+        requestError !== null &&
+        'code' in requestError &&
+        requestError.code === 'email_not_confirmed'
+      ) {
+        changeMode('verify');
+      } else reportError(authErrorMessage(requestError));
     } finally {
       pending.current = false;
       setBusy(false);

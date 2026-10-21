@@ -41,7 +41,7 @@ export function authErrorMessage(error: unknown) {
     case 'otp_expired':
     case 'flow_state_expired':
     case 'flow_state_not_found':
-      return 'This link has expired or was already used. Request a new link.';
+      return 'This link has expired or was already used.';
     case 'pkce_code_verifier_not_found':
       return 'Open this address in the same browser profile or Expo Go app where you started. Signing out or clearing storage can interrupt confirmation.';
     case 'bad_code_verifier':

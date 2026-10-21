@@ -101,6 +101,28 @@ test('reset success does not reveal account existence', async () => {
   expect(await screen.findByText(/If this email has an account/)).toBeTruthy();
 });
 
+test.each(['web', 'ios'] as const)(
+  'unconfirmed sign-in on %s offers explicit resend without automatically sending an email',
+  async (platform) => {
+    jest.replaceProperty(Platform, 'OS', platform);
+    service.signIn.mockRejectedValue({ code: 'email_not_confirmed' });
+    service.resendConfirmation.mockResolvedValue(undefined);
+    await render(<AuthScreen />, { wrapper: FeedbackTestRoot });
+    await enterEmailAndPassword();
+    await fireEvent.press(screen.getByRole('button', { name: 'Sign in' }));
+    expect(await screen.findByText('Check your email')).toBeTruthy();
+    expect(screen.getByText('tester@example.com')).toBeTruthy();
+    expect(screen.queryByLabelText('Password')).toBeNull();
+    expect(service.resendConfirmation).not.toHaveBeenCalled();
+    await fireEvent.press(screen.getByRole('button', { name: 'Resend confirmation' }));
+    expect(service.resendConfirmation).toHaveBeenCalledTimes(1);
+    expect(service.resendConfirmation).toHaveBeenCalledWith('tester@example.com');
+    await fireEvent.press(screen.getByRole('button', { name: 'Already have an account? Sign in' }));
+    expect(screen.getByLabelText('Email')).toHaveProp('value', 'tester@example.com');
+    expect(screen.getByLabelText('Password')).toHaveProp('value', '');
+  },
+);
+
 test('password recovery validates confirmation before updating the user', async () => {
   service.updatePassword.mockResolvedValue(undefined);
   await render(<AuthScreen recovery />, { wrapper: FeedbackTestRoot });

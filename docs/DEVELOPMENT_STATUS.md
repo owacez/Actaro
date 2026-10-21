@@ -1,39 +1,46 @@
 # Actaro — Development Status
 
-Updated: 2026-10-20 (America/Los_Angeles).
+Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
-Email-confirmation return routing (2026-10-20): configuration correction **DONE**;
-fresh live acceptance **IN_PROGRESS**. The user reports
-the other tested app flows work, but email verification completes without a
-usable Safari return. Read-only invalid-token probes reproduce a native
-destination/configuration issue: current Expo Go LAN and configured standalone
-scheme callbacks are rejected in favor of `http://localhost:3000/`; current
-web callback/recovery paths on port 8081 are accepted. Auth reports v2.197.0;
-its non-loopback IP rule is consistent with the LAN rejection. No email was
-sent, account modified or valid confirmation token used in these probes.
+Email-confirmation recovery (2026-10-21): implementation/local verification **DONE**;
+live Safari return **IN_PROGRESS**. The latest supplied signup email
+targets `http://localhost:8081/auth/callback` and the user reports the app's
+expired/used-link screen. A localhost target cannot reach the computer from
+iPhone; it may originate from web, an old email or Site URL fallback. The token
+was not replayed, logged or retained in tracked files.
 
-Prepared a separate free hostname-based Expo Go tunnel on port 8082 using the
-already installed ignored x64 tools; the user's port-8081 server remains.
-Application URLs, credentials, auth validation and policies are unchanged.
-README and AUTH_TESTING now explain the verified diagnosis and exact-runtime
-configuration. The connected MCP cannot edit Auth configuration and no dashboard
-browser was available; the user saved the development Site URL and exact tunnel
-callbacks. Repeat invalid-token probes **PASS**: default/web callback go to the
-observed port-8081 callback, and both tunnel callback/recovery URLs are accepted
-exactly. The tunnel native manifest and iPhone loading page (`?platform=ios`)
-return HTTP 200. No live email was requested by the agent; a fresh phone
-confirmation and PKCE exchange remain unverified. The standalone `actaro://`
-allowlist is still a retained native-build configuration check.
-`npm.cmd run check` **PASS**: strict TypeScript/lint/format, 357 Jest tests in
-67 suites plus six dataset tests (**363 total**). These baseline checks do not
-establish live redirect acceptance or an iPhone launch.
+`auth-callback-screen.tsx` explains trying normal sign-in after a confirmation
+return fails, without claiming success. `auth-screen.tsx` routes only Supabase's
+`email_not_confirmed` sign-in rejection to the existing verification screen;
+email is preserved, password cleared, and resend requires explicit action.
+`auth-service.ts` removes the unconditional resend advice from expiry errors.
+Password recovery retains separate reset-link guidance. Tests cover web/iOS
+recovery, explicit resend, password clearing and no false success/session exchange.
+No dependencies, credentials, schema, policies or callback hosts were changed.
+This refinement does not change release weights or close live acceptance.
 
-Next three actions: open the tunnel project in Expo Go; start one fresh
-confirmation and open it on the initiating phone; verify the confirmed screen
-and normal sign-in. Old email links retain their old target. Production URLs/native builds
-and release approval remain subject to the retained gates below.
+Verification: `npm.cmd run check` **PASS** (strict TypeScript, lint, formatting,
+360 Jest tests in 67 suites plus six dataset tests, **366 total**).
+`git diff --check` **PASS**. Auth SDK calls are mocked in the UI/service tests;
+they do not establish live email delivery or iPhone handoff. Read-only aggregate
+Auth logs were inspected without selecting tokens, email addresses or account IDs;
+they do not identify why this individual token expired. No live token was used.
+
+October 20 configuration evidence remains in AUTH_TESTING: after the user's
+dashboard correction, invalid-token probes accepted the exact web and tunnel
+callbacks. Those probes did not verify an emailed callback or phone handoff.
+On October 21 the old tunnel was offline; two restarts timed out. A currently
+reachable phone callback remains the blocker. MCP cannot edit Auth settings and
+no dashboard browser is available. No extra live email was requested by the agent.
+The standalone `actaro://` allowlist remains a retained native-build check.
+
+Next three actions: try normal sign-in for the already-confirmed account; if
+confirmation is still required, resend once from the intended running runtime;
+verify a fresh callback and subsequent sign-in there. Web needs the original
+computer/browser and running server; Expo Go needs a running hostname tunnel
+and its exact allowed callbacks. Native builds and release approval remain deferred.
 
 Swipeable Today habit cards and compact logged actions (2026-10-20): **DONE**
 for implementation/local verification; physical-device acceptance **DEFERRED**.

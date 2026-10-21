@@ -1,8 +1,8 @@
 # Authentication testing
 
-Updated: 2026-10-14. v0.1 authentication development is DONE for the active scope.
-Remaining live signup/verification and native acceptance checks are user-DEFERRED;
-this checklist is retained for later testing, not marked passed. See
+Updated: 2026-10-21. v0.1 authentication development is DONE for the active scope.
+Live confirmation return testing is IN_PROGRESS after the reported Safari failure;
+other retained native acceptance checks remain user-DEFERRED. See
 [foundation closure](DEVELOPMENT_STATUS.md#v01-development-closure--2026-10-14).
 
 ## Configuration
@@ -26,6 +26,34 @@ Use your Supabase team email for free testing. Do not send a password in chat.
 See [Supabase default sender restrictions](https://supabase.com/docs/guides/auth/auth-smtp).
 
 ## Callback URLs
+
+### Latest failing link and recovery (2026-10-21)
+
+The user's latest signup email explicitly targets `http://localhost:8081/auth/callback`.
+This is a web destination: on iPhone it addresses the phone, not the development
+computer. It could come from a web request, an older email or Supabase's Site URL
+fallback; the destination alone does not prove which runtime initiated signup.
+The reported **Unable to open this link / expired or already used** message is
+the app's callback error UI, distinct from Safari being unable to reach a host.
+Do not replay the shared link or copy its token into logs or documentation.
+
+The callback now recommends trying normal sign-in before sending more confirmation
+emails, without claiming success or granting a session. If Supabase rejects sign-in
+with `email_not_confirmed`, the existing verification screen opens with the email
+preserved and password cleared. Resend requires an explicit button press. Expired
+password recovery keeps separate instructions to request a new reset link.
+
+The previous tunnel's successful manifest/allowlist probes were point-in-time
+checks. On October 21 the tunnel was offline and two restart attempts timed out;
+its old hostname is not evidence of a currently reachable callback. Phone email
+handoff is still **IN_PROGRESS**, not fixed by these recovery UI changes. No
+IP address, tunnel hostname or localhost return was hardcoded into app code.
+
+Next checks: sign in normally if already verified; if unconfirmed, resend only
+from the intended running runtime; verify a fresh email returns there. For web,
+use the original computer/browser with its server running. For phone, a running
+hostname-based Expo Go tunnel and its allowed callbacks are required; stable
+installed-build callbacks remain deferred by the user's build decision.
 
 ### Verified redirect diagnosis (2026-10-20)
 

@@ -71,6 +71,15 @@ export function AuthCallbackScreen({ recovery = false }: { recovery?: boolean })
                 ? authErrorMessage({ code: error_code })
                 : 'Open the link in the browser or app where you started. If it expired or was already used, request one new link.'}
           </AuthNotice>
+          {recovery ? (
+            <AuthText>Return to sign in and request a new password reset link.</AuthText>
+          ) : (
+            <AuthText>
+              If you already opened a confirmation email, try signing in. Your email may have been
+              verified before the return to Actaro failed. If sign-in still requires confirmation,
+              you can resend it there.
+            </AuthText>
+          )}
           <AuthButton title="Return to sign in" onPress={() => router.replace('/')} />
         </>
       ) : (

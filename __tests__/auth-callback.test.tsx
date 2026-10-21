@@ -83,15 +83,27 @@ test('missing local PKCE storage explains the original-browser requirement witho
 test('server expiry and mismatched verifier errors are distinguished safely', async () => {
   mockParams = { error_code: 'otp_expired' };
   const view = await render(<AuthCallbackScreen />);
-  expect(
-    screen.getByText('This link has expired or was already used. Request a new link.'),
-  ).toBeTruthy();
+  expect(screen.getByText('This link has expired or was already used.')).toBeTruthy();
+  expect(screen.getByText(/try signing in. Your email may have/)).toBeTruthy();
+  expect(screen.queryByText('Email confirmed')).toBeNull();
+  expect(exchange).not.toHaveBeenCalled();
+  expect(mockReplace).not.toHaveBeenCalled();
   mockParams = { code: 'mismatched-verifier' };
   exchange.mockRejectedValue({ code: 'bad_code_verifier' });
   await view.rerender(<AuthCallbackScreen />);
   expect(
     await screen.findByText(/This link belongs to a different confirmation request/),
   ).toBeTruthy();
+});
+
+test('expired recovery does not suggest that a password reset succeeded', async () => {
+  mockParams = { error_code: 'otp_expired' };
+  await render(<AuthCallbackScreen recovery />);
+  expect(screen.getByText('Unable to open this link')).toBeTruthy();
+  expect(screen.queryByText(/Your email may have/)).toBeNull();
+  expect(screen.getByText('Return to sign in and request a new password reset link.')).toBeTruthy();
+  expect(exchange).not.toHaveBeenCalled();
+  expect(mockReplace).not.toHaveBeenCalled();
 });
 
 test('first email-change confirmation explains the other inbox without exchanging a session', async () => {
