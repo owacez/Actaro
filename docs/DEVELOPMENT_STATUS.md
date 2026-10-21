@@ -4,6 +4,43 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Running map/accuracy follow-up (2026-10-21): overall **IN_PROGRESS**; code and hosted
+database changes **DONE**, actual map rendering/outdoor GPS acceptance **DEFERRED**
+pending verification. Ingredient discovery implementation and hosted checks **DONE**.
+MapLibre/OpenFreeMap street maps replace the outline on
+active/review/detail screens, with follow/recenter, fit-route, visible attribution
+and an outline/retry fallback. This uses Expo-compatible WebView and an isolated
+web frame; no new key, paid provider, backend or Supabase request per GPS fix.
+Live pace clears on stops/stale GPS; uncertainty/speed filtering rejects drift,
+and stops create route segment boundaries. Database-derived moving_seconds keeps
+Today/history/Progress average moving pace separate from elapsed recording time.
+
+Ingredient investigation found the full **7,793-food** USDA catalogue already
+contains plain oats and raw bananas. Alphabetic results and repeated-term ranking
+buried direct ingredients under composite foods. Search now prioritizes direct,
+concise names and offers an Ingredients filter excluding recipes. Recipe building
+defaults to it; Recipes stays separately selectable. No records, nutrient values,
+logging behavior or historical diary snapshots were replaced. Hosted read-only
+acceptance **PASS**: first results for oats/banana match USDA IDs 169705/173944,
+page size remains 24, recipe separation and ownership remain enforced.
+
+`npm.cmd run check` **PASS**: typecheck/lint/format, **389 Jest tests in 74 suites
+plus six dataset tests = 395**. Hosted rollback-only running SQL checks **PASS**,
+including generated moving time, pause gaps, ownership and injection rejection.
+New migrations: running_moving_time, ingredient_search_ranking and
+food_search_concise_matches; generated running types updated. Earlier Windows
+memory failures and one stale test assertion were resolved for the final check.
+The local WebAssembly Postgres runner still failed allocation; no new local SQL
+pass is claimed. Live-tile browser verification timed out and no connected browser
+was available; real map/native rendering and device accuracy remain **DEFERRED**.
+Final `npm.cmd exec -- expo export --platform all --output-dir .actaro-tools/run-map-export-final`
+**PASS** for Android/iOS Hermes bundles and web routes. No build was submitted
+and no release weights/gates changed.
+
+Next three checks: verify street tiles/follow/recenter on iPhone; record a known
+outdoor route with one minute stationary before/after; build oats/banana recipes
+and compare ingredient quantities/portion macros. See [running tests](RUNNING_TESTING.md).
+
 Running (2026-10-21): implementation and automated/browser verification **DONE**;
 physical GPS, permissions and background lifecycle acceptance **DEFERRED** by the
 user. Early v1.2 scope adds Train → Run, permission rationale, foreground/background

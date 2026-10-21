@@ -84,22 +84,31 @@ export function FoodPicker({
       {!recipesOnly && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            {['Search', 'Recent', 'Frequent', 'Favorites', 'Custom', 'Recipes'].map((value) => (
-              <AuthChoice
-                key={value}
-                title={value}
-                selected={mode === value}
-                disabled={disabled}
-                onPress={() => {
-                  setMode(value);
-                  setOffset(0);
-                }}
-              />
-            ))}
+            {['Search', 'Ingredients', 'Recent', 'Frequent', 'Favorites', 'Custom', 'Recipes'].map(
+              (value) => (
+                <AuthChoice
+                  key={value}
+                  title={value}
+                  selected={mode === value}
+                  disabled={disabled}
+                  onPress={() => {
+                    setMode(value);
+                    setOffset(0);
+                  }}
+                />
+              ),
+            )}
           </View>
         </ScrollView>
       )}
       <LoadFeedback {...resource} retry={resource.refresh} />
+      {mode === 'Ingredients' && (
+        <AuthText kind="muted">
+          Individual foods for your recipe. Search oats, banana, rice or milk, then choose the
+          matching raw, dry or cooked preparation and enter its quantity. Your saved recipes stay in
+          Recipes.
+        </AuthText>
+      )}
       {resource.data && !resource.loading && (
         <>
           {resource.data.length === 0 && (

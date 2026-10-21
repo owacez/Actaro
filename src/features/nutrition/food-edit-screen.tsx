@@ -502,6 +502,7 @@ export function RecipeScreen({
               <>
                 <FoodPicker
                   userId={userId}
+                  initialMode="Ingredients"
                   disabled={action.locked}
                   onSelect={(food) => {
                     if (food.id === id) {

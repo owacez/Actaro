@@ -1,6 +1,10 @@
 import { beforeEach, expect, jest, test } from '@jest/globals';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import { FoodPortionScreen, RecipeLibraryScreen } from '@/features/nutrition/food-screen';
+import {
+  FoodPicker,
+  FoodPortionScreen,
+  RecipeLibraryScreen,
+} from '@/features/nutrition/food-screen';
 import { CustomFoodScreen, RecipeScreen } from '@/features/nutrition/food-edit-screen';
 import { TargetsScreen } from '@/features/nutrition/targets-screen';
 import { bodyService } from '@/features/body/body-service';
@@ -35,6 +39,25 @@ jest.mock('@/features/nutrition/nutrition-service', () => ({
   },
 }));
 const service = jest.mocked(nutritionService);
+test('ingredient picker searches individual foods and keeps personal recipes separately selectable', async () => {
+  await render(
+    <FoodPicker userId={nutritionOwner} initialMode="Ingredients" onSelect={jest.fn()} />,
+    { wrapper: FeedbackTestRoot },
+  );
+  await waitFor(() =>
+    expect(service.search).toHaveBeenCalledWith(nutritionOwner, '', 'Ingredients', 0),
+  );
+  expect(screen.getByText(/Individual foods for your recipe/)).toBeTruthy();
+  await fireEvent.changeText(screen.getByLabelText('Search foods'), 'banana');
+  await fireEvent.press(screen.getByRole('button', { name: 'Search food database' }));
+  await waitFor(() =>
+    expect(service.search).toHaveBeenCalledWith(nutritionOwner, 'banana', 'Ingredients', 0),
+  );
+  await fireEvent.press(screen.getByRole('button', { name: 'Recipes' }));
+  await waitFor(() =>
+    expect(service.search).toHaveBeenCalledWith(nutritionOwner, 'banana', 'Recipes', 0),
+  );
+});
 beforeEach(() => {
   jest.clearAllMocks();
   service.context.mockResolvedValue(nutritionContext());

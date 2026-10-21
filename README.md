@@ -498,8 +498,12 @@ the user-approved early GPS run tracker below.
 Open **Train → Run → Start run**. After granting location access, keep the app open
 for foreground tracking, pause/resume as needed, then **Stop → Review → Save run**.
 Saved runs appear in run history, Today and **Progress → Running**. History opens
-route details and confirmed deletion. Routes are private GPS outlines, without
-street-map tiles. No additional API key or paid map service is required.
+route details and confirmed deletion. Active/review/detail screens display
+OpenFreeMap street maps with follow/recenter and fit-route controls; compact cards
+keep route outlines. No additional API key or paid map service is required.
+Live pace clears when movement stops; average moving pace uses separately recorded
+moving time. The elapsed timer includes standing time but excludes manual pauses.
+Outdoor GPS accuracy and live map rendering still require phone acceptance.
 
 Start with the usual project-root commands:
 
@@ -515,6 +519,14 @@ stores points on the device, with no API call per GPS update; only explicit fina
 save uploads the route. See [running tests and limitations](docs/RUNNING_TESTING.md)
 for permissions, privacy, offline retry and background acceptance. A different
 Supabase project also needs the committed running migrations.
+
+**Recipe ingredients:** select **Ingredients** in food search, or create a recipe
+from **Your recipes** (ingredient search defaults to this filter). Search `oats`
+or `banana`; direct, concise food names appear ahead of composite dishes.
+The shared catalogue already includes 7,793 USDA foods, including plain oats and
+raw bananas. Choose the correct dry/raw/cooked preparation and quantity; recipe
+calories/macros still calculate from the existing source nutrients. Saved recipes
+stay separately selectable in **Recipes**. No duplicate food import was performed.
 
 ## Manual nutrition (v0.4)
 
