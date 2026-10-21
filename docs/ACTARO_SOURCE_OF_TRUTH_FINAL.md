@@ -791,6 +791,13 @@ Manual food creation.
 
 ## 11.8 Recipes
 
+User testing revision (2026-10-21): distinguish a custom food copied from a label,
+a recipe calculated from ingredient amounts, and a saved meal copied from diary
+entries. Your recipes opens a dedicated recipe-only list with create/edit and
+portion logging. Ingredient search/portion editing uses a sheet. Calculated
+batch, per-serving and optional cooked-weight nutrition stays above ingredients.
+Saving a recipe does not log it; choose a portion and diary meal, then confirm.
+
 Support:
 
 - Recipe name

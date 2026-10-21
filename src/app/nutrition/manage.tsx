@@ -9,7 +9,11 @@ import {
   AuthNotice,
 } from '@/features/auth/auth-components';
 import { CustomFoodScreen, RecipeScreen } from '@/features/nutrition/food-edit-screen';
-import { FoodPortionScreen, FoodSearchScreen } from '@/features/nutrition/food-screen';
+import {
+  FoodPortionScreen,
+  FoodSearchScreen,
+  RecipeLibraryScreen,
+} from '@/features/nutrition/food-screen';
 import { SavedMealsScreen } from '@/features/nutrition/saved-meals-screen';
 import { TargetsScreen } from '@/features/nutrition/targets-screen';
 import { nutritionService } from '@/features/nutrition/nutrition-service';
@@ -110,14 +114,8 @@ function NutritionManager({
   if (view === 'saved') return <SavedMealsScreen {...common} onLogged={onLogged} />;
   if (view === 'portion' && foodId)
     return <FoodPortionScreen {...common} foodId={foodId} onOpen={onOpen} onLogged={onLogged} />;
-  if (view === 'search' || view === 'recipes')
-    return (
-      <FoodSearchScreen
-        {...common}
-        initialMode={view === 'recipes' ? 'Recipes' : 'Search'}
-        onOpen={onOpen}
-      />
-    );
+  if (view === 'recipes') return <RecipeLibraryScreen {...common} onOpen={onOpen} />;
+  if (view === 'search') return <FoodSearchScreen {...common} onOpen={onOpen} />;
   return (
     <AuthFrame>
       <AuthNotice error>Nutrition screen unavailable.</AuthNotice>

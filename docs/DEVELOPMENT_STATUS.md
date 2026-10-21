@@ -4,6 +4,22 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Recipe UX (2026-10-21): implementation/local verification **DONE**; mobile
+acceptance **DEFERRED**. The recipe-only library separates creating/editing recipes
+from food-label entry and portion logging. Ingredient search/editing uses a sheet;
+existing deterministic ingredient calculations now appear above the ingredient
+list. The portion screen allows choosing the destination meal. Saving a recipe
+never writes a diary entry. Existing recipe RLS, server recalculation and historical
+diary snapshots are unchanged; no nutrition schema or dependency changes.
+`npm.cmd run check` **PASS**: strict TypeScript/lint/format, 362 Jest tests in
+67 suites plus six dataset tests (**368 total**). Focused nutrition checks **PASS**:
+20 tests, including recipe creation math, recipe-only actions and explicit meal logging.
+This is a v0.4 refinement; weights and retained release gates are unchanged.
+
+User report (2026-10-21): confirmation now works perfectly on web. Phone
+confirmation testing remains **DEFERRED** to the user's next mobile check;
+the earlier Safari investigation below is historical, not a new web blocker.
+
 Email-confirmation recovery (2026-10-21): implementation/local verification **DONE**;
 live Safari return **IN_PROGRESS**. The latest supplied signup email
 targets `http://localhost:8081/auth/callback` and the user reports the app's

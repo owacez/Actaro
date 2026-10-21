@@ -518,9 +518,14 @@ directly rather than reconstructed from macros.
 
 **Custom foods** accepts package-label values for an explicit base amount and unit.
 Add known serving equivalents such as one bottle, slice, cup, tablespoon or piece.
-**Recipes → New recipe** uses actual selected ingredients and quantities. Enter
-servings and optionally total cooked edible weight. Without cooked weight, log by
-servings; with weight, log any gram amount. Recipes are also reachable from You.
+**Your recipes → Create recipe** opens a recipe builder, separate from label-based
+custom foods. Add ingredients and their amounts using the ingredient sheet. Calories
+and macros calculate automatically for the batch, each serving and optional cooked
+100 g amount; no manual recipe macro entry is needed. Enter the number of servings
+and optionally weigh the cooked edible batch. Without weight, log by servings;
+with weight, log any gram amount. Saving only creates/updates the recipe. On the
+next screen choose how much you ate and Breakfast/Lunch/Dinner/Snacks, then press
+**Log** to add it to the diary. You can reopen/edit recipes from **You → Recipes**.
 Editing food/recipe nutrition affects new portions; existing diary snapshots stay.
 Library deletion removes a food from search while retaining earlier diary values.
 

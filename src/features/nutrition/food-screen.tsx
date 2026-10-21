@@ -15,6 +15,7 @@ import {
 } from '@/features/auth/auth-components';
 import {
   formatNumber,
+  meals,
   numeric,
   nutritionLabel,
   portionNutrition,
@@ -38,11 +39,15 @@ export function FoodPicker({
   onSelect,
   initialMode = 'Search',
   disabled = false,
+  recipesOnly = false,
+  onEdit,
 }: {
   userId: string;
   onSelect: (food: Food) => void;
   initialMode?: string;
   disabled?: boolean;
+  recipesOnly?: boolean;
+  onEdit?: (food: Food) => void;
 }) {
   const [input, setInput] = useState(''),
     [query, setQuery] = useState(''),
@@ -56,7 +61,7 @@ export function FoodPicker({
   return (
     <>
       <AuthInput
-        label="Search foods"
+        label={recipesOnly ? 'Search your recipes' : 'Search foods'}
         value={input}
         onChangeText={setInput}
         maxLength={200}
@@ -67,7 +72,7 @@ export function FoodPicker({
         }}
       />
       <AuthButton
-        title="Search food database"
+        title={recipesOnly ? 'Search recipes' : 'Search food database'}
         outlined
         disabled={disabled}
         onPress={() => {
@@ -76,28 +81,32 @@ export function FoodPicker({
           if (query === input) resource.refresh();
         }}
       />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          {['Search', 'Recent', 'Frequent', 'Favorites', 'Custom', 'Recipes'].map((value) => (
-            <AuthChoice
-              key={value}
-              title={value}
-              selected={mode === value}
-              disabled={disabled}
-              onPress={() => {
-                setMode(value);
-                setOffset(0);
-              }}
-            />
-          ))}
-        </View>
-      </ScrollView>
+      {!recipesOnly && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {['Search', 'Recent', 'Frequent', 'Favorites', 'Custom', 'Recipes'].map((value) => (
+              <AuthChoice
+                key={value}
+                title={value}
+                selected={mode === value}
+                disabled={disabled}
+                onPress={() => {
+                  setMode(value);
+                  setOffset(0);
+                }}
+              />
+            ))}
+          </View>
+        </ScrollView>
+      )}
       <LoadFeedback {...resource} retry={resource.refresh} />
       {resource.data && !resource.loading && (
         <>
           {resource.data.length === 0 && (
             <AuthNotice>
-              No matching foods. Try another term or create a custom food from its label.
+              {recipesOnly
+                ? 'No recipes yet or no matching name. Create a recipe by adding foods as ingredients.'
+                : 'No matching foods. Try another term or create a custom food from its label.'}
             </AuthNotice>
           )}
           {resource.data.map((food) => (
@@ -119,6 +128,14 @@ export function FoodPicker({
               <AuthText>
                 {nutritionLabel(food)} / {formatNumber(food.base_amount)} {food.base_unit}
               </AuthText>
+              {onEdit && (
+                <AuthButton
+                  title={`Edit ${food.name}`}
+                  outlined
+                  disabled={disabled}
+                  onPress={() => onEdit(food)}
+                />
+              )}
               <AuthText>
                 {food.kind === 'reference'
                   ? 'USDA SR Legacy · April 2018'
@@ -146,6 +163,43 @@ export function FoodPicker({
     </>
   );
 }
+export function RecipeLibraryScreen({
+  userId,
+  date,
+  meal,
+  onBack,
+  onOpen,
+}: {
+  userId: string;
+  date: string;
+  meal: Meal;
+  onBack: () => void;
+  onOpen: (view: NutritionView, foodId?: string) => void;
+}) {
+  return (
+    <AuthFrame>
+      <AuthLink title="Back" onPress={onBack} />
+      <AuthText kind="title">Your recipes</AuthText>
+      <AuthText>
+        A recipe combines ingredients into a dish you cook. Add their amounts and we calculate
+        calories and macros automatically.
+      </AuthText>
+      <AuthButton title="Create recipe" onPress={() => onOpen('recipe')} />
+      <AuthText kind="eyebrow">Choose a recipe to log</AuthText>
+      <AuthText>
+        Choose how much you ate before adding it to {meal} on {date}. Saving a recipe alone does not
+        add it to your diary.
+      </AuthText>
+      <FoodPicker
+        userId={userId}
+        initialMode="Recipes"
+        recipesOnly
+        onSelect={(food) => onOpen('portion', food.id)}
+        onEdit={(food) => onOpen('recipe', food.id)}
+      />
+    </AuthFrame>
+  );
+}
 export function FoodSearchScreen({
   userId,
   date,
@@ -164,7 +218,7 @@ export function FoodSearchScreen({
   return (
     <AuthFrame>
       <AuthLink title="← Nutrition" onPress={onBack} />
-      <AuthText kind="title">{initialMode === 'Recipes' ? 'Your recipes' : 'Log food'}</AuthText>
+      <AuthText kind="title">Log food</AuthText>
       <AuthText>
         {date} · {meal}
       </AuthText>
@@ -173,8 +227,8 @@ export function FoodSearchScreen({
         preparation; use its current label when it differs.
       </AuthText>
       <View style={authStyles.choices}>
-        <AuthLink title="New custom food" onPress={() => onOpen('custom')} />
-        <AuthLink title="New recipe" onPress={() => onOpen('recipe')} />
+        <AuthLink title="Create food from label" onPress={() => onOpen('custom')} />
+        <AuthLink title="Your recipes" onPress={() => onOpen('recipes')} />
         <AuthLink title="Saved meals" onPress={() => onOpen('saved')} />
       </View>
       <FoodPicker
@@ -189,7 +243,7 @@ export function FoodPortionScreen({
   userId,
   foodId,
   date,
-  meal,
+  meal: initialMeal,
   onBack,
   onOpen,
   onLogged,
@@ -211,6 +265,7 @@ export function FoodPortionScreen({
     return { ...context, food, favorites, diary: await nutritionService.diary(userId, date) };
   }, [userId, foodId, date]);
   const [unit, setUnit] = useState('g'),
+    [meal, setMeal] = useState(initialMeal),
     [quantity, setQuantity] = useState('100'),
     [favorite, setFavorite] = useState(false),
     [confirmDelete, setConfirmDelete] = useState(false),
@@ -237,6 +292,11 @@ export function FoodPortionScreen({
       {data && !resource.loading && (
         <>
           <AuthText kind="title">{data.food.name}</AuthText>
+          {data.food.kind === 'recipe' && (
+            <AuthText>
+              Log a portion of this recipe. Its nutrition is calculated from the saved ingredients.
+            </AuthText>
+          )}
           <AuthText>
             {date} · {meal}
           </AuthText>
@@ -246,6 +306,18 @@ export function FoodPortionScreen({
             </AuthNotice>
           ) : (
             <>
+              <AuthText kind="eyebrow">Add to meal</AuthText>
+              <View style={authStyles.choices}>
+                {meals.map((value) => (
+                  <AuthChoice
+                    key={value}
+                    title={value}
+                    selected={meal === value}
+                    disabled={action.locked}
+                    onPress={() => setMeal(value)}
+                  />
+                ))}
+              </View>
               <PortionEditor
                 food={data.food}
                 unit={unit}

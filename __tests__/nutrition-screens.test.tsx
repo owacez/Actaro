@@ -1,6 +1,6 @@
 import { beforeEach, expect, jest, test } from '@jest/globals';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import { FoodPortionScreen } from '@/features/nutrition/food-screen';
+import { FoodPortionScreen, RecipeLibraryScreen } from '@/features/nutrition/food-screen';
 import { CustomFoodScreen, RecipeScreen } from '@/features/nutrition/food-edit-screen';
 import { TargetsScreen } from '@/features/nutrition/targets-screen';
 import { bodyService } from '@/features/body/body-service';
@@ -164,6 +164,63 @@ test('recipe editor sums selected ingredients, cooked weight and fractional serv
     [{ food_id: nutritionFood().id, unit: 'g', quantity: 300 }],
     2.5,
     600,
+  );
+});
+
+test('recipe library separates creating, editing and portion logging from food search', async () => {
+  const open = jest.fn();
+  service.search.mockResolvedValue([{ ...nutritionFood(), kind: 'recipe', name: 'Lentil soup' }]);
+  await render(
+    <FeedbackTestRoot>
+      <RecipeLibraryScreen
+        userId={nutritionOwner}
+        date="2026-10-13"
+        meal="Dinner"
+        onBack={jest.fn()}
+        onOpen={open}
+      />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByRole('button', { name: 'Lentil soup' });
+  expect(service.search).toHaveBeenCalledWith(nutritionOwner, '', 'Recipes', 0);
+  expect(screen.queryByRole('button', { name: 'Custom' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Create recipe' }));
+  expect(open).toHaveBeenLastCalledWith('recipe');
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit Lentil soup' }));
+  expect(open).toHaveBeenLastCalledWith('recipe', nutritionFood().id);
+  await fireEvent.press(screen.getByRole('button', { name: 'Lentil soup' }));
+  expect(open).toHaveBeenLastCalledWith('portion', nutritionFood().id);
+  expect(service.log).not.toHaveBeenCalled();
+});
+
+test('recipe portion can choose a meal and does not log until confirmed', async () => {
+  service.food.mockResolvedValue({ ...nutritionFood(), kind: 'recipe', recipe_servings: 4 });
+  await render(
+    <FeedbackTestRoot>
+      <FoodPortionScreen
+        userId={nutritionOwner}
+        foodId={nutritionFood().id}
+        date="2026-10-13"
+        meal="Lunch"
+        onBack={jest.fn()}
+        onOpen={jest.fn()}
+        onLogged={jest.fn()}
+      />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByLabelText('Quantity');
+  expect(service.log).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Dinner' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Log to Dinner' }));
+  expect(service.log).toHaveBeenCalledWith(
+    nutritionOwner,
+    expect.any(String),
+    '2026-10-13',
+    'UTC',
+    'Dinner',
+    expect.objectContaining({ kind: 'recipe' }),
+    'g',
+    100,
   );
 });
 test('targets validate before writing and kJ values normalize to kcal', async () => {

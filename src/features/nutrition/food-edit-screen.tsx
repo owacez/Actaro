@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { randomUUID } from 'expo-crypto';
 import { View } from 'react-native';
+import { ActionSheet } from '@/components/product-ui';
 import {
   AuthButton,
   AuthCard,
@@ -389,6 +390,10 @@ export function RecipeScreen({
     <AuthFrame>
       <AuthLink title="← Nutrition" disabled={action.locked} onPress={onBack} />
       <AuthText kind="title">{foodId ? 'Edit recipe' : 'New recipe'}</AuthText>
+      <AuthText>
+        Build your dish once, then log only the portion you eat. Calories and macros come from your
+        ingredients automatically.
+      </AuthText>
       <LoadFeedback {...resource} retry={resource.refresh} />
       {resource.data && !resource.loading && (
         <>
@@ -399,107 +404,6 @@ export function RecipeScreen({
             maxLength={200}
             editable={!action.locked}
           />
-          <AuthText>
-            Ingredients use the selected preparation and edible portion. Saving recalculates current
-            ingredient nutrition; existing diary entries retain their original values.
-          </AuthText>
-          {entries.map((entry, index) => (
-            <AuthCard key={index}>
-              <AuthText kind="heading">{entry.food.name}</AuthText>
-              <AuthText>
-                {entry.quantity} ×{' '}
-                {foodUnits(entry.food).find((item) => item.key === entry.unit)?.label}
-                {entry.food.archived ? ' · Deleted food; remove or replace before saving.' : ''}
-              </AuthText>
-              <View style={authStyles.choices}>
-                <AuthLink
-                  title={`Edit ingredient ${index + 1}`}
-                  disabled={action.locked}
-                  onPress={() => {
-                    setSelected(entry.food);
-                    setUnit(entry.unit);
-                    setQuantity(entry.quantity);
-                    setEditIndex(index);
-                    setPicker(false);
-                  }}
-                />
-                <AuthLink
-                  title={`Remove ingredient ${index + 1}`}
-                  disabled={action.locked}
-                  onPress={() => setEntries((values) => values.filter((_, i) => i !== index))}
-                />
-              </View>
-            </AuthCard>
-          ))}
-          <AuthLink
-            title="Add ingredient"
-            disabled={action.locked || entries.length >= 100}
-            onPress={() => {
-              setPicker(true);
-              setSelected(null);
-              setEditIndex(null);
-            }}
-          />
-          {picker && (
-            <>
-              <FoodPicker
-                userId={userId}
-                disabled={action.locked}
-                onSelect={(food) => {
-                  if (food.id === id) {
-                    action.setError('A recipe cannot include itself.');
-                    return;
-                  }
-                  setSelected(food);
-                  setUnit(food.base_unit);
-                  setQuantity(String(food.base_amount));
-                  setPicker(false);
-                }}
-              />
-              <AuthLink
-                title="Cancel ingredient search"
-                disabled={action.locked}
-                onPress={() => setPicker(false)}
-              />
-            </>
-          )}
-          {selected && (
-            <AuthCard>
-              <AuthText kind="heading">{selected.name}</AuthText>
-              <PortionEditor
-                food={selected}
-                unit={unit}
-                quantity={quantity}
-                onUnit={setUnit}
-                onQuantity={setQuantity}
-                disabled={action.locked}
-                energyUnit={resource.data.preferences.energy_unit}
-              />
-              <AuthButton
-                title="Use ingredient portion"
-                disabled={action.locked}
-                onPress={() =>
-                  validate(() => {
-                    const amount = numeric(quantity, 'ingredient quantity', 100000);
-                    portionNutrition(selected, unit, amount);
-                    const entry = { food: selected, unit, quantity: String(amount) };
-                    setEntries((values) =>
-                      editIndex === null
-                        ? [...values, entry]
-                        : values.map((value, i) => (i === editIndex ? entry : value)),
-                    );
-                    setSelected(null);
-                    setEditIndex(null);
-                  })
-                }
-              />
-              <AuthLink
-                title="Cancel ingredient portion"
-                disabled={action.locked}
-                onPress={() => setSelected(null)}
-              />
-            </AuthCard>
-          )}
           <AuthInput
             label="Recipe servings"
             value={servings}
@@ -540,12 +444,130 @@ export function RecipeScreen({
               )}
             </>
           )}
+          <AuthText kind="eyebrow">Ingredients</AuthText>
+          <AuthText>
+            Ingredients use the selected preparation and edible portion. Saving recalculates current
+            ingredient nutrition; existing diary entries retain their original values.
+          </AuthText>
+          {entries.map((entry, index) => (
+            <AuthCard key={index}>
+              <AuthText kind="heading">{entry.food.name}</AuthText>
+              <AuthText>
+                {entry.quantity} ×{' '}
+                {foodUnits(entry.food).find((item) => item.key === entry.unit)?.label}
+                {entry.food.archived ? ' · Deleted food; remove or replace before saving.' : ''}
+              </AuthText>
+              <View style={authStyles.choices}>
+                <AuthLink
+                  title={`Edit ingredient ${index + 1}`}
+                  disabled={action.locked}
+                  onPress={() => {
+                    setSelected(entry.food);
+                    setUnit(entry.unit);
+                    setQuantity(entry.quantity);
+                    setEditIndex(index);
+                    setPicker(false);
+                  }}
+                />
+                <AuthLink
+                  title={`Remove ingredient ${index + 1}`}
+                  disabled={action.locked}
+                  onPress={() => setEntries((values) => values.filter((_, i) => i !== index))}
+                />
+              </View>
+            </AuthCard>
+          ))}
+          <AuthButton
+            outlined
+            title="Add ingredient"
+            disabled={action.locked || entries.length >= 100}
+            onPress={() => {
+              setPicker(true);
+              setSelected(null);
+              setEditIndex(null);
+            }}
+          />
+          <ActionSheet
+            title={selected ? 'Ingredient portion' : 'Find an ingredient'}
+            visible={picker || selected !== null}
+            onClose={() => {
+              if (!action.locked) {
+                setPicker(false);
+                setSelected(null);
+                setEditIndex(null);
+              }
+            }}
+          >
+            {picker && (
+              <>
+                <FoodPicker
+                  userId={userId}
+                  disabled={action.locked}
+                  onSelect={(food) => {
+                    if (food.id === id) {
+                      action.setError('A recipe cannot include itself.');
+                      return;
+                    }
+                    setSelected(food);
+                    setUnit(food.base_unit);
+                    setQuantity(String(food.base_amount));
+                    setPicker(false);
+                  }}
+                />
+                <AuthLink
+                  title="Cancel ingredient search"
+                  disabled={action.locked}
+                  onPress={() => setPicker(false)}
+                />
+              </>
+            )}
+            {selected && (
+              <AuthCard>
+                <AuthText kind="heading">{selected.name}</AuthText>
+                <PortionEditor
+                  food={selected}
+                  unit={unit}
+                  quantity={quantity}
+                  onUnit={setUnit}
+                  onQuantity={setQuantity}
+                  disabled={action.locked}
+                  energyUnit={resource.data.preferences.energy_unit}
+                />
+                <AuthButton
+                  title="Use ingredient portion"
+                  disabled={action.locked}
+                  onPress={() =>
+                    validate(() => {
+                      const amount = numeric(quantity, 'ingredient quantity', 100000);
+                      portionNutrition(selected, unit, amount);
+                      const entry = { food: selected, unit, quantity: String(amount) };
+                      setEntries((values) =>
+                        editIndex === null
+                          ? [...values, entry]
+                          : values.map((value, i) => (i === editIndex ? entry : value)),
+                      );
+                      setSelected(null);
+                      setEditIndex(null);
+                    })
+                  }
+                />
+                <AuthLink
+                  title="Cancel ingredient portion"
+                  disabled={action.locked}
+                  onPress={() => setSelected(null)}
+                />
+              </AuthCard>
+            )}
+          </ActionSheet>
           <AuthButton
             title="Save recipe"
             disabled={action.locked || preview === null || selected !== null || picker}
             busy={action.busy}
             onPress={save}
           />
+          <AuthText kind="muted">
+            Saves to Your recipes. Choose a portion next; nothing is logged until you confirm.
+          </AuthText>
         </>
       )}
       <SaveFeedback action={action} />

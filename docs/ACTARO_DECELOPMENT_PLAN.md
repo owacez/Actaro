@@ -743,6 +743,12 @@ Important math must have tests.
 
 ## 3.11 Recipes — Weight 5
 
+User UX clarification (2026-10-21): dedicated recipe-only library, explicit
+create/edit versus portion logging, ingredient selection in a sheet, and visible
+automatically calculated nutrition. Preserve owned server calculation and diary
+snapshots. Choose the destination meal before logging; saving alone never logs.
+This refines the existing recipe task without changing its weight.
+
 Custom recipe form:
 
 - Name
