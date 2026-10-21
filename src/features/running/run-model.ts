@@ -9,7 +9,7 @@ export type RunPoint = {
   accuracy: number;
   segment: number;
 };
-export type RunFix = Omit<RunPoint, 'segment'>;
+export type RunFix = Omit<RunPoint, 'segment'> & { speed?: number | null };
 export type RunDraft = {
   format: 1;
   unit: 'km' | 'mi';
@@ -28,11 +28,15 @@ export type RunDraft = {
   updatedAt: number;
   notes: string;
   interruption: string | null;
+  lastFix: RunFix;
+  pendingFix: RunFix | null;
+  autoPaused: boolean;
 };
 export const runLimits = { points: 20000, accuracy: 35, gapSeconds: 60, speed: 12, hours: 24 };
 export function validFix(value: RunFix) {
   return (
-    Object.values(value).every(Number.isFinite) &&
+    [value.latitude, value.longitude, value.timestamp, value.accuracy].every(Number.isFinite) &&
+    (value.speed == null || (Number.isFinite(value.speed) && value.speed >= 0)) &&
     Math.abs(value.latitude) <= 90 &&
     Math.abs(value.longitude) <= 180 &&
     value.timestamp >= 0 &&
@@ -89,11 +93,22 @@ export function newRun(
     status: 'recording',
     clock: { elapsedMs: 0, runningSince: now },
     segment: 0,
-    route: [{ ...first, segment: 0 }],
+    route: [
+      {
+        latitude: first.latitude,
+        longitude: first.longitude,
+        timestamp: first.timestamp,
+        accuracy: first.accuracy,
+        segment: 0,
+      },
+    ],
     distanceMeters: 0,
     updatedAt: now,
     notes: '',
     interruption: null,
+    lastFix: first,
+    pendingFix: null,
+    autoPaused: false,
   };
 }
 export function appendRunFix(draft: RunDraft, fix: RunFix): RunDraft {
@@ -104,7 +119,7 @@ export function appendRunFix(draft: RunDraft, fix: RunFix): RunDraft {
   )
     return draft;
   const previous = draft.route.at(-1);
-  if (!previous || fix.timestamp <= previous.timestamp) return draft;
+  if (!previous || fix.timestamp <= draft.lastFix.timestamp) return draft;
   if (
     fix.timestamp - Date.parse(draft.startedAt) > 86400000 ||
     draft.route.length >= runLimits.points
@@ -116,18 +131,69 @@ export function appendRunFix(draft: RunDraft, fix: RunFix): RunDraft {
     );
   const seconds = (fix.timestamp - previous.timestamp) / 1000;
   const metres = pointDistance(previous, fix);
-  let segment = draft.segment;
-  if (segment === previous.segment) {
-    if (seconds > runLimits.gapSeconds) segment++;
-    else if (metres / seconds > runLimits.speed || metres < 5) return draft;
+  const fresh = { ...draft, lastFix: fix };
+  if (fix.speed != null && fix.speed < 0.6) return { ...fresh, autoPaused: true, pendingFix: null };
+  // GPS error circles overlap: do not interpret their jitter as distance travelled.
+  const threshold = Math.max(5, 1.5 * Math.hypot(previous.accuracy, fix.accuracy));
+  if (metres < threshold)
+    return {
+      ...fresh,
+      pendingFix: null,
+      autoPaused: draft.autoPaused || seconds >= 10,
+    };
+  if (
+    draft.segment === previous.segment &&
+    !draft.autoPaused &&
+    seconds <= runLimits.gapSeconds &&
+    metres / seconds > runLimits.speed
+  )
+    return { ...draft, pendingFix: null };
+  const candidate = draft.pendingFix;
+  // Browsers often supply no speed. Require two consistent fixes before accepting movement.
+  if (fix.speed == null) {
+    const consistent =
+      candidate &&
+      fix.timestamp - candidate.timestamp <= 10000 &&
+      pointDistance(candidate, fix) / ((fix.timestamp - candidate.timestamp) / 1000) <=
+        runLimits.speed &&
+      (candidate.latitude - previous.latitude) * (fix.latitude - candidate.latitude) +
+        (candidate.longitude - previous.longitude) * (fix.longitude - candidate.longitude) >
+        0;
+    if (!consistent) return { ...fresh, pendingFix: fix };
   }
-  const point = { ...fix, segment };
-  return {
-    ...draft,
+  const boundary =
+    draft.segment !== previous.segment || draft.autoPaused || seconds > runLimits.gapSeconds;
+  const segment = boundary ? Math.max(draft.segment, previous.segment + 1) : draft.segment;
+  const point = (value: RunFix): RunPoint => ({
+    latitude: value.latitude,
+    longitude: value.longitude,
+    timestamp: value.timestamp,
+    accuracy: value.accuracy,
     segment,
-    route: [...draft.route, point],
+  });
+  const additions: RunPoint[] = [];
+  if (boundary) {
+    const anchor = candidate ?? draft.lastFix;
+    if (
+      anchor.timestamp > previous.timestamp &&
+      anchor.timestamp >= (draft.clock.runningSince ?? Infinity) &&
+      fix.timestamp - anchor.timestamp <= 10000 &&
+      pointDistance(anchor, fix) / ((fix.timestamp - anchor.timestamp) / 1000) <= runLimits.speed
+    )
+      additions.push(point(anchor));
+  } else if (candidate) additions.push(point(candidate));
+  additions.push(point(fix));
+  const route = [...draft.route, ...additions];
+  if (route.length > runLimits.points)
+    return pauseRun(draft, fix.timestamp, 'Recording limit reached. Review and save this run.');
+  return {
+    ...fresh,
+    segment,
+    route,
     updatedAt: fix.timestamp,
-    distanceMeters: draft.distanceMeters + (segment === previous.segment ? metres : 0),
+    distanceMeters: draft.distanceMeters + routeDistance([previous, ...additions]),
+    pendingFix: null,
+    autoPaused: false,
   };
 }
 export function pauseRun(
@@ -142,6 +208,7 @@ export function pauseRun(
     clock: pauseClock(draft.clock, now),
     updatedAt: now,
     interruption,
+    pendingFix: null,
   };
 }
 export function resumeRun(draft: RunDraft, now: number): RunDraft {
@@ -155,6 +222,8 @@ export function resumeRun(draft: RunDraft, now: number): RunDraft {
     segment: draft.segment + 1,
     updatedAt: now,
     interruption: null,
+    pendingFix: null,
+    autoPaused: true,
   };
 }
 export function finishRun(draft: RunDraft, now: number): RunDraft {
@@ -178,6 +247,36 @@ export function runClock(seconds: number) {
 }
 export function runDistance(metres: number, unit: 'km' | 'mi') {
   return (metres / (unit === 'mi' ? 1609.344 : 1000)).toFixed(2);
+}
+export function routeMovingSeconds(route: readonly RunPoint[]) {
+  return Math.floor(
+    route.reduce((total, point, index) => {
+      const previous = route[index - 1];
+      return (
+        total +
+        (previous && previous.segment === point.segment
+          ? Math.min(60000, point.timestamp - previous.timestamp)
+          : 0)
+      );
+    }, 0) / 1000,
+  );
+}
+export function runMovingSeconds(draft: RunDraft) {
+  return Math.min(routeMovingSeconds(draft.route), runSeconds(draft, draft.updatedAt));
+}
+export function runLivePace(draft: RunDraft, now: number) {
+  const last = draft.route[draft.route.length - 1];
+  if (
+    draft.status !== 'recording' ||
+    draft.autoPaused ||
+    now - last.timestamp > 10000 ||
+    now - draft.lastFix.timestamp > 10000
+  )
+    return '—';
+  const recent = draft.route.filter(
+    (point) => point.segment === last.segment && last.timestamp - point.timestamp <= 30000,
+  );
+  return runPace(routeMovingSeconds(recent), routeDistance(recent), draft.unit);
 }
 export function runPace(seconds: number, metres: number, unit: 'km' | 'mi') {
   return metres < 20 || seconds <= 0
@@ -257,6 +356,23 @@ export function restoreRun(raw: string, userId: string): RunDraft {
   )
     throw new Error('Saved run unavailable. Keep device storage and retry.');
   const route = readRunPoints(value.route);
+  const lastFix =
+    object(value.lastFix) &&
+    typeof value.lastFix.latitude === 'number' &&
+    typeof value.lastFix.longitude === 'number' &&
+    typeof value.lastFix.timestamp === 'number' &&
+    typeof value.lastFix.accuracy === 'number' &&
+    (value.lastFix.speed == null || typeof value.lastFix.speed === 'number')
+      ? {
+          latitude: value.lastFix.latitude,
+          longitude: value.lastFix.longitude,
+          timestamp: value.lastFix.timestamp,
+          accuracy: value.lastFix.accuracy,
+          speed: value.lastFix.speed,
+        }
+      : route[route.length - 1];
+  if (!validFix(lastFix) || lastFix.timestamp < route[route.length - 1].timestamp)
+    throw new Error('Saved GPS signal unavailable.');
   const status =
     value.status === 'recording' ? 'recording' : value.status === 'paused' ? 'paused' : 'review';
   const endedAt =
@@ -288,5 +404,8 @@ export function restoreRun(raw: string, userId: string): RunDraft {
     updatedAt: value.updatedAt,
     notes: value.notes,
     interruption: value.interruption,
+    lastFix,
+    pendingFix: null,
+    autoPaused: value.autoPaused === true,
   };
 }

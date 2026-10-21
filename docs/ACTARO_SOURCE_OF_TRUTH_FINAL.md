@@ -1086,7 +1086,10 @@ Execution exception approved by the user on 2026-10-21: implement running early,
 including background GPS support, with native development-build/device acceptance
 deferred. The first implementation records private routes, time, distance and pace;
 supports pause, review/save, history/detail and Today/Progress integration; and
-draws route outlines rather than street-map tiles. This does not authorize active
+draws route outlines. The user's subsequent 2026-10-21 feedback also authorizes
+live street maps, a Strava-informed recording flow, GPS drift filtering and
+separate live/moving-average pace. OpenFreeMap supplies the public basemap; location
+recording remains device-local until explicit save. This does not authorize active
 minutes, inferred calories, running goals/events, wearables or advanced analytics.
 See `RUNNING_TESTING.md` for limits and the deferred checks. Core release approval
 remains separate.

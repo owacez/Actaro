@@ -9,6 +9,7 @@ import { FeedbackTestRoot } from './helpers/feedback-root';
 import { runFixture, runId, runOwner, runTime } from './helpers/run-fixture';
 import { nutritionContext } from './helpers/nutrition-fixture';
 let mockCurrent: RunDraft | null;
+jest.mock('@/features/running/run-map', () => ({ RunMap: () => null }));
 let mockRemoval: (value: { data: { action: { type: string } } }) => void;
 const mockDispatch = jest.fn(),
   mockNavigation = { dispatch: mockDispatch };

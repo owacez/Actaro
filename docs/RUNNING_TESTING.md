@@ -3,6 +3,56 @@
 Updated 2026-10-21. The user approved this v1.2 implementation early, including
 background GPS, with native builds and physical acceptance **DEFERRED**.
 
+## Street maps and stationary accuracy update
+
+The user's follow-up authorizes street maps and a recording flow informed by
+Strava. Active/review/detail screens now use MapLibre GL JS 6.15.0 with
+[OpenFreeMap](https://openfreemap.org/) vector tiles. Native uses the Expo-compatible
+WebView; web uses a sandboxed frame. The map follows the recorded position; drag
+to explore, use **Recenter** to follow again or **Fit route** for the whole route.
+History/Today keep lightweight outlines rather than creating many live maps.
+No API key, billing account, Redis or independent backend is needed. Internet
+access is needed for the pinned MapLibre CDN files and map tiles. Attribution
+stays visible. A loading failure offers an outline and retry without stopping GPS.
+
+The map has no auth/session bridge and does not request its own location permission.
+Only route geometry is passed into its isolated renderer. Map/CDN providers receive
+normal resource requests, including viewed tile areas and IP address; Supabase
+credentials and personal profile/health fields are never passed to the map.
+These public provider URLs are service endpoints, not personal configuration.
+
+Live pace uses recent accepted movement and becomes **—** when stopped or stale.
+Average moving pace uses moving time, which freezes without accepted movement.
+The separate elapsed timer still includes standing time, excluding manual pauses.
+The database derives `moving_seconds` from route segments, bounded by elapsed time;
+Today, history and Progress use that same moving-time estimate. Old routes retain
+only the evidence they originally recorded; this cannot reconstruct missing fixes.
+
+GPS filtering now uses device speed, reported accuracy and two consistent fixes
+when speed is unavailable. Speed below 0.6 m/s is treated as stopped; displacement
+inside 1.5 times the combined accuracy radius is ignored. Live pace expires after
+10 seconds without accepted movement. GPS remains active to detect resumption;
+auto-pause here freezes movement metrics rather than turning location off. The
+filter is deliberately conservative and may omit very short/slow movements.
+GPS accuracy and battery impact still need outdoor phone acceptance.
+
+Verification: `npm.cmd run check` **PASS**, 389 Jest tests in 74 suites plus six
+dataset tests (**395 total**), including stationary drift, missing speed,
+resumption, stale pace, map gap geometry, fallback/retry and ingredient search.
+Hosted rollback-only SQL checks **PASS**, including generated moving time,
+ownership and rejection of injected moving-time values. The isolated local
+Postgres runner could not start because its WebAssembly runtime ran out of memory;
+no local SQL pass is claimed for this update. Final
+`npm.cmd exec -- expo export --platform all --output-dir .actaro-tools/run-map-export-final`
+**PASS** for Android/iOS Hermes bundles and web static routes. This is a bundle
+export, not an installed native build. Live-tile/native rendering acceptance remains
+**DEFERRED**. The attempted browser fixture timed out; no real-tile pass is claimed.
+
+After `npm install`, restart Metro with `npm start -- --go --clear`. Test outdoors:
+stand still for a minute, move along a known route, stop, resume, pan/recenter the
+map, then review/save and compare history/Progress. Test missing internet separately
+from GPS permission/signal. Background acceptance still requires a development build.
+
 ## Start and test
 
 From the repository root, install dependencies with `npm install`, then run
@@ -45,12 +95,13 @@ saved location rather than claiming the missing interval was tracked.
 
 ## Metrics, privacy and cost
 
-- Time excludes explicit pauses; standing still while recording still counts.
-  Average pace is recorded time divided by distance, not instantaneous speed.
+- Elapsed time excludes explicit pauses; standing while recording still counts
+  there. Moving time excludes detected stops; average moving pace uses moving time.
 - GPS is an estimate. Fixes worse than 35 m accuracy, movement below 5 m and
   implausible same-segment speeds above 12 m/s are rejected. Gaps over 60 seconds
   start a new segment. Limits are 20,000 points and 24 hours per run.
-- The app draws route outlines, not street maps. No elevation, calorie/intensity,
+- Active/review/detail show street maps; compact cards keep route outlines.
+  No elevation, calorie/intensity,
   heart-rate, active-minute or running-goal inference is implemented. Running
   distance is separate from steps; saving a run does not duplicate daily activity.
 - A device draft is account-bound. Only explicit save uploads coordinates to the
@@ -60,7 +111,8 @@ saved location rather than claiming the missing interval was tracked.
 - Account exports include private GPS routes and the local draft. Confirmed
   account deletion cascades saved routes and clears its local draft. Device drafts
   are not an encrypted health vault or a cross-device sync system.
-- No Redis, map provider, independent backend or new credential is introduced.
+- OpenFreeMap is the public map provider. No Redis, independent backend or new
+  credential is introduced.
 
 ## Verification evidence
 

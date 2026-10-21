@@ -27,6 +27,7 @@ function row(id = runId, distance = 1000, seconds = 300) {
     local_date: '2026-10-10',
     time_zone: 'UTC',
     duration_seconds: seconds,
+    moving_seconds: seconds,
     distance_meters: distance,
     notes: '',
     route_preview: draft.route,

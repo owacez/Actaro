@@ -20,6 +20,7 @@ import {
 import { readRunPoints, runClock, runPace } from './run-model';
 import { runService } from './run-service';
 import { RunRoute } from './run-route';
+import { RunMap } from './run-map';
 import { RunMetrics } from './run-screen';
 
 export function RunHistoryScreen({
@@ -65,11 +66,11 @@ export function RunHistoryScreen({
             <View key={row.id} style={{ gap: 8 }}>
               <ActionRow
                 title={`Run · ${row.local_date}`}
-                detail={`${runClock(row.duration_seconds)} · ${runPace(row.duration_seconds, row.distance_meters, resource.data!.unit)}`}
+                detail={`${runClock(row.moving_seconds)} moving · ${runPace(row.moving_seconds, row.distance_meters, resource.data!.unit)}`}
                 onPress={() => onOpen(row.id)}
               />
               <RunMetrics
-                seconds={row.duration_seconds}
+                seconds={row.moving_seconds}
                 distance={row.distance_meters}
                 unit={resource.data!.unit}
               />
@@ -122,11 +123,15 @@ export function RunDetailScreen({
           <AuthText kind="heading">{resource.data.run.local_date}</AuthText>
           <AuthText kind="metric">{runClock(resource.data.run.duration_seconds)}</AuthText>
           <RunMetrics
-            seconds={resource.data.run.duration_seconds}
+            seconds={resource.data.run.moving_seconds}
             distance={resource.data.run.distance_meters}
             unit={resource.data.unit}
           />
-          <RunRoute points={resource.data.run.points} />
+          <AuthText>
+            Moving time {runClock(resource.data.run.moving_seconds)} · Elapsed time excludes manual
+            pauses.
+          </AuthText>
+          <RunMap points={resource.data.run.points} />
           <AuthText>{resource.data.run.notes || 'No run notes.'}</AuthText>
           <AuthText kind="muted">
             Recorded with GPS · {resource.data.run.time_zone}. Pauses and route gaps are excluded

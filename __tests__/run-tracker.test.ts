@@ -26,7 +26,7 @@ jest.mock('expo-location', () => ({
   startLocationUpdatesAsync: jest.fn(),
   stopLocationUpdatesAsync: jest.fn(),
   watchPositionAsync: jest.fn(),
-  Accuracy: { High: 4 },
+  Accuracy: { High: 4, BestForNavigation: 6 },
   ActivityType: { Fitness: 3 },
 }));
 jest.mock('expo-task-manager', () => ({
@@ -53,7 +53,7 @@ function position(longitude: number, timestamp: number): Location.LocationObject
       altitude: null,
       altitudeAccuracy: null,
       heading: null,
-      speed: null,
+      speed: 3.7,
     },
     timestamp,
   };

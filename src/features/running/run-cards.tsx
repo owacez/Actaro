@@ -61,9 +61,9 @@ export function TodayRunCard({ userId, unit }: { userId: string; unit: 'km' | 'm
     <AuthCard>
       <AuthText kind="eyebrow">RECENT RUN · {run.local_date}</AuthText>
       <AuthText kind="heading">
-        {runDistance(run.distance_meters, unit)} {unit} · {runClock(run.duration_seconds)}
+        {runDistance(run.distance_meters, unit)} {unit} · {runClock(run.moving_seconds)}
       </AuthText>
-      <AuthText>{runPace(run.duration_seconds, run.distance_meters, unit)}</AuthText>
+      <AuthText>{runPace(run.moving_seconds, run.distance_meters, unit)}</AuthText>
       <RunRoute points={readRunPoints(run.route_preview)} compact />
       <AuthLink
         title="View recent run"
@@ -93,7 +93,7 @@ export function RunProgressScreen({
       {(data) => {
         const unit = data.preferences.distance_unit === 'mi' ? 'mi' : 'km';
         const distance = data.rows.reduce((sum, run) => sum + run.distance_meters, 0),
-          duration = data.rows.reduce((sum, run) => sum + run.duration_seconds, 0);
+          duration = data.rows.reduce((sum, run) => sum + run.moving_seconds, 0);
         return (
           <>
             <ProgressMetrics
@@ -104,14 +104,14 @@ export function RunProgressScreen({
                   value: `${runDistance(distance, unit)} ${unit}`,
                 },
                 {
-                  title: 'Run time',
+                  title: 'Moving time',
                   value: runClock(duration),
-                  detail: 'Recorded time excluding explicit pauses',
+                  detail: 'GPS movement estimate; excludes stops',
                 },
                 {
-                  title: 'Average pace',
+                  title: 'Avg moving pace',
                   value: runPace(duration, distance, unit),
-                  detail: 'Total recorded time divided by total distance',
+                  detail: 'Total moving time divided by total distance',
                 },
               ]}
             />
@@ -139,7 +139,7 @@ export function RunProgressScreen({
               entries={[...data.rows].reverse().map((run) => ({
                 key: run.id,
                 title: run.local_date,
-                detail: `${runDistance(run.distance_meters, unit)} ${unit} · ${runClock(run.duration_seconds)} · ${runPace(run.duration_seconds, run.distance_meters, unit)}`,
+                detail: `${runDistance(run.distance_meters, unit)} ${unit} · ${runClock(run.moving_seconds)} · ${runPace(run.moving_seconds, run.distance_meters, unit)}`,
               }))}
             />
           </>

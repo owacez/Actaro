@@ -26,10 +26,16 @@ export function backgroundRunSupported() {
   );
 }
 function fix(location: Location.LocationObject): RunFix | null {
-  const { latitude, longitude, accuracy } = location.coords;
+  const { latitude, longitude, accuracy, speed } = location.coords;
   return accuracy === null
     ? null
-    : { latitude, longitude, accuracy, timestamp: location.timestamp };
+    : {
+        latitude,
+        longitude,
+        accuracy,
+        timestamp: location.timestamp,
+        speed: speed !== null && speed >= 0 ? speed : null,
+      };
 }
 function report(userId: string, message: string) {
   problem = { userId, message };
@@ -156,8 +162,8 @@ async function attach(draft: RunDraft) {
   await halt();
   if (draft.background) {
     await Location.startLocationUpdatesAsync(runLocationTask, {
-      accuracy: Location.Accuracy.High,
-      distanceInterval: 5,
+      accuracy: Location.Accuracy.BestForNavigation,
+      distanceInterval: 0,
       timeInterval: 2000,
       activityType: Location.ActivityType.Fitness,
       pausesUpdatesAutomatically: false,
@@ -172,7 +178,7 @@ async function attach(draft: RunDraft) {
     if (AppState.currentState !== 'active')
       throw new RecordRequestError('Return to Actaro to start foreground recording.');
     foreground = await Location.watchPositionAsync(
-      { accuracy: Location.Accuracy.High, distanceInterval: 5, timeInterval: 2000 },
+      { accuracy: Location.Accuracy.BestForNavigation, distanceInterval: 0, timeInterval: 2000 },
       (position) => {
         void consume([position]).catch(() =>
           report(draft.userId, 'Run recording stopped. Reopen your run and check permissions.'),
@@ -203,7 +209,7 @@ export const runTracker = {
       let position: Location.LocationObject;
       try {
         position = await Promise.race([
-          Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }),
+          Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.BestForNavigation }),
           new Promise<never>((_, reject) => {
             timeout = setTimeout(
               () =>

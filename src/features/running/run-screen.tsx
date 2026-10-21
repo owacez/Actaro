@@ -27,8 +27,15 @@ import { RecordRequestError } from '@/lib/owned-data';
 import { backgroundRunSupported, runTracker } from './run-tracker';
 import { runStore } from './run-store';
 import { runService } from './run-service';
-import { runClock, runDistance, runPace, runSeconds } from './run-model';
-import { RunRoute } from './run-route';
+import {
+  runClock,
+  runDistance,
+  runPace,
+  runSeconds,
+  runMovingSeconds,
+  runLivePace,
+} from './run-model';
+import { RunMap } from './run-map';
 import { useRunDraft } from './use-run-draft';
 
 export function RunMetrics({
@@ -47,7 +54,7 @@ export function RunMetrics({
           title: 'Distance',
           value: `${runDistance(distance, unit)} ${unit}`,
         },
-        { title: 'Average pace', value: runPace(seconds, distance, unit) },
+        { title: 'Avg moving pace', value: runPace(seconds, distance, unit) },
       ]}
     />
   );
@@ -346,15 +353,35 @@ export function RunSessionScreen({
                 ? 'PAUSED'
                 : 'RUN SUMMARY'}
           </AuthText>
-          <AuthText kind="metric">{runClock(seconds)}</AuthText>
-          <RunMetrics seconds={seconds} distance={draft.distanceMeters} unit={draft.unit} />
-          <RunRoute points={draft.route} />
+          <RunMap points={draft.route} live={draft.status === 'recording'} />
+          <AuthText kind="eyebrow">DISTANCE</AuthText>
+          <AuthText kind="metric">
+            {runDistance(draft.distanceMeters, draft.unit)} {draft.unit}
+          </AuthText>
+          <ProgressMetrics
+            metrics={[
+              { title: 'Moving time', value: runClock(runMovingSeconds(draft)) },
+              { title: 'Elapsed time', value: runClock(seconds), detail: 'Excludes manual pauses' },
+              {
+                title: 'Live pace',
+                value: runLivePace(draft, saved.now),
+                detail: '— when stopped or GPS is uncertain',
+              },
+              {
+                title: 'Avg moving pace',
+                value: runPace(runMovingSeconds(draft), draft.distanceMeters, draft.unit),
+              },
+            ]}
+          />
           {draft.interruption && <AuthNotice>{draft.interruption}</AuthNotice>}
           <AuthText kind="muted">
             {draft.status === 'recording'
-              ? saved.now - draft.route[draft.route.length - 1].timestamp < 20000
-                ? 'GPS signal received'
-                : 'Waiting for GPS movement or a fresh fix. Gaps are excluded from distance.'
+              ? saved.now - draft.lastFix.timestamp > 15000
+                ? 'GPS signal is stale. Move outdoors; uncertain movement is not counted.'
+                : draft.autoPaused ||
+                    saved.now - draft.route[draft.route.length - 1].timestamp > 10000
+                  ? 'Auto-paused · waiting for clear movement. GPS remains on to resume automatically.'
+                  : `GPS accuracy ±${Math.round(draft.lastFix.accuracy)} m · recording movement`
               : `${draft.route.length} GPS points kept on this device`}
           </AuthText>
           <AuthText>

@@ -1001,6 +1001,7 @@ export type Database = {
           ended_at: string;
           id: string;
           local_date: string;
+          moving_seconds: number;
           notes: string;
           route: Json;
           route_preview: Json;
@@ -1015,6 +1016,7 @@ export type Database = {
           ended_at: string;
           id: string;
           local_date: string;
+          moving_seconds?: number;
           notes?: string;
           route: Json;
           route_preview?: Json;
@@ -1029,6 +1031,7 @@ export type Database = {
           ended_at?: string;
           id?: string;
           local_date?: string;
+          moving_seconds?: number;
           notes?: string;
           route?: Json;
           route_preview?: Json;
@@ -1732,6 +1735,7 @@ export type Database = {
         Returns: string;
       };
       run_route_distance: { Args: { p_route: Json }; Returns: number };
+      run_route_moving_seconds: { Args: { p_route: Json }; Returns: number };
       run_route_preview: { Args: { p_route: Json }; Returns: Json };
       save_activity: {
         Args: {

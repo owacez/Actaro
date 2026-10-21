@@ -12,6 +12,8 @@ import {
   runDistance,
   runPace,
   runSeconds,
+  runMovingSeconds,
+  runLivePace,
 } from '@/features/running/run-model';
 import { routePath } from '@/features/running/run-route';
 import { runFixture, runFix, runId, runOwner, runTime } from './helpers/run-fixture';
@@ -25,6 +27,69 @@ test('haversine distance, stored route and pace agree without inventing low-dist
   expect(runPace(60, 0, 'km')).toBe('—');
   expect(runDistance(22.24, 'km')).toBe('0.02');
   expect(runDistance(1609.344, 'mi')).toBe('1.00');
+});
+
+test('stationary GPS drift and overlapping uncertainty circles cannot become running distance', () => {
+  const start = newRun(runId, runOwner, 'UTC', false, runFix, runTime);
+  const stopped = appendRunFix(start, {
+    ...runFix,
+    longitude: 0.00036,
+    timestamp: runTime + 10000,
+    speed: 0,
+  });
+  expect(stopped.distanceMeters).toBe(0);
+  expect(stopped.autoPaused).toBe(true);
+  expect(runMovingSeconds(stopped)).toBe(0);
+  const coarse = appendRunFix(start, {
+    ...runFix,
+    longitude: 0.00036,
+    accuracy: 35,
+    timestamp: runTime + 10000,
+  });
+  expect(coarse.distanceMeters).toBe(0);
+});
+
+test('moving average freezes while stopped, live pace expires, and resuming excludes idle time', () => {
+  let run = runFixture();
+  expect(runMovingSeconds(run)).toBe(30);
+  expect(runLivePace(run, runTime + 30000)).not.toBe('—');
+  expect(runLivePace(run, runTime + 45000)).toBe('—');
+  run = appendRunFix(run, { ...runFix, longitude: 0.0013, timestamp: runTime + 35000, speed: 0 });
+  expect(runMovingSeconds(run)).toBe(30);
+  expect(runLivePace(run, runTime + 35000)).toBe('—');
+  run = appendRunFix(run, { ...runFix, longitude: 0.0014, timestamp: runTime + 90000 });
+  run = appendRunFix(run, { ...runFix, longitude: 0.0016, timestamp: runTime + 95000 });
+  expect(runMovingSeconds(run)).toBe(35);
+  expect(run.distanceMeters).toBeCloseTo(133.4339, 3);
+  expect(runSeconds(finishRun(run, runTime + 120000), runTime + 120000)).toBe(120);
+});
+
+test('without device speed a single GPS jump is not accepted; consistent motion resumes automatically', () => {
+  let run = newRun(runId, runOwner, 'UTC', false, { ...runFix, speed: null }, runTime);
+  run = appendRunFix(run, {
+    ...runFix,
+    speed: null,
+    longitude: 0.0004,
+    timestamp: runTime + 10000,
+  });
+  expect(run.distanceMeters).toBe(0);
+  run = appendRunFix(run, { ...runFix, speed: null, longitude: 0, timestamp: runTime + 12000 });
+  expect(run.distanceMeters).toBe(0);
+  run = appendRunFix(run, {
+    ...runFix,
+    speed: null,
+    longitude: 0.0001,
+    timestamp: runTime + 15000,
+  });
+  run = appendRunFix(run, {
+    ...runFix,
+    speed: null,
+    longitude: 0.0002,
+    timestamp: runTime + 20000,
+  });
+  expect(run.distanceMeters).toBeCloseTo(11.1195, 3);
+  expect(runMovingSeconds(run)).toBe(5);
+  expect(run.autoPaused).toBe(false);
 });
 test('pauses exclude time and travel; resumed and late locations cannot bridge the pause', () => {
   const paused = pauseRun(runFixture(), runTime + 60000);
@@ -45,8 +110,11 @@ test('GPS noise, poor accuracy, stale and impossible jumps are ignored; gaps sta
     { ...runFix, accuracy: 80 },
     { ...runFix, longitude: 90, timestamp: runTime + 31000 },
     { ...runFix, longitude: 0.001001, timestamp: runTime + 31000 },
-  ])
-    expect(appendRunFix(run, fix)).toBe(run);
+  ]) {
+    const updated = appendRunFix(run, fix);
+    expect(updated.route).toBe(run.route);
+    expect(updated.distanceMeters).toBe(run.distanceMeters);
+  }
   const gap = appendRunFix(run, { ...runFix, longitude: 1, timestamp: runTime + 100000 });
   expect(gap.distanceMeters).toBe(run.distanceMeters);
   expect(gap.route.at(-1)?.segment).toBe(1);

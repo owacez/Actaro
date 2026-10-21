@@ -6,19 +6,24 @@ import type { Tables } from '@/lib/supabase/database.types';
 import { readRunPoints, restoreRun, runSeconds, type RunDraft } from './run-model';
 
 const metricColumns =
-  'id,user_id,started_at,ended_at,local_date,time_zone,duration_seconds,distance_meters,notes,created_at' as const;
+  'id,user_id,started_at,ended_at,local_date,time_zone,duration_seconds,moving_seconds,distance_meters,notes,created_at' as const;
 const columns = `${metricColumns},route_preview` as const;
 export type RunSummary = Omit<Tables<'run_sessions'>, 'route' | 'distance_meters'> & {
   distance_meters: number;
 };
-function normalize<T extends { distance_meters: number | null; duration_seconds: number }>(row: T) {
+function normalize<
+  T extends { distance_meters: number | null; duration_seconds: number; moving_seconds: number },
+>(row: T) {
   const distance = row.distance_meters;
   if (
     distance === null ||
     !Number.isFinite(distance) ||
     distance < 0 ||
     !Number.isInteger(row.duration_seconds) ||
-    row.duration_seconds < 1
+    row.duration_seconds < 1 ||
+    !Number.isInteger(row.moving_seconds) ||
+    row.moving_seconds < 0 ||
+    row.moving_seconds > row.duration_seconds
   )
     throw new Error('Run metrics are unavailable. Retry.');
   return { ...row, distance_meters: distance };
