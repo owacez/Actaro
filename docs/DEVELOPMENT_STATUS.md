@@ -4,6 +4,32 @@ Updated: 2026-10-20 (America/Los_Angeles).
 
 ## Overall
 
+Email-confirmation return routing (2026-10-20): **IN_PROGRESS**. The user reports
+the other tested app flows work, but email verification completes without a
+usable Safari return. Read-only invalid-token probes reproduce a native
+destination/configuration issue: current Expo Go LAN and configured standalone
+scheme callbacks are rejected in favor of `http://localhost:3000/`; current
+web callback/recovery paths on port 8081 are accepted. Auth reports v2.197.0;
+its non-loopback IP rule is consistent with the LAN rejection. No email was
+sent, account modified or valid confirmation token used in these probes.
+
+Prepared a separate free hostname-based Expo Go tunnel on port 8082 using the
+already installed ignored x64 tools; the user's port-8081 server remains.
+Application URLs, credentials, auth validation and policies are unchanged.
+README and AUTH_TESTING now explain the verified diagnosis and exact-runtime
+configuration. The connected MCP cannot edit Auth configuration and no dashboard
+browser was available, so the user's dashboard save is pending; remote settings
+and live phone confirmation are **NOT** reported fixed.
+`npm.cmd run check` **PASS**: strict TypeScript/lint/format, 357 Jest tests in
+67 suites plus six dataset tests (**363 total**). These baseline checks do not
+establish live redirect acceptance or an iPhone launch.
+
+Next three actions: save the actual tunnel callbacks and development Site URL
+in Supabase; verify effective destinations with fresh invalid-token probes;
+open the tunnel in Expo Go and test one fresh confirmation on its initiating
+phone. Old email links retain their old target. Production URLs/native builds
+and release approval remain subject to the retained gates below.
+
 Swipeable Today habit cards and compact logged actions (2026-10-20): **DONE**
 for implementation/local verification; physical-device acceptance **DEFERRED**.
 `today-habits.tsx` pages every already-loaded scheduled habit with Habit 1 of 3,

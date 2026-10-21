@@ -135,6 +135,12 @@ links require a development build. Follow the
 [Expo Go email-change checklist](docs/AUTH_TESTING.md#email-changes-started-in-expo-go)
 before repeating requests. No additional app key or paid SMTP service was configured.
 
+If confirmation succeeds but Safari cannot open the return page, check both
+the project's Site URL and the allowed callback URLs. A rejected destination can
+fall back to an obsolete localhost address. Switch Expo Go to the allowed tunnel
+project before requesting a fresh email. See the
+[verified redirect diagnosis](docs/AUTH_TESTING.md#verified-redirect-diagnosis-2026-10-20).
+
 Native email-link requests use the SDK-compatible `expo-crypto` module for secure
 randomness and SHA-256 PKCE challenges. It is included in Expo Go; after pulling
 dependency changes, run `npm ci` and restart Metro. Web retains browser crypto

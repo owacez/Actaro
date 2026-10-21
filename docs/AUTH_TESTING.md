@@ -27,9 +27,39 @@ See [Supabase default sender restrictions](https://supabase.com/docs/guides/auth
 
 ## Callback URLs
 
+### Verified redirect diagnosis (2026-10-20)
+
+Read-only probes of the development project used an intentionally invalid token,
+followed no redirect and sent no emails. Supabase returned HTTP 303:
+
+| Requested destination                                        | Observed result                        |
+| ------------------------------------------------------------ | -------------------------------------- |
+| Current web origin on port 8081, callback and recovery paths | Accepted                               |
+| The user's current Expo Go LAN callback                      | Replaced with `http://localhost:3000/` |
+| Configured `actaro://auth/callback` and recovery scheme      | Replaced with `http://localhost:3000/` |
+| No requested redirect                                        | `http://localhost:3000/`               |
+
+Verification can succeed at Supabase before the browser fails to open its return
+destination. The app already sends runtime-derived URLs for signup, resend,
+reset and email changes; hardcoding a LAN address would not fix this.
+
+For development, set Site URL to the **actual web origin plus `/auth/callback`**.
+Keep exact web callback/recovery entries. Start a hostname-based Expo tunnel,
+allow its exact callback/recovery URLs, and open that tunnel project on the
+phone **before** requesting a fresh email there. Old emails retain old targets.
+Keep the server running; avoid broad wildcards. Installed builds need the
+configured `actaro://` entries. Before deployment, use the actual deployed web
+origin for Site URL; no production domain is assumed here.
+
+The connected tools cannot edit hosted Auth configuration, and no browser was
+available for the dashboard. A user dashboard save and fresh live confirmation
+remain necessary. Successful invalid-token probes verify destination selection,
+not email delivery, PKCE exchange or an iPhone app launch.
+
 In the Supabase dashboard, Authentication > URL Configuration, allow the exact
 URLs for the runtime you are testing. The connected MCP tools do not expose Auth
-configuration editing; the allowlist has not been inspected or changed.
+configuration editing. The probes above verify specific effective destinations;
+the full allowlist and email templates have not been inspected or changed.
 
 - Development build using the existing `actaro` scheme:
   `actaro://auth/callback` and `actaro://auth/recovery`.
