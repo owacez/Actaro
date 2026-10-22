@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { actaroColors } from '@/constants/actaro-theme';
 import { randomUUID } from 'expo-crypto';
@@ -14,7 +14,7 @@ import {
   authStyles,
 } from '@/features/auth/auth-components';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
-import { ScreenHeader, ActionSheet, ProductIcon } from '@/components/product-ui';
+import { ScreenHeader, ActionSheet, ProductIcon, StatTile } from '@/components/product-ui';
 import { plural } from '@/lib/format';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { weekdays } from './split-model';
@@ -384,48 +384,6 @@ function Chips({ values }: { values: string[] }) {
           <AuthText kind="muted">{value}</AuthText>
         </View>
       ))}
-    </View>
-  );
-}
-function StatTile({
-  icon,
-  label,
-  value,
-}: {
-  icon: ComponentProps<typeof ProductIcon>['name'];
-  label: string;
-  value: string;
-}) {
-  const { colors } = useAppTheme();
-  return (
-    <View
-      accessible
-      accessibilityLabel={`${label}: ${value}`}
-      style={{
-        flexGrow: 1,
-        flexBasis: '45%',
-        gap: 8,
-        padding: 14,
-        borderRadius: 18,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.surface,
-      }}
-    >
-      <View
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: 12,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: colors.fill,
-        }}
-      >
-        <ProductIcon name={icon} size={20} />
-      </View>
-      <AuthText kind="eyebrow">{label.toUpperCase()}</AuthText>
-      <AuthText kind="heading">{value}</AuthText>
     </View>
   );
 }

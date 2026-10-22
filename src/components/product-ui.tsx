@@ -246,7 +246,7 @@ export function Segments<T extends string>({
   disabled = false,
   label,
 }: {
-  options: readonly { value: T; label: string }[];
+  options: readonly { value: T; label: string; icon?: SymbolViewProps['name'] }[];
   value: T;
   onChange: (value: T) => void;
   disabled?: boolean;
@@ -270,9 +270,17 @@ export function Segments<T extends string>({
             borderRadius: 12,
             alignItems: 'center',
             justifyContent: 'center',
+            gap: 2,
             backgroundColor: option.value === value ? colors.surface : 'transparent',
           }}
         >
+          {option.icon && (
+            <ProductIcon
+              name={option.icon}
+              size={18}
+              color={value === option.value ? colors.text : colors.muted}
+            />
+          )}
           <Text
             style={{
               fontFamily: 'Inter_500Medium',
@@ -384,5 +392,48 @@ export function StepsCard({
       ))}
       {note && <AuthText kind="muted">{note}</AuthText>}
     </AuthCard>
+  );
+}
+// An icon, a small label and one value; used for headline figures on overview screens.
+export function StatTile({
+  icon,
+  label,
+  value,
+}: {
+  icon: SymbolViewProps['name'];
+  label: string;
+  value: string;
+}) {
+  const { colors } = useAppTheme();
+  return (
+    <View
+      accessible
+      accessibilityLabel={`${label}: ${value}`}
+      style={{
+        flexGrow: 1,
+        flexBasis: '45%',
+        gap: 8,
+        padding: 14,
+        borderRadius: 18,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.surface,
+      }}
+    >
+      <View
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 12,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.fill,
+        }}
+      >
+        <ProductIcon name={icon} size={20} />
+      </View>
+      <AuthText kind="eyebrow">{label.toUpperCase()}</AuthText>
+      <AuthText kind="heading">{value}</AuthText>
+    </View>
   );
 }

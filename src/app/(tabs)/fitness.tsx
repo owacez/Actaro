@@ -16,10 +16,26 @@ export default function FitnessRoute() {
       value={section}
       onChange={setSection}
       options={[
-        { value: 'workouts', label: 'Workouts' },
-        { value: 'library', label: 'Library' },
-        { value: 'plans', label: 'Plans' },
-        { value: 'run', label: 'Run' },
+        {
+          value: 'workouts',
+          label: 'Workouts',
+          icon: { ios: 'dumbbell', android: 'fitness_center', web: 'fitness_center' },
+        },
+        {
+          value: 'library',
+          label: 'Library',
+          icon: { ios: 'book', android: 'menu_book', web: 'menu_book' },
+        },
+        {
+          value: 'plans',
+          label: 'Plans',
+          icon: { ios: 'calendar', android: 'calendar_month', web: 'calendar_month' },
+        },
+        {
+          value: 'run',
+          label: 'Run',
+          icon: { ios: 'figure.run', android: 'directions_run', web: 'directions_run' },
+        },
       ]}
     />
   );

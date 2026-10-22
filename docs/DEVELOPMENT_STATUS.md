@@ -4,6 +4,24 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Train tab icons and Training summary (2026-10-22): implementation and local
+verification **DONE**; device acceptance **DEFERRED**. These are user-requested
+refinements of v0.3 tasks 2.13/2.14; weights are unchanged.
+
+Changes:
+
+- Train segments show icons (Workouts, Library, Plans, Run). The shared `Segments`
+  accepts an optional icon.
+- Training summary has icon stat tiles (workouts, training days, working sets/reps,
+  Training Volume), one concise data note, status cards and a Muscle balance card
+  with bars ordered by allocated sets.
+- Recovery check is a row with an icon.
+- `StatTile` moved to shared `product-ui` (Plans and Training summary).
+
+The Library tab is kept: Source of Truth §§5 and 8.1–8.4 and Development Plan tasks
+1.6–1.8 require it, so removal awaits the user's decision. Evidence: new
+`training-screen.test.tsx` and 390×844 captures.
+
 Training plan presentation (2026-10-22): implementation and local verification
 **DONE**; device acceptance **DEFERRED**. This is a user-requested refinement of v0.3
 task 2.3; weights are unchanged.
