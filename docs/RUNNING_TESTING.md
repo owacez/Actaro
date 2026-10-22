@@ -3,6 +3,40 @@
 Updated 2026-10-21. The user approved this v1.2 implementation early, including
 background GPS, with native builds and physical acceptance **DEFERRED**.
 
+## Lock-screen live run (2026-10-22, untested on device)
+
+The user asked for a Strava-style live lock-screen display, to be tested once a
+development build exists. Implementation **DONE**; physical acceptance **DEFERRED**.
+
+- **iOS:** an `expo-widgets` Live Activity (`RunActivity`) on the Lock Screen and in
+  the Dynamic Island. It shows status, a self-counting elapsed timer that excludes
+  manual pauses and freezes while paused, distance and average moving pace.
+  - The `expo-widgets` plugin (`frequentUpdates: true`) adds the
+    `ExpoWidgetsTarget` extension, `NSSupportsLiveActivities`, frequent updates
+    and the app group `group.com.actaro.app`.
+  - Introspection confirmed these settings; prebuilding iOS needs macOS/Linux or EAS.
+- **Android:** there is no Live Activity, so a quiet sticky notification (`run-live`
+  channel, low importance) shows status, elapsed time, distance and pace.
+  - It needs notification permission; without it only the location service
+    notification appears.
+- **Updates:** every saved draft change (start, GPS fix, pause, resume) is mirrored
+  in order, including from the background task. Status changes go out at once;
+  others at most every 5 s on iOS and 10 s on Android.
+- **Ending:** it ends on finish/review, discard or an account change. Tapping it
+  opens the run.
+- **Expo Go:** the widget module is loaded only when its native module exists, so
+  Expo Go is unaffected and simply shows nothing.
+- **Privacy:** only these four figures are shown; no route or location appears.
+
+Device checklist (development build):
+
+1. Start a background run and lock the phone. Confirm the activity or notification
+   and that the iOS timer counts.
+2. Walk; distance and pace update within about 5–10 s.
+3. Pause; the status changes and the timer freezes.
+4. Resume, then finish or discard; the activity or notification disappears.
+5. Sign out mid-run; nothing stays on the lock screen.
+
 ## Street maps and stationary accuracy update
 
 The user's follow-up authorizes street maps and a recording flow informed by

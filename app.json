@@ -53,7 +53,8 @@
       ],
       "expo-sharing",
       "expo-notifications",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      ["expo-widgets", { "frequentUpdates": true }]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -6,6 +6,7 @@ import * as TaskManager from 'expo-task-manager';
 import { PermissionStatus } from 'expo-modules-core';
 import { runTracker, runLocationTask } from '@/features/running/run-tracker';
 import { runStore } from '@/features/running/run-store';
+import { runLive } from '@/features/running/run-live';
 import { runFixture, runId, runOwner, runTime } from './helpers/run-fixture';
 const mockGetSession =
   jest.fn<() => Promise<{ data: { session: { user: { id: string } } }; error: null }>>();
@@ -33,6 +34,9 @@ jest.mock('expo-task-manager', () => ({
   isTaskDefined: () => false,
   defineTask: jest.fn(),
   isAvailableAsync: jest.fn(),
+}));
+jest.mock('@/features/running/run-live', () => ({
+  runLive: { show: jest.fn(async () => {}), end: jest.fn(async () => {}) },
 }));
 jest.mock('@react-native-async-storage/async-storage', () => ({
   getItem: jest.fn(),
@@ -124,6 +128,12 @@ test('background GPS persists offline without auth polling, and pause/finish sto
   expect((await runStore.read(runOwner))?.route).toHaveLength(2);
   await runTracker.finish(runOwner);
   expect((await runStore.read(runOwner))?.status).toBe('review');
+  // Every saved change is mirrored to the lock screen, in order; review ends it.
+  for (let tick = 0; tick < 10; tick++) await Promise.resolve();
+  const shown = jest.mocked(runLive.show).mock.calls.map(([draft]) => draft.status);
+  expect(shown[0]).toBe('recording');
+  expect(shown).toContain('paused');
+  expect(jest.mocked(runLive.end)).toHaveBeenCalled();
 });
 test('denied background permission cannot silently start foreground recording', async () => {
   location.requestBackgroundPermissionsAsync.mockResolvedValue({

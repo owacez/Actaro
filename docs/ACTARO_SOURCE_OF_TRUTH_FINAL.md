@@ -1149,6 +1149,11 @@ minutes, inferred calories, running goals/events, wearables or advanced analytic
 See `RUNNING_TESTING.md` for limits and the deferred checks. Core release approval
 remains separate.
 
+User revision (2026-10-22): an active run shows a live lock-screen display, an iOS Live
+Activity (Lock Screen and Dynamic Island) and an Android sticky notification, with
+status, elapsed time, distance and average moving pace. It mirrors the local draft only
+and needs a development build; testing is deferred until one exists.
+
 ## 16.1 Running Screens
 
 Design and later implement:

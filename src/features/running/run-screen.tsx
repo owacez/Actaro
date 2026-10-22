@@ -526,7 +526,12 @@ export function RunSessionScreen({
               )}
             </>
           )}
-          <AuthLink title="Discard run" disabled={locked} onPress={() => setSheet('discard')} />
+          <AuthButton
+            title="Discard run"
+            outlined
+            disabled={locked}
+            onPress={() => setSheet('discard')}
+          />
         </>
       )}
       <RecordSaveFeedback action={action} />

@@ -4,6 +4,37 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Live run on the lock screen (2026-10-22): implementation and local verification
+**DONE**; device acceptance **DEFERRED** until the user makes a development build.
+This is a user-authorized running refinement; Phase 9 weights are unchanged.
+
+Dependency: `expo-widgets` ~57.0.27, installed with `expo install`, with the plugin
+`frequentUpdates: true`.
+
+Modules:
+
+- `run-live-model` (pure props and throttling).
+- `run-activity` (the SwiftUI Live Activity).
+- `run-live.ios` (loaded only with the native module present).
+- `run-live.android` (sticky low-importance notification).
+- `run-live` (web no-op).
+
+The run tracker mirrors every saved draft change, in order, and ends the display
+on review, discard or an account change. The Discard run control is now an
+outlined button.
+
+Local evidence:
+
+- `run-live.test.ts`: props, throttling, the iOS gate, start/update/end, and the
+  Android notification and permission skip.
+- `run-tracker.test.ts`: mirroring order.
+- `expo config --type introspect`: Info.plist and entitlements.
+- The widgets Babel transform stringifies the layout.
+- `expo export --platform all` **PASS**.
+
+Not verifiable here: iOS prebuild on Windows and on-device rendering. See
+[RUNNING_TESTING.md](RUNNING_TESTING.md#lock-screen-live-run-2026-10-22-untested-on-device).
+
 Train tab icons and Training summary (2026-10-22): implementation and local
 verification **DONE**; device acceptance **DEFERRED**. These are user-requested
 refinements of v0.3 tasks 2.13/2.14; weights are unchanged.

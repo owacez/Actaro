@@ -6,6 +6,7 @@ import { getSupabase } from '@/lib/supabase/client';
 import { RecordRequestError, recordInput } from '@/lib/owned-data';
 import { newRun, finishRun, resumeRun, type RunDraft, type RunFix } from './run-model';
 import { runStore } from './run-store';
+import { runLive } from './run-live';
 
 export const runLocationTask = 'actaro-running-location-v1';
 let foreground: Location.LocationSubscription | null = null;
@@ -112,6 +113,15 @@ function consume(locations: Location.LocationObject[]) {
     }
   });
 }
+// The lock-screen activity / live notification mirrors every saved draft change, in order,
+// including writes from the headless background task. A review or removed draft ends it.
+let live = Promise.resolve();
+function mirror(task: () => Promise<void>) {
+  live = live.then(task, task);
+}
+runStore.subscribe((_userId, draft) =>
+  mirror(() => (draft && draft.status !== 'review' ? runLive.show(draft) : runLive.end())),
+);
 // Imported by the root layout, so a headless native launch registers the task without mounting UI.
 if (Platform.OS !== 'web' && !TaskManager.isTaskDefined(runLocationTask)) {
   TaskManager.defineTask<{ locations: Location.LocationObject[] }>(
@@ -289,6 +299,8 @@ export const runTracker = {
           );
         } finally {
           await halt();
+          // Another account must not see the previous account's run on the lock screen.
+          mirror(() => runLive.end());
         }
       }
       runStore.clearMemory();
