@@ -90,6 +90,37 @@ export function portionNutrition(food: Food, unit: string, quantity: number): Nu
     fat: food.fat * factor,
   };
 }
+// Countable foods start at USDA's measured medium size (e.g. 1 medium banana, 118 g);
+// other foods start at their base amount for direct gram entry.
+export function defaultPortion(food: Food) {
+  const index = portions(food.portions).findIndex((portion) => /^1 medium\b/i.test(portion.label));
+  return index < 0
+    ? { unit: food.base_unit, quantity: String(food.base_amount) }
+    : { unit: String(index), quantity: '1' };
+}
+// Switching between weight units keeps the same amount; a household portion starts at one.
+export function switchPortion(food: Food, from: string, quantity: string, to: string) {
+  const units = foodUnits(food),
+    target = units.find((item) => item.key === to);
+  if (!target) return quantity;
+  if (to !== food.base_unit && to !== 'oz') return '1';
+  const source = units.find((item) => item.key === from),
+    amount = Number(quantity.trim());
+  if (!source || !quantity.trim() || !Number.isFinite(amount) || amount <= 0)
+    return String(food.base_amount);
+  const converted = (source.amount * amount) / target.amount,
+    step = converted >= 10 ? 1 : 10;
+  return String(Math.max(0.1, Math.round(converted * step) / step));
+}
+// Readable amount for a chosen portion, always including its weight in the base unit.
+export function portionText(food: Food, unit: string, quantity: number) {
+  const portion = /^\d+$/.test(unit) ? portions(food.portions)[Number(unit)] : undefined;
+  if (portion)
+    return `${quantity === 1 ? portion.label : `${formatNumber(quantity)} × ${portion.label}`} · ${formatNumber(portion.amount * quantity)} ${food.base_unit}`;
+  return unit === 'oz'
+    ? `${formatNumber(quantity)} oz · ${formatNumber(quantity * ounceGrams)} g`
+    : `${formatNumber(quantity)} ${unit}`;
+}
 export function totalNutrition(items: readonly Nutrients[]): Nutrients {
   return items.reduce(
     (sum, item) => ({

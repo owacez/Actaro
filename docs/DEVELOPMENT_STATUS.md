@@ -4,6 +4,41 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Recipe builder clarity (2026-10-21): implementation and local verification
+**DONE**; mobile acceptance **DEFERRED** pending the user's test. This is a v0.4
+task 3.11 refinement requested by the user, so no weight changes.
+
+Changes:
+
+- The builder now reads name → ingredient list → total → servings → cooked weight.
+- Each ingredient row shows its amount and weight, calories and macros, with
+  edit/remove actions.
+- A combined total sits below the ingredients, and the ingredient sheet shows what
+  the ingredient adds and the new recipe total.
+- Countable foods default to USDA's measured "1 medium" portion; other foods
+  default to their base grams.
+- Defect fixed: changing the unit kept the old number, so 100 g became 100 bananas.
+  This also affected diary logging. Weight-unit switches now keep the same amount,
+  and a household portion starts at one.
+- The Food tab has a visible Recipes section (Create recipe, Your recipes).
+
+USDA check: SR Legacy already has measured portions for 7,533 of 7,793 foods,
+including Quaker Quick Oats (½ cup = 40 g) and bananas (small/medium/large).
+No food data, schema, RLS or dependency changed, and no estimated foods were
+added.
+
+Evidence:
+
+- The model test reproduces 70 g quick oats plus 1 medium banana = **364.72 kcal**
+  from USDA 172989/173944 values.
+- The screen test covers the same flow, plus live impact, unit switching, row
+  calories, total and removal.
+- `npm run check` **PASS**: **395 Jest tests in 75 suites plus six dataset tests =
+  401**.
+- `git diff --check` **PASS**.
+
+No device or browser rendering is claimed.
+
 iPhone map worker follow-up (2026-10-21): implementation and Chromium verification
 **DONE**; iPhone rendering **DEFERRED** pending the user's retest.
 

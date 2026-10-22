@@ -420,6 +420,27 @@ export function DiaryScreen({ userId, onOpen }: { userId: string; onOpen: OpenNu
               onPress={() => setWaterOpen(true)}
             />
           </AuthCard>
+          <AuthText kind="eyebrow">RECIPES</AuthText>
+          <AuthCard>
+            <ActionRow
+              title="Create recipe"
+              detail="Add ingredients and amounts; calories add up as you go"
+              icon={{
+                ios: 'plus.circle',
+                android: 'add_circle_outline',
+                web: 'add_circle_outline',
+              }}
+              disabled={action.locked}
+              onPress={() => open('recipe')}
+            />
+            <ActionRow
+              title="Your recipes"
+              detail="Edit a recipe or log the portion you ate"
+              icon={{ ios: 'book', android: 'menu_book', web: 'menu_book' }}
+              disabled={action.locked}
+              onPress={() => open('recipes')}
+            />
+          </AuthCard>
           <ActionSheet
             title="Hydration"
             visible={waterOpen}

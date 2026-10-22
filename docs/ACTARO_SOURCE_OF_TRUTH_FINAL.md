@@ -798,6 +798,16 @@ portion logging. Ingredient search/portion editing uses a sheet. Calculated
 batch, per-serving and optional cooked-weight nutrition stays above ingredients.
 Saving a recipe does not log it; choose a portion and diary meal, then confirm.
 
+User revision (2026-10-21): the recipe builder lists each ingredient with its amount,
+weight and calories/macros, followed by a combined recipe total, then servings and
+optional cooked weight. While choosing an ingredient, the sheet shows what it adds
+and the new recipe total. Countable foods default to USDA's measured "1 medium"
+portion (for example a 118 g banana); other foods default to their base grams.
+Switching between weight units keeps the same amount, and picking a household
+portion starts at one. The Food tab has a visible Recipes section to create or open
+recipes. No new food data is added: the USDA SR Legacy catalogue already supplies
+measured household portions for most foods.
+
 Support:
 
 - Recipe name

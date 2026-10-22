@@ -20,6 +20,7 @@ import {
   numeric,
   nutritionLabel,
   portionNutrition,
+  switchPortion,
   type Food,
   type Nutrients,
 } from './nutrition-model';
@@ -264,7 +265,11 @@ export function PortionEditor({
             title={item.label}
             selected={unit === item.key}
             disabled={disabled}
-            onPress={() => onUnit(item.key)}
+            onPress={() => {
+              if (item.key === unit) return;
+              onQuantity(switchPortion(food, unit, quantity, item.key));
+              onUnit(item.key);
+            }}
           />
         ))}
       </View>

@@ -173,7 +173,10 @@ test('recipe editor sums selected ingredients, cooked weight and fractional serv
   await fireEvent.press(screen.getByRole('button', { name: 'Test food' }));
   await screen.findByLabelText('Quantity');
   await fireEvent.changeText(screen.getByLabelText('Quantity'), '300');
-  await fireEvent.press(screen.getByRole('button', { name: 'Use ingredient portion' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Add to recipe' }));
+  // Each ingredient shows its own calories; the combined total sits below the list.
+  expect(screen.getByLabelText('Test food, 300 g, 495 kcal')).toBeTruthy();
+  expect(screen.getByLabelText('Recipe total 495 kcal · P 93 g · C 0 g · F 10.8 g')).toBeTruthy();
   await fireEvent.changeText(screen.getByLabelText('Recipe servings'), '2.5');
   await fireEvent.changeText(screen.getByLabelText('Total cooked weight (g, optional)'), '600');
   expect(screen.getByLabelText('198 kcal · P 37.2 g · C 0 g · F 4.3 g')).toBeTruthy();
@@ -429,4 +432,75 @@ test('food options keep a failed copy visible and retry the same request before 
   await waitFor(() => expect(screen.queryByRole('button', { name: 'Copy yesterday' })).toBeNull());
   expect(service.copy).toHaveBeenCalledTimes(2);
   expect(service.copy.mock.calls[1]).toEqual(service.copy.mock.calls[0]);
+});
+test('oatmeal recipe adds grams of oats then one medium banana with live per-ingredient calories', async () => {
+  const oats = {
+    ...nutritionFood(),
+    name: 'Quick oats',
+    calories: 371,
+    protein: 13.7,
+    carbs: 68.2,
+    fat: 6.87,
+    portions: [],
+  };
+  const banana = {
+    ...nutritionFood(),
+    id: '04000000-0000-4000-8000-000000000010',
+    name: 'Bananas, raw',
+    calories: 89,
+    protein: 1.09,
+    carbs: 22.8,
+    fat: 0.33,
+    portions: [{ label: '1 medium (7" to 7-7/8" long)', unit: 'medium', amount: 118 }],
+  };
+  await render(
+    <FeedbackTestRoot>
+      <RecipeScreen userId={nutritionOwner} onBack={jest.fn()} onSaved={jest.fn()} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByLabelText('Recipe name');
+  expect(screen.getByText(/No ingredients yet/)).toBeTruthy();
+  service.search.mockResolvedValue([oats]);
+  await fireEvent.press(screen.getByRole('button', { name: 'Add ingredient' }));
+  await fireEvent.press(await screen.findByRole('button', { name: 'Quick oats' }));
+  await fireEvent.changeText(await screen.findByLabelText('Quantity'), '70');
+  expect(screen.getByText('Adds 259.7 kcal · recipe total 259.7 kcal')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Add to recipe' }));
+  service.search.mockResolvedValue([banana]);
+  await fireEvent.press(screen.getByRole('button', { name: 'Add another ingredient' }));
+  await fireEvent.press(await screen.findByRole('button', { name: 'Bananas, raw' }));
+  // A countable food starts at one measured medium piece, not 100 pieces.
+  expect(await screen.findByLabelText('Quantity')).toHaveProp('value', '1');
+  expect(screen.getByText('Adds 105 kcal · recipe total 364.7 kcal')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'g' }));
+  expect(screen.getByLabelText('Quantity')).toHaveProp('value', '118');
+  await fireEvent.press(
+    screen.getByRole('button', { name: '1 medium (7" to 7-7/8" long) (118 g)' }),
+  );
+  expect(screen.getByLabelText('Quantity')).toHaveProp('value', '1');
+  await fireEvent.press(screen.getByRole('button', { name: 'Add to recipe' }));
+  expect(screen.getByLabelText('Quick oats, 70 g, 259.7 kcal')).toBeTruthy();
+  expect(
+    screen.getByLabelText('Bananas, raw, 1 medium (7" to 7-7/8" long) · 118 g, 105 kcal'),
+  ).toBeTruthy();
+  expect(
+    screen.getByLabelText('Recipe total 364.7 kcal · P 10.9 g · C 74.6 g · F 5.2 g'),
+  ).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Remove ingredient 1' }));
+  expect(
+    screen.getByLabelText('Recipe total 105 kcal · P 1.3 g · C 26.9 g · F 0.4 g'),
+  ).toBeTruthy();
+});
+test('Food tab shows a recipes section for creating and opening recipes', async () => {
+  const open = jest.fn();
+  await render(
+    <FeedbackTestRoot>
+      <DiaryScreen userId={nutritionOwner} onOpen={open} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByText(/No target set/);
+  await fireEvent.press(screen.getByRole('button', { name: 'Create recipe' }));
+  expect(open).toHaveBeenLastCalledWith('recipe', '2026-10-13', 'Lunch');
+  await fireEvent.press(screen.getByRole('button', { name: 'Your recipes' }));
+  expect(open).toHaveBeenLastCalledWith('recipes', '2026-10-13', 'Lunch');
 });

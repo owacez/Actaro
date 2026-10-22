@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { randomUUID } from 'expo-crypto';
 import { View } from 'react-native';
 import { ActionSheet } from '@/components/product-ui';
+import { useAppTheme } from '@/features/profile/theme-context';
 import {
   AuthButton,
   AuthCard,
@@ -14,13 +15,20 @@ import {
   authStyles,
 } from '@/features/auth/auth-components';
 import {
+  defaultPortion,
+  energy,
   foodUnits,
+  formatNumber,
   numeric,
+  nutritionLabel,
   portions,
   portionNutrition,
+  portionText,
   recipeNutrition,
+  totalNutrition,
   type Food,
   type Ingredient,
+  type Nutrients,
 } from './nutrition-model';
 import { nutritionService } from './nutrition-service';
 import { FoodPicker } from './food-screen';
@@ -345,6 +353,20 @@ export function RecipeScreen({
   }, []);
   const resource = useNutritionLoad(load, onLoaded),
     action = useNutritionAction();
+  const { colors } = useAppTheme();
+  const energyUnit = resource.data?.preferences.energy_unit ?? 'kcal';
+  const rows = entries.map((entry) => {
+    try {
+      const amount = numeric(entry.quantity, 'ingredient quantity', 100000);
+      return {
+        values: portionNutrition(entry.food, entry.unit, amount),
+        amount: portionText(entry.food, entry.unit, amount),
+      };
+    } catch {
+      return null;
+    }
+  });
+  const total = totalNutrition(rows.flatMap((row) => (row ? [row.values] : [])));
   let preview = null;
   try {
     if (entries.length)
@@ -360,6 +382,15 @@ export function RecipeScreen({
         weight.trim() ? numeric(weight, 'cooked weight', 100000) : null,
       );
   } catch {}
+  // Live impact of the ingredient being chosen, before it is added to the recipe.
+  let candidate = null;
+  try {
+    if (selected)
+      candidate = portionNutrition(selected, unit, numeric(quantity, 'quantity', 100000));
+  } catch {}
+  const kcal = (value: number) => `${formatNumber(energy(value, energyUnit))} ${energyUnit}`;
+  const macros = (value: Nutrients) =>
+    `P ${formatNumber(value.protein)} g · C ${formatNumber(value.carbs)} g · F ${formatNumber(value.fat)} g`;
   function validate(work: () => void) {
     try {
       work();
@@ -391,8 +422,8 @@ export function RecipeScreen({
       <AuthLink title="← Nutrition" disabled={action.locked} onPress={onBack} />
       <AuthText kind="title">{foodId ? 'Edit recipe' : 'New recipe'}</AuthText>
       <AuthText>
-        Build your dish once, then log only the portion you eat. Calories and macros come from your
-        ingredients automatically.
+        Add each ingredient with its amount, such as 70 g oats and 1 medium banana. Calories and
+        macros add up as you go; afterwards, log only the portion you eat.
       </AuthText>
       <LoadFeedback {...resource} retry={resource.refresh} />
       {resource.data && !resource.loading && (
@@ -404,82 +435,86 @@ export function RecipeScreen({
             maxLength={200}
             editable={!action.locked}
           />
-          <AuthInput
-            label="Recipe servings"
-            value={servings}
-            onChangeText={setServings}
-            keyboardType="decimal-pad"
-            editable={!action.locked}
-          />
-          <AuthInput
-            label="Total cooked weight (g, optional)"
-            value={weight}
-            onChangeText={setWeight}
-            keyboardType="decimal-pad"
-            editable={!action.locked}
-          />
-          <AuthNotice>
-            Weigh the finished edible batch to log arbitrary grams. Without cooked weight, the
-            recipe can be logged by servings only. Added water changes weight, not ingredient
-            calories.
-          </AuthNotice>
-          {preview && (
-            <>
-              <NutrientSummary
-                title="Recipe total"
-                values={preview.total}
-                unit={resource.data.preferences.energy_unit}
-              />
-              <NutrientSummary
-                title="Per serving"
-                values={preview.perServing}
-                unit={resource.data.preferences.energy_unit}
-              />
-              {preview.per100g && (
-                <NutrientSummary
-                  title="Per 100 g cooked"
-                  values={preview.per100g}
-                  unit={resource.data.preferences.energy_unit}
-                />
-              )}
-            </>
-          )}
-          <AuthText kind="eyebrow">Ingredients</AuthText>
-          <AuthText>
-            Ingredients use the selected preparation and edible portion. Saving recalculates current
-            ingredient nutrition; existing diary entries retain their original values.
+          <AuthText kind="eyebrow">
+            INGREDIENTS{entries.length ? ` · ${entries.length}` : ''}
           </AuthText>
-          {entries.map((entry, index) => (
-            <AuthCard key={index}>
-              <AuthText kind="heading">{entry.food.name}</AuthText>
+          <AuthCard>
+            {entries.length === 0 && (
               <AuthText>
-                {entry.quantity} ×{' '}
-                {foodUnits(entry.food).find((item) => item.key === entry.unit)?.label}
-                {entry.food.archived ? ' · Deleted food; remove or replace before saving.' : ''}
+                No ingredients yet. Search a food, choose grams or a household portion, and its
+                calories appear here with the recipe total.
               </AuthText>
-              <View style={authStyles.choices}>
-                <AuthLink
-                  title={`Edit ingredient ${index + 1}`}
-                  disabled={action.locked}
-                  onPress={() => {
-                    setSelected(entry.food);
-                    setUnit(entry.unit);
-                    setQuantity(entry.quantity);
-                    setEditIndex(index);
-                    setPicker(false);
+            )}
+            {entries.map((entry, index) => {
+              const row = rows[index];
+              return (
+                <View
+                  key={index}
+                  accessible={false}
+                  style={{
+                    gap: 4,
+                    paddingBottom: 10,
+                    borderBottomWidth: 1,
+                    borderBottomColor: colors.border,
                   }}
-                />
-                <AuthLink
-                  title={`Remove ingredient ${index + 1}`}
-                  disabled={action.locked}
-                  onPress={() => setEntries((values) => values.filter((_, i) => i !== index))}
-                />
+                >
+                  <View
+                    accessible
+                    accessibilityLabel={`${entry.food.name}, ${row ? `${row.amount}, ${kcal(row.values.calories)}` : 'invalid amount'}`}
+                    style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}
+                  >
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <AuthText kind="heading">{entry.food.name}</AuthText>
+                      <AuthText kind="muted">
+                        {row ? row.amount : `${entry.quantity} ${entry.unit}`}
+                        {entry.food.archived
+                          ? ' · Deleted food; remove or replace before saving.'
+                          : ''}
+                      </AuthText>
+                      {row && <AuthText kind="muted">{macros(row.values)}</AuthText>}
+                    </View>
+                    <AuthText kind="heading">{row ? kcal(row.values.calories) : '—'}</AuthText>
+                  </View>
+                  <View style={authStyles.choices}>
+                    <AuthLink
+                      title={`Edit ingredient ${index + 1}`}
+                      disabled={action.locked}
+                      onPress={() => {
+                        setSelected(entry.food);
+                        setUnit(entry.unit);
+                        setQuantity(entry.quantity);
+                        setEditIndex(index);
+                        setPicker(false);
+                      }}
+                    />
+                    <AuthLink
+                      title={`Remove ingredient ${index + 1}`}
+                      disabled={action.locked}
+                      onPress={() => setEntries((values) => values.filter((_, i) => i !== index))}
+                    />
+                  </View>
+                </View>
+              );
+            })}
+            {entries.length > 0 && (
+              <View
+                accessible
+                accessibilityLabel={`Recipe total ${nutritionLabel(total, energyUnit)}`}
+                style={{ gap: 2 }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 12 }}>
+                  <View style={{ flex: 1 }}>
+                    <AuthText kind="eyebrow">TOTAL CALORIES</AuthText>
+                  </View>
+                  <AuthText kind="metric">{kcal(total.calories)}</AuthText>
+                </View>
+                <AuthText>{macros(total)}</AuthText>
               </View>
-            </AuthCard>
-          ))}
+            )}
+          </AuthCard>
           <AuthButton
             outlined
-            title="Add ingredient"
+            title={entries.length ? 'Add another ingredient' : 'Add ingredient'}
             disabled={action.locked || entries.length >= 100}
             onPress={() => {
               setPicker(true);
@@ -487,8 +522,32 @@ export function RecipeScreen({
               setEditIndex(null);
             }}
           />
+          <AuthInput
+            label="Recipe servings"
+            value={servings}
+            onChangeText={setServings}
+            keyboardType="decimal-pad"
+            editable={!action.locked}
+          />
+          {preview && (
+            <NutrientSummary title="Per serving" values={preview.perServing} unit={energyUnit} />
+          )}
+          <AuthInput
+            label="Total cooked weight (g, optional)"
+            value={weight}
+            onChangeText={setWeight}
+            keyboardType="decimal-pad"
+            editable={!action.locked}
+          />
+          <AuthText kind="muted">
+            Weigh the finished batch to log any number of grams later. Without it, log by servings.
+            Added water changes weight, not ingredient calories.
+          </AuthText>
+          {preview?.per100g && (
+            <NutrientSummary title="Per 100 g cooked" values={preview.per100g} unit={energyUnit} />
+          )}
           <ActionSheet
-            title={selected ? 'Ingredient portion' : 'Find an ingredient'}
+            title={selected ? 'Ingredient amount' : 'Find an ingredient'}
             visible={picker || selected !== null}
             onClose={() => {
               if (!action.locked) {
@@ -509,9 +568,13 @@ export function RecipeScreen({
                       action.setError('A recipe cannot include itself.');
                       return;
                     }
+                    let start = { unit: food.base_unit, quantity: String(food.base_amount) };
+                    try {
+                      start = defaultPortion(food);
+                    } catch {}
                     setSelected(food);
-                    setUnit(food.base_unit);
-                    setQuantity(String(food.base_amount));
+                    setUnit(start.unit);
+                    setQuantity(start.quantity);
                     setPicker(false);
                   }}
                 />
@@ -532,10 +595,21 @@ export function RecipeScreen({
                   onUnit={setUnit}
                   onQuantity={setQuantity}
                   disabled={action.locked}
-                  energyUnit={resource.data.preferences.energy_unit}
+                  energyUnit={energyUnit}
                 />
+                {candidate && (
+                  <AuthText kind="heading">
+                    {editIndex === null ? 'Adds' : 'Now'} {kcal(candidate.calories)} · recipe total{' '}
+                    {kcal(
+                      totalNutrition([
+                        ...rows.flatMap((row, i) => (row && i !== editIndex ? [row.values] : [])),
+                        candidate,
+                      ]).calories,
+                    )}
+                  </AuthText>
+                )}
                 <AuthButton
-                  title="Use ingredient portion"
+                  title={editIndex === null ? 'Add to recipe' : 'Update ingredient'}
                   disabled={action.locked}
                   onPress={() =>
                     validate(() => {
@@ -555,7 +629,10 @@ export function RecipeScreen({
                 <AuthLink
                   title="Cancel ingredient portion"
                   disabled={action.locked}
-                  onPress={() => setSelected(null)}
+                  onPress={() => {
+                    setSelected(null);
+                    setEditIndex(null);
+                  }}
                 />
               </AuthCard>
             )}
