@@ -55,3 +55,37 @@ Verification lives in `target-estimate.test.ts`, `nutrition-screens.test.tsx`,
 `body-form.test.tsx` and `v05-services.test.ts`. They cover the eight equations,
 birthday/leap-day boundaries, unsupported inputs, unit conversion, explicit
 preview/save, water preservation, separate writes and date/owner query bounds.
+
+## First-run setup and goal adjustment (user revision, 2026-10-22)
+
+New accounts with no nutrition targets and no weigh-ins are offered a six-step
+setup after sign-in: units, sex/date of birth/height, current weight and optional
+waist, goal, usual activity, and an editable plan. It can be skipped at any step;
+completion or skipping is remembered on the device, and accounts with existing
+targets or weigh-ins never see it.
+
+The user chooses Lose fat, Maintain or Build muscle. This revises the earlier
+maintenance-only rule: the adjustment is explicit, shown and editable, never
+silent. From the published maintenance estimate:
+
+- Lose fat: maintenance − min(500 kcal, 20% of maintenance).
+- Build muscle: maintenance + min(300 kcal, 15% of maintenance).
+- Maintain: the maintenance estimate and its 20/50/30 split, unchanged.
+
+Energy is rounded to the nearest 50 kcal. For lose/gain, protein starts at
+1.6 g/kg bodyweight (a common evidence-based level for retaining or building
+muscle during energy change), capped at 35% of energy for very high bodyweights;
+fat is 25% of energy and carbohydrate is the remainder. No rate of weight change
+is promised. An optional target weight must point the same way as the goal and
+creates a Bodyweight goal from today's weigh-in.
+
+Without an available estimate (under 19, an equation setting other than
+male/female, or no eligibility confirmation), the plan step explains why and asks
+for manual targets. Water is always the user's own entry.
+
+Saving reuses existing owned paths in order: preferences, the atomic body form
+(weight, height, sex, date of birth), an optional waist measurement, nutrition
+targets and the optional goal. Each is keyed by user/date/goal id, so a retry
+after a partial failure repeats the same requests. Verification:
+`onboarding-model.test.ts`, `onboarding-service.test.ts`,
+`onboarding-screen.test.tsx` and `navigation.test.tsx`.

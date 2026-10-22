@@ -236,6 +236,11 @@ Preferences:
 
 Authentication screens must match the same athletic visual system as the rest of the app.
 
+First-run setup (user revision, 2026-10-22): after sign-up, confirmation and first sign-in,
+new accounts are offered a skippable setup for units, sex, date of birth, height,
+current weight, optional waist, goal (Lose fat, Maintain, Build muscle), usual
+activity and an editable daily plan. See `TARGET_CALCULATION.md`.
+
 ---
 
 # 7. Today Dashboard
@@ -676,6 +681,9 @@ before Save; water remains user-set. A 20/50/30 protein/carbohydrate/fat split i
 an editable starting default within adult reference ranges, not individualized
 macro requirements. Keep manual entry for unsupported cases. Do not use BMI as
 a calorie-needs equation or silently apply weight-loss/gain adjustments.
+User revision (2026-10-22): an explicit, user-chosen Lose fat or Build muscle goal
+applies a shown, editable deficit/surplus and 1.6 g/kg protein starting point; it is
+never silent and promises no rate of change.
 See `docs/TARGET_CALCULATION.md` for sources, bounds and calculation behavior.
 
 - Calories

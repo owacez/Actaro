@@ -49,6 +49,7 @@ function AuthRoutes() {
       <Stack.Screen name="auth/recovery" />
       <Stack.Protected guard={!!session && !recovery}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
         <Stack.Screen name="profile" />
         <Stack.Screen name="privacy" />
         <Stack.Screen name="reminders" />

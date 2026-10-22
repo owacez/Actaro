@@ -4,6 +4,38 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+First-run setup (2026-10-22): implementation and local verification **DONE**;
+device acceptance **DEFERRED**. This is a user-requested refinement of profile
+(0.9) and nutrition targets (3.2), so no weights change.
+
+Who sees it: new accounts with no targets and no weigh-ins, on first sign-in. Each
+step can be skipped, and completion or skipping is remembered on the device.
+
+Steps:
+
+1. Units.
+2. Sex, date of birth and height.
+3. Current weight and optional waist.
+4. Goal (Lose fat/Maintain/Build muscle) with an optional target weight.
+5. Usual activity and eligibility confirmation.
+6. An editable plan from the 2023 DRI maintenance estimate.
+
+The plan step, saving and data:
+
+- Lose fat: −min(500, 20%). Build muscle: +min(300, 15%). Lose and gain use 1.6 g/kg
+  protein (capped at 35% of energy) and 25% fat. Water is always the user's entry.
+- With no estimate available, the plan step asks for manual targets.
+- Saving reuses the existing preference, body-form, measurement, nutrition-target
+  and goal paths, in order, and is retry-safe.
+- No schema change.
+
+Product rule change: the Source of Truth §11.1 and `TARGET_CALCULATION.md` now
+allow an explicit, user-chosen deficit or surplus. It is never silent and promises
+no rate of change.
+
+Evidence: model, service, screen and navigation tests (new-account redirect,
+existing-account Today, skip, manual fallback, exact saved request).
+
 Workout session, habits and goals clarity (2026-10-22): implementation and local
 verification **DONE**; device acceptance **DEFERRED**. These are user-requested
 refinements of v0.3 task 2.6 and v0.5 tasks 4.2/4.7; weights are unchanged.

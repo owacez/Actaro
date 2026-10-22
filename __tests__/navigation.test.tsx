@@ -17,6 +17,10 @@ const mockPush = jest.fn(),
 const workoutId = '00000000-0000-4000-8000-000000000002';
 const exerciseId = '00000000-0000-4000-8000-000000000003';
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
+const mockNeeded = jest.fn(async () => false);
+jest.mock('@/features/onboarding/onboarding-service', () => ({
+  onboardingService: { needed: () => mockNeeded() },
+}));
 jest.mock('@/features/workouts/workouts-screen', () => {
   const { Button } = jest.requireActual<typeof import('react-native')>('react-native');
   return {
@@ -145,10 +149,15 @@ test('signed-out and recovery sessions cannot enter workout selection or editing
 
 test('normal sign-in lands on Today and exposes all five module routes', async () => {
   const result = await render(<IndexScreen />);
-  expect(screen.getByText('Redirect: /today')).toBeTruthy();
+  expect(await screen.findByText('Redirect: /today')).toBeTruthy();
   await result.rerender(<MainTabs />);
   for (const route of ['today', 'fitness', 'nutrition', 'progress', 'more'])
     expect(screen.getByText(route)).toBeTruthy();
+});
+test('a new account with no targets or weigh-ins is sent to setup first', async () => {
+  mockNeeded.mockResolvedValueOnce(true);
+  await render(<IndexScreen />);
+  expect(await screen.findByText('Redirect: /welcome')).toBeTruthy();
 });
 test('signed-out access to tabs returns to sign-in', async () => {
   mockSession = null;
