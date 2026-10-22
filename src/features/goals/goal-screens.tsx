@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { View } from 'react-native';
-import { Meter, ScreenHeader } from '@/components/product-ui';
+import { Meter, ScreenHeader, StepsCard } from '@/components/product-ui';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { router, useFocusEffect } from 'expo-router';
 import { DatePicker } from '@/components/date-picker';
@@ -28,7 +28,10 @@ import { exerciseService } from '@/features/exercises/exercise-service';
 import { habitService } from '@/features/habits/habit-service';
 import { goalService } from './goal-service';
 import {
+  changeGoalMetrics,
+  goalDefaultName,
   goalMetrics,
+  goalSummary,
   goalHelp,
   goalPayload,
   metricInfo,
@@ -64,17 +67,15 @@ export function GoalsScreen({
   return (
     <AuthFrame header={<ScreenHeader title="Goals" />}>
       <AuthLink title="← You" disabled={action.locked} onPress={onBack} />
-      <AuthCard>
-        <AuthText kind="heading">Choose a result you want to reach</AuthText>
-        <AuthText>
-          Example: finish 3 workouts this week. Log and finish your workouts in Train; Actaro
-          updates this goal automatically. You do not check a goal off by hand.
-        </AuthText>
-        <AuthText kind="muted">
-          A habit is an action you record, such as stretching. You can use habits and goals
-          independently.
-        </AuthText>
-      </AuthCard>
+      <StepsCard
+        title="How goals work"
+        steps={[
+          'Choose a result, such as 3 workouts a week or a target weight.',
+          'Keep logging workouts, food, weight or steps as usual.',
+          'Progress updates automatically; there is nothing to tick off.',
+        ]}
+        note="Goals measure results. Habits are actions you log yourself: see You → Habits."
+      />
       <AuthButton title="Create goal" disabled={action.locked} onPress={() => onEdit()} />
       <View style={authStyles.choices}>
         <AuthChoice
@@ -394,11 +395,15 @@ export function GoalEditor({
     action = useRecordAction();
   const data = resource.data,
     unit = data ? goalUnit(form.metric, data.preferences) : metricInfo(form.metric).unit;
+  // Existing goals with a non-zero baseline keep the field so it is never silently hidden.
+  const measuresChange = changeGoalMetrics.includes(form.metric) || Number(form.baseline) !== 0,
+    defaultName = goalDefaultName(form.metric, form.target, unit);
   function save() {
     if (!data) return;
     try {
       const canonical: GoalForm = {
         ...form,
+        name: form.name.trim() || defaultName,
         direction:
           ['body_weight', 'body_measurement', 'calories_day'].includes(form.metric) &&
           Number(form.target) < Number(form.baseline)
@@ -420,14 +425,6 @@ export function GoalEditor({
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {data && !resource.loading && (
         <>
-          <AuthInput
-            label="Goal name"
-            placeholder="For example, train three times a week"
-            value={form.name}
-            maxLength={120}
-            editable={!action.locked}
-            onChangeText={(name) => setForm((current) => ({ ...current, name }))}
-          />
           <AuthText kind="heading">What do you want to achieve?</AuthText>
           <View style={authStyles.choices}>
             {goalMetrics
@@ -478,7 +475,6 @@ export function GoalEditor({
           <AuthCard>
             <AuthText kind="heading">{metricInfo(form.metric).label}</AuthText>
             <AuthText>Example: {goalHelp[form.metric].example.replaceAll('{unit}', unit)}</AuthText>
-            <AuthText>{goalHelp[form.metric].source}</AuthText>
           </AuthCard>
           {form.metric.startsWith('habit_') && (
             <HabitSource
@@ -506,17 +502,25 @@ export function GoalEditor({
               onChangeText={(measurement) => setForm((current) => ({ ...current, measurement }))}
             />
           )}
-          <AuthText>
-            Your starting value sets the beginning of the progress bar. Your target is the result
-            you want. These settings do not create a log.
-          </AuthText>
-          <AuthInput
-            label={`Starting value (${unit})`}
-            value={form.baseline}
-            keyboardType="decimal-pad"
-            editable={!action.locked}
-            onChangeText={(baseline) => setForm((current) => ({ ...current, baseline }))}
-          />
+          {measuresChange ? (
+            <>
+              <AuthText>
+                Starting value is where you are now; target is where you want to be. Progress is
+                measured between them.
+              </AuthText>
+              <AuthInput
+                label={`Starting value (${unit})`}
+                value={form.baseline}
+                keyboardType="decimal-pad"
+                editable={!action.locked}
+                onChangeText={(baseline) => setForm((current) => ({ ...current, baseline }))}
+              />
+            </>
+          ) : (
+            <AuthText>
+              {`Counts restart at zero ${form.metric.endsWith('_week') ? 'every Monday' : 'every day'}. Set the amount you want to reach.`}
+            </AuthText>
+          )}
           <AuthInput
             label={`Target (${unit})`}
             value={form.target}
@@ -524,10 +528,25 @@ export function GoalEditor({
             editable={!action.locked}
             onChangeText={(target) => setForm((current) => ({ ...current, target }))}
           />
-          <AuthText kind="muted">
-            Starts {form.start}
-            {form.end ? ' · Ends ' + form.end : ' · No deadline'}
-          </AuthText>
+          <AuthInput
+            label="Goal name (optional)"
+            placeholder={defaultName}
+            value={form.name}
+            maxLength={120}
+            editable={!action.locked}
+            onChangeText={(name) => setForm((current) => ({ ...current, name }))}
+          />
+          <AuthCard>
+            <AuthText kind="eyebrow">YOUR GOAL</AuthText>
+            <AuthText kind="heading">
+              {goalSummary(form.metric, form.baseline, form.target, unit)}
+            </AuthText>
+            <AuthText>{goalHelp[form.metric].source}</AuthText>
+            <AuthText kind="muted">
+              Starts {form.start ? displayDate(form.start) : 'today'}
+              {form.end ? ' · Target date ' + displayDate(form.end) : ' · No deadline'}
+            </AuthText>
+          </AuthCard>
           <AuthButton
             title={showOptions ? 'Hide optional settings' : 'Dates and other options'}
             outlined

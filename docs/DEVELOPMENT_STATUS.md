@@ -4,6 +4,40 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Workout session, habits and goals clarity (2026-10-22): implementation and local
+verification **DONE**; device acceptance **DEFERRED**. These are user-requested
+refinements of v0.3 task 2.6 and v0.5 tasks 4.2/4.7; weights are unchanged.
+
+Active workout:
+
+- Unlogged sets show a visible × to remove them from the current session. Before,
+  this took select → "…" → Remove.
+- Logged sets and the last remaining set cannot be removed.
+- A session card shows a large elapsed time with inline pause/resume.
+- Exercise chips show logged/planned sets and jump between exercises.
+
+Goals:
+
+- The editor asks the outcome first.
+- Starting value appears only for change goals (bodyweight, measurements, strength
+  targets, calories); daily and weekly counts start from zero.
+- The name is optional, with a generated default.
+- A "Your goal" summary and its source appear before Save.
+
+Habits:
+
+- The editor ends with a plain summary of the habit.
+- Habits and Goals open with matching "How it works" steps that cross-reference each
+  other.
+
+Behaviour unchanged: the goal payload validation, the "Starting value" label and
+the existing data. No schema change.
+
+Evidence: model tests cover goal/habit summaries and schedules; screen tests cover
+direct set removal, logged-set protection, exercise chips and goal defaults.
+Screens were captured with a seeded local session at 390×844, with 0 live
+Supabase requests.
+
 App-wide UI/UX review (2026-10-22): implementation and local verification **DONE**;
 device acceptance **DEFERRED**. The user asked for a whole-app UI/UX review,
 because the plan defines features but not UI details.

@@ -104,6 +104,33 @@ export function metricInfo(metric: string) {
   if (!found) throw new Error('Unsupported goal metric.');
   return found;
 }
+// Only these goals compare a value over time. Daily/weekly counts restart from zero
+// each period, so a starting value would only confuse.
+export const changeGoalMetrics: readonly GoalMetric[] = [
+  'body_weight',
+  'body_measurement',
+  'lift_weight',
+  'exercise_pr',
+  'calories_day',
+];
+function amount(value: string, unit: string) {
+  return unit === '%' ? `${value}%` : `${value} ${unit}`;
+}
+// One plain sentence describing the goal being saved.
+export function goalSummary(metric: GoalMetric, baseline: string, target: string, unit: string) {
+  const period = metric.endsWith('_day')
+    ? ' each day'
+    : metric.endsWith('_week')
+      ? ' each week'
+      : '';
+  return changeGoalMetrics.includes(metric) && baseline.trim()
+    ? `Go from ${baseline.trim()} to ${amount(target.trim(), unit)}${period}.`
+    : `Reach ${amount(target.trim(), unit)}${period}.`;
+}
+// Used when the optional name is left blank, e.g. "Workouts per week: 3 workouts".
+export function goalDefaultName(metric: GoalMetric, target: string, unit: string) {
+  return `${metricInfo(metric).label}: ${amount(target.trim() || '?', unit)}`.slice(0, 120);
+}
 export function goalPayload(form: GoalForm) {
   const name = form.name.trim(),
     baseline = numeric(form.baseline, 'baseline', 1000000, true),

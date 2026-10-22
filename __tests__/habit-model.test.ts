@@ -10,6 +10,8 @@ import {
   logValue,
   reminderDue,
   type HabitRecord,
+  habitSchedule,
+  habitSummary,
 } from '@/features/habits/habit-model';
 const habit = (): HabitRecord => ({
   id: '05000000-0000-4000-8000-000000000003',
@@ -206,4 +208,22 @@ test('form rejects missing schedule, fractional counts and invalid reminder/end 
   expect(() => habitPayload({ ...form, reminder: '25:00' })).toThrow();
   expect(() => habitPayload({ ...form, end: '2026-10-13' })).toThrow();
   expect(() => habitPayload({ ...form, kind: 'frequency', target: '8' })).toThrow('1 and 7');
+});
+test('habit editor summary states the schedule and target in plain words', () => {
+  expect(habitSchedule([1, 2, 3, 4, 5, 6, 7])).toBe('every day');
+  expect(habitSchedule([5, 1, 2, 3, 4])).toBe('on weekdays');
+  expect(habitSchedule([6, 7])).toBe('on weekends');
+  expect(habitSchedule([1, 3, 5])).toBe('on Mon, Wed and Fri');
+  expect(habitSummary('boolean', 'Stretch', '1', 'done', [1, 2, 3, 4, 5, 6, 7])).toBe(
+    'Mark “Stretch” done every day.',
+  );
+  expect(habitSummary('numeric', 'Read', '10', 'pages', [1, 2, 3, 4, 5])).toBe(
+    'Log “Read” on weekdays; 10 pages meets the target.',
+  );
+  expect(habitSummary('frequency', 'Gym', '4', 'times', [1, 2, 3, 4, 5, 6, 7])).toBe(
+    'Do “Gym” on 4 different days each week.',
+  );
+  expect(habitSummary('avoidance', '', '1', 'drinks', [1, 2, 3, 4, 5, 6, 7])).toBe(
+    'Keep it to 1 drinks or fewer every day.',
+  );
 });

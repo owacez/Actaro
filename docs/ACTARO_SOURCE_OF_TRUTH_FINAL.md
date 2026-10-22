@@ -531,6 +531,14 @@ Support:
 
 Fast set logging (user testing revision, 2026-10-20; supersedes guided swipe cards):
 
+User revision (2026-10-22): each unlogged set shows a visible remove (×) control so a
+planned set can be dropped from the current session in one tap. Logged sets cannot
+be removed until undone, and the last set cannot be removed. A session card shows the
+elapsed workout time prominently with an inline pause/resume control (Timed) and
+every exercise with its logged/planned set count; tapping one jumps to it. Previous
+and Next exercise remain available.
+
+
 - Planned sets, reps and load remain prefilled from the workout.
 - Show all sets in a compact Set / Weight (preferred unit) / Reps table. Tap a number to replace it directly; no editor is required for basic logging.
 - Highlight the current/selected row. The pinned Log set action completes it and advances to the next unfinished set. Row check buttons log or undo that specific set.
@@ -841,6 +849,11 @@ Support quantity and daily target.
 
 # 12. Habits
 
+User revision (2026-10-22): Habits and Goals each open with the same short
+"how it works" steps that state the difference and point to the other screen. The
+habit editor ends with a plain summary of what will be saved, for example "Mark
+“Stretch” done on weekdays."
+
 User testing revision (2026-10-18): date fields use calendar controls and reminder
 times use a time picker. Confirmed quick completions update the visible habit in
 place with a short completion animation that respects Reduce Motion; no success
@@ -902,6 +915,13 @@ Scheduled rest/non-action days should not break progress.
 ---
 
 # 13. Goals
+
+User revision (2026-10-22): the goal editor asks what to achieve first. Starting value
+appears only for goals that compare a value over time (bodyweight, measurements,
+strength targets, calories); daily and weekly counts restart from zero, so they ask
+only for a target. The goal name is optional and defaults to the outcome, for example
+"Workouts per week: 3 workouts". A summary such as "Reach 3 workouts each week." and
+its source record appear before Save.
 
 Explain that habits are repeated actions while goals measure outcomes from saved
 records. Show the source record value, target and starting value clearly, with an

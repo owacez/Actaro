@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { randomUUID } from 'expo-crypto';
 import { View } from 'react-native';
-import { ScreenHeader, ActionSheet, IconButton } from '@/components/product-ui';
+import { ScreenHeader, ActionSheet, IconButton, StepsCard } from '@/components/product-ui';
 import { NumberStepper } from '@/components/number-stepper';
 import { RecordCalendar } from '@/components/record-calendar';
 import { DatePicker } from '@/components/date-picker';
@@ -33,6 +33,7 @@ import {
 } from '@/features/nutrition/nutrition-model';
 import {
   habitActive,
+  habitSummary,
   habitTypeInfo,
   acknowledgedHabitLog,
   habitConsistency,
@@ -114,10 +115,15 @@ export function HabitsScreen({
   return (
     <AuthFrame header={<ScreenHeader title="Habits" />}>
       <AuthLink title="← You" disabled={action.locked} onPress={onBack} />
-      <AuthText>
-        A habit is something you do regularly, such as stretching after training. Record it on
-        Today; this screen keeps your schedule and history.
-      </AuthText>
+      <StepsCard
+        title="How habits work"
+        steps={[
+          'Create a habit, such as stretching, and choose its days.',
+          'Log it on Today with one tap, or enter an amount.',
+          'See your streak and history here.',
+        ]}
+        note="Habits are things you do. Goals measure results from your logs: see You → Goals."
+      />
       <AuthButton title="Create habit" disabled={action.locked} onPress={() => onOpen('edit')} />
       <View style={authStyles.choices}>
         <AuthChoice
@@ -648,6 +654,17 @@ export function HabitEditor({
               </View>
             </>
           )}
+          <AuthCard>
+            <AuthText kind="eyebrow">YOUR HABIT</AuthText>
+            <AuthText kind="heading">
+              {habitSummary(form.kind, form.name, form.target, form.unit, form.days)}
+            </AuthText>
+            <AuthText>
+              {form.kind === 'frequency'
+                ? 'Log it on Today when you do it. Each date counts once.'
+                : 'It appears on Today on these days; one tap logs it there.'}
+            </AuthText>
+          </AuthCard>
           <AuthButton
             title="Save habit"
             disabled={action.locked || resource.data.saved?.record.archived}

@@ -15,7 +15,7 @@ import { GlassView, isGlassEffectAPIAvailable, isLiquidGlassAvailable } from 'ex
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '@/features/profile/theme-context';
-import { AuthText } from '@/features/auth/auth-components';
+import { AuthCard, AuthText } from '@/features/auth/auth-components';
 import { actaroLayout } from '@/constants/actaro-theme';
 
 export function ProductIcon({
@@ -349,3 +349,40 @@ export const ui = StyleSheet.create({
   segments: { flexDirection: 'row', borderRadius: 16, padding: 4 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
 });
+// A short numbered explanation, shared by Habits and Goals so both read the same way.
+export function StepsCard({
+  title,
+  steps,
+  note,
+}: {
+  title: string;
+  steps: readonly string[];
+  note?: string;
+}) {
+  const { colors } = useAppTheme();
+  return (
+    <AuthCard>
+      <AuthText kind="heading">{title}</AuthText>
+      {steps.map((step, index) => (
+        <View key={step} style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+          <View
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: 11,
+              backgroundColor: colors.fill,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <AuthText kind="eyebrow">{index + 1}</AuthText>
+          </View>
+          <View style={{ flex: 1 }}>
+            <AuthText>{step}</AuthText>
+          </View>
+        </View>
+      ))}
+      {note && <AuthText kind="muted">{note}</AuthText>}
+    </AuthCard>
+  );
+}

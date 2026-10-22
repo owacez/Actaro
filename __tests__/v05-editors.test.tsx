@@ -61,8 +61,8 @@ test('goal editor validates a starting value and infers decreasing direction wit
       <GoalEditor userId={owner} onBack={onBack} />
     </FeedbackTestRoot>,
   );
-  await screen.findByLabelText('Goal name');
-  await fireEvent.changeText(screen.getByLabelText('Goal name'), 'Weight target');
+  await screen.findByText('What do you want to achieve?');
+  await fireEvent.changeText(screen.getByLabelText('Goal name (optional)'), 'Weight target');
   await fireEvent.press(screen.getByRole('button', { name: 'Bodyweight' }));
   await fireEvent.changeText(screen.getByLabelText('Starting value (kg)'), '80');
   await fireEvent.changeText(screen.getByLabelText('Target (kg)'), '80');
@@ -85,6 +85,31 @@ test('goal editor validates a starting value and infers decreasing direction wit
     }),
   );
 });
+test('weekly goals count from zero, name themselves and summarize the goal before saving', async () => {
+  const onBack = jest.fn();
+  await render(
+    <FeedbackTestRoot>
+      <GoalEditor userId={owner} onBack={onBack} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByText('What do you want to achieve?');
+  // Workouts per week is the default: no starting value, a plain summary and a generated name.
+  expect(screen.queryByLabelText('Starting value (workouts)')).toBeNull();
+  expect(screen.getByText('Reach 3 workouts each week.')).toBeTruthy();
+  await fireEvent.changeText(screen.getByLabelText('Target (workouts)'), '4');
+  expect(screen.getByText('Reach 4 workouts each week.')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Bodyweight' }));
+  expect(screen.getByLabelText('Starting value (kg)')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Workouts per week' }));
+  await fireEvent.changeText(screen.getByLabelText('Target (workouts)'), '4');
+  await fireEvent.press(screen.getByRole('button', { name: 'Save goal' }));
+  await waitFor(() => expect(onBack).toHaveBeenCalled());
+  expect(goalService.save).toHaveBeenCalledWith(
+    owner,
+    expect.any(String),
+    expect.objectContaining({ name: 'Workouts per week: 4 workouts', baseline: '0', target: '4' }),
+  );
+});
 test('more goals keeps a selected uncommon goal visible and preserves hidden optional settings', async () => {
   const onBack = jest.fn();
   await render(
@@ -92,11 +117,14 @@ test('more goals keeps a selected uncommon goal visible and preserves hidden opt
       <GoalEditor userId={owner} onBack={onBack} />
     </FeedbackTestRoot>,
   );
-  await screen.findByLabelText('Goal name');
+  await screen.findByText('What do you want to achieve?');
   expect(screen.queryByRole('button', { name: 'Daily macro adherence' })).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'More goals' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Daily macro adherence' }));
-  await fireEvent.changeText(screen.getByLabelText('Goal name'), 'Nutrition consistency');
+  await fireEvent.changeText(
+    screen.getByLabelText('Goal name (optional)'),
+    'Nutrition consistency',
+  );
   await fireEvent.press(screen.getByRole('button', { name: 'Dates and other options' }));
   await fireEvent.changeText(screen.getByLabelText('Macro tolerance (%)'), '15');
   await fireEvent.press(screen.getByRole('button', { name: 'Hide optional settings' }));

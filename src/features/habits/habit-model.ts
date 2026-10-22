@@ -37,6 +37,42 @@ export const habitTypeInfo = {
   },
 };
 
+const weekdayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+// Schedule as people say it: "every day", "on weekdays", "on Mon, Wed and Fri".
+export function habitSchedule(days: readonly number[]) {
+  const sorted = [...new Set(days)].sort((a, b) => a - b);
+  if (sorted.length === 7) return 'every day';
+  if (sorted.join() === '1,2,3,4,5') return 'on weekdays';
+  if (sorted.join() === '6,7') return 'on weekends';
+  const names = sorted.map((day) => weekdayNames[day - 1]);
+  return names.length > 1
+    ? `on ${names.slice(0, -1).join(', ')} and ${names.at(-1)}`
+    : `on ${names[0] ?? 'no days'}`;
+}
+// One plain sentence describing the habit being saved.
+export function habitSummary(
+  kind: HabitKind,
+  name: string,
+  target: string,
+  unit: string,
+  days: readonly number[],
+) {
+  const what = name.trim() ? `“${name.trim()}”` : 'it';
+  const when = habitSchedule(days),
+    amount = `${target.trim() || '?'} ${unit.trim() || 'units'}`;
+  switch (kind) {
+    case 'boolean':
+      return `Mark ${what} done ${when}.`;
+    case 'numeric':
+    case 'duration':
+      return `Log ${what} ${when}; ${amount} meets the target.`;
+    case 'frequency':
+      return `Do ${what} on ${target.trim() || '?'} different days each week.`;
+    case 'avoidance':
+      return `Keep ${what} to ${amount} or fewer ${when}.`;
+  }
+}
+
 // Patch only after the server acknowledges the date-keyed log; never optimistic success.
 export function acknowledgedHabitLog(
   record: HabitRecord,
