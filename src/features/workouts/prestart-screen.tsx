@@ -15,6 +15,7 @@ import { prestartTotals, type SessionDraft } from './session-model';
 import { sessionService, type PreparedWorkout } from './session-service';
 import { sessionStore } from './session-store';
 import { clearReadCache } from '@/lib/supabase/read-cache';
+import { plural } from '@/lib/format';
 export function PrestartScreen({
   userId,
   templateId,
@@ -132,7 +133,8 @@ export function PrestartScreen({
         ) : (
           <>
             <AuthText>
-              {prepared.exercises.length} exercises · {totals?.sets} working sets
+              {plural(prepared.exercises.length, 'exercise')} ·{' '}
+              {plural(totals?.sets ?? 0, 'working set')}
             </AuthText>
             <AuthText>
               Estimated duration: {totals?.estimatedMinutes} min. Assumes 45 seconds per set plus

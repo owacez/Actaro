@@ -180,7 +180,7 @@ test('recipe editor sums selected ingredients, cooked weight and fractional serv
   await fireEvent.changeText(screen.getByLabelText('Recipe servings'), '2.5');
   await fireEvent.changeText(screen.getByLabelText('Total cooked weight (g, optional)'), '600');
   expect(screen.getByLabelText('198 kcal · P 37.2 g · C 0 g · F 4.3 g')).toBeTruthy();
-  expect(screen.getByLabelText('82.5 kcal · P 15.5 g · C 0 g · F 1.8 g')).toBeTruthy();
+  expect(screen.getByLabelText('83 kcal · P 15.5 g · C 0 g · F 1.8 g')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Save recipe' }));
   await waitFor(() => expect(saved).toHaveBeenCalled());
   expect(service.recipe).toHaveBeenCalledWith(
@@ -464,14 +464,14 @@ test('oatmeal recipe adds grams of oats then one medium banana with live per-ing
   await fireEvent.press(screen.getByRole('button', { name: 'Add ingredient' }));
   await fireEvent.press(await screen.findByRole('button', { name: 'Quick oats' }));
   await fireEvent.changeText(await screen.findByLabelText('Quantity'), '70');
-  expect(screen.getByText('Adds 259.7 kcal · recipe total 259.7 kcal')).toBeTruthy();
+  expect(screen.getByText('Adds 260 kcal · recipe total 260 kcal')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Add to recipe' }));
   service.search.mockResolvedValue([banana]);
   await fireEvent.press(screen.getByRole('button', { name: 'Add another ingredient' }));
   await fireEvent.press(await screen.findByRole('button', { name: 'Bananas, raw' }));
   // A countable food starts at one measured medium piece, not 100 pieces.
   expect(await screen.findByLabelText('Quantity')).toHaveProp('value', '1');
-  expect(screen.getByText('Adds 105 kcal · recipe total 364.7 kcal')).toBeTruthy();
+  expect(screen.getByText('Adds 105 kcal · recipe total 365 kcal')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'g' }));
   expect(screen.getByLabelText('Quantity')).toHaveProp('value', '118');
   await fireEvent.press(
@@ -479,12 +479,12 @@ test('oatmeal recipe adds grams of oats then one medium banana with live per-ing
   );
   expect(screen.getByLabelText('Quantity')).toHaveProp('value', '1');
   await fireEvent.press(screen.getByRole('button', { name: 'Add to recipe' }));
-  expect(screen.getByLabelText('Quick oats, 70 g, 259.7 kcal')).toBeTruthy();
+  expect(screen.getByLabelText('Quick oats, 70 g, 260 kcal')).toBeTruthy();
   expect(
     screen.getByLabelText('Bananas, raw, 1 medium (7" to 7-7/8" long) · 118 g, 105 kcal'),
   ).toBeTruthy();
   expect(
-    screen.getByLabelText('Recipe total 364.7 kcal · P 10.9 g · C 74.6 g · F 5.2 g'),
+    screen.getByLabelText('Recipe total 365 kcal · P 10.9 g · C 74.6 g · F 5.2 g'),
   ).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Remove ingredient 1' }));
   expect(

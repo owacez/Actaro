@@ -22,6 +22,7 @@ import { periodDays, type ProgressPreset, type ProgressRange } from './progress-
 import { progressService } from './progress-service';
 import { habitUnit } from '@/features/habits/habit-model';
 import { RunProgressScreen } from '@/features/running/run-cards';
+import { displayDate, displayRange } from '@/lib/format';
 
 const modules = [
   { key: 'weight', title: 'Body' },
@@ -191,7 +192,7 @@ function SummaryResults({ data }: { data: Awaited<ReturnType<typeof progressServ
       {rows.slice(current * 8, (current + 1) * 8).map((row) => (
         <View key={row.from} style={{ gap: 8, paddingVertical: 8 }}>
           <AuthText kind="heading">
-            {row.from} → {row.to}
+            {displayRange(row.from, row.to)}
             {row.partial ? ' · partial period' : ''}
           </AuthText>
           <ProgressMetrics
@@ -209,7 +210,7 @@ function SummaryResults({ data }: { data: Awaited<ReturnType<typeof progressServ
                 value:
                   row.nutrition.average === null
                     ? 'No food logs'
-                    : `${formatNumber(row.nutrition.average.calories * factor)} ${unit}`,
+                    : `${formatNumber(Math.round(row.nutrition.average.calories * factor))} ${unit}`,
                 detail: `${row.nutrition.count}/${row.days} logged dates; protein ${row.nutrition.average === null ? 'unavailable' : formatNumber(row.nutrition.average.protein) + ' g'}`,
               },
               {
@@ -243,8 +244,8 @@ function SummaryResults({ data }: { data: Awaited<ReturnType<typeof progressServ
           />
           {row.comparison && (
             <AuthText>
-              Versus {row.comparison.from} → {row.comparison.to}: logged-day average energy{' '}
-              {comparison(row.comparison.energy)}, recorded-day average steps{' '}
+              Versus {displayRange(row.comparison.from, row.comparison.to)}: logged-day average
+              energy {comparison(row.comparison.energy)}, recorded-day average steps{' '}
               {comparison(row.comparison.steps)}, workouts per calendar day{' '}
               {comparison(row.comparison.workoutRate)}. Logging coverage may differ.
             </AuthText>
@@ -398,7 +399,10 @@ function HabitResults({ data }: { data: Awaited<ReturnType<typeof progressServic
         key={habit.record.id}
         entries={[...habit.periods].reverse().map((period) => ({
           key: period.date,
-          title: period.date + (period.end !== period.date ? ' → ' + period.end : ''),
+          title:
+            period.end !== period.date
+              ? displayRange(period.date, period.end)
+              : displayDate(period.date),
           detail: `${period.status}${period.partial ? ' · partial/excluded' : ''} · ${period.value === null ? 'Not recorded' : formatNumber(period.value) + ' ' + habitUnit(habit.record)} / ${formatNumber(period.target)} target`,
         }))}
       />
@@ -428,7 +432,7 @@ function NutritionResults({
         metrics={[
           {
             title: 'Average logged energy',
-            value: `${formatNumber((summary.average?.calories ?? 0) * factor)} ${unit}`,
+            value: `${formatNumber(Math.round((summary.average?.calories ?? 0) * factor))} ${unit}`,
             detail: 'Mean of dates with food logs',
           },
           {
@@ -471,7 +475,7 @@ function NutritionResults({
         entries={[...summary.days].reverse().map((day) => ({
           key: day.date,
           title: day.date,
-          detail: `${formatNumber(day.calories * factor)} ${unit} · P ${formatNumber(day.protein)} g · C ${formatNumber(day.carbs)} g · F ${formatNumber(day.fat)} g · ${day.adherence === null ? 'No saved targets' : formatNumber(day.adherence) + '% macro adherence'}`,
+          detail: `${formatNumber(Math.round(day.calories * factor))} ${unit} · P ${formatNumber(day.protein)} g · C ${formatNumber(day.carbs)} g · F ${formatNumber(day.fat)} g · ${day.adherence === null ? 'No saved targets' : formatNumber(day.adherence) + '% macro adherence'}`,
         }))}
       />
     </>

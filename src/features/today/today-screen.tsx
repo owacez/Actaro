@@ -17,7 +17,12 @@ import {
   RecordLoadFeedback,
   RecordSaveFeedback,
 } from '@/hooks/use-records';
-import { formatNumber, energy, localNutritionDate } from '@/features/nutrition/nutrition-model';
+import {
+  formatEnergy,
+  formatNumber,
+  energy,
+  localNutritionDate,
+} from '@/features/nutrition/nutrition-model';
 import { weightSummary, unitFactor, goalUnit } from '@/features/body/body-model';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { habitToday, habitDoneToday, acknowledgedHabitLog } from '@/features/habits/habit-model';
@@ -27,6 +32,7 @@ import { todayService } from './today-service';
 import { useDeviceSteps } from '@/features/activity/step-provider';
 import { habitGoalFact, goalProgress } from '@/features/goals/goal-model';
 import { TodayRunCard } from '@/features/running/run-cards';
+import { plural } from '@/lib/format';
 export function TodayScreen({ userId }: { userId: string }) {
   const deviceSteps = useDeviceSteps();
   const load = useCallback(() => todayService.load(userId), [userId]),
@@ -185,8 +191,8 @@ export function TodayScreen({ userId }: { userId: string }) {
             </Text>
             {data.workout && (
               <Text style={{ color: '#111311', fontSize: 14 }}>
-                {data.workout.draft.exercises.length} exercises · {data.workout.sets} sets · ~
-                {data.workout.estimatedMinutes} min
+                {plural(data.workout.draft.exercises.length, 'exercise')} ·{' '}
+                {plural(data.workout.sets, 'set')} · ~{data.workout.estimatedMinutes} min
               </Text>
             )}
             {data.session ? (
@@ -219,7 +225,7 @@ export function TodayScreen({ userId }: { userId: string }) {
           <AuthCard>
             <ActionRow
               title="Calories"
-              detail={`${formatNumber(energy(data.total.calories, data.context.preferences.energy_unit))}${data.nutrition.targets ? ' / ' + formatNumber(energy(data.nutrition.targets.calories, data.context.preferences.energy_unit)) : ''} ${data.context.preferences.energy_unit}`}
+              detail={`${formatEnergy(data.total.calories, data.context.preferences.energy_unit)}${data.nutrition.targets ? ' / ' + formatNumber(energy(data.nutrition.targets.calories, data.context.preferences.energy_unit)) : ''} ${data.context.preferences.energy_unit}`}
               onPress={() => router.push('/nutrition')}
             />
             <View style={{ flexDirection: 'row', gap: 10 }}>

@@ -28,6 +28,7 @@ import {
   type WeightUnit,
   type WorkoutDraft,
 } from './workout-model';
+import { plural } from '@/lib/format';
 
 function exerciseDraft(exerciseId: string, name: string, imageUrl: string | null): ExerciseDraft {
   return {
@@ -321,7 +322,7 @@ export function BuilderScreen({
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.background }}>
         <AuthLink title="← Back to workout" onPress={() => setPicking(false)} />
         <AuthText>
-          {draft.exercises.length} exercises in this draft. Return to the workout to save.
+          {plural(draft.exercises.length, 'exercise')} in this draft. Return to the workout to save.
         </AuthText>
         <LibraryScreen
           userId={userId}
@@ -410,7 +411,7 @@ export function BuilderScreen({
                   <AuthText>
                     {index + 1}. {item.name}
                   </AuthText>
-                  <AuthText kind="muted">{item.sets.length} sets</AuthText>
+                  <AuthText kind="muted">{plural(item.sets.length, 'set')}</AuthText>
                 </View>
                 <AuthLink
                   title={editing === item.key ? 'Close' : `Edit ${index + 1}`}

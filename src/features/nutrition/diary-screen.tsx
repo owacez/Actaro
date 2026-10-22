@@ -16,8 +16,9 @@ import {
   authStyles,
 } from '@/features/auth/auth-components';
 import {
-  energy,
+  formatEnergy,
   formatNumber,
+  loggedAmount,
   meals,
   numeric,
   nutritionDate,
@@ -29,6 +30,7 @@ import {
 } from './nutrition-model';
 import { nutritionService } from './nutrition-service';
 import { LoadFeedback, SaveFeedback, useNutritionAction, useNutritionLoad } from './nutrition-ui';
+import { displayDate } from '@/lib/format';
 export type NutritionView =
   'search' | 'recipes' | 'portion' | 'targets' | 'custom' | 'recipe' | 'saved';
 export type OpenNutrition = (
@@ -105,7 +107,7 @@ export function DiaryScreen({ userId, onOpen }: { userId: string; onOpen: OpenNu
       header={
         <ScreenHeader
           title="Food"
-          subtitle={data?.date}
+          subtitle={data ? displayDate(data.date) : undefined}
           action={
             <IconButton
               label="Food options"
@@ -135,14 +137,14 @@ export function DiaryScreen({ userId, onOpen }: { userId: string; onOpen: OpenNu
             </AuthText>
             <AuthText kind="metric">
               {data.targets
-                ? formatNumber(Math.abs(energy(data.targets.calories - total.calories, unit)))
+                ? formatEnergy(Math.abs(data.targets.calories - total.calories), unit)
                 : '—'}{' '}
               {unit}
             </AuthText>
             <AuthText>
-              {formatNumber(energy(total.calories, unit))} eaten
+              {formatEnergy(total.calories, unit)} eaten
               {data.targets
-                ? ' / ' + formatNumber(energy(data.targets.calories, unit)) + ' target'
+                ? ' / ' + formatEnergy(data.targets.calories, unit) + ' target'
                 : ' · No target set'}
             </AuthText>
             <Meter
@@ -206,9 +208,7 @@ export function DiaryScreen({ userId, onOpen }: { userId: string; onOpen: OpenNu
                       key={log.id}
                       title={log.food_name}
                       detail={
-                        formatNumber(log.quantity) +
-                        ' × ' +
-                        log.portion_label +
+                        loggedAmount(log.quantity, log.portion_label) +
                         ' · ' +
                         nutritionLabel(log, unit)
                       }

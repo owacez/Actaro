@@ -9,6 +9,7 @@ import { trainingService } from './training-service';
 import { workoutService } from './workout-service';
 import { prestartTotals } from './session-model';
 import { shiftDate } from './training-overview';
+import { plural } from '@/lib/format';
 
 export function ScheduledTraining({
   userId,
@@ -131,8 +132,8 @@ export function ScheduledTraining({
                 {data.workout.draft.name}
               </Text>
               <Text style={{ color: actaroColors.text, fontSize: 14 }}>
-                {data.workout.draft.exercises.length} exercises · {data.workout.sets} sets · ~
-                {data.workout.estimatedMinutes} min
+                {plural(data.workout.draft.exercises.length, 'exercise')} ·{' '}
+                {plural(data.workout.sets, 'set')} · ~{data.workout.estimatedMinutes} min
               </Text>
               <AuthButton
                 title="Start today's workout"

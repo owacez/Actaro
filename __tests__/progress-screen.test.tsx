@@ -4,6 +4,7 @@ import { ProgressScreen } from '@/features/progress/progress-screen';
 import { progressService } from '@/features/progress/progress-service';
 import { FeedbackTestRoot } from './helpers/feedback-root';
 import { nutritionContext } from './helpers/nutrition-fixture';
+import { displayDate } from '@/lib/format';
 jest.mock('expo-router', () => ({ useFocusEffect: jest.fn() }));
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
 jest.mock('@/features/running/run-cards', () => ({ RunProgressScreen: () => null }));
@@ -77,9 +78,9 @@ test('navigation opens nutrition, distinguishes unavailable targets and validate
     ),
   );
   await fireEvent.press(screen.getByRole('button', { name: 'Change dates' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'From: 2026-10-01' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'From: ' + displayDate('2026-10-01') }));
   await fireEvent.press(screen.getByRole('button', { name: '2026-10-13' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'To: 2026-10-13' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'To: ' + displayDate('2026-10-13') }));
   await fireEvent.press(screen.getByRole('button', { name: '2026-10-12' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Apply dates' }));
   expect(

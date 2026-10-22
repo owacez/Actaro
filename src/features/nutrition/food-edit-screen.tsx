@@ -16,8 +16,8 @@ import {
 } from '@/features/auth/auth-components';
 import {
   defaultPortion,
-  energy,
   foodUnits,
+  formatEnergy,
   formatNumber,
   numeric,
   nutritionLabel,
@@ -388,7 +388,7 @@ export function RecipeScreen({
     if (selected)
       candidate = portionNutrition(selected, unit, numeric(quantity, 'quantity', 100000));
   } catch {}
-  const kcal = (value: number) => `${formatNumber(energy(value, energyUnit))} ${energyUnit}`;
+  const kcal = (value: number) => `${formatEnergy(value, energyUnit)} ${energyUnit}`;
   const macros = (value: Nutrients) =>
     `P ${formatNumber(value.protein)} g · C ${formatNumber(value.carbs)} g · F ${formatNumber(value.fat)} g`;
   function validate(work: () => void) {

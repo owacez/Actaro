@@ -45,7 +45,7 @@ test('shows actual targets, explicit estimate and mode choice; only navigates af
       <PrestartScreen {...props} />
     </FeedbackTestRoot>,
   );
-  await screen.findByText('1 exercises · 1 working sets');
+  await screen.findByText('1 exercise · 1 working set');
   expect(screen.getByText(/Assumes 45 seconds/)).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Start Workout' }));
   await screen.findByText('Choose session mode');

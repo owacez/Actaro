@@ -6,6 +6,7 @@ import { AuthInput } from '@/features/auth/auth-components';
 import { nutritionService } from '@/features/nutrition/nutrition-service';
 import { FeedbackTestRoot } from './helpers/feedback-root';
 import { nutritionContext } from './helpers/nutrition-fixture';
+import { displayDate } from '@/lib/format';
 
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({ router: { push: (target: unknown) => mockPush(target) } }));
@@ -24,7 +25,9 @@ test('calendar handles leap days and prevents selecting dates beyond the permitt
   await render(<DatePicker value="2024-02-28" max="2024-02-29" onChange={changed} />, {
     wrapper: FeedbackTestRoot,
   });
-  await fireEvent.press(screen.getByRole('button', { name: 'Choose date: 2024-02-28' }));
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Choose date: ' + displayDate('2024-02-28') }),
+  );
   await fireEvent.press(screen.getByRole('button', { name: 'Next month' }));
   expect(screen.getByRole('button', { name: '2024-03-01' })).toBeDisabled();
   await fireEvent.press(screen.getByRole('button', { name: 'Previous month' }));

@@ -23,6 +23,7 @@ import {
   type ExerciseSummary,
   type SearchFilters,
 } from './exercise-service';
+import { plural } from '@/lib/format';
 
 const initialFilters: SearchFilters = {
   query: '',
@@ -197,7 +198,8 @@ export function LibraryScreen({
             )}
             {!loading && !error && (
               <AuthText>
-                {total} exercises{filters.availableOnly ? ' · your equipment' : ''}
+                {plural(total, 'exercise')}
+                {filters.availableOnly ? ' · your equipment' : ''}
               </AuthText>
             )}
           </View>

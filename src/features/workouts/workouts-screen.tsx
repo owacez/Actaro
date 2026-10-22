@@ -15,6 +15,7 @@ import {
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
 import { workoutService } from './workout-service';
 import { ScheduledTraining } from './scheduled-training';
+import { plural } from '@/lib/format';
 type Page = Awaited<ReturnType<typeof workoutService.list>>;
 export function WorkoutsScreen({
   userId,
@@ -144,7 +145,7 @@ export function WorkoutsScreen({
               <View style={{ flex: 1, minWidth: 0 }}>
                 <ActionRow
                   title={row.name}
-                  detail={String(row.workout_template_exercises[0]?.count ?? 0) + ' exercises'}
+                  detail={plural(row.workout_template_exercises[0]?.count ?? 0, 'exercise')}
                   icon={{ ios: 'dumbbell', android: 'fitness_center', web: 'fitness_center' }}
                   disabled={removing}
                   onPress={() => onEdit(row.id, row.name)}

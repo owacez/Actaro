@@ -21,6 +21,7 @@ import { bodyService } from './body-service';
 import { weightPeriod, weightProgress } from './weight-progress-model';
 import { ProgressPresets } from '@/features/progress/progress-components';
 import type { ProgressPreset } from '@/features/progress/progress-period';
+import { displayDate, displayRange } from '@/lib/format';
 export function WeightProgressScreen({
   userId,
   onLog,
@@ -151,7 +152,7 @@ export function WeightProgressScreen({
       {data && summary && !resource.loading && (
         <>
           <AuthText>
-            {data.from} → {data.to} · {summary.count} recorded weigh-in
+            {displayRange(data.from, data.to)} · {summary.count} recorded weigh-in
             {summary.count === 1 ? '' : 's'} / {summary.days} calendar dates
           </AuthText>
           {!summary.count ? (
@@ -170,7 +171,7 @@ export function WeightProgressScreen({
               <AuthText>
                 {summary.change === null
                   ? 'A change needs at least two dated weigh-ins.'
-                  : `${summary.changePercent !== null && summary.changePercent > 0 ? '+' : ''}${formatNumber(summary.changePercent ?? 0)}% recorded change from ${summary.first?.local_date} to ${summary.latest?.local_date}`}
+                  : `${summary.changePercent !== null && summary.changePercent > 0 ? '+' : ''}${formatNumber(summary.changePercent ?? 0)}% recorded change from ${displayDate(summary.first?.local_date ?? '')} to ${displayDate(summary.latest?.local_date ?? '')}`}
               </AuthText>
               <AuthCard>
                 <AuthText>
@@ -180,11 +181,11 @@ export function WeightProgressScreen({
                   rows={summary.rows}
                   from={data.from}
                   to={data.to}
-                  description={`Weight trend from ${data.from} to ${data.to}. ${summary.count} recorded weigh-ins. Lowest ${label(summary.low)}, highest ${label(summary.high)}. Blank positions have no records. Lines join recorded weigh-ins only. Exact dated weights appear below.`}
+                  description={`Weight trend from ${displayDate(data.from)} to ${displayDate(data.to)}. ${summary.count} recorded weigh-ins. Lowest ${label(summary.low)}, highest ${label(summary.high)}. Blank positions have no records. Lines join recorded weigh-ins only. Exact dated weights appear below.`}
                 />
                 <View style={authStyles.row}>
-                  <AuthText kind="muted">{data.from}</AuthText>
-                  <AuthText kind="muted">{data.to}</AuthText>
+                  <AuthText kind="muted">{displayDate(data.from)}</AuthText>
+                  <AuthText kind="muted">{displayDate(data.to)}</AuthText>
                 </View>
                 <AuthText>
                   Recorded weigh-ins only. Lines join observations; missing dates are never
@@ -194,10 +195,12 @@ export function WeightProgressScreen({
               <AuthCard>
                 <AuthText kind="heading">Recorded weights</AuthText>
                 <AuthText>
-                  First {label(summary.first?.weight_kg)} · {summary.first?.local_date}
+                  First {label(summary.first?.weight_kg)} ·{' '}
+                  {displayDate(summary.first?.local_date ?? '')}
                 </AuthText>
                 <AuthText>
-                  Latest {label(summary.latest?.weight_kg)} · {summary.latest?.local_date}
+                  Latest {label(summary.latest?.weight_kg)} ·{' '}
+                  {displayDate(summary.latest?.local_date ?? '')}
                 </AuthText>
                 <AuthText>Average {label(summary.average)} · mean of recorded weigh-ins</AuthText>
                 <AuthText>
@@ -216,7 +219,7 @@ export function WeightProgressScreen({
                       { borderBottomWidth: 1, borderColor: colors.border, paddingVertical: 8 },
                     ]}
                   >
-                    <AuthText>{row.local_date}</AuthText>
+                    <AuthText>{displayDate(row.local_date)}</AuthText>
                     <AuthText kind="heading">{label(row.weight_kg)}</AuthText>
                   </View>
                 ))}

@@ -11,6 +11,7 @@ import {
 import { displayWeight } from './workout-model';
 import { trainingService } from './training-service';
 import { shiftDate, trainingStatus } from './training-overview';
+import { displayRange } from '@/lib/format';
 type Loaded = Awaited<ReturnType<typeof trainingService.load>>;
 export function TrainingScreen({
   userId,
@@ -66,7 +67,7 @@ export function TrainingScreen({
       ) : (
         <>
           <AuthText>
-            {shiftDate(data.today, -27)}–{data.today} · {data.timeZone}
+            {displayRange(shiftDate(data.today, -27), data.today)} · {data.timeZone}
           </AuthText>
           <AuthText>
             Uses completed sets and each workout’s recorded local date. Changing or deleting a log

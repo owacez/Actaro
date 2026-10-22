@@ -4,6 +4,7 @@ import { BodyFormEditor, BodyDetailsEditor } from '@/features/body/body-form';
 import { bodyService } from '@/features/body/body-service';
 import { FeedbackTestRoot } from './helpers/feedback-root';
 import { nutritionContext } from './helpers/nutrition-fixture';
+import { displayDate } from '@/lib/format';
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
 jest.mock('@/features/body/body-service', () => ({
   bodyService: { form: jest.fn(), saveForm: jest.fn(), save: jest.fn() },
@@ -82,7 +83,9 @@ test('daily logging hides personal inputs and changing date loads only that date
   await screen.findByLabelText('Weight (kg)');
   expect(screen.queryByLabelText('Location (city/country, optional)')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Female' })).toBeNull();
-  await fireEvent.press(screen.getByRole('button', { name: 'Body log date: 2026-10-18' }));
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Body log date: ' + displayDate('2026-10-18') }),
+  );
   service.form.mockResolvedValue({
     ...loaded,
     day: '2026-10-17',

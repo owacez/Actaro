@@ -135,6 +135,7 @@ export function ActionRow({
   onPress,
   disabled = false,
   trailing,
+  last = false,
 }: {
   title: string;
   detail?: string;
@@ -142,6 +143,8 @@ export function ActionRow({
   onPress: () => void;
   disabled?: boolean;
   trailing?: ReactNode;
+  /** Set by AuthCard on its final row so cards do not end with a divider. */
+  last?: boolean;
 }) {
   const { colors } = useAppTheme();
   return (
@@ -153,7 +156,11 @@ export function ActionRow({
       onPress={onPress}
       style={({ pressed }) => [
         ui.row,
-        { borderBottomColor: colors.border, opacity: disabled || pressed ? 0.5 : 1 },
+        {
+          borderBottomColor: colors.border,
+          borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth,
+          opacity: disabled || pressed ? 0.5 : 1,
+        },
       ]}
     >
       {icon && (
@@ -174,6 +181,8 @@ export function ActionRow({
     </Pressable>
   );
 }
+// AuthCard reads this marker; it cannot import ActionRow without an import cycle.
+ActionRow.closesCard = true;
 
 export function ActionSheet({
   title,

@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { ActionSheet, IconButton } from './product-ui';
 import { AuthButton, AuthText } from '@/features/auth/auth-components';
 import { useAppTheme } from '@/features/profile/theme-context';
+import { displayDate } from '@/lib/format';
 
 function asDate(value: string) {
   return new Date(value + 'T12:00:00');
@@ -42,7 +43,7 @@ export function DatePicker({
   return (
     <>
       <AuthButton
-        title={label + ': ' + (value || 'Not set')}
+        title={label + ': ' + (value ? displayDate(value) : 'Not set')}
         outlined
         disabled={disabled}
         onPress={() => {

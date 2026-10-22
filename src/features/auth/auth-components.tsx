@@ -1,4 +1,11 @@
-import { useState, type PropsWithChildren, type ReactNode } from 'react';
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  useState,
+  type PropsWithChildren,
+  type ReactNode,
+} from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -244,9 +251,17 @@ export function AuthLoading({ children }: PropsWithChildren) {
 
 export function AuthCard({ children }: PropsWithChildren) {
   const { colors } = useAppTheme();
+  const items = Children.toArray(children);
   return (
     <View style={[styles.notice, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-      {children}
+      {items.map((child, index) =>
+        index === items.length - 1 &&
+        isValidElement<{ last?: boolean }>(child) &&
+        typeof child.type === 'function' &&
+        'closesCard' in child.type
+          ? cloneElement(child, { last: true })
+          : child,
+      )}
     </View>
   );
 }

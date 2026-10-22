@@ -35,6 +35,7 @@ import {
   type GoalForm,
   type GoalMetric,
 } from './goal-model';
+import { displayDate } from '@/lib/format';
 export function GoalsScreen({
   userId,
   onBack,
@@ -127,7 +128,7 @@ export function GoalsScreen({
                 <AuthText kind="muted">{goalHelp[metricInfo(goal.metric).key].source}</AuthText>
                 <AuthText>
                   Started at {formatNumber(goal.baseline * factor)} {unit} · {goal.start_date}
-                  {goal.end_date ? ' → ' + goal.end_date : ' · No target date'}
+                  {goal.end_date ? ' → ' + displayDate(goal.end_date) : ' · No target date'}
                 </AuthText>
                 {goal.direction === 'at_most' && goal.metric === 'calories_day' && (
                   <AuthText>

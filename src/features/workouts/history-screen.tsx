@@ -25,6 +25,7 @@ import { exerciseRecords, trainingVolume } from './training-metrics';
 import { WorkoutCalendar } from './workout-calendar';
 import { RecordLoadFeedback, useRecords } from '@/hooks/use-records';
 import { ScreenHeader, Segments, ActionRow } from '@/components/product-ui';
+import { plural } from '@/lib/format';
 type Page = Awaited<ReturnType<typeof historyService.list>>;
 export function HistoryScreen({
   userId,
@@ -300,7 +301,8 @@ export function HistoryScreen({
             {totals && (
               <AuthCard>
                 <AuthText>
-                  {preview?.exercises.length} exercises · {totals.sets} sets · {totals.reps} reps
+                  {plural(preview?.exercises.length ?? 0, 'exercise')} ·{' '}
+                  {plural(totals.sets, 'set')} · {plural(totals.reps, 'rep')}
                 </AuthText>
                 <AuthText>
                   Training Volume: {displayWeight(totals.volumeKg, draft.unit)} {draft.unit}·reps ·{' '}

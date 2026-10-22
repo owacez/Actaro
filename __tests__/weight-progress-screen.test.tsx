@@ -4,6 +4,7 @@ import { WeightProgressScreen } from '@/features/body/weight-progress-screen';
 import { bodyService } from '@/features/body/body-service';
 import { FeedbackTestRoot } from './helpers/feedback-root';
 import { nutritionContext } from './helpers/nutrition-fixture';
+import { displayDate } from '@/lib/format';
 jest.mock('expo-router', () => ({ useFocusEffect: jest.fn() }));
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
 jest.mock('@/features/body/body-service', () => ({ bodyService: { progress: jest.fn() } }));
@@ -33,19 +34,19 @@ test('weight progress uses saved units, shows actual dates/gaps and validates da
   expect(screen.getByRole('image').props.accessibilityLabel).toContain('Blank positions');
   expect(screen.getByText(/Latest 176.4 lb/)).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Change weight dates' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'From: 2026-09-15' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'From: ' + displayDate('2026-09-15') }));
   await fireEvent.press(screen.getByRole('button', { name: 'Next month' }));
   await fireEvent.press(screen.getByRole('button', { name: '2026-10-14' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'To: 2026-10-14' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'To: ' + displayDate('2026-10-14') }));
   await fireEvent.press(screen.getByRole('button', { name: '2026-10-13' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Apply weight dates' }));
   expect(
     screen.getAllByText('Start date must be on or before the end date.').length,
   ).toBeGreaterThan(0);
   expect(bodyService.progress).toHaveBeenCalledTimes(1);
-  await fireEvent.press(screen.getByRole('button', { name: 'From: 2026-10-14' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'From: ' + displayDate('2026-10-14') }));
   await fireEvent.press(screen.getByRole('button', { name: '2026-10-01' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'To: 2026-10-13' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'To: ' + displayDate('2026-10-13') }));
   await fireEvent.press(screen.getByRole('button', { name: '2026-10-14' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Apply weight dates' }));
   await waitFor(() =>

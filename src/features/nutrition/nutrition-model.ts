@@ -121,6 +121,11 @@ export function portionText(food: Food, unit: string, quantity: number) {
     ? `${formatNumber(quantity)} oz · ${formatNumber(quantity * ounceGrams)} g`
     : `${formatNumber(quantity)} ${unit}`;
 }
+// Diary amount: plain units read '150 g'; household portions read '2 × 1 medium (…)'.
+export function loggedAmount(quantity: number, label: string) {
+  if (!/^\d/.test(label)) return `${formatNumber(quantity)} ${label}`;
+  return quantity === 1 ? label : `${formatNumber(quantity)} × ${label}`;
+}
 export function totalNutrition(items: readonly Nutrients[]): Nutrients {
   return items.reduce(
     (sum, item) => ({
@@ -164,11 +169,15 @@ function scale(values: Nutrients, factor: number): Nutrients {
 export function energy(value: number, unit: 'kcal' | 'kJ') {
   return unit === 'kJ' ? value * 4.184 : value;
 }
+// Energy reads as whole kcal/kJ, like food labels; calculations stay unrounded.
+export function formatEnergy(value: number, unit: 'kcal' | 'kJ') {
+  return formatNumber(Math.round(energy(value, unit)));
+}
 export function formatNumber(value: number) {
   return new Intl.NumberFormat('en', { maximumFractionDigits: 1 }).format(value);
 }
 export function nutritionLabel(values: Nutrients, unit: 'kcal' | 'kJ' = 'kcal') {
-  return `${formatNumber(energy(values.calories, unit))} ${unit} · P ${formatNumber(values.protein)} g · C ${formatNumber(values.carbs)} g · F ${formatNumber(values.fat)} g`;
+  return `${formatEnergy(values.calories, unit)} ${unit} · P ${formatNumber(values.protein)} g · C ${formatNumber(values.carbs)} g · F ${formatNumber(values.fat)} g`;
 }
 export function localNutritionDate(zone: string, instant = new Date()) {
   const fields = new Intl.DateTimeFormat('en', {

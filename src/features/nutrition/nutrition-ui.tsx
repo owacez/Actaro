@@ -15,7 +15,7 @@ import { useAuthFeedback } from '@/features/auth/auth-feedback';
 import { clearReadCache } from '@/lib/supabase/read-cache';
 import {
   foodUnits,
-  energy,
+  formatEnergy,
   formatNumber,
   numeric,
   nutritionLabel,
@@ -197,7 +197,7 @@ export function NutrientSummary({
           {(['calories', 'protein', 'carbs', 'fat'] as const).map((key) => (
             <View key={key} style={{ flex: 1, minWidth: 60, gap: 4 }}>
               <AuthText kind="heading">
-                {formatNumber(key === 'calories' ? energy(values[key], unit) : values[key])}
+                {key === 'calories' ? formatEnergy(values[key], unit) : formatNumber(values[key])}
               </AuthText>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <View

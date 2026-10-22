@@ -23,6 +23,7 @@ import {
   type ProgressRange,
   validateProgressRange,
 } from './progress-period';
+import { displayRange } from '@/lib/format';
 
 export function ProgressPanel<T extends ProgressRange & { today: string }>({
   title,
@@ -127,9 +128,7 @@ export function ProgressPanel<T extends ProgressRange & { today: string }>({
       <RecordLoadFeedback {...resource} retry={refresh} />
       {resource.data && (
         <View key={resource.data.from + resource.data.to} style={{ gap: 14 }}>
-          <AuthText>
-            {resource.data.from} → {resource.data.to}
-          </AuthText>
+          <AuthText>{displayRange(resource.data.from, resource.data.to)}</AuthText>
           {children(resource.data)}
         </View>
       )}

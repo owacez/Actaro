@@ -33,6 +33,7 @@ import {
   useNutritionLoad,
 } from './nutrition-ui';
 import type { NutritionView } from './diary-screen';
+import { displayDate } from '@/lib/format';
 
 export function FoodPicker({
   userId,
@@ -196,8 +197,8 @@ export function RecipeLibraryScreen({
       <AuthButton title="Create recipe" onPress={() => onOpen('recipe')} />
       <AuthText kind="eyebrow">Choose a recipe to log</AuthText>
       <AuthText>
-        Choose how much you ate before adding it to {meal} on {date}. Saving a recipe alone does not
-        add it to your diary.
+        Choose how much you ate before adding it to {meal} on {displayDate(date)}. Saving a recipe
+        alone does not add it to your diary.
       </AuthText>
       <FoodPicker
         userId={userId}
@@ -229,7 +230,7 @@ export function FoodSearchScreen({
       <AuthLink title="← Nutrition" onPress={onBack} />
       <AuthText kind="title">Log food</AuthText>
       <AuthText>
-        {date} · {meal}
+        {displayDate(date)} · {meal}
       </AuthText>
       <AuthText>
         USDA’s historical common-food catalog and your own foods. Check the exact product or
@@ -307,7 +308,7 @@ export function FoodPortionScreen({
             </AuthText>
           )}
           <AuthText>
-            {date} · {meal}
+            {displayDate(date)} · {meal}
           </AuthText>
           {data.food.archived ? (
             <AuthNotice>
