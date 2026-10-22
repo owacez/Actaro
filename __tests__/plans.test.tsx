@@ -52,8 +52,13 @@ test('filters, previews real targets and schedule, and keeps a stable adoption i
   );
   await screen.findByRole('button', { name: 'Preview Bodyweight' });
   await fireEvent.press(screen.getByRole('button', { name: 'Preview Bodyweight' }));
-  expect(screen.getByText('Monday: Bodyweight A')).toBeTruthy();
-  expect(screen.getByText('Tuesday: Rest')).toBeTruthy();
+  expect(screen.getByLabelText('Monday: Bodyweight A')).toBeTruthy();
+  expect(screen.getByLabelText('Tuesday: Rest')).toBeTruthy();
+  // Stat tiles: 2 exercises × 2 sets = 4 sets × 45 s + 3 × 90 s rest = 7.5 → ~8 min.
+  expect(screen.getByLabelText('Days per week: 3 days')).toBeTruthy();
+  expect(screen.getByLabelText('Session time: ~8 min')).toBeTruthy();
+  expect(screen.getByLabelText('Equipment: None')).toBeTruthy();
+  expect(screen.getAllByText('~8 min')).toHaveLength(2); // Tile and workout card.
   expect(screen.getByText('1. Squat')).toBeTruthy();
   expect(mocks.adopt).not.toHaveBeenCalled();
   mocks.adopt.mockRejectedValueOnce(new Error('lost response'));

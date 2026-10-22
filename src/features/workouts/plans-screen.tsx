@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { View } from 'react-native';
+import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import { actaroColors } from '@/constants/actaro-theme';
 import { randomUUID } from 'expo-crypto';
 import {
   AuthButton,
@@ -13,10 +14,17 @@ import {
   authStyles,
 } from '@/features/auth/auth-components';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
-import { ScreenHeader, ActionSheet } from '@/components/product-ui';
+import { ScreenHeader, ActionSheet, ProductIcon } from '@/components/product-ui';
+import { plural } from '@/lib/format';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { weekdays } from './split-model';
-import { planService, type PlanFilters, type TrainingPlan } from './plan-service';
+import {
+  planService,
+  planSessionTime,
+  planWorkoutMinutes,
+  type PlanFilters,
+  type TrainingPlan,
+} from './plan-service';
 const initialFilters: PlanFilters = {
   goal: null,
   experience: null,
@@ -110,45 +118,99 @@ export function PlansScreen({
           }}
         />
       )}
-      <AuthText kind="heading">{plan?.name ?? 'Training plans'}</AuthText>
-      <AuthText>
-        Actaro-authored starting templates. Review and edit the exercises, targets and schedule to
-        suit you. Choose working weights before training.
-      </AuthText>
+      <AuthText kind="title">{plan?.name ?? 'Training plans'}</AuthText>
+      {!plan && (
+        <AuthText>
+          Actaro-authored starting templates. Review and edit the exercises, targets and schedule to
+          suit you. Choose working weights before training.
+        </AuthText>
+      )}
       {error && <AuthNotice error>{error}</AuthNotice>}
       {plan ? (
         <>
+          <Chips values={[capital(plan.goal), capital(plan.experience)]} />
           <AuthText>{plan.description}</AuthText>
-          <AuthText>
-            {plan.days_per_week} days/week · {plan.experience} · {plan.goal}
-          </AuthText>
-          <AuthText>Equipment: {plan.required_equipment.join(', ') || 'No equipment'}</AuthText>
-          <AuthText kind="eyebrow">Weekly schedule</AuthText>
-          {weekdays.map((day, index) => (
-            <AuthText key={day}>
-              {day}: {plan.schedule[index] ?? 'Rest'}
-            </AuthText>
-          ))}
-          {plan.workouts.map((workout) => (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+            <StatTile
+              icon={{ ios: 'calendar', android: 'calendar_month', web: 'calendar_month' }}
+              label="Days per week"
+              value={plural(plan.days_per_week, 'day')}
+            />
+            <StatTile
+              icon={{ ios: 'clock', android: 'schedule', web: 'schedule' }}
+              label="Session time"
+              value={planSessionTime(plan.workouts)}
+            />
+            <StatTile
+              icon={{ ios: 'dumbbell', android: 'fitness_center', web: 'fitness_center' }}
+              label="Equipment"
+              value={plan.required_equipment.join(', ') || 'None'}
+            />
+            <StatTile
+              icon={{
+                ios: 'chart.bar',
+                android: 'signal_cellular_alt',
+                web: 'signal_cellular_alt',
+              }}
+              label="Level"
+              value={capital(plan.experience)}
+            />
+          </View>
+          <AuthText kind="eyebrow">WEEKLY SCHEDULE</AuthText>
+          <AuthCard>
+            {weekdays.map((day, index) => {
+              const workout = plan.schedule[index];
+              const letter = workout ? workoutLetter(plan.workouts, workout) : null;
+              return (
+                <View
+                  key={day}
+                  accessible
+                  accessibilityLabel={`${day}: ${workout ?? 'Rest'}`}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 12,
+                    paddingVertical: 6,
+                  }}
+                >
+                  <View style={{ width: 40 }}>
+                    <AuthText kind="eyebrow">{day.slice(0, 3).toUpperCase()}</AuthText>
+                  </View>
+                  {letter ? <Badge letter={letter} /> : null}
+                  <AuthText kind={workout ? 'heading' : 'muted'}>{workout ?? 'Rest'}</AuthText>
+                </View>
+              );
+            })}
+          </AuthCard>
+          <AuthText kind="eyebrow">WORKOUTS</AuthText>
+          {plan.workouts.map((workout, at) => (
             <AuthCard key={workout.name}>
-              <View style={{ gap: 8 }}>
-                <AuthText kind="eyebrow">{workout.name}</AuthText>
-                <AuthText>
-                  {workout.sets} sets × {workout.reps} reps per exercise · {workout.rest}s rest
-                </AuthText>
-                {workout.exercises.map((name, index) => (
-                  <AuthText key={`${name}-${index}`}>
-                    {index + 1}. {name}
-                  </AuthText>
-                ))}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Badge letter={String.fromCharCode(65 + at)} />
+                <View style={{ flex: 1 }}>
+                  <AuthText kind="heading">{workout.name}</AuthText>
+                </View>
               </View>
+              <Chips
+                values={[
+                  plural(workout.exercises.length, 'exercise'),
+                  `${workout.sets} × ${workout.reps} reps`,
+                  `${workout.rest}s rest`,
+                  `~${planWorkoutMinutes(workout)} min`,
+                ]}
+              />
+              {workout.exercises.map((name, index) => (
+                <AuthText key={`${name}-${index}`}>
+                  {index + 1}. {name}
+                </AuthText>
+              ))}
             </AuthCard>
           ))}
-          <AuthText>
+          <AuthText kind="muted">
             General programming reference: {plan.source_url}. This template is editable and is not
-            an endorsed program.
+            an endorsed program. Session time assumes about 45 seconds per set plus rest.
           </AuthText>
-          <AuthText>
+          <AuthText kind="muted">
             Adding this plan creates your own workouts and makes its seven-day split active.
             Existing workouts and splits are kept.
           </AuthText>
@@ -214,8 +276,37 @@ export function PlansScreen({
                 </AuthText>
               )}
               {rows.map((row) => (
-                <AuthCard key={row.id}>
-                  <AuthText kind="heading">{row.name}</AuthText>
+                <Pressable
+                  key={row.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Preview ${row.name}`}
+                  onPress={() => {
+                    setError(null);
+                    setSelection({ plan: row, splitId: randomUUID() });
+                  }}
+                  style={({ pressed }) => ({
+                    gap: 10,
+                    padding: 16,
+                    borderRadius: 20,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    backgroundColor: colors.surface,
+                    opacity: pressed ? 0.6 : 1,
+                  })}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <View style={{ flex: 1 }}>
+                      <AuthText kind="heading">{row.name}</AuthText>
+                    </View>
+                    <ProductIcon
+                      name={{
+                        ios: 'chevron.right',
+                        android: 'chevron_right',
+                        web: 'chevron_right',
+                      }}
+                      size={18}
+                    />
+                  </View>
                   <View style={{ flexDirection: 'row', gap: 4 }}>
                     {row.schedule.map((workout, index) => (
                       <View
@@ -229,23 +320,112 @@ export function PlansScreen({
                       />
                     ))}
                   </View>
-                  <AuthText>
-                    {row.days_per_week} days/week · {row.experience} ·{' '}
-                    {row.required_equipment.join(', ') || 'No equipment'}
-                  </AuthText>
-                  <AuthLink
-                    title={`Preview ${row.name}`}
-                    onPress={() => {
-                      setError(null);
-                      setSelection({ plan: row, splitId: randomUUID() });
-                    }}
+                  <Chips
+                    values={[
+                      `${row.days_per_week} days/week`,
+                      capital(row.experience),
+                      planSessionTime(row.workouts),
+                      row.required_equipment.length
+                        ? row.required_equipment.join(', ')
+                        : 'No equipment',
+                    ]}
                   />
-                </AuthCard>
+                </Pressable>
               ))}
             </>
           )}
         </>
       )}
     </AuthFrame>
+  );
+}
+
+function capital(value: string) {
+  return value ? value[0].toUpperCase() + value.slice(1) : value;
+}
+// Workouts are lettered A, B, C… in plan order so the schedule and cards match.
+function workoutLetter(workouts: { name: string }[], name: string) {
+  const index = workouts.findIndex((workout) => workout.name === name);
+  return index < 0 ? null : String.fromCharCode(65 + index);
+}
+function Badge({ letter }: { letter: string }) {
+  const { colors } = useAppTheme();
+  return (
+    <View
+      style={{
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.accent,
+      }}
+    >
+      <Text style={{ color: actaroColors.text, fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>
+        {letter}
+      </Text>
+    </View>
+  );
+}
+function Chips({ values }: { values: string[] }) {
+  const { colors } = useAppTheme();
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+      {values.map((value) => (
+        <View
+          key={value}
+          style={{
+            borderRadius: 10,
+            paddingHorizontal: 8,
+            paddingVertical: 3,
+            backgroundColor: colors.fill,
+          }}
+        >
+          <AuthText kind="muted">{value}</AuthText>
+        </View>
+      ))}
+    </View>
+  );
+}
+function StatTile({
+  icon,
+  label,
+  value,
+}: {
+  icon: ComponentProps<typeof ProductIcon>['name'];
+  label: string;
+  value: string;
+}) {
+  const { colors } = useAppTheme();
+  return (
+    <View
+      accessible
+      accessibilityLabel={`${label}: ${value}`}
+      style={{
+        flexGrow: 1,
+        flexBasis: '45%',
+        gap: 8,
+        padding: 14,
+        borderRadius: 18,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.surface,
+      }}
+    >
+      <View
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 12,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.fill,
+        }}
+      >
+        <ProductIcon name={icon} size={20} />
+      </View>
+      <AuthText kind="eyebrow">{label.toUpperCase()}</AuthText>
+      <AuthText kind="heading">{value}</AuthText>
+    </View>
   );
 }

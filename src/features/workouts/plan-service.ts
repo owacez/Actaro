@@ -35,6 +35,19 @@ export function planWorkouts(value: Json) {
     };
   });
 }
+// Same rule as prestartTotals: about 45 s per set plus the rest between sets.
+export function planWorkoutMinutes(workout: { sets: number; rest: number; exercises: string[] }) {
+  const sets = workout.sets * workout.exercises.length;
+  return Math.ceil((sets * 45 + Math.max(0, sets - 1) * workout.rest) / 60);
+}
+// "45 min", or a range when a plan's workouts differ.
+export function planSessionTime(workouts: { sets: number; rest: number; exercises: string[] }[]) {
+  const minutes = workouts.map(planWorkoutMinutes);
+  if (!minutes.length) return '—';
+  const low = Math.min(...minutes),
+    high = Math.max(...minutes);
+  return low === high ? `~${low} min` : `~${low}–${high} min`;
+}
 export type TrainingPlan = Omit<PlanRow, 'workouts' | 'schedule'> & {
   // PostgreSQL arrays can contain null rest days; generated types omit element nullability.
   schedule: (string | null)[];

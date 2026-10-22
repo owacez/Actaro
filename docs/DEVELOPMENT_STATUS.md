@@ -4,6 +4,25 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Training plan presentation (2026-10-22): implementation and local verification
+**DONE**; device acceptance **DEFERRED**. This is a user-requested refinement of v0.3
+task 2.3; weights are unchanged.
+
+Plan detail:
+
+- Goal and level chips.
+- Icon stat tiles: days per week, session time, equipment (None when empty) and
+  level.
+- A weekly schedule card that letters each workout (A, B, …).
+- Workout cards with chips (exercises, sets × reps, rest, ~minutes) and the
+  numbered exercise list.
+
+Plan list cards are tappable, with the schedule bar and the same chips. Session time
+uses the pre-start rule (≈45 s per set plus rest between sets), shown as a range
+when workouts differ, and is labelled as an estimate. No data change. Evidence:
+`plans.test.tsx` (schedule labels, stat tiles, ~8 min estimate) and 390×844
+captures with a fictional plan.
+
 Logged-set lock (2026-10-22): a logged set's weight/reps are read-only (muted) until
 undone, and its check uses the volt colour of the habit completion mark. This is
 verified in `session-screen.test.tsx` (locked after logging, editable after undo).
