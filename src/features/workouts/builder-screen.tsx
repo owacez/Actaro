@@ -414,7 +414,8 @@ export function BuilderScreen({
                   <AuthText kind="muted">{plural(item.sets.length, 'set')}</AuthText>
                 </View>
                 <AuthLink
-                  title={editing === item.key ? 'Close' : `Edit ${index + 1}`}
+                  title={editing === item.key ? 'Done' : 'Edit'}
+                  accessibilityLabel={`${editing === item.key ? 'Close' : 'Edit'} exercise ${index + 1}`}
                   disabled={saving}
                   onPress={() => setEditing((current) => (current === item.key ? null : item.key))}
                 />

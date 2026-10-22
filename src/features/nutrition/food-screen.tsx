@@ -123,6 +123,13 @@ export function FoodPicker({
             <View key={food.id}>
               <ActionRow
                 title={food.name}
+                detail={`${nutritionLabel(food)} per ${formatNumber(food.base_amount)} ${food.base_unit} · ${
+                  food.kind === 'reference'
+                    ? 'USDA SR Legacy'
+                    : food.kind === 'recipe'
+                      ? 'Your recipe'
+                      : 'Your custom food'
+                }`}
                 disabled={disabled}
                 onPress={() => onSelect(food)}
                 trailing={
@@ -135,39 +142,32 @@ export function FoodPicker({
                   />
                 }
               />
-              <AuthText>
-                {nutritionLabel(food)} / {formatNumber(food.base_amount)} {food.base_unit}
-              </AuthText>
               {onEdit && (
-                <AuthButton
-                  title={`Edit ${food.name}`}
-                  outlined
+                <AuthLink
+                  title="Edit recipe"
+                  accessibilityLabel={`Edit ${food.name}`}
                   disabled={disabled}
                   onPress={() => onEdit(food)}
                 />
               )}
-              <AuthText>
-                {food.kind === 'reference'
-                  ? 'USDA SR Legacy · April 2018'
-                  : food.kind === 'recipe'
-                    ? 'Your recipe'
-                    : 'Your custom food'}
-              </AuthText>
             </View>
           ))}
-          <View style={authStyles.row}>
-            <AuthLink
-              title="Previous food page"
-              disabled={disabled || offset === 0}
-              onPress={() => setOffset((value) => Math.max(0, value - 24))}
-            />
-            <AuthText>Page {offset / 24 + 1}</AuthText>
-            <AuthLink
-              title="Next food page"
-              disabled={disabled || resource.data.length < 24}
-              onPress={() => setOffset((value) => value + 24)}
-            />
-          </View>
+          {/* Pages only appear when there is more than one. */}
+          {(offset > 0 || resource.data.length >= 24) && (
+            <View style={authStyles.row}>
+              <AuthLink
+                title="Previous food page"
+                disabled={disabled || offset === 0}
+                onPress={() => setOffset((value) => Math.max(0, value - 24))}
+              />
+              <AuthText>Page {offset / 24 + 1}</AuthText>
+              <AuthLink
+                title="Next food page"
+                disabled={disabled || resource.data.length < 24}
+                onPress={() => setOffset((value) => value + 24)}
+              />
+            </View>
+          )}
         </>
       )}
     </>
@@ -188,7 +188,7 @@ export function RecipeLibraryScreen({
 }) {
   return (
     <AuthFrame>
-      <AuthLink title="Back" onPress={onBack} />
+      <AuthLink title="← Food" onPress={onBack} />
       <AuthText kind="title">Your recipes</AuthText>
       <AuthText>
         A recipe combines ingredients into a dish you cook. Add their amounts and we calculate
@@ -227,7 +227,7 @@ export function FoodSearchScreen({
 }) {
   return (
     <AuthFrame>
-      <AuthLink title="← Nutrition" onPress={onBack} />
+      <AuthLink title="← Food" onPress={onBack} />
       <AuthText kind="title">Log food</AuthText>
       <AuthText>
         {displayDate(date)} · {meal}

@@ -67,7 +67,7 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
   }
   return (
     <AuthFrame header={<ScreenHeader title="Daily targets" />}>
-      <AuthLink title="← Nutrition" disabled={action.locked} onPress={onBack} />
+      <AuthLink title="← Food" disabled={action.locked} onPress={onBack} />
       <AuthNotice>
         Enter targets yourself or calculate an editable maintenance estimate. Changes apply from
         today in your saved time zone; previous dates retain their earlier targets.

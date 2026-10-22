@@ -223,19 +223,21 @@ export function WeightProgressScreen({
                     <AuthText kind="heading">{label(row.weight_kg)}</AuthText>
                   </View>
                 ))}
-              <View style={authStyles.row}>
-                <AuthLink
-                  title="Newer weigh-ins"
-                  disabled={page === 0}
-                  onPress={() => setPage((current) => current - 1)}
-                />
-                <AuthText>Page {page + 1}</AuthText>
-                <AuthLink
-                  title="Older weigh-ins"
-                  disabled={(page + 1) * 20 >= summary.count}
-                  onPress={() => setPage((current) => current + 1)}
-                />
-              </View>
+              {summary.count > 20 && (
+                <View style={authStyles.row}>
+                  <AuthLink
+                    title="Newer weigh-ins"
+                    disabled={page === 0}
+                    onPress={() => setPage((current) => current - 1)}
+                  />
+                  <AuthText>Page {page + 1}</AuthText>
+                  <AuthLink
+                    title="Older weigh-ins"
+                    disabled={(page + 1) * 20 >= summary.count}
+                    onPress={() => setPage((current) => current + 1)}
+                  />
+                </View>
+              )}
             </>
           )}
         </>

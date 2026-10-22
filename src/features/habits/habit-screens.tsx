@@ -382,19 +382,21 @@ export function HabitsScreen({
               </AuthCard>
             );
           })}
-          <View style={authStyles.row}>
-            <AuthLink
-              title="Previous habits"
-              disabled={action.locked || offset === 0}
-              onPress={() => setOffset((value) => Math.max(0, value - 24))}
-            />
-            <AuthText>Page {offset / 24 + 1}</AuthText>
-            <AuthLink
-              title="Next habits"
-              disabled={action.locked || resource.data.rows.length < 24}
-              onPress={() => setOffset((value) => value + 24)}
-            />
-          </View>
+          {(offset > 0 || resource.data.rows.length >= 24) && (
+            <View style={authStyles.row}>
+              <AuthLink
+                title="Previous habits"
+                disabled={action.locked || offset === 0}
+                onPress={() => setOffset((value) => Math.max(0, value - 24))}
+              />
+              <AuthText>Page {offset / 24 + 1}</AuthText>
+              <AuthLink
+                title="Next habits"
+                disabled={action.locked || resource.data.rows.length < 24}
+                onPress={() => setOffset((value) => value + 24)}
+              />
+            </View>
+          )}
         </>
       )}
       {!menu && <RecordSaveFeedback action={action} />}

@@ -4,6 +4,48 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+App-wide UI/UX review (2026-10-22): implementation and local verification **DONE**;
+device acceptance **DEFERRED**. The user asked for a whole-app UI/UX review,
+because the plan defines features but not UI details.
+
+Method: a fresh web export was captured in headless Edge at 390×844, light and
+dark, using sample-data interception. 31 routes rendered with **0 live Supabase
+requests**.
+
+Changes (presentation only):
+
+- Counts are pluralized ("1 exercise").
+- Diary amounts read "150 g", not "150 × g".
+- Energy displays as whole kcal/kJ; calculations stay unrounded.
+- Civil dates read "Thu, Oct 22", with the year only when it differs. This applies
+  to Food, date pickers, Progress, Weight Progress, Training summary and goals.
+- Cards no longer end with a divider.
+- Back links are renamed: "← More" → "← You", "← Nutrition" → "← Food", the bare
+  "Back" → "← Food", and the My workouts back link → "← Train".
+- Food search rows carry their nutrition and source; recipe edit is a link.
+- Single-page lists hide their pagers.
+- You: Recipes moves to Tracking with an icon, Body and Steps rows gain
+  descriptions, and Sign out is a secondary button.
+- The workout builder's "Edit 1" becomes "Edit"/"Done", with an "Edit exercise N"
+  accessible name.
+
+Not changed:
+
+- A "Create habit" shortcut on Today was considered but not added. The Source of
+  Truth keeps habit management under You → Habits.
+- Data, schema, permissions and calculations are unchanged.
+
+Release weights are unchanged.
+
+Evidence:
+
+- `npm run check` **PASS**: **397 Jest tests in 76 suites plus six dataset tests =
+  403**.
+- `git diff --check` **PASS**.
+- Re-captured screens confirmed the changes.
+
+No phone rendering is claimed.
+
 Recipe builder clarity (2026-10-21): implementation and local verification
 **DONE**; mobile acceptance **DEFERRED** pending the user's test. This is a v0.4
 task 3.11 refinement requested by the user, so no weight changes.

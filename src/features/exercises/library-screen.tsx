@@ -284,7 +284,7 @@ export function LibraryScreen({
         }
         ListFooterComponent={
           <View style={styles.header}>
-            {!loading && !error && (
+            {!loading && !error && total > 24 && (
               <View style={authStyles.row}>
                 <AuthButton
                   title="Previous"

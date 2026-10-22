@@ -44,7 +44,7 @@ export function ProfileScreen({
 
   return (
     <AuthFrame header={<ScreenHeader title="Profile" />}>
-      <AuthLink title="← More" disabled={editor.saving || securityBusy} onPress={onBack} />
+      <AuthLink title="← You" disabled={editor.saving || securityBusy} onPress={onBack} />
       {editor.loading ? (
         <AuthLoading>Loading your profile…</AuthLoading>
       ) : editor.loadError ? (

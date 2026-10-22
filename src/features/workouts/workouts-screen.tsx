@@ -26,7 +26,7 @@ export function WorkoutsScreen({
   selecting = false,
   selectionTitle = 'Add to workout',
   selectionDescription = 'Choose a saved workout or create one. The selected exercise is added to its draft; save the workout to keep it.',
-  backTitle = '← Exercise Library',
+  backTitle = '← Train',
   onSplits,
   onPlans,
   onStart,

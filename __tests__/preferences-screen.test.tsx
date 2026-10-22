@@ -116,7 +116,7 @@ test('sends only changed fields, blocks duplicate saves and awaits server succes
     preferences.user_id,
   );
   expect(screen.getByLabelText('Time zone')).toHaveProp('editable', false);
-  expect(screen.getByRole('button', { name: '← More' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '← You' })).toBeDisabled();
   expect(screen.queryByText('Preferences saved.')).toBeNull();
   await act(() => resolveSave({ ...preferences, weight_unit: 'lb', notifications_enabled: true }));
   expect(screen.getByText('Preferences saved.')).toBeTruthy();

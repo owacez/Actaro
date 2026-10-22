@@ -86,7 +86,7 @@ function NutritionManager({
       <AuthFrame>
         <AuthNotice error>{error}</AuthNotice>
         <AuthButton title="Retry loading" onPress={() => setAttempt((value) => value + 1)} />
-        <AuthLink title="← Nutrition" onPress={onBack} />
+        <AuthLink title="← Food" onPress={onBack} />
       </AuthFrame>
     );
   if (!date)
@@ -101,7 +101,7 @@ function NutritionManager({
     return (
       <AuthFrame>
         <AuthNotice error>Invalid diary date.</AuthNotice>
-        <AuthLink title="← Nutrition" onPress={onBack} />
+        <AuthLink title="← Food" onPress={onBack} />
       </AuthFrame>
     );
   }
@@ -119,7 +119,7 @@ function NutritionManager({
   return (
     <AuthFrame>
       <AuthNotice error>Nutrition screen unavailable.</AuthNotice>
-      <AuthLink title="← Nutrition" onPress={onBack} />
+      <AuthLink title="← Food" onPress={onBack} />
     </AuthFrame>
   );
 }

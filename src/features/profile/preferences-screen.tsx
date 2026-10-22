@@ -111,7 +111,7 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
   const theme = draft.theme ?? saved?.theme;
   return (
     <AuthFrame header={<ScreenHeader title="Preferences" />}>
-      <AuthLink title="← More" disabled={saving} onPress={onBack} />
+      <AuthLink title="← You" disabled={saving} onPress={onBack} />
       {loading ? (
         <AuthLoading>Loading preferences…</AuthLoading>
       ) : !saved ? (

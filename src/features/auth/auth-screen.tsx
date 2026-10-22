@@ -295,15 +295,26 @@ export function AccountScreen() {
         />
         <ActionRow
           title="Body records"
+          detail="Weigh-ins, measurements and personal details"
           icon={{ ios: 'scalemass', android: 'monitor_weight', web: 'monitor_weight' }}
           disabled={busy}
           onPress={() => router.push('/body')}
         />
         <ActionRow
           title="Steps & activity"
+          detail="Daily steps and your target"
           icon={{ ios: 'figure.walk', android: 'directions_walk', web: 'directions_walk' }}
           disabled={busy}
           onPress={() => router.push('/activity')}
+        />
+        <ActionRow
+          title="Recipes"
+          detail="Dishes built from ingredients"
+          icon={{ ios: 'book', android: 'menu_book', web: 'menu_book' }}
+          disabled={busy}
+          onPress={() =>
+            router.push({ pathname: '/nutrition/manage', params: { view: 'recipes' } })
+          }
         />
       </AuthCard>
       <AuthText kind="eyebrow">SETTINGS</AuthText>
@@ -328,16 +339,9 @@ export function AccountScreen() {
           disabled={busy}
           onPress={() => router.push('/privacy')}
         />
-        <ActionRow
-          title="Recipes"
-          disabled={busy}
-          onPress={() =>
-            router.push({ pathname: '/nutrition/manage', params: { view: 'recipes' } })
-          }
-        />
       </AuthCard>
       {error && <AuthNotice error>{error}</AuthNotice>}
-      <AuthButton title="Sign out" busy={busy} onPress={() => void signOut()} />
+      <AuthButton title="Sign out" outlined busy={busy} onPress={() => void signOut()} />
     </AuthFrame>
   );
 }

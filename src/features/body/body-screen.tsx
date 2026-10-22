@@ -280,21 +280,23 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
                   />
                 </AuthCard>
               )}
-              <View style={authStyles.row}>
-                <AuthLink
-                  title="Newer body records"
-                  disabled={action.locked || offset === 0}
-                  onPress={() => setOffset((current) => Math.max(0, current - 30))}
-                />
-                <AuthText>Page {offset / 30 + 1}</AuthText>
-                <AuthLink
-                  title="Older body records"
-                  disabled={
-                    action.locked || (data.weights.length < 30 && data.measurements.length < 30)
-                  }
-                  onPress={() => setOffset((current) => current + 30)}
-                />
-              </View>
+              {(offset > 0 || data.weights.length >= 30 || data.measurements.length >= 30) && (
+                <View style={authStyles.row}>
+                  <AuthLink
+                    title="Newer body records"
+                    disabled={action.locked || offset === 0}
+                    onPress={() => setOffset((current) => Math.max(0, current - 30))}
+                  />
+                  <AuthText>Page {offset / 30 + 1}</AuthText>
+                  <AuthLink
+                    title="Older body records"
+                    disabled={
+                      action.locked || (data.weights.length < 30 && data.measurements.length < 30)
+                    }
+                    onPress={() => setOffset((current) => current + 30)}
+                  />
+                </View>
+              )}
             </>
           )}
         </>

@@ -56,7 +56,7 @@ export function SavedMealsScreen({
     [remove, setRemove] = useState<string | null>(null);
   return (
     <AuthFrame>
-      <AuthLink title="← Nutrition" disabled={action.locked} onPress={onBack} />
+      <AuthLink title="← Food" disabled={action.locked} onPress={onBack} />
       <AuthText kind="title">Saved meals</AuthText>
       <AuthText>
         Log to {meal} · {date}. Create a saved meal from any populated meal group in the diary.

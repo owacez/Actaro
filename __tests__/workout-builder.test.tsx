@@ -357,13 +357,13 @@ test('new workout selects an exercise, validates and saves the entire draft', as
   await fireEvent.press(screen.getByRole('button', { name: '+ Add exercise' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Select real fixture exercise' }));
   await fireEvent.press(screen.getByRole('button', { name: '← Back to workout' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'Edit 1' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit exercise 1' }));
   await fireEvent.changeText(screen.getByLabelText('Reps · exercise 1 set 1'), '0');
   await fireEvent.press(screen.getByRole('button', { name: 'Done editing' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
   await screen.findByText(/enter a whole number/);
   expect(mocks.save).not.toHaveBeenCalled();
-  await fireEvent.press(screen.getByRole('button', { name: 'Edit 1' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit exercise 1' }));
   await fireEvent.changeText(screen.getByLabelText('Reps · exercise 1 set 1'), '10');
   await fireEvent.changeText(screen.getByLabelText('Weight (kg) · exercise 1 set 1'), '22.5');
   await fireEvent.press(screen.getByRole('button', { name: 'Done editing' }));
@@ -522,7 +522,7 @@ test('delete requires confirmation, keeps failed rows and blocks duplicate pendi
   await fireEvent.press(screen.getByRole('button', { name: 'Keep workout' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Create workout' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Upper A' }));
-  await fireEvent.press(screen.getByRole('button', { name: '← Exercise Library' }));
+  await fireEvent.press(screen.getByRole('button', { name: '← Train' }));
   expect(mocks.remove).toHaveBeenCalledTimes(2);
   expect(mocks.remove).toHaveBeenLastCalledWith(userId, workoutId);
   expect(back).not.toHaveBeenCalled();
@@ -579,7 +579,7 @@ test('orders exercises and adds/removes sets and exercises before saving', async
     </FeedbackTestRoot>,
   );
   await screen.findByText('2. Second press');
-  await fireEvent.press(screen.getByRole('button', { name: 'Edit 2' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Edit exercise 2' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Move 2 up' }));
   expect(screen.getByRole('button', { name: 'Move 1 down' })).toBeEnabled();
   await fireEvent.press(screen.getByRole('button', { name: '+ Add set' }));

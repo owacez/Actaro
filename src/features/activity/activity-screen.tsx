@@ -207,19 +207,21 @@ export function ActivityScreen({ userId, onBack }: { userId: string; onBack: () 
               <AuthLink title="Keep activity" disabled={locked} onPress={() => setRemove(null)} />
             </AuthCard>
           )}
-          <View style={authStyles.row}>
-            <AuthLink
-              title="Newer activity records"
-              disabled={locked || offset === 0}
-              onPress={() => setOffset((current) => Math.max(0, current - 30))}
-            />
-            <AuthText>Page {offset / 30 + 1}</AuthText>
-            <AuthLink
-              title="Older activity records"
-              disabled={locked || data.history.length < 30}
-              onPress={() => setOffset((current) => current + 30)}
-            />
-          </View>
+          {(offset > 0 || data.history.length >= 30) && (
+            <View style={authStyles.row}>
+              <AuthLink
+                title="Newer activity records"
+                disabled={locked || offset === 0}
+                onPress={() => setOffset((current) => Math.max(0, current - 30))}
+              />
+              <AuthText>Page {offset / 30 + 1}</AuthText>
+              <AuthLink
+                title="Older activity records"
+                disabled={locked || data.history.length < 30}
+                onPress={() => setOffset((current) => current + 30)}
+              />
+            </View>
+          )}
         </>
       )}
       <RecordSaveFeedback action={action} />
