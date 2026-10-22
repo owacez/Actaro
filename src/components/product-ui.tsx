@@ -437,3 +437,53 @@ export function StatTile({
     </View>
   );
 }
+// A widget with a soft colour wash, a coloured icon tile and a title. Tints use existing
+// semantic tokens at low opacity, so they read in light and dark themes alike.
+export function TintCard({
+  tint,
+  icon,
+  title,
+  action,
+  children,
+  darkIcon = false,
+}: PropsWithChildren<{
+  tint: string;
+  icon: SymbolViewProps['name'];
+  title: string;
+  action?: ReactNode;
+  /** Use a dark glyph on light tints such as volt. */
+  darkIcon?: boolean;
+}>) {
+  return (
+    <View
+      style={{
+        borderRadius: 24,
+        padding: 16,
+        gap: 10,
+        backgroundColor: tint + '1F',
+        borderWidth: 1,
+        borderColor: tint + '47',
+      }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <View
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 11,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: tint,
+          }}
+        >
+          <ProductIcon name={icon} size={18} color={darkIcon ? '#111311' : '#ffffff'} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <AuthText kind="heading">{title}</AuthText>
+        </View>
+        {action}
+      </View>
+      {children}
+    </View>
+  );
+}

@@ -695,6 +695,11 @@ a calorie-needs equation or silently apply weight-loss/gain adjustments.
 User revision (2026-10-22): an explicit, user-chosen Lose fat or Build muscle goal
 applies a shown, editable deficit/surplus and 1.6 g/kg protein starting point; it is
 never silent and promises no rate of change.
+User revision (2026-10-22): You → Daily plan & targets (also from Food and Today when no
+target exists) shows the current plan and, without one, opens on the calculator
+prefilled from saved age, latest weight, height and sex, so a goal and activity usually
+suffice. The same Lose fat / Maintain / Build muscle rule as first-run setup applies,
+and nothing is saved without review.
 See `docs/TARGET_CALCULATION.md` for sources, bounds and calculation behavior.
 
 - Calories

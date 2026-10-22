@@ -4,18 +4,18 @@ import { useCallback, useState } from 'react';
 import { Linking, View } from 'react-native';
 import {
   AuthButton,
+  AuthCard,
   AuthChoice,
   AuthFrame,
   AuthLink,
-  AuthNotice,
   AuthText,
   authStyles,
 } from '@/features/auth/auth-components';
-import { energy, numeric } from './nutrition-model';
+import { energy, formatEnergy, formatNumber, numeric } from './nutrition-model';
 import { nutritionService } from './nutrition-service';
 import { LoadFeedback, SaveFeedback, useNutritionAction, useNutritionLoad } from './nutrition-ui';
 import { TargetCalculator } from './target-calculator';
-import { targetMacroUrl } from './target-estimate';
+import { bodyGoals, targetMacroUrl, type BodyGoal } from './target-estimate';
 export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () => void }) {
   const load = useCallback(async () => {
     const context = await nutritionService.context(userId),
@@ -29,8 +29,11 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
     [water, setWater] = useState('');
   const [mode, setMode] = useState<'manual' | 'calculated'>('manual'),
     [reviewing, setReviewing] = useState(false),
-    [generated, setGenerated] = useState(false);
+    [generated, setGenerated] = useState(false),
+    [goal, setGoal] = useState<BodyGoal>('maintain');
   const onLoaded = useCallback((value: Awaited<ReturnType<typeof load>>) => {
+    // Without a target yet, start from the calculator so saved details do the work.
+    if (!value.targets) setMode('calculated');
     if (value.targets) {
       const t = value.targets;
       setCalories(String(energy(t.calories, value.preferences.energy_unit)));
@@ -66,15 +69,39 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
     }
   }
   return (
-    <AuthFrame header={<ScreenHeader title="Daily targets" />}>
-      <AuthLink title="← Food" disabled={action.locked} onPress={onBack} />
-      <AuthNotice>
-        Enter targets yourself or calculate an editable maintenance estimate. Changes apply from
-        today in your saved time zone; previous dates retain their earlier targets.
-      </AuthNotice>
+    <AuthFrame header={<ScreenHeader title="Daily plan & targets" />}>
+      <AuthLink title="← Back" disabled={action.locked} onPress={onBack} />
       <LoadFeedback {...resource} retry={resource.refresh} />
       {resource.data && !resource.loading && (
         <>
+          <AuthCard>
+            <AuthText kind="eyebrow">YOUR DAILY PLAN</AuthText>
+            {resource.data.targets ? (
+              <>
+                <AuthText kind="metric">
+                  {formatEnergy(
+                    resource.data.targets.calories,
+                    resource.data.preferences.energy_unit,
+                  )}{' '}
+                  <AuthText kind="muted">{resource.data.preferences.energy_unit} a day</AuthText>
+                </AuthText>
+                <AuthText>
+                  Protein {formatNumber(resource.data.targets.protein)} g · Carbs{' '}
+                  {formatNumber(resource.data.targets.carbs)} g · Fat{' '}
+                  {formatNumber(resource.data.targets.fat)} g · Water{' '}
+                  {formatNumber(resource.data.targets.water_ml)} ml
+                </AuthText>
+              </>
+            ) : (
+              <AuthText>
+                Not set yet. Choose a goal and activity below and your saved details work out the
+                rest.
+              </AuthText>
+            )}
+            <AuthText kind="muted">
+              Changes apply from today; earlier days keep the targets they had.
+            </AuthText>
+          </AuthCard>
           <View style={authStyles.choices}>
             <AuthChoice
               title="Enter manually"
@@ -98,7 +125,8 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
                 userId={userId}
                 preferences={resource.data.preferences}
                 disabled={action.locked}
-                onGenerated={(values) => {
+                onGenerated={(values, chosen) => {
+                  setGoal(chosen);
                   const preferences = resource.data?.preferences;
                   if (!preferences) return;
                   setCalories(String(energy(values.calories, preferences.energy_unit)));
@@ -117,9 +145,10 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
                 <>
                   <AuthText kind="heading">Review your targets</AuthText>
                   <AuthText>
-                    Generated energy estimates maintenance needs, rounded to 50 kcal. Macros start
-                    at 20% protein, 50% carbohydrate and 30% fat; these are editable defaults, not
-                    individually calculated requirements. Water stays as your own goal.
+                    {goal === 'maintain'
+                      ? 'Energy estimates maintenance, rounded to 50 kcal. Macros start at 20% protein, 50% carbohydrate and 30% fat.'
+                      : `${bodyGoals.find((option) => option.key === goal)?.detail} Protein starts at 1.6 g per kg of bodyweight; fat is 25% of energy and carbohydrate the rest.`}{' '}
+                    These are editable starting points. Water stays as your own goal.
                   </AuthText>
                   <AuthLink
                     title="About the macro starting split"
@@ -142,6 +171,7 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
                 onChange={setCalories}
                 step={10}
                 disabled={action.locked}
+                heading
               />
               <NumberStepper
                 label="Protein (g)"
@@ -149,6 +179,7 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
                 onChange={setProtein}
                 step={10}
                 disabled={action.locked}
+                heading
               />
               <NumberStepper
                 label="Carbohydrates (g)"
@@ -156,6 +187,7 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
                 onChange={setCarbs}
                 step={10}
                 disabled={action.locked}
+                heading
               />
               <NumberStepper
                 label="Fat (g)"
@@ -163,6 +195,7 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
                 onChange={setFat}
                 step={10}
                 disabled={action.locked}
+                heading
               />
               <NumberStepper
                 label="Water (ml)"
@@ -170,6 +203,7 @@ export function TargetsScreen({ userId, onBack }: { userId: string; onBack: () =
                 onChange={setWater}
                 step={10}
                 disabled={action.locked}
+                heading
               />
               <AuthButton
                 title="Save daily targets"

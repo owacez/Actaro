@@ -18,8 +18,11 @@ import type { Preferences } from '@/features/profile/profile-model';
 import {
   ageOnDate,
   activityLevels,
+  bodyGoals,
   estimateTargets,
+  planTargets,
   targetMethodUrl,
+  type BodyGoal,
   type TargetEstimate,
 } from './target-estimate';
 
@@ -32,13 +35,14 @@ export function TargetCalculator({
   userId: string;
   preferences: Preferences;
   disabled: boolean;
-  onGenerated: (values: TargetEstimate) => void;
+  onGenerated: (values: TargetEstimate, goal: BodyGoal) => void;
 }) {
   const [age, setAge] = useState(''),
     [weight, setWeight] = useState(''),
     [height, setHeight] = useState(''),
     [sex, setSex] = useState(''),
     [activity, setActivity] = useState(''),
+    [goal, setGoal] = useState<BodyGoal>('maintain'),
     [eligible, setEligible] = useState(false),
     [editingDetails, setEditingDetails] = useState(false),
     [detailsLocked, setDetailsLocked] = useState(false),
@@ -68,8 +72,8 @@ export function TargetCalculator({
     <View style={{ gap: 12 }}>
       <AuthText kind="heading">Calculate from your details</AuthText>
       <AuthText>
-        Uses your saved age, latest weight and height. Fill any missing values here. Edits here
-        affect this estimate only.
+        Prefilled from your saved age, latest weight and height, so usually you only choose a goal
+        and activity. Edits here affect this estimate only.
       </AuthText>
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {data && !resource.loading && (
@@ -122,7 +126,22 @@ export function TargetCalculator({
             The published equations use these two settings. Choosing one here does not change your
             profile; manual targets remain available.
           </AuthText>
-          <AuthText>Usual daily activity</AuthText>
+          <AuthText kind="heading">Your goal</AuthText>
+          <View style={authStyles.choices}>
+            {bodyGoals.map((option) => (
+              <AuthChoice
+                key={option.key}
+                title={option.label}
+                selected={goal === option.key}
+                disabled={disabled}
+                onPress={() => setGoal(option.key)}
+              />
+            ))}
+          </View>
+          <AuthText kind="muted">
+            {bodyGoals.find((option) => option.key === goal)?.detail}
+          </AuthText>
+          <AuthText kind="heading">Usual daily activity</AuthText>
           <View style={authStyles.choices}>
             {activityLevels.map((level) => (
               <AuthChoice
@@ -139,7 +158,8 @@ export function TargetCalculator({
           )}
           <AuthText>
             Uses the 2023 DRI maintenance equations for adults 19+ who are not pregnant or
-            breastfeeding. This is not a weight-loss prescription.
+            breastfeeding. A goal adds a shown, editable deficit or surplus; it is not a
+            prescription and promises no rate of change.
           </AuthText>
           <AuthChoice
             title="This general adult estimate applies to me"
@@ -153,16 +173,17 @@ export function TargetCalculator({
             disabled={disabled}
             onPress={() => {
               try {
+                const weightKg = canonicalInput(weight, preferences.weight_unit, 1000);
                 const result = estimateTargets({
                   age,
-                  weightKg: canonicalInput(weight, preferences.weight_unit, 1000),
+                  weightKg,
                   heightCm: canonicalInput(height, preferences.length_unit, 1000),
                   sex,
                   activity,
                   eligible,
                 });
                 setError(null);
-                onGenerated(result);
+                onGenerated(planTargets(result, goal, weightKg), goal);
               } catch (reason) {
                 setError(reason instanceof Error ? reason.message : 'Check your details.');
               }

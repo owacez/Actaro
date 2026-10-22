@@ -10,7 +10,7 @@ import {
   AuthText,
   authStyles,
 } from '@/features/auth/auth-components';
-import { ActionRow, IconButton, Meter, ScreenHeader } from '@/components/product-ui';
+import { ActionRow, IconButton, Meter, ScreenHeader, TintCard } from '@/components/product-ui';
 import {
   useRecords,
   useRecordAction,
@@ -20,7 +20,6 @@ import {
 import {
   formatEnergy,
   formatNumber,
-  energy,
   localNutritionDate,
 } from '@/features/nutrition/nutrition-model';
 import { weightSummary, unitFactor, goalUnit } from '@/features/body/body-model';
@@ -112,8 +111,11 @@ export function TodayScreen({ userId }: { userId: string }) {
           )}
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <View style={{ flex: 1 }}>
-              <AuthCard>
-                <AuthText>Bodyweight</AuthText>
+              <TintCard
+                tint={colors.protein}
+                icon={{ ios: 'scalemass', android: 'monitor_weight', web: 'monitor_weight' }}
+                title="Weight"
+              >
                 <AuthText kind="metric">
                   {weight?.latest ? formatNumber(weight.latest.weight_kg * unitFactor(unit)) : '—'}
                   <AuthText kind="muted"> {unit}</AuthText>
@@ -124,11 +126,14 @@ export function TodayScreen({ userId }: { userId: string }) {
                     : `${weight.change > 0 ? '+' : ''}${formatNumber(weight.change * unitFactor(unit))} ${unit} this week`}
                 </AuthText>
                 <AuthLink title="Log bodyweight" onPress={() => router.push('/body')} />
-              </AuthCard>
+              </TintCard>
             </View>
             <View style={{ flex: 1 }}>
-              <AuthCard>
-                <AuthText>Steps</AuthText>
+              <TintCard
+                tint={colors.success}
+                icon={{ ios: 'figure.walk', android: 'directions_walk', web: 'directions_walk' }}
+                title="Steps"
+              >
                 <AuthText kind="metric">{steps === null ? '—' : formatNumber(steps)}</AuthText>
                 <AuthText>
                   {steps === null
@@ -137,9 +142,11 @@ export function TodayScreen({ userId }: { userId: string }) {
                       ? 'Set a daily target'
                       : formatNumber(Math.max(0, target - steps)) + ' to go'}
                 </AuthText>
-                {steps !== null && target !== null && <Meter value={steps} target={target} />}
+                {steps !== null && target !== null && (
+                  <Meter value={steps} target={target} color={colors.success} />
+                )}
                 <AuthLink title="Steps & target" onPress={() => router.push('/activity')} />
-              </AuthCard>
+              </TintCard>
             </View>
           </View>
           <TodayRunCard
@@ -222,17 +229,64 @@ export function TodayScreen({ userId }: { userId: string }) {
               />
             )}
           </View>
-          <AuthCard>
-            <ActionRow
-              title="Calories"
-              detail={`${formatEnergy(data.total.calories, data.context.preferences.energy_unit)}${data.nutrition.targets ? ' / ' + formatNumber(energy(data.nutrition.targets.calories, data.context.preferences.energy_unit)) : ''} ${data.context.preferences.energy_unit}`}
-              onPress={() => router.push('/nutrition')}
-            />
+          <TintCard
+            tint={colors.accent}
+            icon={{ ios: 'flame', android: 'local_fire_department', web: 'local_fire_department' }}
+            title="Calories"
+            action={<AuthLink title="Open Food" onPress={() => router.push('/nutrition')} />}
+          >
+            {data.nutrition.targets ? (
+              <>
+                <AuthText kind="metric">
+                  {formatEnergy(
+                    Math.abs(data.nutrition.targets.calories - data.total.calories),
+                    data.context.preferences.energy_unit,
+                  )}
+                  <AuthText kind="muted">
+                    {' '}
+                    {data.context.preferences.energy_unit}{' '}
+                    {data.total.calories > data.nutrition.targets.calories ? 'over' : 'left'}
+                  </AuthText>
+                </AuthText>
+                <AuthText>
+                  {formatEnergy(data.total.calories, data.context.preferences.energy_unit)} eaten /{' '}
+                  {formatEnergy(
+                    data.nutrition.targets.calories,
+                    data.context.preferences.energy_unit,
+                  )}{' '}
+                  target
+                </AuthText>
+                <Meter
+                  value={data.total.calories}
+                  target={data.nutrition.targets.calories}
+                  color={colors.accent}
+                />
+              </>
+            ) : (
+              <>
+                <AuthText>
+                  {formatEnergy(data.total.calories, data.context.preferences.energy_unit)}{' '}
+                  {data.context.preferences.energy_unit} eaten · no daily target yet
+                </AuthText>
+                <AuthButton
+                  title="Set my calorie target"
+                  onPress={() =>
+                    router.push({ pathname: '/nutrition/manage', params: { view: 'targets' } })
+                  }
+                />
+              </>
+            )}
             <View style={{ flexDirection: 'row', gap: 10 }}>
               {(['protein', 'carbs', 'fat'] as const).map((key) => (
                 <View key={key} style={{ flex: 1, gap: 5 }}>
                   <AuthText kind="muted">{key[0].toUpperCase() + key.slice(1)}</AuthText>
-                  <AuthText>{formatNumber(data.total[key])} g</AuthText>
+                  <AuthText>
+                    {formatNumber(data.total[key])}
+                    {data.nutrition.targets
+                      ? ' / ' + formatNumber(data.nutrition.targets[key])
+                      : ''}{' '}
+                    g
+                  </AuthText>
                   <Meter
                     value={data.total[key]}
                     target={data.nutrition.targets?.[key] ?? 0}
@@ -272,8 +326,13 @@ export function TodayScreen({ userId }: { userId: string }) {
                 }}
               />
             </View>
-          </AuthCard>
-          <AuthCard>
+          </TintCard>
+          <TintCard
+            tint={colors.volt}
+            darkIcon
+            icon={{ ios: 'checkmark.square', android: 'check_box', web: 'check_box' }}
+            title="Habits"
+          >
             <TodayHabits
               userId={userId}
               habits={data.habits}
@@ -308,29 +367,42 @@ export function TodayScreen({ userId }: { userId: string }) {
             {data.habits.length > 0 && (
               <AuthText kind="muted">{data.completedHabits} completed today</AuthText>
             )}
-          </AuthCard>
-          <AuthCard>
-            <ActionRow
-              title="Recovery"
-              detail={data.recovery?.label ?? 'Not checked today'}
-              onPress={() => router.push('/workouts/recovery')}
-            />
+          </TintCard>
+          <TintCard
+            tint={colors.fat}
+            icon={{ ios: 'heart', android: 'favorite', web: 'favorite' }}
+            title="Recovery & training"
+            action={<AuthLink title="Check in" onPress={() => router.push('/workouts/recovery')} />}
+          >
+            <AuthText kind="heading">{data.recovery?.label ?? 'Not checked today'}</AuthText>
             {data.recovery && <AuthText>{data.recovery.reason}</AuthText>}
-            <AuthText kind="eyebrow">Training status</AuthText>
             {data.status.map((status) => (
               <View key={status.label}>
-                <AuthText kind="heading">{status.label}</AuthText>
+                <AuthText kind="eyebrow">{status.label.toUpperCase()}</AuthText>
                 <AuthText>{status.reason}</AuthText>
               </View>
             ))}
-            <AuthLink
-              title="Manage training split"
-              onPress={() => router.push('/workouts/splits')}
-            />
-            <AuthLink title="Choose a workout" onPress={() => router.push('/workouts')} />
-          </AuthCard>
-          <AuthCard>
-            <AuthText kind="heading">Goals</AuthText>
+            <View style={authStyles.row}>
+              <AuthLink
+                title="Manage training split"
+                onPress={() => router.push('/workouts/splits')}
+              />
+              <AuthLink title="Choose a workout" onPress={() => router.push('/workouts')} />
+            </View>
+          </TintCard>
+          <TintCard
+            tint={colors.carbs}
+            darkIcon
+            icon={{ ios: 'target', android: 'my_location', web: 'my_location' }}
+            title="Goals"
+            action={
+              <AuthLink
+                title="Manage"
+                accessibilityLabel="Manage all goals"
+                onPress={() => router.push('/goals')}
+              />
+            }
+          >
             {!data.goals.length && <AuthText>No active goals yet.</AuthText>}
             {data.goals.slice(0, 4).map((result) => {
               const goalUnitLabel = goalUnit(result.goal.metric, data.context.preferences);
@@ -351,13 +423,12 @@ export function TodayScreen({ userId }: { userId: string }) {
                     / {formatNumber(result.goal.target * unitFactor(goalUnitLabel))} {goalUnitLabel}
                   </AuthText>
                   {result.percentage !== null && (
-                    <Meter value={result.percentage} target={100} color={colors.accent} />
+                    <Meter value={result.percentage} target={100} color={colors.carbs} />
                   )}
                 </View>
               );
             })}
-            <AuthButton outlined title="Manage all goals" onPress={() => router.push('/goals')} />
-          </AuthCard>
+          </TintCard>
         </>
       )}
       <RecordSaveFeedback action={action} />

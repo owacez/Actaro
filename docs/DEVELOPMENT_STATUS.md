@@ -4,6 +4,35 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Colourful Today and daily plan targets (2026-10-22): implementation and local
+verification **DONE**; device acceptance **DEFERRED**.
+
+Today:
+
+- Widgets use a shared `TintCard` (soft wash, coloured icon tile, title, optional
+  action) built only from existing semantic tokens. The colours are weight blue,
+  steps green, calories accent, habits volt, recovery teal and goals amber.
+- Calories leads with kcal left or over, then eaten/target, macros with targets, and
+  water.
+
+Targets:
+
+- "No target set" came from having no saved nutrition target (Food → Daily targets or
+  first-run setup).
+- Food and Today now offer "Set my calorie target".
+- You gains "Daily plan & targets".
+- That screen shows the current plan and opens on the calculator when no target
+  exists. The calculator is prefilled from saved details and adds the Lose fat /
+  Maintain / Build muscle choice; `bodyGoals` and `planTargets` moved to
+  `target-estimate` and are shared with onboarding.
+
+No schema change. Evidence:
+
+- `nutrition-screens.test.tsx`: lose-fat plan 2,650 kcal / 128 g from saved
+  details, calculator default and manual path.
+- Onboarding and model tests unchanged and passing.
+- Light and dark 390×844 captures.
+
 Body record uniformity (2026-10-22): implementation and local verification **DONE**;
 device acceptance **DEFERRED**.
 

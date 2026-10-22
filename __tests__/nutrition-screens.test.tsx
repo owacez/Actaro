@@ -276,8 +276,9 @@ test('targets validate before writing and kJ values normalize to kcal', async ()
       <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} />
     </FeedbackTestRoot>,
   );
+  // Without a saved target the calculator opens first; manual entry is one tap away.
+  await fireEvent.press(await screen.findByRole('button', { name: 'Enter manually' }));
   await screen.findByLabelText('Energy (kJ)');
-  expect(bodyService.form).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Save daily targets' }));
   expect(service.targets).not.toHaveBeenCalled();
   for (const [label, value] of [
@@ -307,6 +308,7 @@ test('calculation prefills saved imperial body details, preserves water, reviews
       <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} />
     </FeedbackTestRoot>,
   );
+  await fireEvent.press(await screen.findByRole('button', { name: 'Enter manually' }));
   await screen.findByLabelText('Water (ml)');
   await fireEvent.changeText(screen.getByLabelText('Water (ml)'), '1800');
   await fireEvent.press(screen.getByRole('button', { name: 'Calculate from my details' }));
@@ -335,7 +337,9 @@ test('calculation prefills saved imperial body details, preserves water, reviews
   expect(bodyService.saveForm).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Edit calculation' }));
   expect(screen.getByLabelText('Age (years)').props.value).toBe('30');
-  expect(bodyService.form).toHaveBeenCalledTimes(1);
+  // Loaded when the calculator opens by default and again after manual entry; editing the
+  // calculation itself does not reload.
+  expect(bodyService.form).toHaveBeenCalledTimes(2);
   await fireEvent.press(screen.getByRole('button', { name: 'Generate targets' }));
   await fireEvent.changeText(screen.getByLabelText('Energy (kJ)'), '10460');
   await fireEvent.press(screen.getByRole('button', { name: 'Save daily targets' }));
@@ -365,9 +369,9 @@ test('missing body inputs are entered in the calculator without guessing profile
       <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} />
     </FeedbackTestRoot>,
   );
-  await screen.findByLabelText('Energy (kcal)');
-  await fireEvent.press(screen.getByRole('button', { name: 'Calculate from my details' }));
+  // No target yet: the calculator is shown straight away.
   await screen.findByLabelText('Age (years)');
+  expect(screen.getByText(/Not set yet/)).toBeTruthy();
   expect(screen.getByLabelText('Age (years)').props.value).toBe('');
   expect(screen.getByRole('button', { name: 'Male equation' })).toHaveProp(
     'accessibilityState',
@@ -396,7 +400,7 @@ test('diary shows all four empty groups and hydration validates before logging',
       <DiaryScreen userId={nutritionOwner} onOpen={jest.fn()} />
     </FeedbackTestRoot>,
   );
-  await screen.findByText(/No target set/);
+  await screen.findByText(/no daily target yet/);
   for (const meal of ['Breakfast', 'Lunch', 'Dinner', 'Snacks'])
     expect(screen.getByRole('button', { name: 'Add to ' + meal })).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Hydration' }));
@@ -505,9 +509,32 @@ test('Food tab shows a recipes section for creating and opening recipes', async 
       <DiaryScreen userId={nutritionOwner} onOpen={open} />
     </FeedbackTestRoot>,
   );
-  await screen.findByText(/No target set/);
+  await screen.findByText(/no daily target yet/);
   await fireEvent.press(screen.getByRole('button', { name: 'Create recipe' }));
   expect(open).toHaveBeenLastCalledWith('recipe', '2026-10-13', 'Lunch');
   await fireEvent.press(screen.getByRole('button', { name: 'Your recipes' }));
   expect(open).toHaveBeenLastCalledWith('recipes', '2026-10-13', 'Lunch');
+});
+test('daily plan calculates from saved details with a goal: lose fat matches first-run setup', async () => {
+  await render(
+    <FeedbackTestRoot>
+      <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} />
+    </FeedbackTestRoot>,
+  );
+  // Saved male, 30 years, 80 kg, 180 cm prefill the calculator; only goal and activity remain.
+  await screen.findByLabelText('Age (years)');
+  expect(screen.getByLabelText('Age (years)').props.value).toBe('30');
+  await fireEvent.press(screen.getByRole('button', { name: 'Lose fat' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Active' }));
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'This general adult estimate applies to me' }),
+  );
+  await fireEvent.press(screen.getByRole('button', { name: 'Generate targets' }));
+  // 2023 DRI maintenance 3,150 kcal − 500 = 2,650 kcal; protein 1.6 g/kg × 80 = 128 g.
+  await screen.findByLabelText('Energy (kcal)');
+  expect(screen.getByLabelText('Energy (kcal)').props.value).toBe('2650');
+  expect(screen.getByLabelText('Protein (g)').props.value).toBe('128');
+  expect(screen.getByLabelText('Fat (g)').props.value).toBe('74');
+  expect(screen.getByLabelText('Carbohydrates (g)').props.value).toBe('368');
+  expect(screen.getByText(/Protein starts at 1.6 g per kg of bodyweight/)).toBeTruthy();
 });

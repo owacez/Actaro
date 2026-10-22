@@ -145,8 +145,15 @@ export function DiaryScreen({ userId, onOpen }: { userId: string; onOpen: OpenNu
               {formatEnergy(total.calories, unit)} eaten
               {data.targets
                 ? ' / ' + formatEnergy(data.targets.calories, unit) + ' target'
-                : ' · No target set'}
+                : ' · no daily target yet'}
             </AuthText>
+            {!data.targets && (
+              <AuthButton
+                title="Set my calorie target"
+                disabled={action.locked}
+                onPress={() => open('targets')}
+              />
+            )}
             <Meter
               value={total.calories}
               target={data.targets?.calories ?? 0}

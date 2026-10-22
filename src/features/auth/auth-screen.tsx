@@ -280,6 +280,15 @@ export function AccountScreen() {
       <AuthText kind="eyebrow">TRACKING</AuthText>
       <AuthCard>
         <ActionRow
+          title="Daily plan & targets"
+          detail="Calories, macros and water from your goal"
+          icon={{ ios: 'flame', android: 'local_fire_department', web: 'local_fire_department' }}
+          disabled={busy}
+          onPress={() =>
+            router.push({ pathname: '/nutrition/manage', params: { view: 'targets' } })
+          }
+        />
+        <ActionRow
           title="Habits"
           detail="Actions you repeat and record"
           icon={{ ios: 'checkmark.square', android: 'check_box', web: 'check_box' }}
