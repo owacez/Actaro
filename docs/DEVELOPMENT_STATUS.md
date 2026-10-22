@@ -4,6 +4,11 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Logged-set lock (2026-10-22): a logged set's weight/reps are read-only (muted) until
+undone, and its check uses the volt colour of the habit completion mark. This is
+verified in `session-screen.test.tsx` (locked after logging, editable after undo).
+No data change.
+
 Skipped exercises and post-workout recovery (2026-10-22): implementation and local
 verification **DONE**; device acceptance **DEFERRED**. These are user-requested
 refinements of v0.3 tasks 2.6, 2.10 and 2.15; weights are unchanged.

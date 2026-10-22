@@ -100,7 +100,13 @@ export function SetLogRow({
               accessibilityLabel={
                 field === 'weight' ? `Weight (${unit}) · set ${number}` : `Reps · set ${number}`
               }
-              accessibilityHint="Tap to replace the planned value. Logging saves this actual value."
+              accessibilityHint={
+                completed
+                  ? 'Logged. Undo this set to change it.'
+                  : 'Tap to replace the planned value. Logging saves this actual value.'
+              }
+              // A logged set is a record of what was done; undo it before changing values.
+              editable={!completed}
               value={field === 'weight' ? weight : reps}
               onFocus={onSelect}
               onChangeText={(value) => onChange(field, value)}
@@ -117,7 +123,7 @@ export function SetLogRow({
                 fontSize: 22,
                 fontFamily: 'Inter_600SemiBold',
                 fontVariant: ['tabular-nums'],
-                color: colors.text,
+                color: completed ? colors.muted : colors.text,
               }}
             />
             <AuthText kind="eyebrow">{field === 'weight' ? unit.toUpperCase() : 'REPS'}</AuthText>
@@ -133,7 +139,7 @@ export function SetLogRow({
             borderRadius: 22,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: completed ? colors.accent : 'transparent',
+            backgroundColor: completed ? colors.volt : 'transparent',
             borderWidth: completed ? 0 : 1.5,
             borderColor: colors.border,
             opacity: pressed ? 0.6 : 1,

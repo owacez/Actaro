@@ -551,6 +551,8 @@ Finishing with unfinished exercises lists them and offers Go to, Mark as skipped
 finish, or Keep training. Only logged sets are saved. The workout summary includes an
 optional three-question recovery check (energy, soreness, sleep) saving the same daily
 check-in as Recovery, where stress and notes remain.
+Logged sets lock their weight and reps until undone, and their check uses the volt
+completion colour shared with habits (user revision, 2026-10-22).
 
 
 - Planned sets, reps and load remain prefilled from the workout.

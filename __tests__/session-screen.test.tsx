@@ -133,10 +133,15 @@ test('all planned rows stay visible, inline edits validate, primary logging adva
   expect(screen.queryByRole('button', { name: 'Remove set 1' })).toBeNull();
   expect(screen.getByRole('button', { name: 'Remove set 2' })).toBeTruthy();
   expect(screen.getByRole('button', { name: 'View set 1, logged' })).toBeTruthy();
+  // Logged values are locked until the set is undone.
+  expect(screen.getByLabelText('Weight (kg) · set 1')).toHaveProp('editable', false);
+  expect(screen.getByLabelText('Reps · set 1')).toHaveProp('editable', false);
+  expect(screen.getByLabelText('Weight (kg) · set 2')).toHaveProp('editable', true);
   expect(screen.getByText('1 of 3 sets logged')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Undo last set' }));
   await screen.findByRole('button', { name: 'Log set 1' });
   expect(screen.getByText('0 of 3 sets logged')).toBeTruthy();
+  expect(screen.getByLabelText('Weight (kg) · set 1')).toHaveProp('editable', true);
   expect(onBack).not.toHaveBeenCalled();
   expect(mockDispatch).not.toHaveBeenCalled();
   expect(service.save).not.toHaveBeenCalled();
