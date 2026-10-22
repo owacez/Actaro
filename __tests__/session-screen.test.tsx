@@ -93,7 +93,10 @@ test('pause/resume, add/remove, empty completion and cancellation remain real ac
   await fireEvent.press(screen.getByRole('button', { name: 'Remove set 2' }));
   expect(screen.queryByRole('button', { name: 'Complete set 2' })).toBeNull();
   expect(screen.queryByRole('button', { name: 'Remove set 1' })).toBeNull();
+  // Finishing with unlogged exercises asks first; skipping everything still needs one set.
   await fireEvent.press(screen.getByRole('button', { name: 'Finish workout' }));
+  expect(screen.getByText('1. Test exercise · not started')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Mark as skipped and finish' }));
   await screen.findByText('Complete at least one set.');
   expect(service.save).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Cancel workout' }));
@@ -209,4 +212,44 @@ test('the back link uses the same dialog and discard failure cannot navigate or 
   await fireEvent.press(screen.getByRole('button', { name: 'Discard workout' }));
   await waitFor(() => expect(onBack).toHaveBeenCalledTimes(1));
   expect(service.save).not.toHaveBeenCalled();
+});
+test('after the last exercise, unlogged earlier exercises come back first and can be skipped', async () => {
+  const fixture = sessionFixture();
+  const first = fixture.exercises[0];
+  const second = {
+    ...first,
+    id: '00000000-0000-4000-8000-000000000031',
+    name: 'Second exercise',
+    sets: [{ ...first.sets[0], id: '00000000-0000-4000-8000-000000000032' }],
+  };
+  store.read.mockResolvedValue({
+    ...fixture,
+    mode: 'log_only',
+    clock: { elapsedMs: 0, runningSince: null },
+    exercises: [first, second],
+  });
+  await render(
+    <FeedbackTestRoot>
+      <SessionScreen userId={sessionOwner} onBack={onBack} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByRole('button', { name: 'Complete set 1' });
+  // Jump straight to the second exercise and log it.
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Exercise 2: Second exercise, 0 of 1 sets logged' }),
+  );
+  await fireEvent.press(screen.getByRole('button', { name: 'Complete set 1' }));
+  // The first exercise was passed over, so it is offered before finishing.
+  await screen.findByRole('button', { name: 'Go to Test exercise' });
+  expect(screen.queryByRole('button', { name: 'Finish workout' })).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Go to Test exercise' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Skip Test exercise' }));
+  expect(
+    screen.getByRole('button', { name: 'Exercise 1: Test exercise, 0 of 1 sets logged, skipped' }),
+  ).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Undo skip' })).toBeTruthy();
+  // With only skipped work left, finishing saves the logged set without asking again.
+  await fireEvent.press(screen.getByRole('button', { name: 'Finish workout' }));
+  await waitFor(() => expect(service.save).toHaveBeenCalled());
+  expect(service.save.mock.calls[0][0].exercises[0].skipped).toBe(true);
 });

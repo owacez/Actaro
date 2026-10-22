@@ -543,6 +543,15 @@ elapsed workout time prominently with an inline pause/resume control (Timed) and
 every exercise with its logged/planned set count; tapping one jumps to it. Previous
 and Next exercise remain available.
 
+User revision (2026-10-22): after an exercise is complete, the next action goes to the
+first unfinished exercise from the start of the workout, not simply the next one, so
+passed-over exercises return before Finish. Exercises are done, partial, not started or
+skipped; Skip exercise (with Undo) marks one explicitly, and logging a set un-skips it.
+Finishing with unfinished exercises lists them and offers Go to, Mark as skipped and
+finish, or Keep training. Only logged sets are saved. The workout summary includes an
+optional three-question recovery check (energy, soreness, sleep) saving the same daily
+check-in as Recovery, where stress and notes remain.
+
 
 - Planned sets, reps and load remain prefilled from the workout.
 - Show all sets in a compact Set / Weight (preferred unit) / Reps table. Tap a number to replace it directly; no editor is required for basic logging.

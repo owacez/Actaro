@@ -6,6 +6,8 @@ import {
   restoreSession,
   sessionPayload,
   localDateAt,
+  exerciseState,
+  unfinishedExercises,
 } from '@/features/workouts/session-model';
 import {
   estimated1rm,
@@ -87,4 +89,42 @@ test('an invalid finish clock is rejected before an active draft can become froz
   session.exercises[0].sets[0].completedAt = session.startedAt;
   session.endedAt = new Date(Date.parse(session.startedAt) - 1000).toISOString();
   expect(() => sessionPayload(session)).toThrow('device clock');
+});
+test('exercise states separate done, skipped, partial and not started; unfinished starts from the top', () => {
+  const base = sessionFixture().exercises[0];
+  const set = (done: boolean, n: number) => ({
+    ...base.sets[0],
+    id: `00000000-0000-4000-8000-00000000002${n}`,
+    completedAt: done ? '2026-10-22T10:00:00.000Z' : null,
+  });
+  const exercise = (name: string, sets: boolean[], skipped?: boolean) => ({
+    ...base,
+    name,
+    sets: sets.map((done, n) => set(done, n)),
+    ...(skipped === undefined ? {} : { skipped }),
+  });
+  const workout = [
+    exercise('Squat', [false, false]),
+    exercise('Bench', [true, false]),
+    exercise('Row', [false, false], true),
+    exercise('Curl', [true, true], true),
+  ];
+  expect(workout.map(exerciseState)).toEqual(['not_started', 'partial', 'skipped', 'done']);
+  // From the last exercise, the next one to log is the first unfinished from the start.
+  expect(unfinishedExercises(workout, 3).map((item) => item.name)).toEqual(['Squat', 'Bench']);
+  expect(unfinishedExercises(workout, 0)[0]).toEqual({
+    index: 1,
+    name: 'Bench',
+    state: 'partial',
+    remaining: 1,
+  });
+  // Older drafts without the flag still restore; a malformed flag is rejected.
+  const draft = { ...sessionFixture(), exercises: workout };
+  expect(restoreSession(JSON.stringify(draft), draft.userId).exercises[2].skipped).toBe(true);
+  expect(() =>
+    restoreSession(
+      JSON.stringify({ ...draft, exercises: [{ ...workout[0], skipped: 'yes' }] }),
+      draft.userId,
+    ),
+  ).toThrow();
 });

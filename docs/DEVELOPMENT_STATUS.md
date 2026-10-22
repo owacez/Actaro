@@ -4,6 +4,37 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Skipped exercises and post-workout recovery (2026-10-22): implementation and local
+verification **DONE**; device acceptance **DEFERRED**. These are user-requested
+refinements of v0.3 tasks 2.6, 2.10 and 2.15; weights are unchanged.
+
+Session flow:
+
+- A completed exercise now leads to the first unfinished exercise from the start
+  ("Go to …"). Before, the last exercise offered Finish even when earlier ones were
+  unlogged.
+- An exercise is done, partial, not started or skipped. Skipped is stored as an
+  optional draft flag; older drafts still restore, and the flag is not sent to the
+  server.
+- Skip exercise and Undo skip are available, and logging a set un-skips the
+  exercise.
+- Chips show ✓ or "Skipped".
+- Finishing with unfinished exercises lists them and offers Go to, Mark as skipped
+  and finish, or Keep training.
+
+Recovery:
+
+- The workout summary includes an optional three-question recovery check (energy,
+  soreness, sleep).
+- It uses the existing `recoveryService.save` and daily replacement for the
+  workout's date. The full Recovery screen keeps stress and notes.
+
+No schema change. Evidence:
+
+- `session-model.test.ts`: states, start-first order, flag restore and validation.
+- `session-screen.test.tsx`: the user's scenario and the finish prompt.
+- `quick-recovery.test.tsx`: required answers and the exact saved check-in.
+
 Workout logging and history redesign (2026-10-22): implementation and local
 verification **DONE**; device acceptance **DEFERRED**. These are user-requested
 refinements of v0.3 tasks 2.6, 2.9, 2.10 and 2.11; weights are unchanged.

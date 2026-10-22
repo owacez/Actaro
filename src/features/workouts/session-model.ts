@@ -16,6 +16,8 @@ export type SessionExercise = {
   notes: string;
   performance: Performance;
   sets: (SetDraft & { id: string; completedAt: string | null })[];
+  /** Set when the user chose to move on without logging the remaining sets. */
+  skipped?: boolean;
 };
 export type SessionDraft = {
   format: 1;
@@ -224,6 +226,7 @@ function validSession(value: unknown): value is SessionDraft {
         typeof exercise.metadata === 'string' &&
         (exercise.imageUrl === null || typeof exercise.imageUrl === 'string') &&
         typeof exercise.notes === 'string' &&
+        (exercise.skipped === undefined || typeof exercise.skipped === 'boolean') &&
         validPerformance(exercise.performance) &&
         Array.isArray(exercise.sets) &&
         exercise.sets.length >= 1 &&
@@ -239,6 +242,30 @@ function validSession(value: unknown): value is SessionDraft {
         ),
     )
   );
+}
+export type ExerciseState = 'done' | 'skipped' | 'partial' | 'not_started';
+// Done wins over skipped: an exercise with every set logged is complete.
+export function exerciseState(exercise: SessionExercise): ExerciseState {
+  const logged = exercise.sets.filter((set) => set.completedAt).length;
+  if (logged === exercise.sets.length) return 'done';
+  if (exercise.skipped) return 'skipped';
+  return logged ? 'partial' : 'not_started';
+}
+// Exercises still waiting to be logged, from the start of the workout; skipped ones are excluded.
+export function unfinishedExercises(exercises: readonly SessionExercise[], except = -1) {
+  return exercises.flatMap((exercise, index) => {
+    const state = exerciseState(exercise);
+    return index !== except && (state === 'partial' || state === 'not_started')
+      ? [
+          {
+            index,
+            name: exercise.name,
+            state,
+            remaining: exercise.sets.filter((set) => !set.completedAt).length,
+          },
+        ]
+      : [];
+  });
 }
 export function restoreSession(text: string, userId: string): SessionDraft {
   const value: unknown = JSON.parse(text);

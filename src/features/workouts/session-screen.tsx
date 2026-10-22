@@ -16,6 +16,7 @@ import {
 } from '@/features/auth/auth-components';
 import { NavigationSurface, ScreenHeader, IconButton, ActionSheet } from '@/components/product-ui';
 import { SetLogRow } from './set-log-row';
+import { QuickRecovery } from './quick-recovery';
 import { ProgressMetrics } from '@/features/progress/progress-components';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
@@ -23,17 +24,19 @@ import { WorkoutImage } from './workout-image';
 import { blankSet, displayWeight, workoutPayload } from './workout-model';
 import {
   elapsed,
+  exerciseState,
   pauseClock,
   resumeClock,
   sessionPayload,
   timerText,
   type SessionDraft,
+  unfinishedExercises,
 } from './session-model';
 import { sessionStore } from './session-store';
 import { sessionService } from './session-service';
 import { exerciseRecords, trainingVolume } from './training-metrics';
 import { actaroColors, actaroLayout } from '@/constants/actaro-theme';
-import { displayDate } from '@/lib/format';
+import { displayDate, plural } from '@/lib/format';
 
 function FinishWorkoutButton({
   busy,
@@ -44,6 +47,18 @@ function FinishWorkoutButton({
 }) {
   return (
     <AuthButton title="Finish workout" busy={busy} onPress={() => void onFinish(Date.now())} />
+  );
+}
+// The secondary finish action; reads the clock only when tapped.
+function FinishWorkoutLink({
+  disabled,
+  onFinish,
+}: {
+  disabled: boolean;
+  onFinish: (time: number) => void;
+}) {
+  return (
+    <AuthLink title="Finish workout" disabled={disabled} onPress={() => onFinish(Date.now())} />
   );
 }
 
@@ -91,6 +106,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
     [now, setNow] = useState(Date.now);
   const [showOptions, setShowOptions] = useState(false);
   const [focusedSet, setFocusedSet] = useState<{ exerciseId: string; setId: string } | null>(null);
+  const [finishOpen, setFinishOpen] = useState(false);
   const [exitOpen, setExitOpen] = useState(false),
     [exitApproved, setExitApproved] = useState(false),
     [exitAction, setExitAction] = useState<NavigationAction | null>(null);
@@ -333,6 +349,13 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
   const firstReady = exercise.sets.findIndex((set) => !set.completedAt);
   const activeSet = chosen >= 0 ? chosen : firstReady >= 0 ? firstReady : exercise.sets.length - 1;
   const loggedSets = exercise.sets.filter((set) => set.completedAt).length;
+  // The next exercise still to log, searching from the start so skipped-over ones return.
+  const nextUp = unfinishedExercises(draft.exercises, index)[0];
+  function requestFinish(time: number) {
+    const latest = current.current;
+    if (latest && unfinishedExercises(latest.exercises).length) setFinishOpen(true);
+    else void finish(time);
+  }
   const lastLoggedSet = exercise.sets.reduce(
     (last, set, position) =>
       set.completedAt && (last < 0 || set.completedAt >= (exercise.sets[last].completedAt ?? ''))
@@ -412,6 +435,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
         at === index
           ? {
               ...item,
+              skipped: completing ? false : item.skipped,
               sets: item.sets.map((row, place) =>
                 place === position
                   ? { ...row, completedAt: completing ? new Date(time).toISOString() : null }
@@ -548,26 +572,66 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
                     setFocusedSet({ exerciseId: exercise.id, setId: exercise.sets[firstReady].id })
                   }
                 />
-              ) : index < draft.exercises.length - 1 ? (
-                <AuthButton title="Next exercise" onPress={() => setIndex((value) => value + 1)} />
+              ) : nextUp ? (
+                <AuthButton title={`Go to ${nextUp.name}`} onPress={() => setIndex(nextUp.index)} />
               ) : (
                 <FinishWorkoutButton busy={busy} onFinish={finish} />
               )
             ) : (
               <LogSetButton number={activeSet + 1} onLog={(time) => done(activeSet, time, true)} />
             )}
-            {firstReady >= 0 || index < draft.exercises.length - 1 ? (
-              <AuthLink
-                title="Finish workout"
-                disabled={busy}
-                onPress={() => void finish(Date.now())}
-              />
+            {firstReady >= 0 || nextUp ? (
+              <FinishWorkoutLink disabled={busy} onFinish={requestFinish} />
             ) : null}
           </NavigationSurface>
         ) : undefined
       }
     >
       {exitDialog}
+      <ActionSheet
+        title="Finish with exercises left?"
+        visible={finishOpen}
+        onClose={() => {
+          if (!busy) setFinishOpen(false);
+        }}
+      >
+        <AuthText>These exercises still have sets that were not logged:</AuthText>
+        {unfinishedExercises(draft.exercises).map((item) => (
+          <AuthText key={item.index}>
+            {item.index + 1}. {item.name} ·{' '}
+            {item.state === 'not_started'
+              ? 'not started'
+              : `${plural(item.remaining, 'set')} not logged`}
+          </AuthText>
+        ))}
+        {unfinishedExercises(draft.exercises)[0] && (
+          <AuthButton
+            title={`Go to ${unfinishedExercises(draft.exercises)[0].name}`}
+            disabled={busy}
+            onPress={() => {
+              setIndex(unfinishedExercises(draft.exercises)[0].index);
+              setFinishOpen(false);
+            }}
+          />
+        )}
+        <AuthButton
+          title="Mark as skipped and finish"
+          outlined
+          busy={busy}
+          onPress={() => {
+            const left = new Set(unfinishedExercises(draft.exercises).map((item) => item.index));
+            change((value) => ({
+              ...value,
+              exercises: value.exercises.map((entry, at) =>
+                left.has(at) ? { ...entry, skipped: true } : entry,
+              ),
+            }));
+            setFinishOpen(false);
+            void finish(Date.now());
+          }}
+        />
+        <AuthLink title="Keep training" disabled={busy} onPress={() => setFinishOpen(false)} />
+      </ActionSheet>
       <AuthLink
         title="← My workouts"
         disabled={busy}
@@ -664,6 +728,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
             not a measured maximum.
           </AuthText>
           {!!draft.notes && <AuthText>Note: {draft.notes}</AuthText>}
+          <QuickRecovery userId={userId} date={draft.localDate} timeZone={draft.timeZone} />
           <AuthButton title="Done" busy={busy} onPress={() => void leave()} />
         </>
       ) : draft.status === 'pending' ? (
@@ -739,7 +804,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
                     <Pressable
                       key={entry.id}
                       accessibilityRole="button"
-                      accessibilityLabel={`Exercise ${at + 1}: ${entry.name}, ${logged} of ${entry.sets.length} sets logged`}
+                      accessibilityLabel={`Exercise ${at + 1}: ${entry.name}, ${logged} of ${entry.sets.length} sets logged${exerciseState(entry) === 'skipped' ? ', skipped' : ''}`}
                       accessibilityState={{ selected }}
                       onPress={() => setIndex(at)}
                       style={{
@@ -755,7 +820,11 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
                     >
                       <AuthText kind="eyebrow">
                         {at + 1} · {logged}/{entry.sets.length}
-                        {logged === entry.sets.length ? ' ✓' : ''}
+                        {exerciseState(entry) === 'done'
+                          ? ' ✓'
+                          : exerciseState(entry) === 'skipped'
+                            ? ' · Skipped'
+                            : ''}
                       </AuthText>
                       <AuthText>{entry.name}</AuthText>
                     </Pressable>
@@ -905,6 +974,38 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
               setFocusedSet({ exerciseId: exercise.id, setId });
             }}
           />
+          {exerciseState(exercise) === 'skipped' ? (
+            <View style={authStyles.row}>
+              <AuthText kind="muted">Skipped. Unlogged sets are left out when you finish.</AuthText>
+              <AuthLink
+                title="Undo skip"
+                onPress={() =>
+                  change((value) => ({
+                    ...value,
+                    exercises: value.exercises.map((entry, at) =>
+                      at === index ? { ...entry, skipped: false } : entry,
+                    ),
+                  }))
+                }
+              />
+            </View>
+          ) : (
+            exerciseState(exercise) !== 'done' && (
+              <AuthLink
+                title="Skip exercise"
+                accessibilityLabel={`Skip ${exercise.name}`}
+                onPress={() => {
+                  change((value) => ({
+                    ...value,
+                    exercises: value.exercises.map((entry, at) =>
+                      at === index ? { ...entry, skipped: true } : entry,
+                    ),
+                  }));
+                  if (nextUp) setIndex(nextUp.index);
+                }}
+              />
+            )
+          )}
           <AuthLink
             title={showOptions ? 'Hide workout options' : 'Rest and workout notes'}
             onPress={() => setShowOptions((value) => !value)}
