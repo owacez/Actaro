@@ -22,6 +22,7 @@ import {
   RecordSaveFeedback,
 } from '@/hooks/use-records';
 import { formatNumber, nutritionDate } from '@/features/nutrition/nutrition-model';
+import { displayDate } from '@/lib/format';
 import { bodyService, type BodyKind } from './body-service';
 import { unitFactor } from './body-model';
 export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => void }) {
@@ -31,7 +32,6 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
     [formVersion, setFormVersion] = useState(0),
     [offset, setOffset] = useState(0),
     [until, setUntil] = useState<string>(),
-    [historyInput, setHistoryInput] = useState(''),
     [date, setDate] = useState(''),
     [value, setValue] = useState(''),
     [name, setName] = useState('waist'),
@@ -153,7 +153,7 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
               its recorded value. Measurements also support your body goals.
             </AuthText>
             <AuthButton
-              title="Save body record"
+              title="Save record"
               busy={action.busy}
               disabled={action.locked}
               onPress={save}
@@ -169,31 +169,20 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
           {showHistory && (
             <>
               <AuthText kind="heading">Recorded history</AuthText>
-              <AuthInput
-                label="Body history ending date (YYYY-MM-DD)"
-                value={historyInput || until || data.today}
-                editable={!action.locked}
-                onChangeText={setHistoryInput}
-              />
-              <AuthButton
-                title="Open body history dates"
-                outlined
+              <DatePicker
+                label="Show history up to"
+                value={until ?? data.today}
+                max={data.today}
                 disabled={action.locked}
-                onPress={() => {
-                  try {
-                    const day = nutritionDate(historyInput || until || data.today);
-                    if (day > data.today) throw new Error('History cannot end in the future.');
-                    setUntil(day);
-                    setOffset(0);
-                  } catch (error) {
-                    action.setError(error instanceof Error ? error.message : 'Check the date.');
-                  }
+                onChange={(day) => {
+                  setUntil(day);
+                  setOffset(0);
                 }}
               />
               {data.weights.map((row) => (
                 <AuthCard key={row.local_date}>
                   <AuthText kind="heading">
-                    {row.local_date} ·{' '}
+                    {displayDate(row.local_date)} · Weight{' '}
                     {formatNumber(row.weight_kg * unitFactor(data.preferences.weight_unit))}{' '}
                     {data.preferences.weight_unit}
                   </AuthText>
@@ -219,7 +208,7 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
               {data.measurements.map((row) => (
                 <AuthCard key={row.measurement + row.local_date}>
                   <AuthText kind="heading">
-                    {row.local_date} · {row.measurement}:{' '}
+                    {displayDate(row.local_date)} · {capital(row.measurement)}{' '}
                     {formatNumber(row.value_cm * unitFactor(data.preferences.length_unit))}{' '}
                     {data.preferences.length_unit}
                   </AuthText>
@@ -255,8 +244,8 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
               {remove && (
                 <AuthCard>
                   <AuthText>
-                    Delete {remove.kind === 'weight' ? 'weight' : remove.name} on {remove.date}?
-                    Goals will recalculate from remaining records.
+                    Delete {remove.kind === 'weight' ? 'weight' : remove.name} on{' '}
+                    {displayDate(remove.date)}? Goals will recalculate from remaining records.
                   </AuthText>
                   <AuthButton
                     title="Confirm body deletion"
@@ -304,4 +293,7 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
       {!editOpen && <RecordSaveFeedback action={action} />}
     </AuthFrame>
   );
+}
+function capital(value: string) {
+  return value ? value[0].toUpperCase() + value.slice(1) : value;
 }

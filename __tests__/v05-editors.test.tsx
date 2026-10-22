@@ -33,6 +33,8 @@ beforeEach(() => {
     day,
     weight: null,
     height: null,
+    previous: null,
+    waist: null,
     profile: {
       id: owner,
       display_name: null,
@@ -161,7 +163,7 @@ test('additional measurements still save a dated value; an uncertain write freez
   await fireEvent.press(await screen.findByRole('button', { name: 'Add another measurement' }));
   await screen.findByLabelText('Measurement (cm)');
   await fireEvent.changeText(screen.getByLabelText('Measurement (cm)'), '79');
-  await fireEvent.press(screen.getByRole('button', { name: 'Save body record' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Save record' }));
   await screen.findByRole('button', { name: 'Retry saved request' });
   expect(screen.getByLabelText('Measurement (cm)').props.editable).toBe(false);
   await fireEvent.press(screen.getByRole('button', { name: 'Retry saved request' }));

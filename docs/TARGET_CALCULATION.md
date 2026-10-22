@@ -46,10 +46,13 @@ preferences convert to/from canonical kg/cm/kcal. Calculation settings and
 temporary overrides are not silently persisted. Updating body records does
 not automatically overwrite previously saved targets; regenerate/review/save.
 
-Body records opens on weight/date, with optional notes. Personal details use a
-separate save, never carried with daily weigh-ins. Unchanged height is not logged
-again; existing height history is retained. Editing personal details preserves
-an unsaved weigh-in, and uncertain saves keep the retry request intact.
+Body records is one card (user revision, 2026-10-22): a dated weigh-in (defaults to
+today) with the live change since the previous weigh-in, an optional waist value,
+and personal details (height, sex, date of birth, location) shown inline. One save
+writes weight and details atomically through the existing body-form RPC, plus a
+waist measurement when it changes. Unchanged height is not logged again; existing
+height history is retained. The calculator's separate details editor is unchanged,
+and uncertain saves keep the retry request intact.
 
 Verification lives in `target-estimate.test.ts`, `nutrition-screens.test.tsx`,
 `body-form.test.tsx` and `v05-services.test.ts`. They cover the eight equations,

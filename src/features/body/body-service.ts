@@ -17,7 +17,7 @@ export const bodyService = {
       day = date ? nutritionDate(date) : today;
     if (day > today) throw new Error('Cannot log a future date.');
     const weightQuery = getSupabase().from('body_weights').select('*').eq('user_id', userId);
-    const [weight, height] = await Promise.all([
+    const [weight, height, previous, waist] = await Promise.all([
       (options?.latestWeight
         ? weightQuery.lte('local_date', day).order('local_date', { ascending: false }).limit(1)
         : weightQuery.eq('local_date', day)
@@ -31,9 +31,40 @@ export const bodyService = {
         .order('local_date', { ascending: false })
         .limit(1)
         .maybeSingle(),
+      // The weigh-in before this date, so the form can show the change as it is typed.
+      // The calculator (latest weight) needs neither this nor the waist.
+      options?.latestWeight
+        ? Promise.resolve({ data: null, error: null })
+        : getSupabase()
+            .from('body_weights')
+            .select('*')
+            .eq('user_id', userId)
+            .lt('local_date', day)
+            .order('local_date', { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+      options?.latestWeight
+        ? Promise.resolve({ data: null, error: null })
+        : getSupabase()
+            .from('body_measurements')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('measurement', 'waist')
+            .eq('local_date', day)
+            .maybeSingle(),
     ]);
-    if (weight.error || height.error) throw new Error('Body values unavailable. Retry.');
-    return { profile, preferences, today, day, weight: weight.data, height: height.data };
+    if (weight.error || height.error || previous.error || waist.error)
+      throw new Error('Body values unavailable. Retry.');
+    return {
+      profile,
+      preferences,
+      today,
+      day,
+      weight: weight.data,
+      height: height.data,
+      previous: previous.data,
+      waist: waist.data,
+    };
   },
   async saveForm(
     userId: string,

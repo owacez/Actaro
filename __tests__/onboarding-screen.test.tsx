@@ -29,6 +29,8 @@ beforeEach(() => {
     day: '2026-10-22',
     weight: null,
     height: null,
+    previous: null,
+    waist: null,
   });
   service.complete.mockResolvedValue(undefined);
   service.finish.mockResolvedValue(undefined);

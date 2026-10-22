@@ -105,6 +105,8 @@ beforeEach(() => {
       created_at: '',
       updated_at: '',
     },
+    previous: null,
+    waist: null,
   });
 });
 test('portion changes update live totals; failed save locks inputs and retries the original request', async () => {

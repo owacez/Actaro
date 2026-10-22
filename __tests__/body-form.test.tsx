@@ -25,6 +25,8 @@ const loaded: Awaited<ReturnType<typeof bodyService.form>> = {
   day: '2026-10-18',
   weight: null,
   height: null,
+  previous: null,
+  waist: null,
 };
 const service = jest.mocked(bodyService);
 beforeEach(() => {
@@ -74,15 +76,31 @@ test('personal details save separately and retain the same request after failure
     loaded.preferences,
   );
 });
-test('daily logging hides personal inputs and changing date loads only that date’s weight', async () => {
+test('one body record shows weight, waist and details together with the change since the last weigh-in', async () => {
+  service.form.mockResolvedValue({
+    ...loaded,
+    previous: {
+      user_id: owner,
+      local_date: '2026-10-15',
+      weight_kg: 80,
+      time_zone: 'UTC',
+      notes: null,
+      created_at: '',
+      updated_at: '',
+    },
+  });
   await render(
     <FeedbackTestRoot>
       <BodyFormEditor userId={owner} onSaved={jest.fn()} />
     </FeedbackTestRoot>,
   );
   await screen.findByLabelText('Weight (kg)');
-  expect(screen.queryByLabelText('Location (city/country, optional)')).toBeNull();
-  expect(screen.queryByRole('button', { name: 'Female' })).toBeNull();
+  // Details and waist sit in the same record; nothing is behind another button.
+  expect(screen.getByLabelText('Waist (cm, optional)')).toBeTruthy();
+  expect(screen.getByLabelText('Location (city/country, optional)')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Female' })).toBeTruthy();
+  await fireEvent.changeText(screen.getByLabelText('Weight (kg)'), '79.6');
+  expect(screen.getByText(`−0.4 kg since ${displayDate('2026-10-15')}`)).toBeTruthy();
   await fireEvent.press(
     screen.getByRole('button', { name: 'Body log date: ' + displayDate('2026-10-18') }),
   );
@@ -101,30 +119,32 @@ test('daily logging hides personal inputs and changing date loads only that date
   });
   await fireEvent.press(screen.getByRole('button', { name: '2026-10-17' }));
   await waitFor(() => expect(screen.getByLabelText('Weight (kg)').props.value).toBe('79'));
+  expect(screen.getByText('Your first weigh-in starts your trend.')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Add a note' }));
   await fireEvent.changeText(
     screen.getByLabelText('Body record note (optional)'),
     'Before breakfast',
   );
-  await fireEvent.press(screen.getByRole('button', { name: 'Hide note' }));
-  expect(screen.queryByLabelText('Body record note (optional)')).toBeNull();
-  await fireEvent.press(screen.getByRole('button', { name: 'Save weigh-in' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Save body record' }));
   await waitFor(() =>
-    expect(service.save).toHaveBeenCalledWith(
+    expect(service.saveForm).toHaveBeenCalledWith(
       owner,
-      'weight',
-      '2026-10-17',
-      '79',
-      'kg',
-      'UTC',
-      '',
-      'Before breakfast',
+      {
+        date: '2026-10-17',
+        weight: '79',
+        height: '',
+        sex: '',
+        birthDate: '',
+        location: '',
+        notes: 'Before breakfast',
+      },
+      loaded.preferences,
     ),
   );
-  expect(service.saveForm).not.toHaveBeenCalled();
+  expect(service.save).not.toHaveBeenCalled();
   expect(service.form).toHaveBeenCalledWith(owner, '2026-10-17');
 });
-test('saving personal details preserves an unsaved weigh-in and does not log unchanged height', async () => {
+test('weight, changed details and waist save in one tap; unchanged height is not re-logged', async () => {
   service.form.mockResolvedValue({
     ...loaded,
     height: {
@@ -145,24 +165,34 @@ test('saving personal details preserves an unsaved weigh-in and does not log unc
     </FeedbackTestRoot>,
   );
   await screen.findByLabelText('Weight (kg)');
+  // Nothing entered or changed: nothing is written.
+  await fireEvent.press(screen.getByRole('button', { name: 'Save body record' }));
+  expect(screen.getByText(/Enter your weight, a waist value or a changed detail/)).toBeTruthy();
+  expect(service.saveForm).not.toHaveBeenCalled();
   await fireEvent.changeText(screen.getByLabelText('Weight (kg)'), '80');
-  await fireEvent.press(screen.getByRole('button', { name: 'Edit personal details' }));
-  await screen.findByLabelText('Location (city/country, optional)');
+  await fireEvent.changeText(screen.getByLabelText('Waist (cm, optional)'), '86');
   await fireEvent.changeText(
     screen.getByLabelText('Location (city/country, optional)'),
     'Example City',
   );
-  await fireEvent.press(screen.getByRole('button', { name: 'Save personal details' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Save body record' }));
   await screen.findByRole('button', { name: 'Retry saved request' });
-  await fireEvent.press(screen.getByRole('button', { name: 'Dismiss Personal details' }));
-  expect(screen.getByLabelText('Location (city/country, optional)')).toBeTruthy();
-  await fireEvent.press(screen.getByRole('button', { name: 'Retry saved request' }));
-  await screen.findByLabelText('Weight (kg)');
   expect(screen.getByLabelText('Weight (kg)').props.value).toBe('80');
-  expect(service.saveForm).toHaveBeenCalledWith(
+  await fireEvent.press(screen.getByRole('button', { name: 'Retry saved request' }));
+  await waitFor(() => expect(service.save).toHaveBeenCalled());
+  expect(service.saveForm).toHaveBeenLastCalledWith(
     owner,
-    expect.objectContaining({ height: '', weight: '', location: 'Example City' }),
+    expect.objectContaining({ height: '', weight: '80', location: 'Example City' }),
     loaded.preferences,
   );
-  expect(service.save).not.toHaveBeenCalled();
+  expect(service.save).toHaveBeenCalledWith(
+    owner,
+    'measurement',
+    '2026-10-18',
+    '86',
+    'cm',
+    'UTC',
+    'waist',
+    '',
+  );
 });

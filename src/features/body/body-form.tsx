@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import { ActionSheet } from '@/components/product-ui';
 import { DatePicker } from '@/components/date-picker';
 import { NumberStepper } from '@/components/number-stepper';
 import {
   AuthButton,
+  AuthCard,
   AuthChoice,
   AuthInput,
+  AuthLink,
   AuthText,
   authStyles,
 } from '@/features/auth/auth-components';
@@ -19,6 +20,7 @@ import {
 import { bodyService } from './body-service';
 import { bodySexOptions, unitFactor, type BodyForm } from './body-model';
 import { formatNumber } from '@/features/nutrition/nutrition-model';
+import { displayDate } from '@/lib/format';
 
 export function BodyDetailsEditor({
   userId,
@@ -136,20 +138,39 @@ export function BodyDetailsEditor({
   );
 }
 
+// One body record: the dated weigh-in (with live change from the previous one), an optional
+// waist, and personal details shown inline. A single save writes weight and details
+// atomically; height is logged only when it changes, and waist as its dated measurement.
 export function BodyFormEditor({ userId, onSaved }: { userId: string; onSaved: () => void }) {
   const [selectedDate, setSelectedDate] = useState<string>();
   const [weight, setWeight] = useState(''),
+    [waist, setWaist] = useState(''),
     [notes, setNotes] = useState(''),
     [showNote, setShowNote] = useState(false),
-    [editingDetails, setEditingDetails] = useState(false),
-    [detailsLocked, setDetailsLocked] = useState(false);
-  const loadedDate = useRef<string | undefined>(undefined);
+    [details, setDetails] = useState({ height: '', sex: '', birthDate: '', location: '' });
+  const loadedDate = useRef<string | undefined>(undefined),
+    detailsLoaded = useRef(false);
   const load = useCallback(() => bodyService.form(userId, selectedDate), [userId, selectedDate]);
   const onLoaded = useCallback((data: Awaited<ReturnType<typeof bodyService.form>>) => {
+    if (!detailsLoaded.current) {
+      // Details do not depend on the date; keep any edits when switching dates.
+      detailsLoaded.current = true;
+      setDetails({
+        height: data.height
+          ? String(data.height.value_cm * unitFactor(data.preferences.length_unit))
+          : '',
+        sex: data.profile.sex ?? '',
+        birthDate: data.profile.date_of_birth ?? '',
+        location: data.profile.location ?? '',
+      });
+    }
     if (loadedDate.current === data.day) return;
     loadedDate.current = data.day;
     setWeight(
       data.weight ? String(data.weight.weight_kg * unitFactor(data.preferences.weight_unit)) : '',
+    );
+    setWaist(
+      data.waist ? String(data.waist.value_cm * unitFactor(data.preferences.length_unit)) : '',
     );
     setNotes(data.weight?.notes ?? '');
     setShowNote(Boolean(data.weight?.notes));
@@ -157,113 +178,165 @@ export function BodyFormEditor({ userId, onSaved }: { userId: string; onSaved: (
   const resource = useRecords(load, onLoaded),
     action = useRecordAction(),
     data = resource.data;
+  if (!data || resource.loading)
+    return <RecordLoadFeedback {...resource} retry={resource.refresh} />;
+  const weightUnit = data.preferences.weight_unit,
+    lengthUnit = data.preferences.length_unit;
+  const savedHeight = data.height ? data.height.value_cm * unitFactor(lengthUnit) : null;
+  const heightChanged = details.height.trim() !== '' && Number(details.height) !== savedHeight;
+  const detailsChanged =
+    heightChanged ||
+    details.sex !== (data.profile.sex ?? '') ||
+    details.birthDate !== (data.profile.date_of_birth ?? '') ||
+    details.location.trim() !== (data.profile.location ?? '');
+  const savedWaist = data.waist ? String(data.waist.value_cm * unitFactor(lengthUnit)) : '';
+  const waistChanged = waist.trim() !== '' && waist.trim() !== savedWaist;
+  // The change since the last weigh-in, from the typed value; nothing is stored.
+  let change: string | null = null;
+  const typed = Number(weight);
+  if (weight.trim() && Number.isFinite(typed) && typed > 0)
+    change = data.previous
+      ? (() => {
+          const diff = typed - data.previous.weight_kg * unitFactor(weightUnit);
+          const rounded = Math.round(diff * 10) / 10;
+          return `${rounded > 0 ? '+' : rounded < 0 ? '−' : '±'}${formatNumber(Math.abs(rounded))} ${weightUnit} since ${displayDate(data.previous.local_date)}`;
+        })()
+      : 'Your first weigh-in starts your trend.';
+  function save() {
+    if (!data) return;
+    if (!weight.trim() && !detailsChanged && !waistChanged) {
+      action.setError('Enter your weight, a waist value or a changed detail to save.');
+      return;
+    }
+    void action.run(
+      async () => {
+        await bodyService.saveForm(
+          userId,
+          {
+            date: data.day,
+            weight,
+            height: heightChanged ? details.height : '',
+            sex: details.sex,
+            birthDate: details.birthDate,
+            location: details.location,
+            notes,
+          },
+          data.preferences,
+        );
+        if (waistChanged)
+          await bodyService.save(
+            userId,
+            'measurement',
+            data.day,
+            waist,
+            lengthUnit,
+            data.preferences.time_zone,
+            'waist',
+            '',
+          );
+      },
+      'Body record saved',
+      () => {
+        detailsLoaded.current = false;
+        loadedDate.current = undefined;
+        resource.refresh();
+        onSaved();
+      },
+    );
+  }
   return (
-    <View style={{ gap: 12 }}>
-      <AuthText kind="heading">Log your weight</AuthText>
-      <AuthText>A quick weigh-in. Personal details only need updating when they change.</AuthText>
-      <RecordLoadFeedback {...resource} retry={resource.refresh} />
-      {data && !resource.loading && (
-        <>
-          <DatePicker
-            label="Body log date"
-            value={data.day}
-            max={data.today}
+    <AuthCard>
+      <AuthText kind="heading">Body record</AuthText>
+      <DatePicker
+        label="Body log date"
+        value={data.day}
+        max={data.today}
+        disabled={action.locked}
+        onChange={setSelectedDate}
+      />
+      <NumberStepper
+        label={`Weight (${weightUnit})`}
+        value={weight}
+        onChange={setWeight}
+        step={0.1}
+        max={1000 * unitFactor(weightUnit)}
+        disabled={action.locked}
+      />
+      {change && <AuthText kind="muted">{change}</AuthText>}
+      <AuthInput
+        label={`Waist (${lengthUnit}, optional)`}
+        value={waist}
+        onChangeText={setWaist}
+        keyboardType="decimal-pad"
+        maxLength={7}
+        editable={!action.locked}
+      />
+      <AuthText kind="eyebrow">YOUR DETAILS</AuthText>
+      <AuthText kind="muted">
+        Change only when needed. Used for calorie estimates; kept private to you.
+      </AuthText>
+      <NumberStepper
+        label={`Height (${lengthUnit}, optional)`}
+        value={details.height}
+        onChange={(height) => setDetails((current) => ({ ...current, height }))}
+        step={0.1}
+        max={1000 * unitFactor(lengthUnit)}
+        disabled={action.locked}
+      />
+      <AuthText>Sex (optional)</AuthText>
+      <View style={authStyles.choices}>
+        {bodySexOptions.map((option) => (
+          <AuthChoice
+            key={option.value}
+            title={option.label}
+            selected={details.sex === option.value}
             disabled={action.locked}
-            onChange={setSelectedDate}
+            onPress={() => setDetails((current) => ({ ...current, sex: option.value }))}
           />
-          <NumberStepper
-            label={`Weight (${data.preferences.weight_unit})`}
-            value={weight}
-            onChange={setWeight}
-            step={0.1}
-            max={1000 * unitFactor(data.preferences.weight_unit)}
-            disabled={action.locked}
-          />
-          <AuthButton
-            title={showNote ? 'Hide note' : notes ? 'Edit note' : 'Add a note'}
-            outlined
-            disabled={action.locked}
-            onPress={() => setShowNote((value) => !value)}
-          />
-          {showNote && (
-            <AuthInput
-              label="Body record note (optional)"
-              value={notes}
-              onChangeText={setNotes}
-              maxLength={2000}
-              multiline
-              editable={!action.locked}
-            />
-          )}
-          <AuthButton
-            title="Save weigh-in"
-            busy={action.busy}
-            disabled={action.locked}
-            onPress={() =>
-              void action.run(
-                () =>
-                  bodyService.save(
-                    userId,
-                    'weight',
-                    data.day,
-                    weight,
-                    data.preferences.weight_unit,
-                    data.preferences.time_zone,
-                    '',
-                    notes,
-                  ),
-                'Weight saved',
-                () => {
-                  resource.refresh();
-                  onSaved();
-                },
-              )
-            }
-          />
-          <AuthText kind="heading">Personal details</AuthText>
-          <AuthText kind="muted">
-            {data.height
-              ? `Height ${formatNumber(data.height.value_cm * unitFactor(data.preferences.length_unit))} ${data.preferences.length_unit}`
-              : 'Height not set'}{' '}
-            ·{' '}
-            {bodySexOptions.find((option) => option.value === data.profile.sex)?.label ??
-              'Sex not set'}
-          </AuthText>
-          <AuthText kind="muted">
-            {data.profile.date_of_birth
-              ? `Born ${data.profile.date_of_birth}`
-              : 'Date of birth not set'}
-            {data.profile.location ? ` · ${data.profile.location}` : ''}
-          </AuthText>
-          <AuthButton
-            title="Edit personal details"
-            outlined
-            disabled={action.locked}
-            onPress={() => setEditingDetails(true)}
-          />
-          <ActionSheet
-            title="Personal details"
-            visible={editingDetails}
-            onClose={() => {
-              if (!detailsLocked) setEditingDetails(false);
-            }}
-          >
-            {editingDetails && (
-              <BodyDetailsEditor
-                userId={userId}
-                onLockChange={setDetailsLocked}
-                onSaved={() => {
-                  setDetailsLocked(false);
-                  setEditingDetails(false);
-                  resource.refresh();
-                  onSaved();
-                }}
-              />
-            )}
-          </ActionSheet>
-        </>
+        ))}
+      </View>
+      <DatePicker
+        label="Date of birth (optional)"
+        value={details.birthDate}
+        max={data.today}
+        referenceDate="2000-01-01"
+        yearSelection
+        disabled={action.locked}
+        onChange={(birthDate) => setDetails((current) => ({ ...current, birthDate }))}
+      />
+      <AuthInput
+        label="Location (city/country, optional)"
+        value={details.location}
+        onChangeText={(location) => setDetails((current) => ({ ...current, location }))}
+        maxLength={120}
+        editable={!action.locked}
+      />
+      <AuthLink
+        title={showNote ? 'Hide note' : notes ? 'Edit note' : 'Add a note'}
+        disabled={action.locked}
+        onPress={() => setShowNote((value) => !value)}
+      />
+      {showNote && (
+        <AuthInput
+          label="Body record note (optional)"
+          value={notes}
+          onChangeText={setNotes}
+          maxLength={2000}
+          multiline
+          editable={!action.locked}
+        />
       )}
+      <AuthButton
+        title="Save body record"
+        busy={action.busy}
+        disabled={action.locked}
+        onPress={save}
+      />
+      <AuthText kind="muted">
+        One weight per date: saving the same date again corrects it. Height is logged only when it
+        changes.
+      </AuthText>
       <RecordSaveFeedback action={action} />
-    </View>
+    </AuthCard>
   );
 }

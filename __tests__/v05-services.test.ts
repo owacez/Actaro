@@ -99,6 +99,18 @@ test('body form reuses latest saved height, and only the calculator opts into la
     );
     expect(height.searchParams.get('local_date')).toMatch(/^lte\./);
     expect(height.searchParams.get('measurement')).toBe('eq.height');
+    // The body record also reads the weigh-in before the date and that date's waist.
+    const urls = mockFetch.mock.calls.map(([url]) => new URL(String(url)));
+    const previous = urls.find(
+      (url) =>
+        url.pathname.endsWith('/body_weights') &&
+        url.searchParams.get('local_date') === 'lt.2026-10-01',
+    );
+    expect(previous?.searchParams.get('order')).toBe('local_date.desc');
+    expect(previous?.searchParams.get('limit')).toBe('1');
+    const waist = urls.find((url) => url.searchParams.get('measurement') === 'eq.waist');
+    expect(waist?.searchParams.get('local_date')).toBe('eq.2026-10-01');
+    expect(waist?.searchParams.get('user_id')).toBe('eq.' + owner);
   } finally {
     prefs.mockRestore();
     profile.mockRestore();

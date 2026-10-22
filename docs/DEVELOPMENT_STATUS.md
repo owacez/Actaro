@@ -4,6 +4,34 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Body records in one card (2026-10-22): implementation and local verification
+**DONE**; device acceptance **DEFERRED**. This is a user-requested refinement of v0.5
+task 4.9; weights are unchanged.
+
+The card holds:
+
+- A dated weigh-in (the date picker defaults to today).
+- The live change since the previous weigh-in. `bodyService.form` now also reads
+  the previous weight and that date's waist.
+- An optional waist value.
+- Personal details inline.
+
+One save:
+
+- Uses the existing atomic `save_body_form` for weight and details.
+- Logs height only when it changes.
+- Adds a waist measurement when it changes.
+- Refuses an empty save.
+
+Design decision: keep absolute dated weights. Entering increases or decreases
+would compound mistakes and break with gaps. The change is shown instead.
+
+The history filter is a date picker and history rows show friendly dates. The
+calculator's details editor is unchanged, and there is no schema change. Evidence:
+`body-form.test.tsx` (inline details, live change, date switch, one-tap save with
+waist, unchanged height, empty-save refusal, retry), the v05 measurement sheet
+test, and a 390×844 capture.
+
 Live run on the lock screen (2026-10-22): implementation and local verification
 **DONE**; device acceptance **DEFERRED** until the user makes a development build.
 This is a user-authorized running refinement; Phase 9 weights are unchanged.

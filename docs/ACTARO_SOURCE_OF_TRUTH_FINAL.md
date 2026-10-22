@@ -997,6 +997,14 @@ Habits are actions users record; goals calculate progress from saved records.
 
 ## 14.1 Body
 
+User revision (2026-10-22) supersedes the 2026-10-20 split below: Body records is one
+card. A dated weigh-in (date picker defaulting to today, for missed days and
+corrections) shows the change since the previous weigh-in as it is typed. It sits with
+an optional waist value and inline personal details, saved together in one tap.
+Absolute daily weights, not entered increases or decreases, build the trend; one weight
+per date, and re-saving a date corrects it. Height is logged only when it changes.
+Other named measurements and history stay below.
+
 User revision (2026-10-20) supersedes the unified daily form below: open on a
 dated weigh-in with an optional note. Height, sex, birth date and location live
 in a separate explicit personal-details editor, reused by the target calculator.
