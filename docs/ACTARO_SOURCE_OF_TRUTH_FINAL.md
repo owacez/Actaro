@@ -1003,7 +1003,9 @@ corrections) shows the change since the previous weigh-in as it is typed. It sit
 an optional waist value and inline personal details, saved together in one tap.
 Absolute daily weights, not entered increases or decreases, build the trend; one weight
 per date, and re-saving a date corrects it. Height is logged only when it changes.
-Other named measurements and history stay below.
+Other named measurements are added inside the same card (name and value, using its
+date); there is no separate measurement button. Weight, waist, height and other values
+use the same stepper with a clear heading. History stays below for edits and deletion.
 
 User revision (2026-10-20) supersedes the unified daily form below: open on a
 dated weigh-in with an optional note. Height, sex, birth date and location live

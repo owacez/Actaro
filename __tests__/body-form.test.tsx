@@ -167,7 +167,7 @@ test('weight, changed details and waist save in one tap; unchanged height is not
   await screen.findByLabelText('Weight (kg)');
   // Nothing entered or changed: nothing is written.
   await fireEvent.press(screen.getByRole('button', { name: 'Save body record' }));
-  expect(screen.getByText(/Enter your weight, a waist value or a changed detail/)).toBeTruthy();
+  expect(screen.getByText(/Enter your weight, a measurement or a changed detail/)).toBeTruthy();
   expect(service.saveForm).not.toHaveBeenCalled();
   await fireEvent.changeText(screen.getByLabelText('Weight (kg)'), '80');
   await fireEvent.changeText(screen.getByLabelText('Waist (cm, optional)'), '86');

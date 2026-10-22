@@ -72,13 +72,19 @@ export function AuthText({
 export function AuthInput({
   label,
   error,
+  hideLabel = false,
   ...props
-}: TextInputProps & { label: string; error?: string }) {
+}: TextInputProps & {
+  label: string;
+  error?: string;
+  /** The caller shows its own heading; the label remains the accessible name. */
+  hideLabel?: boolean;
+}) {
   const { colors, scheme } = useAppTheme();
   const [visible, setVisible] = useState(false);
   return (
     <View style={styles.field}>
-      <Text style={[styles.label, { color: colors.muted }]}>{label}</Text>
+      {!hideLabel && <Text style={[styles.label, { color: colors.muted }]}>{label}</Text>}
       <View
         style={{
           flexDirection: 'row',

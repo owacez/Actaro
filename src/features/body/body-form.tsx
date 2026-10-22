@@ -147,6 +147,7 @@ export function BodyFormEditor({ userId, onSaved }: { userId: string; onSaved: (
     [waist, setWaist] = useState(''),
     [notes, setNotes] = useState(''),
     [showNote, setShowNote] = useState(false),
+    [other, setOther] = useState({ open: false, name: '', value: '' }),
     [details, setDetails] = useState({ height: '', sex: '', birthDate: '', location: '' });
   const loadedDate = useRef<string | undefined>(undefined),
     detailsLoaded = useRef(false);
@@ -204,25 +205,31 @@ export function BodyFormEditor({ userId, onSaved }: { userId: string; onSaved: (
       : 'Your first weigh-in starts your trend.';
   function save() {
     if (!data) return;
-    if (!weight.trim() && !detailsChanged && !waistChanged) {
-      action.setError('Enter your weight, a waist value or a changed detail to save.');
+    const otherEntered = other.name.trim() !== '' && other.value.trim() !== '';
+    if (other.open && (other.name.trim() !== '') !== (other.value.trim() !== '')) {
+      action.setError('Enter both a name and a value for the other measurement.');
+      return;
+    }
+    if (!weight.trim() && !detailsChanged && !waistChanged && !otherEntered) {
+      action.setError('Enter your weight, a measurement or a changed detail to save.');
       return;
     }
     void action.run(
       async () => {
-        await bodyService.saveForm(
-          userId,
-          {
-            date: data.day,
-            weight,
-            height: heightChanged ? details.height : '',
-            sex: details.sex,
-            birthDate: details.birthDate,
-            location: details.location,
-            notes,
-          },
-          data.preferences,
-        );
+        if (weight.trim() || detailsChanged)
+          await bodyService.saveForm(
+            userId,
+            {
+              date: data.day,
+              weight,
+              height: heightChanged ? details.height : '',
+              sex: details.sex,
+              birthDate: details.birthDate,
+              location: details.location,
+              notes,
+            },
+            data.preferences,
+          );
         if (waistChanged)
           await bodyService.save(
             userId,
@@ -234,11 +241,23 @@ export function BodyFormEditor({ userId, onSaved }: { userId: string; onSaved: (
             'waist',
             '',
           );
+        if (otherEntered)
+          await bodyService.save(
+            userId,
+            'measurement',
+            data.day,
+            other.value,
+            lengthUnit,
+            data.preferences.time_zone,
+            other.name,
+            '',
+          );
       },
       'Body record saved',
       () => {
         detailsLoaded.current = false;
         loadedDate.current = undefined;
+        setOther({ open: false, name: '', value: '' });
         resource.refresh();
         onSaved();
       },
@@ -261,16 +280,53 @@ export function BodyFormEditor({ userId, onSaved }: { userId: string; onSaved: (
         step={0.1}
         max={1000 * unitFactor(weightUnit)}
         disabled={action.locked}
+        heading
       />
       {change && <AuthText kind="muted">{change}</AuthText>}
-      <AuthInput
+      <NumberStepper
         label={`Waist (${lengthUnit}, optional)`}
         value={waist}
-        onChangeText={setWaist}
-        keyboardType="decimal-pad"
-        maxLength={7}
-        editable={!action.locked}
+        onChange={setWaist}
+        step={0.5}
+        max={300 * unitFactor(lengthUnit)}
+        disabled={action.locked}
+        heading
       />
+      {other.open ? (
+        <>
+          <AuthText kind="heading">Other measurement</AuthText>
+          <AuthInput
+            label="Measurement name (for example chest)"
+            hideLabel
+            placeholder="Name, for example chest"
+            value={other.name}
+            onChangeText={(name) => setOther((current) => ({ ...current, name }))}
+            maxLength={80}
+            editable={!action.locked}
+          />
+          <NumberStepper
+            label={`Measurement value (${lengthUnit})`}
+            hideLabel
+            value={other.value}
+            onChange={(value) => setOther((current) => ({ ...current, value }))}
+            step={0.5}
+            max={300 * unitFactor(lengthUnit)}
+            disabled={action.locked}
+          />
+          <AuthLink
+            title="Remove other measurement"
+            disabled={action.locked}
+            onPress={() => setOther({ open: false, name: '', value: '' })}
+          />
+        </>
+      ) : (
+        <AuthLink
+          title="+ Add a measurement"
+          accessibilityLabel="Add a measurement"
+          disabled={action.locked}
+          onPress={() => setOther((current) => ({ ...current, open: true }))}
+        />
+      )}
       <AuthText kind="eyebrow">YOUR DETAILS</AuthText>
       <AuthText kind="muted">
         Change only when needed. Used for calorie estimates; kept private to you.
@@ -282,8 +338,9 @@ export function BodyFormEditor({ userId, onSaved }: { userId: string; onSaved: (
         step={0.1}
         max={1000 * unitFactor(lengthUnit)}
         disabled={action.locked}
+        heading
       />
-      <AuthText>Sex (optional)</AuthText>
+      <AuthText kind="heading">Sex (optional)</AuthText>
       <View style={authStyles.choices}>
         {bodySexOptions.map((option) => (
           <AuthChoice
@@ -304,8 +361,11 @@ export function BodyFormEditor({ userId, onSaved }: { userId: string; onSaved: (
         disabled={action.locked}
         onChange={(birthDate) => setDetails((current) => ({ ...current, birthDate }))}
       />
+      <AuthText kind="heading">Location (optional)</AuthText>
       <AuthInput
         label="Location (city/country, optional)"
+        hideLabel
+        placeholder="City, country"
         value={details.location}
         onChangeText={(location) => setDetails((current) => ({ ...current, location }))}
         maxLength={120}

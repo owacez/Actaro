@@ -16,7 +16,13 @@ jest.mock('@/features/goals/goal-service', () => ({
   goalService: { load: jest.fn(), save: jest.fn() },
 }));
 jest.mock('@/features/body/body-service', () => ({
-  bodyService: { history: jest.fn(), form: jest.fn(), save: jest.fn(), remove: jest.fn() },
+  bodyService: {
+    history: jest.fn(),
+    form: jest.fn(),
+    save: jest.fn(),
+    saveForm: jest.fn(),
+    remove: jest.fn(),
+  },
 }));
 jest.mock('@/features/activity/activity-service', () => ({
   activityService: { load: jest.fn(), save: jest.fn(), target: jest.fn(), remove: jest.fn() },
@@ -160,17 +166,33 @@ test('additional measurements still save a dated value; an uncertain write freez
       <BodyScreen userId={owner} onBack={jest.fn()} />
     </FeedbackTestRoot>,
   );
-  await fireEvent.press(await screen.findByRole('button', { name: 'Add another measurement' }));
-  await screen.findByLabelText('Measurement (cm)');
-  await fireEvent.changeText(screen.getByLabelText('Measurement (cm)'), '79');
-  await fireEvent.press(screen.getByRole('button', { name: 'Save record' }));
+  // Other measurements are added inside the body record and use its date.
+  await fireEvent.press(await screen.findByRole('button', { name: 'Add a measurement' }));
+  expect(screen.queryByRole('button', { name: 'Add another measurement' })).toBeNull();
+  await fireEvent.changeText(
+    screen.getByLabelText('Measurement name (for example chest)'),
+    'chest',
+  );
+  await fireEvent.changeText(screen.getByLabelText('Measurement value (cm)'), '79');
+  await fireEvent.press(screen.getByRole('button', { name: 'Save body record' }));
   await screen.findByRole('button', { name: 'Retry saved request' });
-  expect(screen.getByLabelText('Measurement (cm)').props.editable).toBe(false);
+  expect(screen.getByLabelText('Measurement value (cm)').props.editable).toBe(false);
   await fireEvent.press(screen.getByRole('button', { name: 'Retry saved request' }));
   await screen.findByText('Body record saved');
   expect(jest.mocked(bodyService.save).mock.calls[1]).toEqual(
     jest.mocked(bodyService.save).mock.calls[0],
   );
+  expect(jest.mocked(bodyService.save).mock.calls[0]).toEqual([
+    owner,
+    'measurement',
+    day,
+    '79',
+    'cm',
+    'UTC',
+    'chest',
+    '',
+  ]);
+  expect(bodyService.saveForm).not.toHaveBeenCalled();
 });
 test('steps are read-only, distance saves preserve sensor totals, and the daily target stays in this section', async () => {
   jest

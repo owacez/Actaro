@@ -96,20 +96,8 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
       {data && !resource.loading && (
         <>
           <BodyFormEditor key={formVersion} userId={userId} onSaved={resource.refresh} />
-          <AuthButton
-            title="Add another measurement"
-            outlined
-            disabled={action.locked}
-            onPress={() => {
-              setKind('measurement');
-              setValue('');
-              setNotes('');
-              setDate(data.today);
-              setEditOpen(true);
-            }}
-          />
           <ActionSheet
-            title={kind === 'weight' ? 'Edit weight record' : 'Body measurement'}
+            title={kind === 'weight' ? 'Edit weight record' : 'Edit measurement'}
             visible={editOpen}
             onClose={() => {
               if (!action.locked) setEditOpen(false);

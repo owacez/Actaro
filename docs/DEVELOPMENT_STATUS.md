@@ -4,6 +4,21 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Body record uniformity (2026-10-22): implementation and local verification **DONE**;
+device acceptance **DEFERRED**.
+
+- The separate "Add another measurement" button is removed. Named measurements are
+  added inside the card ("+ Add a measurement": name and value, the card's date) and
+  saved with "Save body record". The history sheet remains for edits.
+- Weight, waist, height and the other value use one centred stepper. Its new
+  `heading` mode shows a full-width bold label, and `AuthInput`/`NumberStepper`
+  `hideLabel` keep accessible names.
+- Sex and location have matching headings.
+
+Evidence: `v05-editors.test.tsx` (inline chest measurement saved with the card's
+date, identical retry, no body-form write) and `body-form.test.tsx`; 390×844
+captures.
+
 Body records in one card (2026-10-22): implementation and local verification
 **DONE**; device acceptance **DEFERRED**. This is a user-requested refinement of v0.5
 task 4.9; weights are unchanged.
