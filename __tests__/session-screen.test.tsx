@@ -84,9 +84,13 @@ test('pause/resume, add/remove, empty completion and cancellation remain real ac
   await screen.findByRole('button', { name: 'Resume workout timer' });
   await fireEvent.press(screen.getByRole('button', { name: 'Add set' }));
   await screen.findByRole('button', { name: 'Complete set 2' });
-  await fireEvent.press(screen.getByRole('button', { name: 'Edit set 2' }));
+  // Unlogged sets have a visible remove control; the last remaining set cannot be removed.
+  expect(
+    screen.getByRole('button', { name: 'Exercise 1: Test exercise, 0 of 2 sets logged' }),
+  ).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Remove set 2' }));
   expect(screen.queryByRole('button', { name: 'Complete set 2' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Remove set 1' })).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Finish workout' }));
   await screen.findByText('Complete at least one set.');
   expect(service.save).not.toHaveBeenCalled();
@@ -120,6 +124,9 @@ test('all planned rows stay visible, inline edits validate, primary logging adva
   await fireEvent.changeText(screen.getByLabelText('Weight (kg) · set 1'), '22.5');
   await fireEvent.press(screen.getByRole('button', { name: 'Log set 1' }));
   await screen.findByRole('button', { name: 'Log set 2' });
+  // A logged set keeps its data: it has no remove control until undone.
+  expect(screen.queryByRole('button', { name: 'Remove set 1' })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Remove set 2' })).toBeTruthy();
   expect(screen.getByRole('button', { name: 'View set 1, logged' })).toBeTruthy();
   expect(screen.getByText('1 of 3 sets logged')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Undo last set' }));

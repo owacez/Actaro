@@ -2,7 +2,7 @@ import { useState, type PropsWithChildren } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import { AuthText } from '@/features/auth/auth-components';
 import { useAppTheme } from '@/features/profile/theme-context';
-import { IconButton } from '@/components/product-ui';
+import { IconButton, ProductIcon } from '@/components/product-ui';
 
 export function SetLogRow({
   number,
@@ -16,6 +16,7 @@ export function SetLogRow({
   onChange,
   onLog,
   onUndo,
+  onRemove,
   children,
 }: PropsWithChildren<{
   number: number;
@@ -29,6 +30,8 @@ export function SetLogRow({
   onChange: (field: 'weight' | 'reps', value: string) => void;
   onLog: () => void;
   onUndo: () => void;
+  /** Present only for sets that may be removed from this session (unlogged, not the last). */
+  onRemove?: () => void;
 }>) {
   const [editing, setEditing] = useState(false);
   const { colors, scheme } = useAppTheme();
@@ -44,6 +47,30 @@ export function SetLogRow({
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        {onRemove ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Remove set ${number}`}
+            accessibilityHint="Removes this planned set from the current workout only."
+            hitSlop={4}
+            onPress={onRemove}
+            style={({ pressed }) => ({
+              width: 28,
+              minHeight: 44,
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: pressed ? 0.5 : 1,
+            })}
+          >
+            <ProductIcon
+              name={{ ios: 'xmark', android: 'close', web: 'close' }}
+              size={16}
+              color={colors.muted}
+            />
+          </Pressable>
+        ) : (
+          <View style={{ width: 28 }} />
+        )}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Select set ${number}, ${completed ? 'logged' : 'not logged'}`}

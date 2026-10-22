@@ -656,25 +656,90 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
         </>
       ) : (
         <>
-          {draft.mode === 'timed' && (
-            <>
-              <AuthButton
-                title={
-                  draft.clock.runningSince === null ? 'Resume workout timer' : 'Pause workout timer'
-                }
-                outlined
-                onPress={() =>
-                  change((value) => ({
-                    ...value,
-                    clock:
-                      value.clock.runningSince === null
-                        ? resumeClock(value.clock, Date.now())
-                        : pauseClock(value.clock, Date.now()),
-                  }))
-                }
-              />
-            </>
-          )}
+          <View
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              borderWidth: 1,
+              borderRadius: 20,
+              padding: 14,
+              gap: 12,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={{ flex: 1 }}>
+                <AuthText kind="eyebrow">
+                  {draft.mode === 'timed'
+                    ? draft.clock.runningSince === null
+                      ? 'WORKOUT TIME · PAUSED'
+                      : 'WORKOUT TIME'
+                    : 'LOG ONLY'}
+                </AuthText>
+                {draft.mode === 'timed' ? (
+                  <AuthText kind="metric">{timerText(elapsed(draft.clock, now))}</AuthText>
+                ) : (
+                  <AuthText>No workout timer. Sets and rest still record.</AuthText>
+                )}
+              </View>
+              {draft.mode === 'timed' && (
+                <IconButton
+                  label={
+                    draft.clock.runningSince === null
+                      ? 'Resume workout timer'
+                      : 'Pause workout timer'
+                  }
+                  name={
+                    draft.clock.runningSince === null
+                      ? { ios: 'play', android: 'play_arrow', web: 'play_arrow' }
+                      : { ios: 'pause', android: 'pause', web: 'pause' }
+                  }
+                  onPress={() =>
+                    change((value) => ({
+                      ...value,
+                      clock:
+                        value.clock.runningSince === null
+                          ? resumeClock(value.clock, Date.now())
+                          : pauseClock(value.clock, Date.now()),
+                    }))
+                  }
+                />
+              )}
+            </View>
+            {/* Every exercise with its progress; tap to jump without stepping through the list. */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                {draft.exercises.map((entry, at) => {
+                  const logged = entry.sets.filter((set) => set.completedAt).length;
+                  const selected = at === index;
+                  return (
+                    <Pressable
+                      key={entry.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Exercise ${at + 1}: ${entry.name}, ${logged} of ${entry.sets.length} sets logged`}
+                      accessibilityState={{ selected }}
+                      onPress={() => setIndex(at)}
+                      style={{
+                        maxWidth: 170,
+                        minHeight: 44,
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 14,
+                        borderWidth: 1,
+                        borderColor: selected ? colors.accent : colors.border,
+                        backgroundColor: selected ? colors.fill : colors.background,
+                      }}
+                    >
+                      <AuthText kind="eyebrow">
+                        {at + 1} · {logged}/{entry.sets.length}
+                        {logged === entry.sets.length ? ' ✓' : ''}
+                      </AuthText>
+                      <AuthText>{entry.name}</AuthText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </ScrollView>
+          </View>
           <WorkoutImage
             key={exercise.id}
             exerciseId={exercise.exerciseId}
@@ -726,6 +791,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
           <View
             style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 8 }}
           >
+            <View style={{ width: 28 }} />
             <View style={{ width: 36 }}>
               <AuthText kind="muted">Set</AuthText>
             </View>
@@ -771,6 +837,19 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
               onUndo={() => {
                 done(position, Date.now(), false);
               }}
+              onRemove={
+                set.completedAt || exercise.sets.length === 1
+                  ? undefined
+                  : () =>
+                      change((value) => ({
+                        ...value,
+                        exercises: value.exercises.map((entry, at) =>
+                          at === index
+                            ? { ...entry, sets: entry.sets.filter((row) => row.id !== set.id) }
+                            : entry,
+                        ),
+                      }))
+              }
             >
               {(['rpe', 'notes'] as const).map((field) => (
                 <AuthInput
@@ -782,23 +861,6 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
                   onChangeText={(value) => setField(position, field, value)}
                 />
               ))}
-              <AuthLink
-                title={`Remove set ${position + 1}`}
-                disabled={exercise.sets.length === 1}
-                onPress={() =>
-                  change((value) => ({
-                    ...value,
-                    exercises: value.exercises.map((entry, at) =>
-                      at === index
-                        ? {
-                            ...entry,
-                            sets: entry.sets.filter((_, place) => place !== position),
-                          }
-                        : entry,
-                    ),
-                  }))
-                }
-              />
             </SetLogRow>
           ))}
           <AuthButton
