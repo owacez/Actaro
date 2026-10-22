@@ -3,6 +3,7 @@ import { Pressable, TextInput, View } from 'react-native';
 import { AuthText } from '@/features/auth/auth-components';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { IconButton, ProductIcon } from '@/components/product-ui';
+import { actaroColors } from '@/constants/actaro-theme';
 
 export function SetLogRow({
   number,
@@ -40,7 +41,7 @@ export function SetLogRow({
       style={{
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: selected ? colors.accent : completed ? colors.success : colors.border,
+        borderColor: selected ? colors.accent : colors.border,
         backgroundColor: selected ? colors.fill : colors.surface,
         padding: 8,
         gap: 6,
@@ -76,49 +77,74 @@ export function SetLogRow({
           accessibilityLabel={`Select set ${number}, ${completed ? 'logged' : 'not logged'}`}
           accessibilityState={{ selected }}
           onPress={onSelect}
-          style={{ minWidth: 36, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
+          style={{ minWidth: 28, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
         >
-          <AuthText kind="title">{number}</AuthText>
+          <AuthText kind="heading">{number}</AuthText>
         </Pressable>
+        {/* Value pills carry their own unit, so the table needs no column header. */}
         {(['weight', 'reps'] as const).map((field) => (
-          <TextInput
+          <View
             key={field}
-            accessibilityLabel={
-              field === 'weight' ? `Weight (${unit}) · set ${number}` : `Reps · set ${number}`
-            }
-            accessibilityHint="Tap to replace the planned value. Logging saves this actual value."
-            value={field === 'weight' ? weight : reps}
-            onFocus={onSelect}
-            onChangeText={(value) => onChange(field, value)}
-            keyboardType={field === 'weight' ? 'decimal-pad' : 'number-pad'}
-            keyboardAppearance={scheme}
-            selectTextOnFocus
-            placeholder="—"
-            placeholderTextColor={colors.muted}
-            maxLength={field === 'weight' ? 12 : 4}
             style={{
               flex: 1,
               minWidth: 0,
               minHeight: 48,
-              borderRadius: 10,
-              textAlign: 'center',
-              fontSize: 24,
-              fontFamily: 'Inter_600SemiBold',
-              fontVariant: ['tabular-nums'],
-              color: colors.text,
+              borderRadius: 14,
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingHorizontal: 10,
               backgroundColor: colors.background,
             }}
-          />
+          >
+            <TextInput
+              accessibilityLabel={
+                field === 'weight' ? `Weight (${unit}) · set ${number}` : `Reps · set ${number}`
+              }
+              accessibilityHint="Tap to replace the planned value. Logging saves this actual value."
+              value={field === 'weight' ? weight : reps}
+              onFocus={onSelect}
+              onChangeText={(value) => onChange(field, value)}
+              keyboardType={field === 'weight' ? 'decimal-pad' : 'number-pad'}
+              keyboardAppearance={scheme}
+              selectTextOnFocus
+              placeholder="—"
+              placeholderTextColor={colors.muted}
+              maxLength={field === 'weight' ? 12 : 4}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                minHeight: 44,
+                fontSize: 22,
+                fontFamily: 'Inter_600SemiBold',
+                fontVariant: ['tabular-nums'],
+                color: colors.text,
+              }}
+            />
+            <AuthText kind="eyebrow">{field === 'weight' ? unit.toUpperCase() : 'REPS'}</AuthText>
+          </View>
         ))}
-        <IconButton
-          label={`${completed ? 'Unmark' : 'Complete'} set ${number}`}
-          name={
-            completed
-              ? { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }
-              : { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' }
-          }
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${completed ? 'Unmark' : 'Complete'} set ${number}`}
           onPress={completed ? onUndo : onLog}
-        />
+          style={({ pressed }) => ({
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: completed ? colors.accent : 'transparent',
+            borderWidth: completed ? 0 : 1.5,
+            borderColor: colors.border,
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <ProductIcon
+            name={{ ios: 'checkmark', android: 'check', web: 'check' }}
+            size={20}
+            color={completed ? actaroColors.text : colors.muted}
+          />
+        </Pressable>
       </View>
       {(selected || editing) && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingLeft: 4 }}>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AppState, Keyboard, Pressable, ScrollView, View } from 'react-native';
+import { AppState, Keyboard, Pressable, ScrollView, Text, View } from 'react-native';
 import { randomUUID } from 'expo-crypto';
 import { useNavigation } from 'expo-router';
 import { usePreventRemove, type NavigationAction } from 'expo-router/react-navigation';
@@ -14,13 +14,7 @@ import {
   AuthText,
   authStyles,
 } from '@/features/auth/auth-components';
-import {
-  NavigationSurface,
-  ScreenHeader,
-  Meter,
-  IconButton,
-  ActionSheet,
-} from '@/components/product-ui';
+import { NavigationSurface, ScreenHeader, IconButton, ActionSheet } from '@/components/product-ui';
 import { SetLogRow } from './set-log-row';
 import { ProgressMetrics } from '@/features/progress/progress-components';
 import { useAppTheme } from '@/features/profile/theme-context';
@@ -38,7 +32,8 @@ import {
 import { sessionStore } from './session-store';
 import { sessionService } from './session-service';
 import { exerciseRecords, trainingVolume } from './training-metrics';
-import { actaroLayout } from '@/constants/actaro-theme';
+import { actaroColors, actaroLayout } from '@/constants/actaro-theme';
+import { displayDate } from '@/lib/format';
 
 function FinishWorkoutButton({
   busy,
@@ -449,55 +444,68 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
         : null,
     }));
   }
+  // One compact rest bar: the pill skips, its fill drains as rest runs out.
   const restPanel = draft.rest ? (
-    <View style={{ gap: 8, paddingVertical: 12 }}>
-      <View
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8 }}>
+      <AuthLink title="-15" accessibilityLabel="-15 sec" onPress={() => adjustRest(-15)} />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Skip rest"
+        accessibilityHint={`${timerText(remaining)} of rest left`}
+        onPress={() => change((value) => ({ ...value, rest: null, restDuration: 0 }))}
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 8,
+          flex: 1,
+          minHeight: 48,
+          borderRadius: 24,
+          borderWidth: 1,
+          borderColor: colors.accent,
+          overflow: 'hidden',
+          justifyContent: 'center',
         }}
       >
-        <View>
-          <AuthText kind="eyebrow">REST</AuthText>
-          <AuthText kind="title">{timerText(remaining)}</AuthText>
+        <View
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: `${draft.restDuration ? Math.min(100, (remaining / draft.restDuration) * 100) : 0}%`,
+            backgroundColor: colors.fill,
+          }}
+        />
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+          }}
+        >
+          <AuthText kind="heading">
+            {draft.rest.runningSince === null ? 'Rest paused' : 'Skip rest'}
+          </AuthText>
+          <AuthText kind="heading">{timerText(remaining)}</AuthText>
         </View>
-        <View style={{ flexDirection: 'row', gap: 6 }}>
-          {[-15, 15].map((seconds) => (
-            <AuthLink
-              key={seconds}
-              title={seconds > 0 ? '+15' : '-15'}
-              accessibilityLabel={seconds > 0 ? '+15 sec' : '-15 sec'}
-              onPress={() => adjustRest(seconds)}
-            />
-          ))}
-          <IconButton
-            label={draft.rest.runningSince === null ? 'Resume rest' : 'Pause rest'}
-            name={
-              draft.rest.runningSince === null
-                ? { ios: 'play', android: 'play_arrow', web: 'play_arrow' }
-                : { ios: 'pause', android: 'pause', web: 'pause' }
-            }
-            onPress={() =>
-              change((value) => ({
-                ...value,
-                rest: value.rest
-                  ? value.rest.runningSince === null
-                    ? resumeClock(value.rest, Date.now())
-                    : pauseClock(value.rest, Date.now())
-                  : null,
-              }))
-            }
-          />
-          <IconButton
-            label="Skip rest"
-            name={{ ios: 'forward.end', android: 'skip_next', web: 'skip_next' }}
-            onPress={() => change((value) => ({ ...value, rest: null, restDuration: 0 }))}
-          />
-        </View>
-      </View>
-      <Meter value={remaining} target={draft.restDuration} color={colors.accent} />
+      </Pressable>
+      <AuthLink title="+15" accessibilityLabel="+15 sec" onPress={() => adjustRest(15)} />
+      <IconButton
+        label={draft.rest.runningSince === null ? 'Resume rest' : 'Pause rest'}
+        name={
+          draft.rest.runningSince === null
+            ? { ios: 'play', android: 'play_arrow', web: 'play_arrow' }
+            : { ios: 'pause', android: 'pause', web: 'pause' }
+        }
+        onPress={() =>
+          change((value) => ({
+            ...value,
+            rest: value.rest
+              ? value.rest.runningSince === null
+                ? resumeClock(value.rest, Date.now())
+                : pauseClock(value.rest, Date.now())
+              : null,
+          }))
+        }
+      />
     </View>
   ) : null;
   return (
@@ -508,7 +516,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
           title={summary ? 'Workout complete' : draft.name}
           subtitle={
             summary
-              ? draft.localDate
+              ? displayDate(draft.localDate)
               : (draft.mode === 'timed'
                   ? timerText(elapsed(draft.clock, now)) + ' · TIMED'
                   : 'LOG ONLY') +
@@ -571,7 +579,6 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
           }
         }}
       />
-      {summary && <AuthText kind="heading">Workout summary</AuthText>}
       {error && !exitOpen && <AuthNotice error>{error}</AuthNotice>}
       {storageError && (
         <>
@@ -587,9 +594,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
       )}
       {summary && totals ? (
         <>
-          <AuthText>
-            {draft.name} · {draft.localDate}
-          </AuthText>
+          <AuthText kind="title">{draft.name}</AuthText>
           <ProgressMetrics
             metrics={[
               ...(draft.mode === 'timed'
@@ -598,21 +603,17 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
               { title: 'Sets', value: String(totals.sets) },
               { title: 'Reps', value: String(totals.reps) },
               {
-                title: 'Volume',
+                title: 'Training Volume',
                 value: displayWeight(totals.volumeKg, draft.unit) + ' ' + draft.unit + '·reps',
               },
             ]}
           />
-          <AuthText>
-            Training Volume: {displayWeight(totals.volumeKg, draft.unit)} {draft.unit}·reps
+          <AuthText kind="muted">
+            Training Volume is external load × reps; bodyweight counts as zero load.
+            {totals.unknownWeightSets
+              ? ` ${totals.unknownWeightSets} sets with unknown weight are excluded.`
+              : ''}
           </AuthText>
-          <AuthText>
-            External load × reps; bodyweight uses zero external load. {totals.unknownWeightSets}{' '}
-            sets have unknown weight and are excluded from volume.
-          </AuthText>
-          {draft.mode === 'timed' && (
-            <AuthText>Duration: {timerText((summary.duration_seconds ?? 0) * 1000)}</AuthText>
-          )}
           {summary.exercises.map((entry) => {
             const original = draft.exercises.find((item) => item.id === entry.id);
             const records =
@@ -622,20 +623,43 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
                 : [];
             return (
               <AuthCard key={entry.id}>
-                <AuthText kind="eyebrow">{original?.name}</AuthText>
-                <AuthText>{entry.sets.length} completed sets</AuthText>
+                <AuthText kind="heading">{original?.name}</AuthText>
+                {entry.sets.map((set, at) => (
+                  <View key={at} style={{ flexDirection: 'row', gap: 12 }}>
+                    <View style={{ width: 20 }}>
+                      <AuthText kind="muted">{at + 1}</AuthText>
+                    </View>
+                    <AuthText>
+                      {set.weight_kg === null
+                        ? 'Unknown load'
+                        : `${displayWeight(set.weight_kg, draft.unit)} ${draft.unit}`}{' '}
+                      × {set.reps}
+                    </AuthText>
+                  </View>
+                ))}
                 {records.map((record, at) => (
-                  <AuthText key={at}>
-                    {record.first ? 'First recorded' : 'New'} {record.kind}:{' '}
-                    {record.kind === 'Rep PR'
-                      ? `${record.value} reps at ${displayWeight(record.weightKg ?? null, draft.unit)} ${draft.unit}`
-                      : `${displayWeight(Math.round(record.value * 1000) / 1000, draft.unit)} ${draft.unit}`}
-                  </AuthText>
+                  <View
+                    key={`record-${at}`}
+                    style={{
+                      alignSelf: 'flex-start',
+                      borderRadius: 10,
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                      backgroundColor: actaroColors.volt,
+                    }}
+                  >
+                    <Text style={{ color: actaroColors.text, fontFamily: 'Inter_600SemiBold' }}>
+                      {record.first ? 'First recorded' : 'New'} {record.kind}:{' '}
+                      {record.kind === 'Rep PR'
+                        ? `${record.value} reps at ${displayWeight(record.weightKg ?? null, draft.unit)} ${draft.unit}`
+                        : `${displayWeight(Math.round(record.value * 1000) / 1000, draft.unit)} ${draft.unit}`}
+                    </Text>
+                  </View>
                 ))}
               </AuthCard>
             );
           })}
-          <AuthText>
+          <AuthText kind="muted">
             Estimated 1RM uses Epley for 2–10 reps, or the actual one-rep load. It is an estimate,
             not a measured maximum.
           </AuthText>
@@ -749,37 +773,19 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
             size={224}
             framed={false}
           />
-          <AuthText kind="heading">{exercise.name}</AuthText>
-          <AuthText>{exercise.metadata}</AuthText>
-          <AuthText kind="muted">
-            Best load:{' '}
-            {exercise.performance.heaviestKg === null
-              ? 'No recorded load'
-              : `${displayWeight(exercise.performance.heaviestKg, draft.unit)} ${draft.unit}`}
-          </AuthText>
-          <ScrollView horizontal contentContainerStyle={{ flexGrow: 1, gap: 6 }}>
-            {exercise.sets.map((set, position) => (
-              <Pressable
-                key={set.id}
-                accessibilityRole="button"
-                accessibilityLabel={`View set ${position + 1}, ${set.completedAt ? 'logged' : 'not logged'}`}
-                accessibilityState={{ selected: position === activeSet }}
-                onPress={() => setFocusedSet({ exerciseId: exercise.id, setId: set.id })}
-                style={{ flex: 1, minWidth: 28, minHeight: 44, justifyContent: 'center', gap: 4 }}
-              >
-                <View
-                  style={{
-                    height: 6,
-                    borderRadius: 3,
-                    backgroundColor: set.completedAt ? colors.volt : colors.fill,
-                    borderWidth: position === activeSet ? 1 : 0,
-                    borderColor: colors.text,
-                  }}
-                />
-                <AuthText kind="muted">{position + 1}</AuthText>
-              </Pressable>
-            ))}
-          </ScrollView>
+          <View style={{ gap: 4 }}>
+            <AuthText kind="title">{exercise.name}</AuthText>
+            <AuthText kind="muted">
+              {[
+                exercise.metadata,
+                exercise.performance.heaviestKg === null
+                  ? 'No recorded best load'
+                  : `Best ${displayWeight(exercise.performance.heaviestKg, draft.unit)} ${draft.unit}`,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </AuthText>
+          </View>
           <View style={authStyles.row}>
             <AuthText kind="eyebrow">
               {loggedSets} of {exercise.sets.length} sets logged
@@ -788,22 +794,29 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
               <AuthLink title="Undo last set" onPress={() => done(lastLoggedSet, now, false)} />
             )}
           </View>
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 8 }}
-          >
-            <View style={{ width: 28 }} />
-            <View style={{ width: 36 }}>
-              <AuthText kind="muted">Set</AuthText>
-            </View>
-            <View style={{ flex: 1, alignItems: 'center' }}>
-              <AuthText kind="muted">
-                {draft.unit === 'kg' ? 'Weight · kg' : 'Weight · lb'}
-              </AuthText>
-            </View>
-            <View style={{ flex: 1, alignItems: 'center' }}>
-              <AuthText kind="muted">Reps</AuthText>
-            </View>
-            <View style={{ width: 44 }} />
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            {exercise.sets.map((set, position) => (
+              <Pressable
+                key={set.id}
+                accessibilityRole="button"
+                accessibilityLabel={`View set ${position + 1}, ${set.completedAt ? 'logged' : 'not logged'}`}
+                accessibilityState={{ selected: position === activeSet }}
+                onPress={() => setFocusedSet({ exerciseId: exercise.id, setId: set.id })}
+                style={{ flex: 1, minHeight: 28, justifyContent: 'center' }}
+              >
+                <View
+                  style={{
+                    height: 6,
+                    borderRadius: 3,
+                    backgroundColor: set.completedAt
+                      ? colors.accent
+                      : position === activeSet
+                        ? colors.text
+                        : colors.fill,
+                  }}
+                />
+              </Pressable>
+            ))}
           </View>
           {loggedSets === exercise.sets.length && (
             <AuthText>

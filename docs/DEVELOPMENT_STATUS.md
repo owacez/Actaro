@@ -4,6 +4,47 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Workout logging and history redesign (2026-10-22): implementation and local
+verification **DONE**; device acceptance **DEFERRED**. These are user-requested
+refinements of v0.3 tasks 2.6, 2.9, 2.10 and 2.11; weights are unchanged.
+
+The direction was informed by a user-supplied Behance concept ("Gym Workout App",
+Denis Saratovskii). Its patterns were adapted to Actaro's Chalk/Carbon tokens; no
+assets were copied.
+
+Session:
+
+- The exercise name is large, with a muted line for muscles/equipment and best
+  load.
+- "N of M sets logged" sits above the set progress bar, which now uses the accent
+  colour for logged sets.
+- Set rows are pill inputs with the unit inside (`60 KG`, `8 REPS`). The column
+  header is gone.
+- Logged sets show a filled accent check.
+- Rest is one bar: −15, a "Skip rest · 0:23" pill whose fill drains, +15, and
+  pause/resume. All Source of Truth §9.3 controls remain.
+
+Summary:
+
+- "Workout complete" with the date.
+- Stat tiles: duration (Timed), sets, reps and Training Volume.
+- Each exercise card lists its sets (`60 kg × 8`), with PRs as volt chips.
+- The duplicate volume and duration lines are removed.
+
+History:
+
+- The calendar view lists the month's sessions by default; choosing a day filters,
+  and "Show whole month" resets.
+- Sessions in both views are tappable cards (date, name, stats chips).
+- Delete is a secondary link with the same confirmation.
+- The pager shows only when more pages exist.
+
+Data, persistence and accessible control names are unchanged, except that history
+cards now include date and stats. Evidence: `session-screen.test.tsx` and
+`history.test.tsx` updated (summary tiles and set rows, month list by default),
+plus 390×844 captures with a seeded session and fictional history (0 live
+Supabase requests).
+
 First-run setup (2026-10-22): implementation and local verification **DONE**;
 device acceptance **DEFERRED**. This is a user-requested refinement of profile
 (0.9) and nutrition targets (3.2), so no weights change.

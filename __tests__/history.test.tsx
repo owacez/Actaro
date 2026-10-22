@@ -90,9 +90,12 @@ test('calendar marks actual workout dates and defers detailed-history requests u
     </FeedbackTestRoot>,
   );
   await screen.findByRole('button', { name: '2026-10-14: workout completed' });
+  // The month's sessions are listed before any day is chosen.
+  expect(screen.getByText('This month')).toBeTruthy();
+  expect(screen.getByRole('button', { name: /^Test workout, / })).toBeTruthy();
   expect(history.list).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: '2026-10-14: workout completed' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'Test workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: /^Test workout, / }));
   expect(onOpen).toHaveBeenCalledWith(recorded().id);
   await fireEvent.press(screen.getByRole('button', { name: 'History' }));
   await waitFor(() => expect(history.list).toHaveBeenCalledTimes(1));

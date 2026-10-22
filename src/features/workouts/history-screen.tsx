@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { randomUUID } from 'expo-crypto';
 import {
@@ -24,8 +24,9 @@ import { displayWeight } from './workout-model';
 import { exerciseRecords, trainingVolume } from './training-metrics';
 import { WorkoutCalendar } from './workout-calendar';
 import { RecordLoadFeedback, useRecords } from '@/hooks/use-records';
-import { ScreenHeader, Segments, ActionRow } from '@/components/product-ui';
-import { plural } from '@/lib/format';
+import { ScreenHeader, Segments, ProductIcon } from '@/components/product-ui';
+import { useAppTheme } from '@/features/profile/theme-context';
+import { displayDate, plural } from '@/lib/format';
 type Page = Awaited<ReturnType<typeof historyService.list>>;
 export function HistoryScreen({
   userId,
@@ -474,7 +475,9 @@ export function HistoryScreen({
           <RecordLoadFeedback {...calendar} retry={calendar.refresh} />
           {calendar.data && (
             <>
-              <AuthText>{calendar.data.rows.length} completed workouts this month</AuthText>
+              <AuthText>
+                {plural(calendar.data.rows.length, 'completed workout')} this month
+              </AuthText>
               <WorkoutCalendar
                 month={calendar.data.month}
                 today={calendar.data.today}
@@ -486,44 +489,45 @@ export function HistoryScreen({
                 }}
                 onSelect={setSelectedDay}
               />
-              <AuthText kind="heading">{selectedDay || 'Select a day'}</AuthText>
-              {selectedDay && !calendar.data.rows.some((row) => row.local_date === selectedDay) && (
-                <AuthText>No completed workouts on this date.</AuthText>
+              <View style={authStyles.row}>
+                <AuthText kind="heading">
+                  {selectedDay ? displayDate(selectedDay) : 'This month'}
+                </AuthText>
+                {!!selectedDay && (
+                  <AuthLink title="Show whole month" onPress={() => setSelectedDay('')} />
+                )}
+              </View>
+              {/* The month's sessions show by default; choosing a day narrows the list. */}
+              {calendar.data.rows.filter((row) => !selectedDay || row.local_date === selectedDay)
+                .length === 0 && (
+                <AuthText>
+                  {selectedDay
+                    ? 'No completed workouts on this date.'
+                    : 'No completed workouts this month yet.'}
+                </AuthText>
               )}
               {calendar.data.rows
-                .filter((row) => row.local_date === selectedDay)
+                .filter((row) => !selectedDay || row.local_date === selectedDay)
+                .sort((a, b) => b.local_date.localeCompare(a.local_date))
                 .map((row) => (
-                  <ActionRow
-                    key={row.id}
-                    title={row.name}
-                    detail={
-                      row.mode === 'timed'
-                        ? timerText((row.duration_seconds ?? 0) * 1000)
-                        : 'Log Only'
-                    }
-                    onPress={() => onOpen(row.id)}
-                  />
+                  <SessionCard key={row.id} row={row} onPress={() => onOpen(row.id)} />
                 ))}
-              <AuthText kind="muted">
-                Select History for detailed session totals, search, editing and deletion.
-              </AuthText>
             </>
           )}
         </>
       ) : (
         <>
-          <AuthText>
-            Completed sessions only. Open a record to edit its actual sets or delete it.
-          </AuthText>
           <AuthInput
             label="Search recorded workouts"
             value={search}
             maxLength={120}
             editable={!busy}
             onChangeText={setSearch}
+            onSubmitEditing={() => refresh({ ...filters, query: search, offset: 0 })}
           />
           <AuthButton
             title="Search history"
+            outlined
             disabled={busy}
             onPress={() => refresh({ ...filters, query: search, offset: 0 })}
           />
@@ -544,23 +548,18 @@ export function HistoryScreen({
             <AuthText>No recorded workouts match. Finish a workout to add a log.</AuthText>
           )}
           {page?.rows.map((row) => (
-            <AuthCard key={row.id}>
-              <AuthLink
-                title={`${row.local_date} · ${row.name}`}
+            <View key={row.id} style={{ gap: 6 }}>
+              <SessionCard
+                row={row}
+                stats={[
+                  plural(row.sets, 'set'),
+                  `${displayWeight(row.volume_kg, page.unit)} ${page.unit}·reps`,
+                ]}
                 disabled={busy}
                 onPress={() => onOpen(row.id)}
               />
-              <AuthText>
-                {row.sets} sets · {displayWeight(row.volume_kg, page.unit)} {page.unit}·reps ·{' '}
-                {row.mode === 'timed' ? timerText((row.duration_seconds ?? 0) * 1000) : 'Log Only'}
-              </AuthText>
-              <AuthLink
-                title={`Delete recorded ${row.name}`}
-                disabled={busy}
-                onPress={() => setDeleting(row)}
-              />
-              {deleting?.id === row.id && (
-                <>
+              {deleting?.id === row.id ? (
+                <AuthCard>
                   <AuthText>
                     Delete this performed log? Its sets are removed and calculations use the
                     remaining logs. Templates and splits stay.
@@ -576,26 +575,94 @@ export function HistoryScreen({
                     busy={busy}
                     onPress={() => void remove()}
                   />
-                </>
+                </AuthCard>
+              ) : (
+                <AuthLink
+                  title="Delete"
+                  accessibilityLabel={`Delete recorded ${row.name}`}
+                  disabled={busy}
+                  onPress={() => setDeleting(row)}
+                />
               )}
-            </AuthCard>
+            </View>
           ))}
           {error && <AuthButton title="Retry history" onPress={() => refresh({ ...filters })} />}
-          <AuthButton
-            title="Previous sessions"
-            outlined
-            disabled={busy || filters.offset === 0}
-            onPress={() => refresh({ ...filters, offset: Math.max(0, filters.offset - 10) })}
-          />
-          <AuthText>Page {filters.offset / 10 + 1}</AuthText>
-          <AuthButton
-            title="Next sessions"
-            outlined
-            disabled={busy || !page?.more}
-            onPress={() => refresh({ ...filters, offset: filters.offset + 10 })}
-          />
+          {(filters.offset > 0 || !!page?.more) && (
+            <View style={authStyles.row}>
+              <AuthLink
+                title="Previous sessions"
+                disabled={busy || filters.offset === 0}
+                onPress={() => refresh({ ...filters, offset: Math.max(0, filters.offset - 10) })}
+              />
+              <AuthText>Page {filters.offset / 10 + 1}</AuthText>
+              <AuthLink
+                title="Next sessions"
+                disabled={busy || !page?.more}
+                onPress={() => refresh({ ...filters, offset: filters.offset + 10 })}
+              />
+            </View>
+          )}
         </>
       )}
     </AuthFrame>
+  );
+}
+// One recorded session: date and mode, name, then compact stats; the whole card opens it.
+function SessionCard({
+  row,
+  stats = [],
+  disabled = false,
+  onPress,
+}: {
+  row: { name: string; local_date: string; mode: string; duration_seconds: number | null };
+  stats?: string[];
+  disabled?: boolean;
+  onPress: () => void;
+}) {
+  const { colors } = useAppTheme();
+  const time = row.mode === 'timed' ? timerText((row.duration_seconds ?? 0) * 1000) : 'Log Only';
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${row.name}, ${displayDate(row.local_date)}, ${[...stats, time].join(', ')}`}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        padding: 16,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.surface,
+        opacity: pressed || disabled ? 0.6 : 1,
+      })}
+    >
+      <View style={{ flex: 1, gap: 6 }}>
+        <AuthText kind="eyebrow">{displayDate(row.local_date).toUpperCase()}</AuthText>
+        <AuthText kind="heading">{row.name}</AuthText>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+          {[...stats, time].map((value) => (
+            <View
+              key={value}
+              style={{
+                borderRadius: 10,
+                paddingHorizontal: 8,
+                paddingVertical: 3,
+                backgroundColor: colors.fill,
+              }}
+            >
+              <AuthText kind="muted">{value}</AuthText>
+            </View>
+          ))}
+        </View>
+      </View>
+      <ProductIcon
+        name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }}
+        size={18}
+      />
+    </Pressable>
   );
 }

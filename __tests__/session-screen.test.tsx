@@ -66,9 +66,11 @@ test('Log Only completes sets, controls independent rest and preserves frozen fa
   expect(failed.status).toBe('pending');
   expect(failed.exercises[0].sets[0].reps).toBe('10');
   await fireEvent.press(screen.getByRole('button', { name: 'Retry workout save' }));
-  await screen.findByText('Workout summary');
+  await screen.findByText('Workout complete');
   expect(service.save.mock.calls[1][0]).toEqual(failed);
-  expect(screen.getByText('Training Volume: 200 kg·reps')).toBeTruthy();
+  // Summary tiles and each completed set, as logged.
+  expect(screen.getByText('200 kg·reps')).toBeTruthy();
+  expect(screen.getByText('20 kg × 10')).toBeTruthy();
   expect(screen.queryByText(/Duration:/)).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
   await waitFor(() => expect(onBack).toHaveBeenCalled());
