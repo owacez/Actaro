@@ -4,6 +4,29 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+iPhone map worker follow-up (2026-10-21): implementation and Chromium verification
+**DONE**; iPhone rendering **DEFERRED** pending the user's retest.
+
+The user's iPhone retest showed **Map stopped at: style · Worker failed to load**,
+so the library loaded but its worker did not start. MapLibre's default worker is a
+blob that imports the cross-origin worker module, and iOS WebKit refused it. The
+page now downloads the pinned, self-contained worker module, starts it from a
+same-origin blob via `setWorkerUrl`, and reports a new `worker` stage. Fit route
+now pads the top so the finish marker clears the map buttons.
+
+Evidence:
+
+- Headless Edge, driven over its debugging protocol, loaded the generated page
+  from `http://127.0.0.1` with a fictional route and reached `ready`.
+- The screenshot showed positron tiles, the cased route, and the start and finish
+  markers.
+- The browser console showed the worker running from a same-origin blob.
+- `npm run check` **PASS**: **391 Jest tests in 75 suites plus six dataset tests =
+  397**.
+- `git diff --check` **PASS**.
+
+No WebKit/iPhone result is claimed. Phase 9 weights are unchanged.
+
 Free map on every platform and Strava-style run layout (2026-10-21): implementation
 and local verification **DONE**; iPhone map rendering, outdoor GPS and device
 acceptance **DEFERRED** pending the user's retest. User decision: one free, keyless

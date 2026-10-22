@@ -17,7 +17,22 @@ value and distance/live pace/average moving pace/moving time beneath it. Review
 leads with distance, and review/detail list per-km/mi moving-pace splits derived
 from the saved route; splits sum to the same distance and moving time as the summary.
 
-iPhone map fix (unverified on device): MapLibre 6.15.0 starts a module worker from
+iPhone worker fix (2026-10-21, unverified on device): the user's retest reported
+**Map stopped at: style · Worker failed to load**. The library loaded, but
+MapLibre's default worker, a blob importing the cross-origin
+`maplibre-gl-worker.mjs`, was refused. The worker is one self-contained module with
+no static imports. The page now downloads that pinned file, wraps it in a
+same-origin blob and passes it to `setWorkerUrl` before creating the map. A new
+`worker` stage separates download failures from start-up failures.
+
+Edge (Chromium) loaded the generated page from an `http://127.0.0.1` origin with a
+fictional route. It reached `ready`, rendered positron tiles, the cased route and
+markers, and the worker ran from a same-origin blob. A `file://` page is not
+comparable, because its blob origin differs from the page origin. WebKit/iPhone
+behaviour still needs the user's retest. Fit route now pads the top so the
+finish marker clears the map buttons.
+
+Earlier iPhone map fix (unverified on device): MapLibre 6.15.0 starts a module worker from
 a blob URL that imports its cross-origin worker script. A WebView page loaded from
 a string has an opaque origin on iOS, where WebKit can refuse that worker. The page
 now has the secure non-routable origin `https://actaro-map.localhost/` (no request

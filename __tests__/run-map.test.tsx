@@ -46,6 +46,9 @@ test('map geometry preserves pause gaps and dateline continuity; document expose
   // WebKit may fall back from worker-src to script-src for MapLibre's blob module worker.
   expect(html).toMatch(/script-src [^;]*blob:/);
   expect(html).toContain('actaro-map:stage:library');
+  // The worker runs from a same-origin blob of the pinned worker module, never a cross-origin import.
+  expect(html).toContain('https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl-worker.mjs');
+  expect(html).toContain('lib.setWorkerUrl(URL.createObjectURL(new Blob(');
   expect(html).toContain('Recenter');
   expect(html).not.toMatch(/supabase|localStorage|geolocation|getUser/);
 });

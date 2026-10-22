@@ -46,13 +46,20 @@ reportMap('actaro-map:stage:page');
 try {
 reportMap('actaro-map:stage:library');
 const lib=await import('https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs');
+reportMap('actaro-map:stage:worker');
+// iOS WebKit refuses MapLibre's default worker, a blob that imports the cross-origin
+// worker module. The worker is one self-contained module, so run it from a same-origin
+// blob instead. Keep the URL: MapLibre may start more workers later.
+const workerResponse=await fetch('https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl-worker.mjs');
+if(!workerResponse.ok)throw new Error('Map worker download failed ('+workerResponse.status+')');
+lib.setWorkerUrl(URL.createObjectURL(new Blob([await workerResponse.text()],{type:'text/javascript'})));
 reportMap('actaro-map:stage:style');
 const map=new lib.Map({container:'map',style:'https://tiles.openfreemap.org/styles/${dark ? 'dark' : 'positron'}',center:latest.position,zoom:16,attributionControl:{compact:false}});
 let following=latest.live,loaded=false;
 function marker(kind){const element=document.createElement('div');element.className='dot '+kind;return new lib.Marker({element})}
 const start=marker('start').setLngLat(latest.lines[0]?.[0]||latest.position).addTo(map);
 const current=marker('here'),finish=marker('finish');
-function fit(){const all=latest.lines.flat();if(all.length<2){map.easeTo({center:latest.position,zoom:16});return}const bounds=new lib.LngLatBounds();all.forEach(p=>bounds.extend(p));map.fitBounds(bounds,{padding:45,maxZoom:17,duration:400})}
+function fit(){const all=latest.lines.flat();if(all.length<2){map.easeTo({center:latest.position,zoom:16});return}const bounds=new lib.LngLatBounds();all.forEach(p=>bounds.extend(p));map.fitBounds(bounds,{padding:{top:105,right:45,bottom:45,left:45},maxZoom:17,duration:400})}
 renderMap=function(){if(!loaded)return;map.getSource('run').setData({type:'Feature',properties:{},geometry:{type:'MultiLineString',coordinates:latest.lines.filter(line=>line.length>1)}});start.setLngLat(latest.lines[0]?.[0]||latest.position);(latest.live?current:finish).setLngLat(latest.position).addTo(map);(latest.live?finish:current).remove();if(following&&latest.live)map.easeTo({center:latest.position,duration:400})};
 map.on('dragstart',()=>{following=false});
 document.getElementById('follow').onclick=()=>{following=true;map.easeTo({center:latest.position,zoom:Math.max(15,map.getZoom()),duration:400})};
