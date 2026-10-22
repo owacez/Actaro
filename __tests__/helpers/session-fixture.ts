@@ -1,7 +1,8 @@
 import { emptyPerformance, type SessionDraft } from '@/features/workouts/session-model';
 export const sessionOwner = '00000000-0000-4000-8000-000000000001';
 export function sessionFixture(): SessionDraft {
-  const startedAt = new Date().toISOString();
+  // Date.now() keeps the start on any clock a test freezes, so finish never precedes it.
+  const startedAt = new Date(Date.now()).toISOString();
   return {
     format: 1,
     userId: sessionOwner,

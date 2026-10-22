@@ -261,6 +261,34 @@ export function routeMovingSeconds(route: readonly RunPoint[]) {
     }, 0) / 1000,
   );
 }
+export type RunSplit = { index: number; metres: number; seconds: number };
+// Whole km/mi splits plus a final partial split. Like routeDistance/routeMovingSeconds,
+// pause gaps add neither distance nor time; a crossing point is interpolated linearly.
+export function runSplits(route: readonly RunPoint[], unit: 'km' | 'mi'): RunSplit[] {
+  const size = unit === 'mi' ? 1609.344 : 1000;
+  const splits: RunSplit[] = [];
+  let metres = 0,
+    seconds = 0;
+  for (let index = 1; index < route.length; index++) {
+    const previous = route[index - 1],
+      point = route[index];
+    if (previous.segment !== point.segment) continue;
+    let distance = pointDistance(previous, point),
+      time = Math.min(60000, point.timestamp - previous.timestamp) / 1000;
+    while (distance > 0 && metres + distance >= size) {
+      const share = (size - metres) / distance;
+      splits.push({ index: splits.length + 1, metres: size, seconds: seconds + time * share });
+      distance -= size - metres;
+      time -= time * share;
+      metres = 0;
+      seconds = 0;
+    }
+    metres += distance;
+    seconds += time;
+  }
+  if (metres >= 1) splits.push({ index: splits.length + 1, metres, seconds });
+  return splits;
+}
 export function runMovingSeconds(draft: RunDraft) {
   return Math.min(routeMovingSeconds(draft.route), runSeconds(draft, draft.updatedAt));
 }

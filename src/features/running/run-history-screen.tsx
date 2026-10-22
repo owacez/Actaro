@@ -21,7 +21,7 @@ import { readRunPoints, runClock, runPace } from './run-model';
 import { runService } from './run-service';
 import { RunRoute } from './run-route';
 import { RunMap } from './run-map';
-import { RunMetrics } from './run-screen';
+import { RunMetrics, RunSplits } from './run-screen';
 
 export function RunHistoryScreen({
   userId,
@@ -132,6 +132,7 @@ export function RunDetailScreen({
             pauses.
           </AuthText>
           <RunMap points={resource.data.run.points} />
+          <RunSplits points={resource.data.run.points} unit={resource.data.unit} />
           <AuthText>{resource.data.run.notes || 'No run notes.'}</AuthText>
           <AuthText kind="muted">
             Recorded with GPS · {resource.data.run.time_zone}. Pauses and route gaps are excluded

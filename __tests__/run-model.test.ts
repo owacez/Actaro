@@ -9,6 +9,8 @@ import {
   restoreRun,
   resumeRun,
   routeDistance,
+  routeMovingSeconds,
+  runSplits,
   runDistance,
   runPace,
   runSeconds,
@@ -153,4 +155,28 @@ test('local start date follows selected time zone; review remains frozen and rou
     { ...runFix, longitude: -179.999, timestamp: runTime + 30000, segment: 0 },
   ]);
   expect(path).not.toMatch(/NaN|Infinity/);
+});
+test('splits interpolate unit crossings and agree with summary distance and moving time', () => {
+  // 24 equator steps of ~111.19 m every 30 s, then a pause boundary that must add nothing.
+  const route = Array.from({ length: 25 }, (_, index) => ({
+    ...runFix,
+    longitude: index * 0.001,
+    timestamp: runTime + index * 30000,
+    segment: 0,
+  }));
+  const paused = [...route, { ...runFix, longitude: 1, timestamp: runTime + 900000, segment: 1 }];
+  const splits = runSplits(paused, 'km');
+  expect(splits.map((split) => split.index)).toEqual([1, 2, 3]);
+  expect(splits[0].metres).toBe(1000);
+  expect(splits[1].metres).toBe(1000);
+  expect(splits[0].seconds).toBeCloseTo((1000 / routeDistance(route.slice(0, 2))) * 30, 6);
+  const sum = (key: 'metres' | 'seconds') => splits.reduce((total, split) => total + split[key], 0);
+  expect(sum('metres')).toBeCloseTo(routeDistance(paused), 6);
+  expect(sum('seconds')).toBeCloseTo(routeMovingSeconds(paused), 6);
+  expect(runSplits(paused, 'mi').map((split) => split.metres)[0]).toBe(1609.344);
+  expect(runPace(splits[0].seconds, splits[0].metres, 'km')).toBe('4:29 /km');
+  // A long same-segment GPS gap contributes the same capped 60 s used for moving time.
+  const gap = [route[0], { ...route[1], timestamp: runTime + 300000 }];
+  expect(runSplits(gap, 'km')[0].seconds).toBe(60);
+  expect(runSplits([route[0]], 'km')).toEqual([]);
 });

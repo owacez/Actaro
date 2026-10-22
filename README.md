@@ -499,7 +499,8 @@ Open **Train → Run → Start run**. After granting location access, keep the a
 for foreground tracking, pause/resume as needed, then **Stop → Review → Save run**.
 Saved runs appear in run history, Today and **Progress → Running**. History opens
 route details and confirmed deletion. Active/review/detail screens display
-OpenFreeMap street maps with follow/recenter and fit-route controls; compact cards
+free OpenFreeMap street maps on every platform, with follow/recenter and fit-route
+controls, start/finish markers and per-km/mi splits on review/detail; compact cards
 keep route outlines. No additional API key or paid map service is required.
 Live pace clears when movement stops; average moving pace uses separately recorded
 moving time. The elapsed timer includes standing time but excludes manual pauses.

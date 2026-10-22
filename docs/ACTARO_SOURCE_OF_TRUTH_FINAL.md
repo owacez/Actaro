@@ -1088,7 +1088,13 @@ deferred. The first implementation records private routes, time, distance and pa
 supports pause, review/save, history/detail and Today/Progress integration; and
 draws route outlines. The user's subsequent 2026-10-21 feedback also authorizes
 live street maps, a Strava-informed recording flow, GPS drift filtering and
-separate live/moving-average pace. OpenFreeMap supplies the public basemap; location
+separate live/moving-average pace. User decision (2026-10-21): free, keyless
+OpenFreeMap tiles rendered by MapLibre supply the street map on iPhone, Android and
+web; Apple Maps is not used. The same decision authorizes a Strava-style recording
+layout (large live map, cased route line, start/position/finish markers, prominent
+time/distance/pace) and per-km/mi moving-pace splits on run review/detail, derived
+from the saved route. Elevation, heart rate and other §16.6 advanced running remain
+later. Location
 recording remains device-local until explicit save. This does not authorize active
 minutes, inferred calories, running goals/events, wearables or advanced analytics.
 See `RUNNING_TESTING.md` for limits and the deferred checks. Core release approval

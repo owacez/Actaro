@@ -12,7 +12,10 @@ jest.mock('@/features/running/run-map-surface', () => ({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Fail map fixture"
-        onPress={() => onStatus('actaro-map:error')}
+        onPress={() => {
+          onStatus('actaro-map:stage:style');
+          onStatus('actaro-map:error:Failed to fetch worker script (403)');
+        }}
       >
         <Text>Map surface</Text>
       </Pressable>
@@ -36,7 +39,13 @@ test('map geometry preserves pause gaps and dateline continuity; document expose
   );
   expect(wrapped.position[0]).toBeCloseTo(180.001);
   const html = runMapDocument(payload, '#ff681e', false);
-  expect(html).toContain('https://tiles.openfreemap.org/styles/liberty');
+  expect(html).toContain('https://tiles.openfreemap.org/styles/positron');
+  expect(runMapDocument(payload, '#ff681e', true)).toContain(
+    'https://tiles.openfreemap.org/styles/dark',
+  );
+  // WebKit may fall back from worker-src to script-src for MapLibre's blob module worker.
+  expect(html).toMatch(/script-src [^;]*blob:/);
+  expect(html).toContain('actaro-map:stage:library');
   expect(html).toContain('Recenter');
   expect(html).not.toMatch(/supabase|localStorage|geolocation|getUser/);
 });
@@ -44,6 +53,9 @@ test('map failure preserves route outline with explicit retry instead of blockin
   await render(<RunMap points={runFixture().route} live />, { wrapper: FeedbackTestRoot });
   await fireEvent.press(screen.getByRole('button', { name: 'Fail map fixture' }));
   expect(screen.getByText(/Street map unavailable/)).toBeTruthy();
+  expect(
+    screen.getByText('Map stopped at: style · Failed to fetch worker script (403)'),
+  ).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Retry street map' }));
   expect(screen.getByRole('button', { name: 'Fail map fixture' })).toBeTruthy();
 });

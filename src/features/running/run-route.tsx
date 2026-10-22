@@ -71,7 +71,7 @@ export function RunRoute({
         <AuthText kind="muted">
           {path
             ? 'Recorded route · north up · gaps are not joined'
-            : 'Waiting for movement and an accurate GPS signal.'}
+            : 'Start point recorded. Your route appears as you move.'}
         </AuthText>
       )}
     </View>

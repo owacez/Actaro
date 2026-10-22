@@ -6,20 +6,43 @@ background GPS, with native builds and physical acceptance **DEFERRED**.
 ## Street maps and stationary accuracy update
 
 The user's follow-up authorizes street maps and a recording flow informed by
-Strava. Active/review/detail screens now use MapLibre GL JS 6.15.0 with
-[OpenFreeMap](https://openfreemap.org/) vector tiles. Native uses the Expo-compatible
-WebView; web uses a sandboxed frame. The map follows the recorded position; drag
+Strava. User decision (2026-10-21): one free map on every platform. iPhone,
+Android and web use MapLibre GL JS 6.15.0 with
+[OpenFreeMap](https://openfreemap.org/) vector tiles (iOS/Android WebView, web
+sandboxed frame); the interim Apple Maps surface and `react-native-maps` were removed.
+Light mode uses the muted `positron` style and dark mode `dark`. The route is an
+accent line over a contrasting casing, with start (green), live position (accent)
+and finish (dark) markers. Recording shows a large map with time as the primary
+value and distance/live pace/average moving pace/moving time beneath it. Review
+leads with distance, and review/detail list per-km/mi moving-pace splits derived
+from the saved route; splits sum to the same distance and moving time as the summary.
+
+iPhone map fix (unverified on device): MapLibre 6.15.0 starts a module worker from
+a blob URL that imports its cross-origin worker script. A WebView page loaded from
+a string has an opaque origin on iOS, where WebKit can refuse that worker. The page
+now has the secure non-routable origin `https://actaro-map.localhost/` (no request
+is sent there) and its CSP also allows `blob:` scripts/children for WebKit's
+worker-src fallback. If the map still fails, the fallback shows **Map stopped at:
+&lt;stage&gt; · &lt;reason&gt;** (stages: page, library, style, tiles); report that
+line to identify the remaining cause. The map follows the recorded position; drag
 to explore, use **Recenter** to follow again or **Fit route** for the whole route.
 History/Today keep lightweight outlines rather than creating many live maps.
 No API key, billing account, Redis or independent backend is needed. Internet
-access is needed for the pinned MapLibre CDN files and map tiles. Attribution
+access is needed for map tiles and the pinned MapLibre CDN files on every platform. Attribution
 stays visible. A loading failure offers an outline and retry without stopping GPS.
 
 The map has no auth/session bridge and does not request its own location permission.
-Only route geometry is passed into its isolated renderer. Map/CDN providers receive
-normal resource requests, including viewed tile areas and IP address; Supabase
+Only route geometry is passed to the map. The OpenFreeMap and unpkg CDN providers
+receive normal resource requests, including viewed tile areas and IP address; Supabase
 credentials and personal profile/health fields are never passed to the map.
 These public provider URLs are service endpoints, not personal configuration.
+
+The earlier fallback text incorrectly suggested an inaccurate GPS signal when
+there was just one valid route point. It now says the start point is recorded and
+the route will appear with movement. A map loading failure and GPS acquisition
+remain separate states. Every run starts from a confirmed GPS fix and saved routes
+are never empty, so the map always has a real start position. Physical iPhone
+rendering of the embedded map still needs the user's retest (see the fix above).
 
 Live pace uses recent accepted movement and becomes **—** when stopped or stale.
 Average moving pace uses moving time, which freezes without accepted movement.

@@ -4,6 +4,59 @@ Updated: 2026-10-21 (America/Los_Angeles).
 
 ## Overall
 
+Free map on every platform and Strava-style run layout (2026-10-21): implementation
+and local verification **DONE**; iPhone map rendering, outdoor GPS and device
+acceptance **DEFERRED** pending the user's retest. User decision: one free, keyless
+map everywhere (option A). The interim, uncommitted native Apple Maps surface, its
+test and `react-native-maps` were removed; package files match the last commit.
+iPhone, Android and web use MapLibre 6.15.0 with OpenFreeMap tiles.
+
+Likely iPhone cause, not yet proven on a device: MapLibre 6.15.0 starts a blob
+module worker that imports its cross-origin worker script. On iOS, a WebView page
+loaded from a string had an opaque origin. The page now has the secure,
+non-routable origin `https://actaro-map.localhost/` (no request is sent there),
+and its CSP allows `blob:` script/child fallbacks. The fallback now shows the
+failing load stage and reason so a retest identifies any remaining cause.
+
+User-authorized Strava-style scope:
+
+- Recording: muted `positron`/`dark` styles; cased accent route; start, position
+  and finish markers; a large live map (45% of screen height); time as the primary
+  value with distance, live pace, average moving pace and moving time.
+- Review leads with distance.
+- Review and history detail show deterministic per-km/mi moving-pace splits from
+  the saved route. Tests show splits sum to the summary's distance and moving time.
+
+No schema, Supabase, permission, credential or build change.
+
+Review correction: the earlier "empty route message" and "0,0 map" findings are
+unreachable. `newRun` requires a confirmed fix and `readRunPoints` rejects empty
+routes, so neither was changed. The flaky Log Only session test, caused by a
+frozen `Date.now()` before a real-clock fixture, now builds its fixture from
+`Date.now()`.
+
+Results:
+
+- `npm run check` **PASS**: strict TypeScript, lint and formatting; **391 Jest
+  tests in 75 suites plus six dataset tests = 397**.
+- `git diff --check` **PASS**.
+- `npx expo export --platform all --output-dir .actaro-tools/run-map-free-export`
+  **PASS**.
+
+No browser, iPhone or Android rendering is claimed. The Phase 9 denominator stays
+48, earning **23/48**; this layout and map work earns no device-dependent weight
+until physical acceptance.
+
+Next three checks:
+
+1. Open a run on iPhone Expo Go. Confirm street tiles, or report the "Map stopped
+   at" line.
+2. Record a known outdoor route with a pause, then confirm the route, markers and
+   splits.
+3. Retest Android map rendering when a device is available.
+
+See [running checklist](RUNNING_TESTING.md).
+
 Running map/accuracy follow-up (2026-10-21): overall **IN_PROGRESS**; code and hosted
 database changes **DONE**, actual map rendering/outdoor GPS acceptance **DEFERRED**
 pending verification. Ingredient discovery implementation and hosted checks **DONE**.

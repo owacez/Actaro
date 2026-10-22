@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useNavigation } from 'expo-router';
 import { usePreventRemove, type NavigationAction } from 'expo-router/react-navigation';
 import { randomUUID } from 'expo-crypto';
-import { View } from 'react-native';
+import { Text, View, useWindowDimensions } from 'react-native';
 import { ActionSheet, NavigationSurface, ScreenHeader } from '@/components/product-ui';
 import {
   AuthButton,
@@ -16,6 +16,7 @@ import {
   AuthText,
 } from '@/features/auth/auth-components';
 import { profileService } from '@/features/profile/profile-service';
+import { useAppTheme } from '@/features/profile/theme-context';
 import { ProgressMetrics } from '@/features/progress/progress-components';
 import {
   RecordLoadFeedback,
@@ -34,6 +35,8 @@ import {
   runSeconds,
   runMovingSeconds,
   runLivePace,
+  runSplits,
+  type RunPoint,
 } from './run-model';
 import { RunMap } from './run-map';
 import { useRunDraft } from './use-run-draft';
@@ -57,6 +60,97 @@ export function RunMetrics({
         { title: 'Avg moving pace', value: runPace(seconds, distance, unit) },
       ]}
     />
+  );
+}
+// Recording-style stat panel: one large primary value with compact secondary values.
+function RunStatPanel({
+  hero,
+  items,
+}: {
+  hero: { title: string; value: string };
+  items: { title: string; value: string }[];
+}) {
+  const { colors } = useAppTheme();
+  const number = {
+    color: colors.text,
+    fontFamily: 'Inter_600SemiBold',
+    fontVariant: ['tabular-nums' as const],
+  };
+  return (
+    <View
+      style={{
+        backgroundColor: colors.surface,
+        borderColor: colors.border,
+        borderWidth: 1,
+        borderRadius: 20,
+        padding: 16,
+        gap: 14,
+      }}
+    >
+      <View accessible accessibilityLabel={`${hero.title} ${hero.value}`}>
+        <AuthText kind="eyebrow">{hero.title.toUpperCase()}</AuthText>
+        <Text style={[number, { fontSize: 56, lineHeight: 64 }]}>{hero.value}</Text>
+      </View>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: 12 }}>
+        {items.map((item) => (
+          <View
+            key={item.title}
+            accessible
+            accessibilityLabel={`${item.title} ${item.value}`}
+            style={{ flexBasis: '50%', paddingRight: 8 }}
+          >
+            <AuthText kind="eyebrow">{item.title.toUpperCase()}</AuthText>
+            <Text style={[number, { fontSize: 24, lineHeight: 30 }]}>{item.value}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+export function RunSplits({ points, unit }: { points: readonly RunPoint[]; unit: 'km' | 'mi' }) {
+  const { colors } = useAppTheme();
+  const splits = runSplits(points, unit);
+  if (!splits.length) return null;
+  // Bars compare speed with the fastest split, so a longer bar is a faster split.
+  const fastest = Math.max(...splits.map((split) => split.metres / Math.max(1, split.seconds)));
+  return (
+    <View style={{ gap: 8 }}>
+      <AuthText kind="eyebrow">SPLITS</AuthText>
+      {splits.map((split) => {
+        const whole = Math.abs(split.metres - (unit === 'mi' ? 1609.344 : 1000)) < 0.001;
+        const label = whole ? String(split.index) : `${runDistance(split.metres, unit)} ${unit}`;
+        const pace = runPace(split.seconds, split.metres, unit);
+        const share = split.metres / Math.max(1, split.seconds) / fastest;
+        return (
+          <View
+            key={split.index}
+            accessible
+            accessibilityLabel={`Split ${label}${whole ? ` ${unit}` : ''}, ${pace}`}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}
+          >
+            <View style={{ width: 64 }}>
+              <AuthText>{label}</AuthText>
+            </View>
+            <View style={{ flex: 1, height: 10, borderRadius: 5, backgroundColor: colors.fill }}>
+              <View
+                style={{
+                  width: `${Math.max(8, Math.round(share * 100))}%`,
+                  height: 10,
+                  borderRadius: 5,
+                  backgroundColor: colors.accent,
+                }}
+              />
+            </View>
+            <View style={{ width: 92, alignItems: 'flex-end' }}>
+              <AuthText>{pace}</AuthText>
+            </View>
+          </View>
+        );
+      })}
+      <AuthText kind="muted">
+        Moving pace per {unit === 'mi' ? 'mile' : 'kilometre'} from GPS.
+      </AuthText>
+    </View>
   );
 }
 export function RunStartScreen({
@@ -214,6 +308,7 @@ export function RunSessionScreen({
   const [exitApproved, setExitApproved] = useState(false),
     [exitAction, setExitAction] = useState<NavigationAction | null>(null),
     [savedId, setSavedId] = useState<string | null>(null);
+  const screenSize = useWindowDimensions();
   const navigation = useNavigation(),
     pending = useRef(false),
     alive = useRef(true);
@@ -353,26 +448,49 @@ export function RunSessionScreen({
                 ? 'PAUSED'
                 : 'RUN SUMMARY'}
           </AuthText>
-          <RunMap points={draft.route} live={draft.status === 'recording'} />
-          <AuthText kind="eyebrow">DISTANCE</AuthText>
-          <AuthText kind="metric">
-            {runDistance(draft.distanceMeters, draft.unit)} {draft.unit}
-          </AuthText>
-          <ProgressMetrics
-            metrics={[
-              { title: 'Moving time', value: runClock(runMovingSeconds(draft)) },
-              { title: 'Elapsed time', value: runClock(seconds), detail: 'Excludes manual pauses' },
-              {
-                title: 'Live pace',
-                value: runLivePace(draft, saved.now),
-                detail: '— when stopped or GPS is uncertain',
-              },
-              {
-                title: 'Avg moving pace',
-                value: runPace(runMovingSeconds(draft), draft.distanceMeters, draft.unit),
-              },
-            ]}
+          <RunMap
+            points={draft.route}
+            live={draft.status === 'recording'}
+            height={
+              draft.status === 'review' ? 280 : Math.max(300, Math.round(screenSize.height * 0.45))
+            }
           />
+          {draft.status === 'review' ? (
+            <RunStatPanel
+              hero={{
+                title: 'Distance',
+                value: `${runDistance(draft.distanceMeters, draft.unit)} ${draft.unit}`,
+              }}
+              items={[
+                { title: 'Moving time', value: runClock(runMovingSeconds(draft)) },
+                {
+                  title: 'Avg moving pace',
+                  value: runPace(runMovingSeconds(draft), draft.distanceMeters, draft.unit),
+                },
+                { title: 'Elapsed time', value: runClock(seconds) },
+              ]}
+            />
+          ) : (
+            <RunStatPanel
+              hero={{ title: 'Time', value: runClock(seconds) }}
+              items={[
+                {
+                  title: 'Distance',
+                  value: `${runDistance(draft.distanceMeters, draft.unit)} ${draft.unit}`,
+                },
+                { title: 'Live pace', value: runLivePace(draft, saved.now) },
+                {
+                  title: 'Avg moving pace',
+                  value: runPace(runMovingSeconds(draft), draft.distanceMeters, draft.unit),
+                },
+                { title: 'Moving time', value: runClock(runMovingSeconds(draft)) },
+              ]}
+            />
+          )}
+          <AuthText kind="muted">
+            Time excludes manual pauses. Live pace shows — when stopped or GPS is uncertain.
+          </AuthText>
+          {draft.status === 'review' && <RunSplits points={draft.route} unit={draft.unit} />}
           {draft.interruption && <AuthNotice>{draft.interruption}</AuthNotice>}
           <AuthText kind="muted">
             {draft.status === 'recording'

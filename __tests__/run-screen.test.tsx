@@ -76,11 +76,17 @@ test('stopping requires confirmation, opens review and never saves automatically
   await render(<RunSessionScreen userId={runOwner} onBack={jest.fn()} onSaved={jest.fn()} />, {
     wrapper: FeedbackTestRoot,
   });
+  expect(screen.getByLabelText(/^Time (\d+:)?\d+:\d\d$/)).toBeTruthy();
+  expect(screen.getByLabelText('Distance 0.11 km')).toBeTruthy();
+  expect(screen.queryByText('SPLITS')).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Stop run' }));
   expect(tracker.finish).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Stop and review' }));
   await screen.findByRole('button', { name: 'Save run' });
   expect(mockCurrent?.status).toBe('review');
+  // Review leads with distance and shows the same GPS movement as per-unit splits.
+  expect(screen.getByLabelText('Distance 0.11 km')).toBeTruthy();
+  expect(screen.getByLabelText('Split 0.11 km, 4:29 /km')).toBeTruthy();
   expect(service.save).not.toHaveBeenCalled();
 });
 test('failed save freezes notes and retries the identical reviewed run before clearing its draft', async () => {

@@ -7,7 +7,15 @@ import { RunRoute } from './run-route';
 import { MapSurface } from './run-map-surface';
 import { runMapDocument, runMapPayload } from './run-map-document';
 
-export function RunMap({ points, live = false }: { points: readonly RunPoint[]; live?: boolean }) {
+export function RunMap({
+  points,
+  live = false,
+  height = 320,
+}: {
+  points: readonly RunPoint[];
+  live?: boolean;
+  height?: number;
+}) {
   const { colors, scheme } = useAppTheme();
   const payload = useMemo(() => runMapPayload(points, live), [points, live]);
   const [initial] = useState(payload);
@@ -16,10 +24,16 @@ export function RunMap({ points, live = false }: { points: readonly RunPoint[]; 
     [initial, colors.accent, scheme],
   );
   const [attempt, setAttempt] = useState(0),
-    [status, setStatus] = useState('loading');
+    [status, setStatus] = useState('loading'),
+    [stage, setStage] = useState('start'),
+    [reason, setReason] = useState<string | null>(null);
   const receive = useCallback((value: string) => {
     if (value === 'actaro-map:ready') setStatus('ready');
-    else if (value === 'actaro-map:error') setStatus('error');
+    else if (value.startsWith('actaro-map:stage:')) setStage(value.slice(17, 40));
+    else if (value.startsWith('actaro-map:error')) {
+      setReason(value.slice(17, 177) || null);
+      setStatus('error');
+    }
   }, []);
   useEffect(() => {
     const timer = setTimeout(
@@ -35,10 +49,16 @@ export function RunMap({ points, live = false }: { points: readonly RunPoint[]; 
         <AuthText>
           Street map unavailable. GPS recording still works; showing your route outline.
         </AuthText>
+        <AuthText kind="muted">
+          Map stopped at: {stage}
+          {reason ? ` · ${reason}` : ' · timed out'}
+        </AuthText>
         <AuthLink
           title="Retry street map"
           onPress={() => {
             setStatus('loading');
+            setStage('start');
+            setReason(null);
             setAttempt((value) => value + 1);
           }}
         />
@@ -46,9 +66,7 @@ export function RunMap({ points, live = false }: { points: readonly RunPoint[]; 
     );
   return (
     <View style={{ gap: 6 }}>
-      <View
-        style={{ height: 320, borderRadius: 20, overflow: 'hidden', backgroundColor: colors.fill }}
-      >
+      <View style={{ height, borderRadius: 20, overflow: 'hidden', backgroundColor: colors.fill }}>
         <MapSurface key={attempt} html={html} payload={payload} onStatus={receive} />
       </View>
       {status === 'loading' && (

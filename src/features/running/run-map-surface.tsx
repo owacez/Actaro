@@ -3,6 +3,10 @@ import { Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { mapJson, type RunMapPayload } from './run-map-document';
 
+// A secure, non-routable page origin. A string page without one is opaque on iOS,
+// where WebKit can refuse MapLibre's blob module worker. No request goes to this host.
+export const mapPageOrigin = 'https://actaro-map.localhost/';
+
 export type MapSurfaceProps = {
   html: string;
   payload: RunMapPayload;
@@ -10,7 +14,7 @@ export type MapSurfaceProps = {
 };
 export function MapSurface({ html, payload, onStatus }: MapSurfaceProps) {
   const view = useRef<WebView>(null);
-  const source = useMemo(() => ({ html }), [html]);
+  const source = useMemo(() => ({ html, baseUrl: mapPageOrigin }), [html]);
   const script = `window.updateActaroMap?.(${mapJson(payload)});true;`;
   useEffect(() => {
     view.current?.injectJavaScript(script);
@@ -31,10 +35,10 @@ export function MapSurface({ html, payload, onStatus }: MapSurfaceProps) {
       setSupportMultipleWindows={false}
       onLoadEnd={() => view.current?.injectJavaScript(script)}
       onMessage={(event) => onStatus(event.nativeEvent.data)}
-      onError={() => onStatus('actaro-map:error')}
-      onContentProcessDidTerminate={() => onStatus('actaro-map:error')}
+      onError={(event) => onStatus(`actaro-map:error:${event.nativeEvent.description}`)}
+      onContentProcessDidTerminate={() => onStatus('actaro-map:error:web content stopped')}
       onShouldStartLoadWithRequest={(request) => {
-        if (request.url === 'about:blank') return true;
+        if (request.url === 'about:blank' || request.url === mapPageOrigin) return true;
         try {
           const url = new URL(request.url);
           if (
