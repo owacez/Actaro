@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
-import { randomUUID } from 'expo-crypto';
 import {
   AuthButton,
   AuthCard,
@@ -15,16 +14,14 @@ import {
   authStyles,
 } from '@/features/auth/auth-components';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
-import { LibraryScreen } from '@/features/exercises/library-screen';
 import { historyService, type HistoryFilters } from './history-service';
-import { sessionService } from './session-service';
 import { sessionStore } from './session-store';
-import { sessionPayload, timerText, emptyPerformance, type SessionDraft } from './session-model';
+import { emptyPerformance, sessionPayload, timerText, type SessionDraft } from './session-model';
 import { displayWeight } from './workout-model';
 import { exerciseRecords, trainingVolume } from './training-metrics';
 import { WorkoutCalendar } from './workout-calendar';
 import { RecordLoadFeedback, useRecords } from '@/hooks/use-records';
-import { ScreenHeader, Segments, ProductIcon, StatTile } from '@/components/product-ui';
+import { ScreenHeader, Segments, ProductIcon } from '@/components/product-ui';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { displayDate, plural } from '@/lib/format';
 type Page = Awaited<ReturnType<typeof historyService.list>>;
@@ -33,13 +30,11 @@ export function HistoryScreen({
   id,
   onBack,
   onOpen,
-  onEquipment,
 }: {
   userId: string;
   id?: string;
   onBack: () => void;
   onOpen: (id: string) => void;
-  onEquipment: () => void;
 }) {
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
   const [month, setMonth] = useState(''),
@@ -54,15 +49,10 @@ export function HistoryScreen({
     [filters, setFilters] = useState<HistoryFilters>({ offset: 0, query: '', mode: null }),
     [search, setSearch] = useState('');
   const [draft, setDraft] = useState<SessionDraft | null>(null),
-    [baseline, setBaseline] = useState(''),
     [attempt, setAttempt] = useState(0);
-  const [savedExerciseIds, setSavedExerciseIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true),
     [error, setError] = useState<string | null>(null),
-    [busy, setBusy] = useState(false);
-  const [frozen, setFrozen] = useState<SessionDraft | null>(null),
-    [discard, setDiscard] = useState(false),
-    [picking, setPicking] = useState(false),
+    [busy, setBusy] = useState(false),
     [deleting, setDeleting] = useState(false);
   const pending = useRef(false),
     alive = useRef(true),
@@ -84,8 +74,6 @@ export function HistoryScreen({
         if (!active) return;
         if (!value) throw new Error('Recorded workout unavailable.');
         setDraft(value);
-        setSavedExerciseIds(value.exercises.map((exercise) => exercise.id));
-        setBaseline(JSON.stringify(value));
         setLoading(false);
       })
       .catch((reason: unknown) => {
@@ -133,40 +121,8 @@ export function HistoryScreen({
   function reload() {
     setLoading(true);
     setDraft(null);
-    setFrozen(null);
     setError(null);
-    setDiscard(false);
     setAttempt((value) => value + 1);
-  }
-  function edit(update: (previous: SessionDraft) => SessionDraft) {
-    if (draft && !busy && !frozen) setDraft(update(draft));
-  }
-  async function save() {
-    if (!draft || pending.current) return;
-    pending.current = true;
-    setBusy(true);
-    setError(null);
-    try {
-      const next = frozen ?? draft;
-      sessionPayload(next);
-      setFrozen(next);
-      await sessionService.save(next);
-      await sessionStore.forgetSaved(userId, next.id);
-      if (alive.current) {
-        notify('Recorded workout updated.', 'success');
-        reload();
-      }
-    } catch (reason) {
-      if (alive.current)
-        setError(
-          reason instanceof Error
-            ? reason.message
-            : 'Unable to save. Keep this screen open and retry.',
-        );
-    } finally {
-      pending.current = false;
-      if (alive.current) setBusy(false);
-    }
   }
   async function remove() {
     if (!id || !draft || pending.current) return;
@@ -189,52 +145,13 @@ export function HistoryScreen({
       if (alive.current) setBusy(false);
     }
   }
-  const dirty = !!draft && JSON.stringify(draft) !== baseline;
-  if (picking && draft)
-    return (
-      <View style={{ flex: 1 }}>
-        <AuthLink title="← Recorded workout" onPress={() => setPicking(false)} />
-        <LibraryScreen
-          userId={userId}
-          onEquipment={onEquipment}
-          onOpen={(exerciseId, entry) => {
-            edit((value) => ({
-              ...value,
-              exercises: [
-                ...value.exercises,
-                {
-                  id: randomUUID(),
-                  exerciseId,
-                  name: entry.name,
-                  imageUrl: entry.imageUrl,
-                  metadata: entry.muscles.join(', '),
-                  notes: '',
-                  performance: emptyPerformance(),
-                  sets: [
-                    {
-                      id: randomUUID(),
-                      reps: '',
-                      weight: '',
-                      rest: '90',
-                      rpe: '',
-                      notes: '',
-                      completedAt: value.endedAt,
-                    },
-                  ],
-                },
-              ],
-            }));
-            setPicking(false);
-          }}
-        />
-      </View>
-    );
+  // A recorded workout is a read-only log; its stats and records come from the saved sets.
   let preview: ReturnType<typeof sessionPayload> | null = null;
   if (draft) {
     try {
       preview = sessionPayload(draft);
     } catch {
-      /* Invalid edit fields remain editable until Save validates them. */
+      /* A stored record that no longer validates still shows its sets without totals. */
     }
   }
   const totals = preview
@@ -258,7 +175,7 @@ export function HistoryScreen({
       <AuthLink
         title={id ? '← Workout history' : '← My workouts'}
         disabled={busy}
-        onPress={() => (dirty || frozen ? setDiscard(true) : onBack())}
+        onPress={onBack}
       />
       {!id && (
         <Segments
@@ -276,107 +193,73 @@ export function HistoryScreen({
       ) : id ? (
         draft ? (
           <>
-            {discard && (
-              <>
-                <AuthText>Discard these unsaved history edits?</AuthText>
-                <AuthButton
-                  title="Keep editing"
-                  outlined
-                  disabled={busy}
-                  onPress={() => setDiscard(false)}
-                />
-                <AuthButton title="Discard history edits" disabled={busy} onPress={onBack} />
-              </>
-            )}
-            <View
-              style={{
-                gap: 6,
-                padding: 18,
-                borderRadius: 24,
-                backgroundColor: colors.accent,
-              }}
-            >
-              <Text style={{ color: '#ffffff', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
-                {displayDate(draft.localDate).toUpperCase()} ·{' '}
-                {draft.mode === 'timed' ? 'TIMED' : 'LOG ONLY'}
-              </Text>
-              <Text
-                style={{
-                  color: '#ffffff',
-                  fontSize: 25,
-                  lineHeight: 32,
-                  fontFamily: 'Inter_600SemiBold',
-                }}
-              >
-                {draft.name || 'Recorded workout'}
-              </Text>
-              <Text style={{ color: '#ffffff', fontSize: 14 }}>
-                {draft.mode === 'timed'
-                  ? `Duration ${timerText(draft.clock.elapsedMs)}`
-                  : 'Logged without a timer'}{' '}
-                · {draft.timeZone}
-              </Text>
-            </View>
-            {totals && (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-                <StatTile
-                  icon={{ ios: 'dumbbell', android: 'fitness_center', web: 'fitness_center' }}
-                  label="Exercises"
-                  value={String(preview?.exercises.length ?? 0)}
-                />
-                <StatTile
-                  icon={{ ios: 'square.stack', android: 'layers', web: 'layers' }}
-                  label="Sets"
-                  value={String(totals.sets)}
-                />
-                <StatTile
-                  icon={{ ios: 'repeat', android: 'repeat', web: 'repeat' }}
-                  label="Reps"
-                  value={String(totals.reps)}
-                />
-                <StatTile
-                  icon={{ ios: 'scalemass', android: 'monitor_weight', web: 'monitor_weight' }}
-                  label="Training volume"
-                  value={`${displayWeight(totals.volumeKg, draft.unit)} ${draft.unit}·reps`}
-                />
+            <AuthCard>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 14,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: colors.accent,
+                  }}
+                >
+                  <ProductIcon
+                    name={
+                      draft.mode === 'timed'
+                        ? { ios: 'stopwatch', android: 'timer', web: 'timer' }
+                        : { ios: 'list.bullet', android: 'list', web: 'list' }
+                    }
+                    size={20}
+                    color="#ffffff"
+                  />
+                </View>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <AuthText kind="eyebrow">
+                    {displayDate(draft.localDate).toUpperCase()} ·{' '}
+                    {draft.mode === 'timed' ? timerText(draft.clock.elapsedMs) : 'LOG ONLY'}
+                  </AuthText>
+                  <AuthText kind="title">{draft.name || 'Recorded workout'}</AuthText>
+                </View>
               </View>
-            )}
-            {!!totals?.unknownWeightSets && (
-              <AuthText kind="muted">
-                {plural(totals.unknownWeightSets, 'set')} without a weight are excluded from volume.
-              </AuthText>
-            )}
-            <AuthText kind="muted">
-              Edits here change this performed log only; templates stay independent. Stats preview
-              your edits and hide while a value is incomplete.
-            </AuthText>
-            <AuthInput
-              label="Recorded workout name"
-              value={draft.name}
-              editable={!busy && !frozen}
-              maxLength={100}
-              onChangeText={(name) => edit((value) => ({ ...value, name }))}
-            />
-            <AuthInput
-              label="Recorded workout note"
-              value={draft.notes}
-              editable={!busy && !frozen}
-              multiline
-              maxLength={2000}
-              onChangeText={(notes) => edit((value) => ({ ...value, notes }))}
-            />
+              {totals && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    paddingTop: 12,
+                    borderTopWidth: StyleSheet.hairlineWidth,
+                    borderTopColor: colors.border,
+                  }}
+                >
+                  {[
+                    ['Exercises', String(preview?.exercises.length ?? 0)],
+                    ['Sets', String(totals.sets)],
+                    ['Reps', String(totals.reps)],
+                    ['Volume', `${displayWeight(totals.volumeKg, draft.unit)} ${draft.unit}`],
+                  ].map(([label, value]) => (
+                    <View
+                      key={label}
+                      accessible
+                      accessibilityLabel={`${label}: ${value}`}
+                      style={{ flex: 1, gap: 2 }}
+                    >
+                      <AuthText kind="heading">{value}</AuthText>
+                      <AuthText kind="muted">{label}</AuthText>
+                    </View>
+                  ))}
+                </View>
+              )}
+              {!!draft.notes && <NoteLine text={draft.notes} />}
+            </AuthCard>
             {draft.exercises.map((exercise, index) => {
-              const shown =
-                savedExerciseIds.includes(exercise.id) &&
+              const best =
                 draft.exercises.find((entry) => entry.exerciseId === exercise.exerciseId)?.id ===
-                  exercise.id
-                  ? (records.get(exercise.exerciseId) ?? [])
+                exercise.id
+                  ? (records.get(exercise.exerciseId) ?? []).filter(
+                      (record) => record.kind !== 'Rep PR',
+                    )
                   : [];
-              const setFields = [
-                ['weight', `Weight (${draft.unit})`, 'decimal-pad'],
-                ['reps', 'Reps', 'number-pad'],
-                ['rpe', 'RPE', 'decimal-pad'],
-              ] as const;
               return (
                 <AuthCard key={exercise.id}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -397,165 +280,80 @@ export function HistoryScreen({
                       <AuthText kind="muted">{plural(exercise.sets.length, 'set')}</AuthText>
                     </View>
                   </View>
-                  {!!shown.length && (
+                  {!!best.length && (
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                      {shown.map((record, at) => (
+                      {best.map((record) => (
                         <View
-                          key={at}
+                          key={record.kind}
                           style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 4,
                             borderRadius: 10,
                             paddingHorizontal: 8,
                             paddingVertical: 3,
                             backgroundColor: colors.fill,
                           }}
                         >
+                          <ProductIcon
+                            name={{ ios: 'trophy', android: 'emoji_events', web: 'emoji_events' }}
+                            size={12}
+                            color={colors.accent}
+                          />
                           <AuthText kind="muted">
-                            {record.first ? 'First recorded' : 'New'} {record.kind}:{' '}
-                            {record.kind === 'Rep PR'
-                              ? `${record.value} reps at ${displayWeight(record.weightKg ?? null, draft.unit)} ${draft.unit}`
-                              : `${displayWeight(Math.round(record.value * 1000) / 1000, draft.unit)} ${draft.unit}`}
+                            {record.first ? 'First' : 'New'}{' '}
+                            {record.kind === 'Estimated 1RM' ? 'est. 1RM' : 'heaviest'}{' '}
+                            {displayWeight(Math.round(record.value * 1000) / 1000, draft.unit)}{' '}
+                            {draft.unit}
                           </AuthText>
                         </View>
                       ))}
                     </View>
                   )}
-                  {!savedExerciseIds.includes(exercise.id) && (
-                    <AuthText kind="muted">
-                      Save to recalculate records for this added exercise.
-                    </AuthText>
-                  )}
-                  {exercise.sets.map((set, position) => {
-                    const change = (field: 'weight' | 'reps' | 'rpe' | 'notes', text: string) =>
-                      edit((value) => ({
-                        ...value,
-                        exercises: value.exercises.map((entry, at) =>
-                          at === index
-                            ? {
-                                ...entry,
-                                sets: entry.sets.map((row, place) =>
-                                  place === position ? { ...row, [field]: text } : row,
-                                ),
-                              }
-                            : entry,
-                        ),
-                      }));
-                    const where = `exercise ${index + 1} set ${position + 1}`;
-                    return (
+                  {!!exercise.notes && <NoteLine text={exercise.notes} />}
+                  <View>
+                    {exercise.sets.map((set, position) => (
                       <View
                         key={set.id}
+                        accessible
+                        accessibilityLabel={`Set ${position + 1}: ${set.weight ? `${set.weight} ${draft.unit}` : 'bodyweight'} × ${set.reps} reps${set.rpe ? `, RPE ${set.rpe}` : ''}`}
                         style={{
-                          gap: 6,
-                          paddingTop: 8,
+                          gap: 2,
+                          paddingVertical: 8,
                           borderTopWidth: StyleSheet.hairlineWidth,
                           borderTopColor: colors.border,
                         }}
                       >
-                        <View style={authStyles.row}>
-                          <AuthText kind="eyebrow">SET {position + 1}</AuthText>
-                          <AuthLink
-                            title="Remove"
-                            accessibilityLabel={`Remove recorded set ${position + 1} from exercise ${index + 1}`}
-                            disabled={busy || !!frozen || exercise.sets.length === 1}
-                            onPress={() =>
-                              edit((value) => ({
-                                ...value,
-                                exercises: value.exercises.map((entry, at) =>
-                                  at === index
-                                    ? {
-                                        ...entry,
-                                        sets: entry.sets.filter((_, place) => place !== position),
-                                      }
-                                    : entry,
-                                ),
-                              }))
-                            }
-                          />
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                          <View style={{ width: 22 }}>
+                            <AuthText kind="muted">{position + 1}</AuthText>
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text
+                              style={{
+                                color: colors.text,
+                                fontSize: 15,
+                                fontFamily: 'Inter_600SemiBold',
+                                fontVariant: ['tabular-nums'],
+                              }}
+                            >
+                              {set.weight ? `${set.weight} ${draft.unit}` : 'Bodyweight'} ×{' '}
+                              {set.reps}
+                            </Text>
+                          </View>
+                          {!!set.rpe && <AuthText kind="muted">RPE {set.rpe}</AuthText>}
                         </View>
-                        <View style={{ flexDirection: 'row', gap: 8 }}>
-                          {setFields.map(([field, title, keyboard]) => (
-                            <View key={field} style={{ flex: 1, gap: 4 }}>
-                              <AuthText kind="muted">{title}</AuthText>
-                              <AuthInput
-                                hideLabel
-                                label={`${field === 'rpe' ? 'RPE (optional)' : title} · ${where}`}
-                                value={set[field]}
-                                editable={!busy && !frozen}
-                                keyboardType={keyboard}
-                                maxLength={10}
-                                onChangeText={(text) => change(field, text)}
-                              />
-                            </View>
-                          ))}
-                        </View>
-                        <AuthInput
-                          hideLabel
-                          label={`Set note · ${where}`}
-                          placeholder="Set note (optional)"
-                          value={set.notes}
-                          editable={!busy && !frozen}
-                          maxLength={2000}
-                          onChangeText={(text) => change('notes', text)}
-                        />
+                        {!!set.notes && (
+                          <View style={{ paddingLeft: 34 }}>
+                            <NoteLine text={set.notes} />
+                          </View>
+                        )}
                       </View>
-                    );
-                  })}
-                  <View style={authStyles.row}>
-                    <AuthLink
-                      title="+ Add set"
-                      accessibilityLabel={`Add recorded set to exercise ${index + 1}`}
-                      disabled={busy || !!frozen || exercise.sets.length >= 100}
-                      onPress={() =>
-                        edit((value) => ({
-                          ...value,
-                          exercises: value.exercises.map((entry, at) =>
-                            at === index
-                              ? {
-                                  ...entry,
-                                  sets: [
-                                    ...entry.sets,
-                                    {
-                                      id: randomUUID(),
-                                      reps: '',
-                                      weight: '',
-                                      rest: '90',
-                                      rpe: '',
-                                      notes: '',
-                                      completedAt: value.endedAt,
-                                    },
-                                  ],
-                                }
-                              : entry,
-                          ),
-                        }))
-                      }
-                    />
-                    <AuthLink
-                      title="Remove exercise"
-                      accessibilityLabel={`Remove recorded exercise ${index + 1}`}
-                      disabled={busy || !!frozen || draft.exercises.length === 1}
-                      onPress={() =>
-                        edit((value) => ({
-                          ...value,
-                          exercises: value.exercises.filter((_, at) => at !== index),
-                        }))
-                      }
-                    />
+                    ))}
                   </View>
                 </AuthCard>
               );
             })}
-            <AuthButton
-              title="Add recorded exercise"
-              outlined
-              disabled={busy || !!frozen || draft.exercises.length >= 100}
-              onPress={() => setPicking(true)}
-            />
-            <AuthButton
-              title={frozen ? 'Retry history save' : 'Save recorded workout'}
-              busy={busy}
-              disabled={!frozen && !dirty}
-              onPress={() => void save()}
-            />
             {deleting ? (
               <AuthCard>
                 <AuthText>
@@ -578,23 +376,9 @@ export function HistoryScreen({
               <AuthLink
                 title="Delete this workout"
                 accessibilityLabel={`Delete recorded ${draft.name}`}
-                disabled={busy || !!frozen}
+                disabled={busy}
                 onPress={() => setDeleting(true)}
               />
-            )}
-            {frozen && (
-              <>
-                <AuthText>
-                  The attempted edit is kept unchanged for retry. Reloading discards that attempted
-                  copy and fetches the saved record.
-                </AuthText>
-                <AuthButton
-                  title="Discard edits and reload saved record"
-                  outlined
-                  disabled={busy}
-                  onPress={reload}
-                />
-              </>
             )}
           </>
         ) : (
@@ -787,5 +571,34 @@ function SessionCard({
         size={18}
       />
     </Pressable>
+  );
+}
+
+// A note shows on one line; long notes expand on request.
+function NoteLine({ text }: { text: string }) {
+  const [open, setOpen] = useState(false),
+    { colors } = useAppTheme();
+  const long = text.length > 60 || text.includes('\n');
+  return (
+    <View style={{ gap: 2 }}>
+      <Text
+        numberOfLines={open ? undefined : 1}
+        style={{ fontSize: 13, lineHeight: 19, fontStyle: 'italic', color: colors.muted }}
+      >
+        {text}
+      </Text>
+      {long && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={open ? 'Show less of note' : 'Show more of note'}
+          onPress={() => setOpen((value) => !value)}
+          hitSlop={8}
+        >
+          <Text style={{ fontSize: 13, fontFamily: 'Inter_600SemiBold', color: colors.accent }}>
+            {open ? 'Less' : 'More'}
+          </Text>
+        </Pressable>
+      )}
+    </View>
   );
 }

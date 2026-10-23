@@ -10,7 +10,7 @@ export default function PreferencesRoute() {
     <PreferencesScreen
       key={session.user.id}
       userId={session.user.id}
-      onBack={() => router.replace('/more')}
+      onBack={() => (router.canGoBack() ? router.back() : router.replace('/more'))}
     />
   );
 }

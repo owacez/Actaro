@@ -39,7 +39,10 @@ export function ProfileScreen({
   async function save() {
     if (securityBusy) return;
     clear();
-    if (await editor.save()) notify('Profile saved.', 'success');
+    if (await editor.save()) {
+      notify('Profile saved.', 'success');
+      onBack();
+    }
   }
 
   return (

@@ -97,6 +97,7 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
       setSaved(record);
       setDraft({});
       notify('Preferences saved.', 'success');
+      onBack();
     } catch (failure) {
       if (request !== generation.current) return;
       const description = message(failure);

@@ -30,10 +30,11 @@ beforeEach(() => {
   service.load.mockResolvedValue({ context, rows: [] });
   service.save.mockResolvedValue(undefined);
 });
-test('missing reports are not saved, failed requests retain selections and retry reloads real saved data', async () => {
+test('missing reports are not saved, failed requests retain selections and a saved check returns', async () => {
+  const back = jest.fn();
   await render(
     <FeedbackTestRoot>
-      <RecoveryScreen userId="owner" onBack={jest.fn()} />
+      <RecoveryScreen userId="owner" onBack={back} />
     </FeedbackTestRoot>,
   );
   await screen.findByRole('button', { name: 'Energy: High' });
@@ -50,8 +51,9 @@ test('missing reports are not saved, failed requests retain selections and retry
   expect(
     screen.getByRole('button', { name: 'Energy: High' }).props.accessibilityState.selected,
   ).toBe(true);
+  expect(back).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Save recovery check' }));
-  await waitFor(() => expect(service.load).toHaveBeenCalledTimes(2));
+  await waitFor(() => expect(back).toHaveBeenCalledTimes(1));
   expect(service.save).toHaveBeenLastCalledWith('owner', '2026-10-13', 'UTC', {
     energy: 3,
     soreness: 0,

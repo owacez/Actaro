@@ -2,7 +2,6 @@ import { beforeEach, expect, jest, test } from '@jest/globals';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { HistoryScreen } from '@/features/workouts/history-screen';
 import { historyService } from '@/features/workouts/history-service';
-import { sessionService } from '@/features/workouts/session-service';
 import { sessionFixture, sessionOwner } from './helpers/session-fixture';
 import { FeedbackTestRoot } from './helpers/feedback-root';
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
@@ -19,10 +18,8 @@ jest.mock('expo-router', () => ({
 jest.mock('@/features/workouts/history-service', () => ({
   historyService: { calendar: jest.fn(), list: jest.fn(), load: jest.fn(), remove: jest.fn() },
 }));
-jest.mock('@/features/workouts/session-service', () => ({ sessionService: { save: jest.fn() } }));
 const history = jest.mocked(historyService),
-  service = jest.mocked(sessionService),
-  props = { userId: sessionOwner, onBack: jest.fn(), onOpen: jest.fn(), onEquipment: jest.fn() };
+  props = { userId: sessionOwner, onBack: jest.fn(), onOpen: jest.fn() };
 const recorded = () => {
   const draft = sessionFixture();
   draft.status = 'pending';
@@ -38,35 +35,29 @@ beforeEach(() => {
   history.list.mockResolvedValue({ rows: [], more: false, unit: 'kg' });
   history.calendar.mockResolvedValue({ month: '2026-10', today: '2026-10-18', rows: [] });
   history.remove.mockResolvedValue(undefined);
-  service.save.mockResolvedValue(2);
 });
-test('history edits recalculate actual volume and freeze failed save payload until identical retry', async () => {
+test('a recorded workout is read-only: totals, compact sets and a one-line note that expands', async () => {
   const row = recorded();
-  history.load.mockResolvedValueOnce(row).mockResolvedValue({
-    ...row,
-    version: 2,
-    exercises: row.exercises.map((entry) => ({
-      ...entry,
-      sets: entry.sets.map((set) => ({ ...set, reps: '10' })),
-    })),
-  });
-  service.save.mockRejectedValueOnce(new Error('offline'));
+  row.exercises[0].notes =
+    'Kept the bar path close and paused at the bottom of every rep; next time add 2.5 kg.';
+  history.load.mockResolvedValue(row);
   await render(
     <FeedbackTestRoot>
       <HistoryScreen {...props} id={row.id} />
     </FeedbackTestRoot>,
   );
-  await screen.findByLabelText('Reps · exercise 1 set 1');
-  await fireEvent.changeText(screen.getByLabelText('Reps · exercise 1 set 1'), '10');
-  expect(screen.getByLabelText(/Training volume: 200 kg/)).toBeTruthy();
-  await fireEvent.press(screen.getByRole('button', { name: 'Save recorded workout' }));
-  await screen.findByRole('button', { name: 'Retry history save' });
-  expect(screen.getByLabelText('Reps · exercise 1 set 1').props.editable).toBe(false);
-  await fireEvent.press(screen.getByRole('button', { name: 'Retry history save' }));
-  await waitFor(() => expect(history.load).toHaveBeenCalledTimes(2));
-  expect(service.save.mock.calls[0][0]).toEqual(service.save.mock.calls[1][0]);
-  await screen.findByLabelText('Reps · exercise 1 set 1');
-  expect(screen.getByLabelText('Reps · exercise 1 set 1').props.value).toBe('10');
+  await screen.findByText('Test workout');
+  expect(screen.getByLabelText('Volume: 160 kg')).toBeTruthy();
+  expect(screen.getByLabelText('Set 1: 20 kg × 8 reps')).toBeTruthy();
+  // Nothing in a recorded workout is editable.
+  expect(screen.queryByLabelText(/Reps · exercise 1 set 1/)).toBeNull();
+  expect(screen.queryByRole('button', { name: /Save recorded workout/ })).toBeNull();
+  const note = screen.getByText(/Kept the bar path close/);
+  expect(note.props.numberOfLines).toBe(1);
+  await fireEvent.press(screen.getByRole('button', { name: 'Show more of note' }));
+  expect(screen.getByText(/Kept the bar path close/).props.numberOfLines).toBeUndefined();
+  await fireEvent.press(screen.getByRole('button', { name: 'Show less of note' }));
+  expect(screen.getByText(/Kept the bar path close/).props.numberOfLines).toBe(1);
 });
 
 test('calendar marks actual workout dates and defers detailed-history requests until History is selected', async () => {

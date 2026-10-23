@@ -23,7 +23,6 @@ export default function HistoryRoute() {
       onOpen={(recordId) =>
         router.push({ pathname: '/workouts/history', params: { id: recordId } })
       }
-      onEquipment={() => router.push('/equipment')}
     />
   );
 }

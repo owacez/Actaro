@@ -58,6 +58,7 @@ export function EquipmentScreen({ userId, onBack }: { userId: string; onBack: ()
       setSaved(ids);
       setSelected(ids);
       notify('Equipment saved.', 'success');
+      onBack();
     } catch {
       if (request === generation.current)
         setError('Unable to save equipment. Your selection is kept; try again.');

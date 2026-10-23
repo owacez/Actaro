@@ -8,7 +8,7 @@ export default function RecoveryRoute() {
     <RecoveryScreen
       key={session.user.id}
       userId={session.user.id}
-      onBack={() => router.replace('/workouts/training')}
+      onBack={() => (router.canGoBack() ? router.back() : router.replace('/workouts/training'))}
     />
   );
 }

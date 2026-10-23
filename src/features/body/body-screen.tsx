@@ -91,11 +91,11 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
   }
   return (
     <AuthFrame header={<ScreenHeader title="Body records" />}>
-      <AuthLink title="← You" disabled={action.locked} onPress={onBack} />
+      <AuthLink title="← Back" disabled={action.locked} onPress={onBack} />
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {data && !resource.loading && (
         <>
-          <BodyFormEditor key={formVersion} userId={userId} onSaved={resource.refresh} />
+          <BodyFormEditor key={formVersion} userId={userId} onSaved={onBack} />
           <ActionSheet
             title={kind === 'weight' ? 'Edit weight record' : 'Edit measurement'}
             visible={editOpen}

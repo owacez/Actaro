@@ -86,8 +86,7 @@ export function RecoveryScreen({ userId, onBack }: { userId: string; onBack: () 
       await recoveryService.save(userId, data.context.today, data.context.timeZone, input);
       if (alive.current) {
         notify('Recovery check saved.', 'success');
-        setLoading(true);
-        setAttempt((value) => value + 1);
+        onBack();
       }
     } catch (reason) {
       if (alive.current)
@@ -108,7 +107,7 @@ export function RecoveryScreen({ userId, onBack }: { userId: string; onBack: () 
   return (
     <AuthFrame>
       <AuthLink
-        title="← Training summary"
+        title="← Back"
         disabled={busy}
         onPress={() => (dirty ? setDiscard(true) : onBack())}
       />

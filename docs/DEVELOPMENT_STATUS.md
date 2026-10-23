@@ -4,6 +4,49 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Return after save, read-only workout history and a lint fix (2026-10-23):
+implementation and local verification **DONE**; device acceptance **DEFERRED**.
+
+- **Return after save:** I audited the success paths of every main save.
+  - These now return to the previous screen after a confirmed save (failures still
+    stay for retry): Recovery check-in, Body record, Equipment, Preferences and
+    Profile.
+  - Their routes go back when there is history, else to their former destinations.
+  - Back labels read "← Back" where the entry point varies (Recovery, Body).
+  - Already returning: habit log/save, goal save, workout builder, splits, plans,
+    food logging, custom food/recipe, daily targets (summary, then Today), sessions
+    and runs.
+  - Hub screens with several independent saves (Activity steps/distance, the Body
+    edit sheet) and inline actions (water, habit check, diary rows) intentionally
+    stay.
+- **User decision:** recorded workouts are display-only.
+  - Editing, adding or removing sets/exercises, and the history save path were
+    removed from the history screen. `sessionService.save` is unchanged for live
+    sessions.
+  - The header is a white card with an accent icon, date · duration and name, plus
+    one row of exercises/sets/reps/volume.
+  - Each exercise shows a numbered heading, heaviest/est. 1RM record tags (rep PRs
+    are omitted to reduce clutter) and "80 kg × 8 · RPE" set lines.
+  - Workout, exercise and set notes show on one line with More/Less.
+  - Delete stays inside, with confirmation.
+- **Lint:** deleting Expo's stale ESLint cache (`.expo/cache/eslint`) uncovered five
+  `import/namespace` false positives in the expo-notifications 58 enum build. The
+  enums exist at runtime and TypeScript checks them.
+  - `eslint.config.js` disables `import/namespace` for TypeScript files, as
+    typescript-eslint recommends.
+  - The SDK 58 commit's lint result came from that cache, and a clean CI lint would
+    have failed until this fix.
+
+Evidence:
+
+- `npm run check` with the Expo ESLint cache removed first: 82 suites with 420 Jest
+  tests pass, plus 6 dataset tests.
+- The recovery test confirms a failed save stays and a successful one calls back
+  once.
+- The history tests cover read-only display (no inputs or save), set labels, volume,
+  note expand/collapse, list rows without delete, and confirmed in-record deletion.
+- The offline web capture of a recorded workout shows the new layout.
+
 Theme alignment for splits, Today widgets and workout history (2026-10-23):
 implementation and local verification **DONE**; device acceptance **DEFERRED**.
 
