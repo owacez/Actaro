@@ -1,8 +1,55 @@
 # Actaro — Development Status
 
-Updated: 2026-10-21 (America/Los_Angeles).
+Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
+
+Expo SDK 58 upgrade (2026-10-23): dependency upgrade and local verification
+**DONE**; device and development-build acceptance **DEFERRED**.
+
+Why: the installed Expo Go is SDK 58.
+
+Versions:
+
+- expo ~58.0.17, React Native 0.88.0, React 19.3.0, Expo Router 58.
+- jest ~30.5.2, jest-expo ~58.0.12, eslint-config-expo ~58.0.4.
+- jest-expo now requires the dev dependency `@react-native/jest-preset` ~0.88.0.
+- Added `@types/node` for the PKCE test's Node crypto reference.
+
+Code changes for SDK 58 APIs:
+
+- Tabs: `initialRouteName` moved to `unstable_settings`. The custom tab bar uses
+  the new `emitter` and `navigateToTab`.
+- Share export awaits the now-async `File.write`.
+- Stricter React Native types:
+  - The run map's WebView component type is declared once, with an explanation.
+  - The habits ScrollView ref is typed.
+  - The theme hook maps an unknown scheme (`null`) to light.
+  - The Supabase app-state listener accepts any state string.
+- Tests:
+  - Typed mocks and `PermissionStatus` imported from `expo`.
+  - The web colour-scheme test uses `null` instead of the removed `'unspecified'`.
+
+Notifications: SDK 58 shows foreground notifications by default only when no
+handler is set. The reminder coordinator always sets one, so behaviour is unchanged.
+
+The lockfile was regenerated without `--legacy-peer-deps`, so CI's plain `npm ci`
+installs it.
+
+Evidence:
+
+- `npx expo install --check`: up to date.
+- `npm ci --ignore-scripts` on a clean copy: 1250 packages, no errors.
+- `npm run check`: typecheck, lint and Prettier pass; 82 suites with 419 Jest tests
+  pass, plus 6 dataset tests.
+  - The first full run on this 4 GB machine hit out-of-memory or timeout failures.
+    `workout-builder` then passed alone (15/15), and the full rerun passed.
+- `npx expo export --platform all`: Android, iOS and web bundles exported.
+- The offline web capture shows Today with the tab bar. Tapping Food opens Food
+  with its tab highlighted, with 0 live Supabase requests.
+
+Development builds must be rebuilt for SDK 58. Before that, the Live Activity
+widget and native modules remain unverified on devices.
 
 Colourful Today and daily plan targets (2026-10-22): implementation and local
 verification **DONE**; device acceptance **DEFERRED**.

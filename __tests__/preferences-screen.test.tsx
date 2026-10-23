@@ -83,7 +83,12 @@ test('rejects invalid time zones before a mutation', async () => {
 });
 
 test('explicit unit choices save all four selected values and restore unchanged state', async () => {
-  const units = { weight_unit: 'lb', length_unit: 'in', distance_unit: 'mi', energy_unit: 'kJ' };
+  const units = {
+    weight_unit: 'lb',
+    length_unit: 'in',
+    distance_unit: 'mi',
+    energy_unit: 'kJ',
+  } as const;
   service.updatePreferences.mockResolvedValue({ ...preferences, ...units });
   await open();
   for (const name of ['Weight: lb', 'Length: in', 'Distance: mi', 'Energy: kJ']) {

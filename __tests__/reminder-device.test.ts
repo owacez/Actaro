@@ -32,6 +32,7 @@ const notification = (
       body: 'Review your scheduled habit.',
       categoryIdentifier: null,
       sound: null,
+      threadIdentifier: null,
       data: { userId },
     },
   },
@@ -63,7 +64,11 @@ test('native scheduling uses an absolute one-off date and generic content; clean
       body: 'Review your scheduled habit.',
       data: { userId: 'owner' },
     },
-    trigger: { type: 'date', date, channelId: 'actaro-habits' },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date,
+      channelId: 'actaro-habits',
+    },
   });
   await reminderDevice.clear();
   expect(Notifications.cancelScheduledNotificationAsync).toHaveBeenCalledTimes(1);

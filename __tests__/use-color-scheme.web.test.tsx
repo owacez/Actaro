@@ -26,9 +26,9 @@ describe('web color scheme hydration', () => {
     await rerender({});
     expect(result.current).toBe('light');
 
-    preference.mockReturnValue('unspecified');
+    preference.mockReturnValue(null);
     await rerender({});
-    expect(result.current).toBe('unspecified');
+    expect(result.current).toBeNull();
   });
 
   afterEach(() => {

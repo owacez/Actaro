@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState } from 'react-native';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
-import { PermissionStatus } from 'expo-modules-core';
+import { PermissionStatus } from 'expo';
 import { runTracker, runLocationTask } from '@/features/running/run-tracker';
 import { runStore } from '@/features/running/run-store';
 import { runLive } from '@/features/running/run-live';

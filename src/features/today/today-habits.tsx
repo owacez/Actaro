@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, View, type ScrollViewInstance } from 'react-native';
 import { IconButton } from '@/components/product-ui';
 import { AuthText } from '@/features/auth/auth-components';
 import type { HabitRecord } from '@/features/habits/habit-model';
@@ -17,7 +17,7 @@ export function TodayHabits({
   const [width, setWidth] = useState(0);
   const [page, setPage] = useState(0);
   const currentPage = useRef(0);
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<ScrollViewInstance>(null);
   const index = Math.max(0, Math.min(page, habits.length - 1));
   // Keep the visible card aligned on rotation and when the current list shrinks.
   useEffect(() => {

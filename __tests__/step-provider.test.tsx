@@ -6,7 +6,7 @@ import { StepProvider, useDeviceSteps } from '@/features/activity/step-provider'
 import { activityService } from '@/features/activity/activity-service';
 import { readTodaySteps } from '@/features/activity/pedometer-service';
 import { nutritionContext } from './helpers/nutrition-fixture';
-import { PermissionStatus } from 'expo-modules-core';
+import { PermissionStatus } from 'expo';
 jest.mock('expo-sensors', () => ({
   Pedometer: { getPermissionsAsync: jest.fn(), watchStepCount: jest.fn() },
 }));

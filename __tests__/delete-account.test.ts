@@ -74,7 +74,7 @@ test('revokes sessions before hard deletion of only the authenticated user; fail
   const response = await deleteAccount(request(), clients);
   expect(response.status).toBe(200);
   expect(await response.json()).toEqual({ deleted: true });
-  expect(signIn).toHaveBeenCalledWith({ email: user.email, password: 'correct' });
+  expect(signIn).toHaveBeenCalledWith({ email: 'fixture@example.invalid', password: 'correct' });
   expect(signOut).toHaveBeenCalledWith(session.access_token, 'global');
   expect(remove).toHaveBeenCalledWith(user.id, false);
   expect(signOut.mock.invocationCallOrder[0]).toBeLessThan(remove.mock.invocationCallOrder[0]);

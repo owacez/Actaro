@@ -1,7 +1,16 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, type ComponentType, type RefAttributes } from 'react';
 import { Linking } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { WebView as LibraryWebView } from 'react-native-webview';
+import type { AndroidWebViewProps, IOSWebViewProps } from 'react-native-webview/lib/WebViewTypes';
 import { mapJson, type RunMapPayload } from './run-map-document';
+
+// react-native-webview 14 declares one cross-platform prop type (iOS, Android and Windows)
+// that intersects to never, and no ref, although the native components forward
+// injectJavaScript through their ref. This file renders on iOS/Android only.
+type MapWebViewHandle = { injectJavaScript: (script: string) => void };
+const WebView = LibraryWebView as unknown as ComponentType<
+  IOSWebViewProps & AndroidWebViewProps & RefAttributes<MapWebViewHandle>
+>;
 
 // A secure, non-routable page origin. A string page without one is opaque on iOS,
 // where WebKit can refuse MapLibre's blob module worker. No request goes to this host.
@@ -13,7 +22,7 @@ export type MapSurfaceProps = {
   onStatus: (status: string) => void;
 };
 export function MapSurface({ html, payload, onStatus }: MapSurfaceProps) {
-  const view = useRef<WebView>(null);
+  const view = useRef<MapWebViewHandle>(null);
   const source = useMemo(() => ({ html, baseUrl: mapPageOrigin }), [html]);
   const script = `window.updateActaroMap?.(${mapJson(payload)});true;`;
   useEffect(() => {

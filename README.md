@@ -35,11 +35,11 @@ and expected results, use the [manual app test plan](docs/APP_TEST_PLAN.md).
 ### Requirements
 
 - Install [Node.js 24 LTS with npm](https://nodejs.org/en/download), then reopen
-  your terminal. SDK 57 requires Node 22.13 or later; this checkout was verified
+  your terminal. SDK 58 requires Node 22.13 or later; this checkout was verified
   with Node 24.21.0. Check with `node --version` and `npm --version`.
 - Install [Git](https://git-scm.com/downloads) if cloning or pulling updates.
 - Install Expo Go on your Android phone or iPhone. Use a version that supports
-  **Expo SDK 57**, the version in this project. Check the
+  **Expo SDK 58**, the version in this project. Check the
   [Expo Go downloads](https://expo.dev/go) if an SDK mismatch appears.
 - Connect the computer and phone to the same Wi-Fi network. Internet access is
   needed for dependency installation and Supabase authentication.
@@ -176,7 +176,7 @@ allowlists or remove the original-device/browser requirement.
 
 - **Stale bundle or configuration:** stop the server and run
   `npm start -- --go --lan --clear`.
-- **Expo Go reports an SDK mismatch:** check SDK 57 support in the installed
+- **Expo Go reports an SDK mismatch:** check SDK 58 support in the installed
   Expo Go. If unavailable on your device, use a compatible version or a
   development build; do not change project dependencies just to bypass it.
 - **iPhone reports an Expo account mismatch:** run `npx expo login` and sign in
@@ -286,7 +286,7 @@ npm run test:watch
 ```
 
 `npm run format` applies Prettier. Canonical documents and binary assets are
-excluded from formatting. Jest uses the SDK 57 Expo preset and React Native Testing Library. Tests cover
+excluded from formatting. Jest uses the SDK 58 Expo preset and React Native Testing Library. Tests cover
 server/client hydration, Supabase configuration, auth forms/services, callback handling and session transitions. `npm run check` includes tests
 and fails if any check fails. `.github/workflows/check.yml` runs the locked
 install, these checks and Android/iOS/web exports on pushes to `main` and pull
@@ -304,7 +304,7 @@ remains pending.
 
 The scaffold follows Expo's default template and supported SDK versions:
 [create-expo-app](https://docs.expo.dev/more/create-expo/) and
-[SDK 57 reference](https://docs.expo.dev/versions/v57.0.0/).
+[SDK 58 reference](https://docs.expo.dev/versions/v58.0.0/).
 
 ```text
 src/app/          Expo Router route entry points and auth layout

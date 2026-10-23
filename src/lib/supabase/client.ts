@@ -2,7 +2,7 @@ import 'react-native-url-polyfill/auto';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
-import { AppState, Platform, type AppStateStatus } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 import { readSupabaseConfiguration } from './config';
 import type { Database } from './database.types';
@@ -41,7 +41,8 @@ export function startSupabaseSessionRefresh() {
   const supabase = getSupabase();
   if (Platform.OS === 'web') return;
 
-  function refreshForState(state: AppStateStatus) {
+  // RN 0.88 reports an unknown state as null/undefined; only 'active' refreshes.
+  function refreshForState(state: string | null | undefined) {
     if (state === 'active') {
       void supabase.auth.startAutoRefresh();
     } else {

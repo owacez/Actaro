@@ -1,6 +1,6 @@
 import { beforeEach, expect, jest, test } from '@jest/globals';
 import { Platform } from 'react-native';
-import { PermissionStatus } from 'expo-modules-core';
+import { PermissionStatus } from 'expo';
 import { Pedometer } from 'expo-sensors';
 import { readTodaySteps } from '@/features/activity/pedometer-service';
 jest.mock('expo-sensors', () => ({

@@ -21,7 +21,8 @@ export async function shareExport(value: unknown) {
   const file = new File(Paths.cache, name);
   try {
     file.create();
-    file.write(json);
+    // SDK 58: File.write is asynchronous; the share sheet must see the complete file.
+    await file.write(json);
     await Sharing.shareAsync(file.uri, {
       mimeType: 'application/json',
       UTI: 'public.json',

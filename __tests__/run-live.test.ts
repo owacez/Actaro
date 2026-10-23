@@ -5,7 +5,10 @@ import { runFixture, runTime } from './helpers/run-fixture';
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
 let mockNative: object | null = null;
 jest.mock('expo', () => ({ requireOptionalNativeModule: () => mockNative }));
-const mockActivity = { update: jest.fn(async () => {}), end: jest.fn(async () => {}) };
+const mockActivity = {
+  update: jest.fn(async (_props: object) => {}),
+  end: jest.fn(async (_policy: string) => {}),
+};
 const mockFactory = { start: jest.fn(() => mockActivity), getInstances: jest.fn(() => []) };
 jest.mock('@/features/running/run-activity', () => ({ __esModule: true, default: mockFactory }));
 jest.mock('expo-notifications', () => ({

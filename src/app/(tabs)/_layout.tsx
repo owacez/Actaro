@@ -7,6 +7,8 @@ import { useAppTheme } from '@/features/profile/theme-context';
 import { NavigationTabLabel } from '@/components/navigation-tab-label';
 import { NavigationSurface, ProductIcon } from '@/components/product-ui';
 import { QuickLogSheet } from '@/components/quick-log-sheet';
+// Expo Router 58 sets the first tab through route settings instead of a Tabs prop.
+export const unstable_settings = { initialRouteName: 'today' };
 const tabs = [
   { name: 'today', title: 'Today', icon: { ios: 'calendar', android: 'today', web: 'today' } },
   {
@@ -48,9 +50,8 @@ export default function MainTabs() {
   return (
     <>
       <Tabs
-        initialRouteName="today"
         screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: colors.background } }}
-        tabBar={({ state, navigation }) =>
+        tabBar={({ state, emitter, navigateToTab }) =>
           keyboardOpen ? null : (
             <View
               pointerEvents="box-none"
@@ -94,18 +95,18 @@ export default function MainTabs() {
                         accessibilityState={{ selected: focused }}
                         style={{ flex: 1 }}
                         onPress={() => {
-                          const event = navigation.emit({
+                          const event = emitter.emit({
                             type: 'tabPress',
                             target: route.key,
                             canPreventDefault: true,
                           });
-                          if (!event.defaultPrevented) {
+                          if (!focused && !event.defaultPrevented) {
                             Keyboard.dismiss();
-                            navigation.navigate(route.name);
+                            navigateToTab(route.key);
                           }
                         }}
                         onLongPress={() =>
-                          navigation.emit({ type: 'tabLongPress', target: route.key })
+                          emitter.emit({ type: 'tabLongPress', target: route.key })
                         }
                       >
                         <NavigationTabLabel title={tab.title} focused={focused} icon={tab.icon} />

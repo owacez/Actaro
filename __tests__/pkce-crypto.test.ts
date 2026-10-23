@@ -1,3 +1,5 @@
+/// <reference types="node" />
+// This test compares app crypto against Node implementations, so it opts into Node types.
 import { afterEach, beforeEach, expect, jest, test } from '@jest/globals';
 import { createHash, webcrypto } from 'node:crypto';
 import { TextEncoder } from 'node:util';
