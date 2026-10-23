@@ -17,11 +17,12 @@ import { trainingStatus } from '@/features/workouts/training-overview';
 import { workoutService } from '@/features/workouts/workout-service';
 import { prestartTotals } from '@/features/workouts/session-model';
 import { sessionStore } from '@/features/workouts/session-store';
+import { historyService } from '@/features/workouts/history-service';
 export const todayService = {
   async load(userId: string) {
     const context = await nutritionService.context(userId),
       today = context.today;
-    const [nutrition, body, activity, habits, goals, recovery, session] = await Promise.all([
+    const [nutrition, body, activity, habits, goals, recovery, stored, month] = await Promise.all([
       nutritionService.diary(userId, today),
       bodyService.history(userId),
       activityService.load(userId, today),
@@ -29,7 +30,16 @@ export const todayService = {
       goalService.list(userId),
       recoveryService.load(userId),
       sessionStore.read(userId),
+      historyService.calendar(userId),
     ]);
+    // A finished session acknowledged by the server is already in history; clearing the local
+    // copy lets the user start another workout today.
+    let session = stored;
+    if (session?.status === 'saved') {
+      await sessionStore.forgetSaved(userId, session.id);
+      session = null;
+    }
+    const completed = month.rows.filter((row) => row.local_date === today).reverse();
     const training = recovery.context,
       splitDay = training.plan?.days[isoWeekday(today) - 1],
       workout =
@@ -74,6 +84,7 @@ export const todayService = {
       splitDay,
       workout: workout?.draft ? { draft: workout.draft, ...prestartTotals(workout.draft) } : null,
       session,
+      completed,
     };
   },
 };

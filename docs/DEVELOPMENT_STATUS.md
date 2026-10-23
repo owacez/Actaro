@@ -4,6 +4,36 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Today workout card reflects completion (2026-10-23): implementation and local
+verification **DONE**; device acceptance **DEFERRED**.
+
+- **Cause:**
+  - The card never read completed sessions, so it kept offering the scheduled
+    workout.
+  - A finished session also stayed on the device as `saved` until Done was tapped
+    on the summary. Leaving the summary any other way kept "Resume saved workout" on
+    Today and blocked starting another workout.
+- **Fix:**
+  - `todayService` loads today's completed sessions (reusing
+    `historyService.calendar` for the current month) and clears a server-acknowledged
+    `saved` local copy with `sessionStore.forgetSaved`.
+  - `todayWorkoutState` (`src/features/today/today-model.ts`) orders the states:
+    unfinished session → resume; completed today → done; scheduled → start; else
+    rest/none.
+  - The done state is a white card with a green "Done" badge, the latest workout's
+    name, "Completed in 52:00" (or "Logged") and a count when there are several.
+    It offers **View workout** (opens that recorded workout) and **Train again**
+    (today's scheduled workout, or Train when none), so training again stays
+    possible.
+
+Evidence:
+
+- `npm run check`: 83 suites with 423 Jest tests pass, plus 6 dataset tests.
+- The new `today-workout-state` tests cover the state order, including a `saved`
+  session showing as done.
+- Offline web captures with a fresh profile show the done state in light and dark
+  themes.
+
 Return after save, read-only workout history and a lint fix (2026-10-23):
 implementation and local verification **DONE**; device acceptance **DEFERRED**.
 

@@ -10,7 +10,14 @@ import {
   AuthText,
   authStyles,
 } from '@/features/auth/auth-components';
-import { ActionRow, IconButton, Meter, ScreenHeader, TintCard } from '@/components/product-ui';
+import {
+  ActionRow,
+  IconButton,
+  Meter,
+  ProductIcon,
+  ScreenHeader,
+  TintCard,
+} from '@/components/product-ui';
 import {
   useRecords,
   useRecordAction,
@@ -32,6 +39,8 @@ import { useDeviceSteps } from '@/features/activity/step-provider';
 import { habitGoalFact, goalProgress } from '@/features/goals/goal-model';
 import { TodayRunCard } from '@/features/running/run-cards';
 import { plural } from '@/lib/format';
+import { timerText } from '@/features/workouts/session-model';
+import { todayWorkoutState } from './today-model';
 export function TodayScreen({ userId }: { userId: string }) {
   const deviceSteps = useDeviceSteps();
   const load = useCallback(() => todayService.load(userId), [userId]),
@@ -153,82 +162,157 @@ export function TodayScreen({ userId }: { userId: string }) {
             userId={userId}
             unit={data.context.preferences.distance_unit === 'mi' ? 'mi' : 'km'}
           />
-          <View
-            style={{
-              backgroundColor: data.workout || data.session ? colors.accent : colors.surface,
-              borderRadius: 28,
-              padding: 20,
-              gap: 18,
-              overflow: 'hidden',
-            }}
-          >
-            {data.workout && (
+          {(() => {
+            const state = todayWorkoutState({
+                session: data.session,
+                completed: data.completed,
+                scheduled: !!data.workout,
+              }),
+              latest = data.completed[0],
+              filled = state === 'resume' || state === 'scheduled',
+              ink = filled ? '#111311' : colors.text;
+            return (
               <View
-                pointerEvents="none"
                 style={{
-                  position: 'absolute',
-                  width: 230,
-                  height: 230,
-                  right: -70,
-                  top: -90,
-                  borderRadius: 120,
-                  backgroundColor: '#ffffff26',
+                  backgroundColor: filled ? colors.accent : colors.surface,
+                  borderRadius: 28,
+                  borderWidth: filled ? 0 : 1,
+                  borderColor: colors.border,
+                  padding: 20,
+                  gap: 14,
+                  overflow: 'hidden',
                 }}
-              />
-            )}
-            <Text
-              style={{
-                color: data.workout || data.session ? '#111311' : colors.muted,
-                fontSize: 12,
-              }}
-            >
-              TODAY · {titleDate}
-            </Text>
-            <Text
-              style={{
-                color: data.workout || data.session ? '#111311' : colors.text,
-                fontFamily: 'Inter_600SemiBold',
-                fontSize: 25,
-                lineHeight: 31,
-              }}
-            >
-              {data.session?.name ??
-                data.workout?.draft.name ??
-                (data.splitDay?.isRest ? 'Scheduled rest day' : 'No workout scheduled')}
-            </Text>
-            {data.workout && (
-              <Text style={{ color: '#111311', fontSize: 14 }}>
-                {plural(data.workout.draft.exercises.length, 'exercise')} ·{' '}
-                {plural(data.workout.sets, 'set')} · ~{data.workout.estimatedMinutes} min
-              </Text>
-            )}
-            {data.session ? (
-              <AuthButton
-                title="Resume saved workout"
-                outlined
-                disabled={action.locked}
-                onPress={() => router.push('/workouts/session')}
-              />
-            ) : data.workout ? (
-              <AuthButton
-                title="Start today's workout"
-                outlined
-                disabled={action.locked}
-                onPress={() =>
-                  router.push({
-                    pathname: '/workouts/start',
-                    params: { id: data.workout?.draft.id },
-                  })
-                }
-              />
-            ) : (
-              <AuthButton
-                title="Browse plans"
-                outlined
-                onPress={() => router.push('/workouts/plans')}
-              />
-            )}
-          </View>
+              >
+                {state === 'scheduled' && (
+                  <View
+                    pointerEvents="none"
+                    style={{
+                      position: 'absolute',
+                      width: 230,
+                      height: 230,
+                      right: -70,
+                      top: -90,
+                      borderRadius: 120,
+                      backgroundColor: '#ffffff26',
+                    }}
+                  />
+                )}
+                <View style={authStyles.row}>
+                  <Text style={{ color: filled ? ink : colors.muted, fontSize: 12 }}>
+                    TODAY · {titleDate}
+                  </Text>
+                  {state === 'done' && (
+                    <View
+                      accessible
+                      accessibilityLabel="Workout completed today"
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 4,
+                        borderRadius: 12,
+                        paddingHorizontal: 10,
+                        paddingVertical: 4,
+                        backgroundColor: colors.success,
+                      }}
+                    >
+                      <ProductIcon
+                        name={{ ios: 'checkmark', android: 'check', web: 'check' }}
+                        size={14}
+                        color="#ffffff"
+                      />
+                      <Text
+                        style={{ color: '#ffffff', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}
+                      >
+                        Done
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                <Text
+                  style={{
+                    color: state === 'none' ? colors.text : ink,
+                    fontFamily: 'Inter_600SemiBold',
+                    fontSize: 25,
+                    lineHeight: 31,
+                  }}
+                >
+                  {state === 'resume'
+                    ? data.session?.name
+                    : state === 'done'
+                      ? latest?.name
+                      : state === 'scheduled'
+                        ? data.workout?.draft.name
+                        : data.splitDay?.isRest
+                          ? 'Scheduled rest day'
+                          : 'No workout scheduled'}
+                </Text>
+                {state === 'done' && latest && (
+                  <Text style={{ color: colors.muted, fontSize: 14 }}>
+                    {latest.mode === 'timed'
+                      ? `Completed in ${timerText((latest.duration_seconds ?? 0) * 1000)}`
+                      : 'Logged'}
+                    {data.completed.length > 1
+                      ? ` · ${plural(data.completed.length, 'workout')} today`
+                      : ''}
+                  </Text>
+                )}
+                {state === 'scheduled' && data.workout && (
+                  <Text style={{ color: ink, fontSize: 14 }}>
+                    {plural(data.workout.draft.exercises.length, 'exercise')} ·{' '}
+                    {plural(data.workout.sets, 'set')} · ~{data.workout.estimatedMinutes} min
+                  </Text>
+                )}
+                {state === 'resume' ? (
+                  <AuthButton
+                    title="Resume saved workout"
+                    outlined
+                    disabled={action.locked}
+                    onPress={() => router.push('/workouts/session')}
+                  />
+                ) : state === 'done' && latest ? (
+                  <>
+                    <AuthButton
+                      title="View workout"
+                      onPress={() =>
+                        router.push({ pathname: '/workouts/history', params: { id: latest.id } })
+                      }
+                    />
+                    <AuthButton
+                      title="Train again"
+                      outlined
+                      disabled={action.locked}
+                      onPress={() =>
+                        data.workout
+                          ? router.push({
+                              pathname: '/workouts/start',
+                              params: { id: data.workout.draft.id },
+                            })
+                          : router.push('/workouts')
+                      }
+                    />
+                  </>
+                ) : state === 'scheduled' ? (
+                  <AuthButton
+                    title="Start today's workout"
+                    outlined
+                    disabled={action.locked}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/workouts/start',
+                        params: { id: data.workout?.draft.id },
+                      })
+                    }
+                  />
+                ) : (
+                  <AuthButton
+                    title="Browse plans"
+                    outlined
+                    onPress={() => router.push('/workouts/plans')}
+                  />
+                )}
+              </View>
+            );
+          })()}
           <TintCard
             tint={colors.accent}
             icon={{ ios: 'flame', android: 'local_fire_department', web: 'local_fire_department' }}
