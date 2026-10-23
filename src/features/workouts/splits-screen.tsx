@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { randomUUID } from 'expo-crypto';
 import { useFocusEffect } from 'expo-router';
 import {
@@ -8,12 +8,15 @@ import {
   AuthLink,
   AuthButton,
   AuthInput,
+  AuthCard,
   AuthChoice,
   AuthLoading,
   AuthNotice,
   authStyles,
 } from '@/features/auth/auth-components';
 import { useAuthFeedback } from '@/features/auth/auth-feedback';
+import { ActionRow, IconButton, ScreenHeader } from '@/components/product-ui';
+import { useAppTheme } from '@/features/profile/theme-context';
 import { splitService } from './split-service';
 import { splitPayload, weekdays, type SplitDraft } from './split-model';
 import { WorkoutsScreen } from './workouts-screen';
@@ -186,16 +189,14 @@ export function SplitsScreen({
         }}
       />
     );
+  const title = id === 'new' ? 'Create split' : id ? 'Edit split' : 'Training splits';
   return (
-    <AuthFrame>
+    <AuthFrame header={<ScreenHeader title={title} />}>
       <AuthLink
         title={id ? '← Training splits' : '← My workouts'}
         disabled={busy}
         onPress={() => (dirty ? setDiscard(true) : onBack())}
       />
-      <AuthText kind="heading">
-        {id === 'new' ? 'Create training split' : id ? 'Edit training split' : 'Training splits'}
-      </AuthText>
       <AuthText>
         A recurring seven-day schedule. Rest days are part of the plan; saved workouts and past logs
         stay independent.
@@ -207,7 +208,7 @@ export function SplitsScreen({
         draft ? (
           <>
             {discard && (
-              <>
+              <AuthCard>
                 <AuthText>Discard these unsaved split changes?</AuthText>
                 <AuthButton
                   title="Keep editing"
@@ -216,55 +217,46 @@ export function SplitsScreen({
                   onPress={() => setDiscard(false)}
                 />
                 <AuthButton title="Discard split changes" disabled={busy} onPress={onBack} />
-              </>
+              </AuthCard>
             )}
-            <AuthInput
-              label="Split name"
-              value={draft.name}
-              maxLength={100}
-              editable={!busy}
-              onChangeText={(name) => setDraft({ ...draft, name })}
-            />
-            <AuthChoice
-              title="Use this as my active split"
-              selected={draft.active}
-              disabled={busy}
-              onPress={() => setDraft({ ...draft, active: !draft.active })}
-            />
-            {draft.days.map((day, index) => (
-              <View key={weekdays[index]} style={{ gap: 8 }}>
-                <AuthText kind="eyebrow">{weekdays[index]}</AuthText>
-                <AuthText>
-                  {day.isRest
-                    ? 'Rest day'
-                    : day.workoutId
-                      ? (day.workoutName ?? 'Saved workout')
-                      : 'Choose a workout or rest (a previous workout may have been deleted).'}
-                </AuthText>
-                <View style={authStyles.row}>
-                  <AuthLink
-                    title={`Choose ${weekdays[index]} workout`}
-                    disabled={busy}
-                    onPress={() => setPicking(index)}
-                  />
-                  <AuthChoice
-                    title={`Rest on ${weekdays[index]}`}
-                    selected={day.isRest}
-                    disabled={busy}
-                    onPress={() =>
-                      setDraft({
-                        ...draft,
-                        days: draft.days.map((value, position) =>
-                          position === index
-                            ? { isRest: true, workoutId: null, workoutName: null }
-                            : value,
-                        ),
-                      })
-                    }
-                  />
-                </View>
-              </View>
-            ))}
+            <AuthCard>
+              <AuthInput
+                label="Split name"
+                value={draft.name}
+                maxLength={100}
+                editable={!busy}
+                onChangeText={(name) => setDraft({ ...draft, name })}
+              />
+              <AuthChoice
+                title="Use this as my active split"
+                selected={draft.active}
+                disabled={busy}
+                onPress={() => setDraft({ ...draft, active: !draft.active })}
+              />
+            </AuthCard>
+            <AuthText kind="eyebrow">WEEKLY SCHEDULE</AuthText>
+            <AuthCard>
+              {draft.days.map((day, index) => (
+                <SplitDayRow
+                  key={weekdays[index]}
+                  day={weekdays[index]}
+                  value={day}
+                  last={index === draft.days.length - 1}
+                  disabled={busy}
+                  onChoose={() => setPicking(index)}
+                  onRest={() =>
+                    setDraft({
+                      ...draft,
+                      days: draft.days.map((value, position) =>
+                        position === index
+                          ? { isRest: true, workoutId: null, workoutName: null }
+                          : value,
+                      ),
+                    })
+                  }
+                />
+              ))}
+            </AuthCard>
             <AuthButton
               title="Save split"
               busy={busy}
@@ -286,50 +278,160 @@ export function SplitsScreen({
         <>
           <AuthButton title="Create split" onPress={() => onOpen('new')} disabled={busy} />
           {!page?.rows.length && <AuthText>No saved splits yet.</AuthText>}
-          {page?.rows.map((row) => (
-            <View key={row.id} style={{ gap: 8 }}>
-              <AuthLink
-                title={`${row.name}${row.is_active ? ' · Active' : ''}`}
+          {!!page?.rows.length && (
+            <AuthCard>
+              {page.rows.map((row) => (
+                <ActionRow
+                  key={row.id}
+                  icon={{ ios: 'calendar', android: 'calendar_month', web: 'calendar_month' }}
+                  title={row.name}
+                  detail={row.is_active ? 'Active split' : 'Not active'}
+                  disabled={busy}
+                  onPress={() => onOpen(row.id)}
+                  trailing={
+                    <IconButton
+                      label={`Delete split ${row.name}`}
+                      name={{ ios: 'trash', android: 'delete', web: 'delete' }}
+                      disabled={busy}
+                      onPress={() => setDeleting(row)}
+                    />
+                  }
+                />
+              ))}
+            </AuthCard>
+          )}
+          {deleting && (
+            <AuthCard>
+              <AuthText>
+                Delete “{deleting.name}”? Workouts and recorded sessions will stay.
+              </AuthText>
+              <AuthButton
+                title="Keep split"
+                outlined
                 disabled={busy}
-                onPress={() => onOpen(row.id)}
+                onPress={() => setDeleting(null)}
               />
-              <AuthLink
-                title={`Delete split ${row.name}`}
-                disabled={busy}
-                onPress={() => setDeleting(row)}
-              />
-              {deleting?.id === row.id && (
-                <>
-                  <AuthText>
-                    Delete “{row.name}”? Workouts and recorded sessions will stay.
-                  </AuthText>
-                  <AuthButton
-                    title="Keep split"
-                    outlined
-                    disabled={busy}
-                    onPress={() => setDeleting(null)}
-                  />
-                  <AuthButton title="Delete split" busy={busy} onPress={() => void remove()} />
-                </>
-              )}
-            </View>
-          ))}
+              <AuthButton title="Delete split" busy={busy} onPress={() => void remove()} />
+            </AuthCard>
+          )}
           {error && <AuthButton title="Retry splits" onPress={() => refresh(offset)} />}
-          <AuthButton
-            title="Previous splits"
-            outlined
-            disabled={busy || offset === 0}
-            onPress={() => refresh(Math.max(0, offset - 10))}
-          />
-          <AuthText>Page {offset / 10 + 1}</AuthText>
-          <AuthButton
-            title="Next splits"
-            outlined
-            disabled={busy || !page?.more}
-            onPress={() => refresh(offset + 10)}
-          />
+          {(offset > 0 || !!page?.more) && (
+            <View style={authStyles.row}>
+              <AuthLink
+                title="Previous splits"
+                disabled={busy || offset === 0}
+                onPress={() => refresh(Math.max(0, offset - 10))}
+              />
+              <AuthText>Page {offset / 10 + 1}</AuthText>
+              <AuthLink
+                title="Next splits"
+                disabled={busy || !page?.more}
+                onPress={() => refresh(offset + 10)}
+              />
+            </View>
+          )}
         </>
       )}
     </AuthFrame>
+  );
+}
+// One weekday: short day label, its workout or rest, then compact Workout and Rest controls.
+function SplitDayRow({
+  day,
+  value,
+  last,
+  disabled,
+  onChoose,
+  onRest,
+}: {
+  day: string;
+  value: SplitDraft['days'][number];
+  last: boolean;
+  disabled: boolean;
+  onChoose: () => void;
+  onRest: () => void;
+}) {
+  const { colors } = useAppTheme();
+  const label = value.isRest
+    ? 'Rest day'
+    : value.workoutId
+      ? (value.workoutName ?? 'Saved workout')
+      : 'Not set';
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        paddingVertical: 10,
+        borderBottomColor: colors.border,
+        borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth,
+      }}
+    >
+      <View style={{ width: 36 }}>
+        <AuthText kind="eyebrow">{day.slice(0, 3).toUpperCase()}</AuthText>
+      </View>
+      <View style={{ flex: 1 }}>
+        <AuthText kind={value.workoutId ? 'heading' : 'muted'}>{label}</AuthText>
+      </View>
+      <DayPill
+        title="Workout"
+        label={`Choose ${day} workout`}
+        selected={!!value.workoutId}
+        disabled={disabled}
+        onPress={onChoose}
+      />
+      <DayPill
+        title="Rest"
+        label={`Rest on ${day}`}
+        selected={value.isRest}
+        disabled={disabled}
+        onPress={onRest}
+      />
+    </View>
+  );
+}
+function DayPill({
+  title,
+  label,
+  selected,
+  disabled,
+  onPress,
+}: {
+  title: string;
+  label: string;
+  selected: boolean;
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  const { colors } = useAppTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected, disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => ({
+        minHeight: 36,
+        paddingHorizontal: 12,
+        borderRadius: 18,
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: selected ? colors.text : colors.border,
+        backgroundColor: selected ? colors.text : colors.surface,
+        opacity: disabled || pressed ? 0.6 : 1,
+      })}
+    >
+      <Text
+        style={{
+          fontSize: 13,
+          fontFamily: 'Inter_600SemiBold',
+          color: selected ? colors.background : colors.text,
+        }}
+      >
+        {title}
+      </Text>
+    </Pressable>
   );
 }

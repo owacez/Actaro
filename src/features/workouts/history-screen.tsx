@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { randomUUID } from 'expo-crypto';
 import {
@@ -24,7 +24,7 @@ import { displayWeight } from './workout-model';
 import { exerciseRecords, trainingVolume } from './training-metrics';
 import { WorkoutCalendar } from './workout-calendar';
 import { RecordLoadFeedback, useRecords } from '@/hooks/use-records';
-import { ScreenHeader, Segments, ProductIcon } from '@/components/product-ui';
+import { ScreenHeader, Segments, ProductIcon, StatTile } from '@/components/product-ui';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { displayDate, plural } from '@/lib/format';
 type Page = Awaited<ReturnType<typeof historyService.list>>;
@@ -63,11 +63,12 @@ export function HistoryScreen({
   const [frozen, setFrozen] = useState<SessionDraft | null>(null),
     [discard, setDiscard] = useState(false),
     [picking, setPicking] = useState(false),
-    [deleting, setDeleting] = useState<Page['rows'][number] | null>(null);
+    [deleting, setDeleting] = useState(false);
   const pending = useRef(false),
     alive = useRef(true),
     generation = useRef(0),
-    { notify } = useAuthFeedback();
+    { notify } = useAuthFeedback(),
+    { colors } = useAppTheme();
   useEffect(() => {
     alive.current = true;
     return () => {
@@ -168,21 +169,17 @@ export function HistoryScreen({
     }
   }
   async function remove() {
-    if (!deleting || pending.current) return;
+    if (!id || !draft || pending.current) return;
     pending.current = true;
     setBusy(true);
     setError(null);
     try {
-      await historyService.remove(userId, deleting.id, deleting.version);
-      await sessionStore.forgetSaved(userId, deleting.id);
+      await historyService.remove(userId, id, draft.version);
+      await sessionStore.forgetSaved(userId, id);
       if (alive.current) {
-        setDeleting(null);
+        setDeleting(false);
         notify('Recorded workout deleted. Calculations use the remaining logs.', 'success');
-        refresh({
-          ...filters,
-          offset:
-            page?.rows.length === 1 && filters.offset > 0 ? filters.offset - 10 : filters.offset,
-        });
+        onBack();
       }
     } catch (reason) {
       if (alive.current)
@@ -291,26 +288,68 @@ export function HistoryScreen({
                 <AuthButton title="Discard history edits" disabled={busy} onPress={onBack} />
               </>
             )}
-            <AuthText>
-              {draft.localDate} · {draft.timeZone} ·{' '}
-              {draft.mode === 'timed' ? `Timed · ${timerText(draft.clock.elapsedMs)}` : 'Log Only'}
-            </AuthText>
-            <AuthText>
-              Save applies changes to the performed log. Templates stay independent. Metrics below
-              preview these edits; incomplete values hide the preview.
-            </AuthText>
+            <View
+              style={{
+                gap: 6,
+                padding: 18,
+                borderRadius: 24,
+                backgroundColor: colors.accent,
+              }}
+            >
+              <Text style={{ color: '#ffffff', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
+                {displayDate(draft.localDate).toUpperCase()} ·{' '}
+                {draft.mode === 'timed' ? 'TIMED' : 'LOG ONLY'}
+              </Text>
+              <Text
+                style={{
+                  color: '#ffffff',
+                  fontSize: 25,
+                  lineHeight: 32,
+                  fontFamily: 'Inter_600SemiBold',
+                }}
+              >
+                {draft.name || 'Recorded workout'}
+              </Text>
+              <Text style={{ color: '#ffffff', fontSize: 14 }}>
+                {draft.mode === 'timed'
+                  ? `Duration ${timerText(draft.clock.elapsedMs)}`
+                  : 'Logged without a timer'}{' '}
+                · {draft.timeZone}
+              </Text>
+            </View>
             {totals && (
-              <AuthCard>
-                <AuthText>
-                  {plural(preview?.exercises.length ?? 0, 'exercise')} ·{' '}
-                  {plural(totals.sets, 'set')} · {plural(totals.reps, 'rep')}
-                </AuthText>
-                <AuthText>
-                  Training Volume: {displayWeight(totals.volumeKg, draft.unit)} {draft.unit}·reps ·{' '}
-                  {totals.unknownWeightSets} unknown-weight sets excluded
-                </AuthText>
-              </AuthCard>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                <StatTile
+                  icon={{ ios: 'dumbbell', android: 'fitness_center', web: 'fitness_center' }}
+                  label="Exercises"
+                  value={String(preview?.exercises.length ?? 0)}
+                />
+                <StatTile
+                  icon={{ ios: 'square.stack', android: 'layers', web: 'layers' }}
+                  label="Sets"
+                  value={String(totals.sets)}
+                />
+                <StatTile
+                  icon={{ ios: 'repeat', android: 'repeat', web: 'repeat' }}
+                  label="Reps"
+                  value={String(totals.reps)}
+                />
+                <StatTile
+                  icon={{ ios: 'scalemass', android: 'monitor_weight', web: 'monitor_weight' }}
+                  label="Training volume"
+                  value={`${displayWeight(totals.volumeKg, draft.unit)} ${draft.unit}·reps`}
+                />
+              </View>
             )}
+            {!!totals?.unknownWeightSets && (
+              <AuthText kind="muted">
+                {plural(totals.unknownWeightSets, 'set')} without a weight are excluded from volume.
+              </AuthText>
+            )}
+            <AuthText kind="muted">
+              Edits here change this performed log only; templates stay independent. Stats preview
+              your edits and hide while a value is incomplete.
+            </AuthText>
             <AuthInput
               label="Recorded workout name"
               value={draft.name}
@@ -326,120 +365,185 @@ export function HistoryScreen({
               maxLength={2000}
               onChangeText={(notes) => edit((value) => ({ ...value, notes }))}
             />
-            {draft.exercises.map((exercise, index) => (
-              <AuthCard key={exercise.id}>
-                <View style={{ gap: 8 }}>
-                  <AuthText kind="eyebrow">
-                    {index + 1}. {exercise.name}
-                  </AuthText>
-                  {savedExerciseIds.includes(exercise.id) &&
-                    draft.exercises.find((entry) => entry.exerciseId === exercise.exerciseId)
-                      ?.id === exercise.id &&
-                    (records.get(exercise.exerciseId) ?? []).map((record, at) => (
-                      <AuthText key={at}>
-                        {record.first ? 'First recorded' : 'New'} {record.kind}:{' '}
-                        {record.kind === 'Rep PR'
-                          ? `${record.value} reps at ${displayWeight(record.weightKg ?? null, draft.unit)} ${draft.unit}`
-                          : `${displayWeight(Math.round(record.value * 1000) / 1000, draft.unit)} ${draft.unit}`}
-                      </AuthText>
-                    ))}
-                  {!savedExerciseIds.includes(exercise.id) && (
-                    <AuthText>Save to recalculate records for this added exercise.</AuthText>
-                  )}
-                  {exercise.sets.map((set, position) => (
-                    <View key={set.id} style={{ gap: 8 }}>
-                      <AuthText>Set {position + 1}</AuthText>
-                      {(['weight', 'reps', 'rpe', 'notes'] as const).map((field) => (
-                        <AuthInput
-                          key={field}
-                          label={`${field === 'weight' ? `Weight (${draft.unit})` : field === 'rpe' ? 'RPE (optional)' : field === 'notes' ? 'Set note' : 'Reps'} · exercise ${index + 1} set ${position + 1}`}
-                          value={set[field]}
-                          editable={!busy && !frozen}
-                          keyboardType={
-                            field === 'notes'
-                              ? 'default'
-                              : field === 'reps'
-                                ? 'number-pad'
-                                : 'decimal-pad'
-                          }
-                          maxLength={field === 'notes' ? 2000 : 10}
-                          onChangeText={(text) =>
-                            edit((value) => ({
-                              ...value,
-                              exercises: value.exercises.map((entry, at) =>
-                                at === index
-                                  ? {
-                                      ...entry,
-                                      sets: entry.sets.map((row, place) =>
-                                        place === position ? { ...row, [field]: text } : row,
-                                      ),
-                                    }
-                                  : entry,
-                              ),
-                            }))
-                          }
-                        />
-                      ))}
-                      <AuthLink
-                        title={`Remove recorded set ${position + 1} from exercise ${index + 1}`}
-                        disabled={busy || !!frozen || exercise.sets.length === 1}
-                        onPress={() =>
-                          edit((value) => ({
-                            ...value,
-                            exercises: value.exercises.map((entry, at) =>
-                              at === index
-                                ? {
-                                    ...entry,
-                                    sets: entry.sets.filter((_, place) => place !== position),
-                                  }
-                                : entry,
-                            ),
-                          }))
-                        }
-                      />
+            {draft.exercises.map((exercise, index) => {
+              const shown =
+                savedExerciseIds.includes(exercise.id) &&
+                draft.exercises.find((entry) => entry.exerciseId === exercise.exerciseId)?.id ===
+                  exercise.id
+                  ? (records.get(exercise.exerciseId) ?? [])
+                  : [];
+              const setFields = [
+                ['weight', `Weight (${draft.unit})`, 'decimal-pad'],
+                ['reps', 'Reps', 'number-pad'],
+                ['rpe', 'RPE', 'decimal-pad'],
+              ] as const;
+              return (
+                <AuthCard key={exercise.id}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <View
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 10,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: colors.fill,
+                      }}
+                    >
+                      <AuthText kind="heading">{index + 1}</AuthText>
                     </View>
-                  ))}
-                  <AuthLink
-                    title={`Add recorded set to exercise ${index + 1}`}
-                    disabled={busy || !!frozen || exercise.sets.length >= 100}
-                    onPress={() =>
+                    <View style={{ flex: 1 }}>
+                      <AuthText kind="heading">{exercise.name}</AuthText>
+                      <AuthText kind="muted">{plural(exercise.sets.length, 'set')}</AuthText>
+                    </View>
+                  </View>
+                  {!!shown.length && (
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                      {shown.map((record, at) => (
+                        <View
+                          key={at}
+                          style={{
+                            borderRadius: 10,
+                            paddingHorizontal: 8,
+                            paddingVertical: 3,
+                            backgroundColor: colors.fill,
+                          }}
+                        >
+                          <AuthText kind="muted">
+                            {record.first ? 'First recorded' : 'New'} {record.kind}:{' '}
+                            {record.kind === 'Rep PR'
+                              ? `${record.value} reps at ${displayWeight(record.weightKg ?? null, draft.unit)} ${draft.unit}`
+                              : `${displayWeight(Math.round(record.value * 1000) / 1000, draft.unit)} ${draft.unit}`}
+                          </AuthText>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                  {!savedExerciseIds.includes(exercise.id) && (
+                    <AuthText kind="muted">
+                      Save to recalculate records for this added exercise.
+                    </AuthText>
+                  )}
+                  {exercise.sets.map((set, position) => {
+                    const change = (field: 'weight' | 'reps' | 'rpe' | 'notes', text: string) =>
                       edit((value) => ({
                         ...value,
                         exercises: value.exercises.map((entry, at) =>
                           at === index
                             ? {
                                 ...entry,
-                                sets: [
-                                  ...entry.sets,
-                                  {
-                                    id: randomUUID(),
-                                    reps: '',
-                                    weight: '',
-                                    rest: '90',
-                                    rpe: '',
-                                    notes: '',
-                                    completedAt: value.endedAt,
-                                  },
-                                ],
+                                sets: entry.sets.map((row, place) =>
+                                  place === position ? { ...row, [field]: text } : row,
+                                ),
                               }
                             : entry,
                         ),
-                      }))
-                    }
-                  />
-                  <AuthLink
-                    title={`Remove recorded exercise ${index + 1}`}
-                    disabled={busy || !!frozen || draft.exercises.length === 1}
-                    onPress={() =>
-                      edit((value) => ({
-                        ...value,
-                        exercises: value.exercises.filter((_, at) => at !== index),
-                      }))
-                    }
-                  />
-                </View>
-              </AuthCard>
-            ))}
+                      }));
+                    const where = `exercise ${index + 1} set ${position + 1}`;
+                    return (
+                      <View
+                        key={set.id}
+                        style={{
+                          gap: 6,
+                          paddingTop: 8,
+                          borderTopWidth: StyleSheet.hairlineWidth,
+                          borderTopColor: colors.border,
+                        }}
+                      >
+                        <View style={authStyles.row}>
+                          <AuthText kind="eyebrow">SET {position + 1}</AuthText>
+                          <AuthLink
+                            title="Remove"
+                            accessibilityLabel={`Remove recorded set ${position + 1} from exercise ${index + 1}`}
+                            disabled={busy || !!frozen || exercise.sets.length === 1}
+                            onPress={() =>
+                              edit((value) => ({
+                                ...value,
+                                exercises: value.exercises.map((entry, at) =>
+                                  at === index
+                                    ? {
+                                        ...entry,
+                                        sets: entry.sets.filter((_, place) => place !== position),
+                                      }
+                                    : entry,
+                                ),
+                              }))
+                            }
+                          />
+                        </View>
+                        <View style={{ flexDirection: 'row', gap: 8 }}>
+                          {setFields.map(([field, title, keyboard]) => (
+                            <View key={field} style={{ flex: 1, gap: 4 }}>
+                              <AuthText kind="muted">{title}</AuthText>
+                              <AuthInput
+                                hideLabel
+                                label={`${field === 'rpe' ? 'RPE (optional)' : title} · ${where}`}
+                                value={set[field]}
+                                editable={!busy && !frozen}
+                                keyboardType={keyboard}
+                                maxLength={10}
+                                onChangeText={(text) => change(field, text)}
+                              />
+                            </View>
+                          ))}
+                        </View>
+                        <AuthInput
+                          hideLabel
+                          label={`Set note · ${where}`}
+                          placeholder="Set note (optional)"
+                          value={set.notes}
+                          editable={!busy && !frozen}
+                          maxLength={2000}
+                          onChangeText={(text) => change('notes', text)}
+                        />
+                      </View>
+                    );
+                  })}
+                  <View style={authStyles.row}>
+                    <AuthLink
+                      title="+ Add set"
+                      accessibilityLabel={`Add recorded set to exercise ${index + 1}`}
+                      disabled={busy || !!frozen || exercise.sets.length >= 100}
+                      onPress={() =>
+                        edit((value) => ({
+                          ...value,
+                          exercises: value.exercises.map((entry, at) =>
+                            at === index
+                              ? {
+                                  ...entry,
+                                  sets: [
+                                    ...entry.sets,
+                                    {
+                                      id: randomUUID(),
+                                      reps: '',
+                                      weight: '',
+                                      rest: '90',
+                                      rpe: '',
+                                      notes: '',
+                                      completedAt: value.endedAt,
+                                    },
+                                  ],
+                                }
+                              : entry,
+                          ),
+                        }))
+                      }
+                    />
+                    <AuthLink
+                      title="Remove exercise"
+                      accessibilityLabel={`Remove recorded exercise ${index + 1}`}
+                      disabled={busy || !!frozen || draft.exercises.length === 1}
+                      onPress={() =>
+                        edit((value) => ({
+                          ...value,
+                          exercises: value.exercises.filter((_, at) => at !== index),
+                        }))
+                      }
+                    />
+                  </View>
+                </AuthCard>
+              );
+            })}
             <AuthButton
               title="Add recorded exercise"
               outlined
@@ -452,6 +556,32 @@ export function HistoryScreen({
               disabled={!frozen && !dirty}
               onPress={() => void save()}
             />
+            {deleting ? (
+              <AuthCard>
+                <AuthText>
+                  Delete this performed log? Its sets are removed and calculations use the remaining
+                  logs. Templates and splits stay.
+                </AuthText>
+                <AuthButton
+                  title="Keep recorded workout"
+                  outlined
+                  disabled={busy}
+                  onPress={() => setDeleting(false)}
+                />
+                <AuthButton
+                  title="Delete recorded workout"
+                  busy={busy}
+                  onPress={() => void remove()}
+                />
+              </AuthCard>
+            ) : (
+              <AuthLink
+                title="Delete this workout"
+                accessibilityLabel={`Delete recorded ${draft.name}`}
+                disabled={busy || !!frozen}
+                onPress={() => setDeleting(true)}
+              />
+            )}
             {frozen && (
               <>
                 <AuthText>
@@ -548,43 +678,16 @@ export function HistoryScreen({
             <AuthText>No recorded workouts match. Finish a workout to add a log.</AuthText>
           )}
           {page?.rows.map((row) => (
-            <View key={row.id} style={{ gap: 6 }}>
-              <SessionCard
-                row={row}
-                stats={[
-                  plural(row.sets, 'set'),
-                  `${displayWeight(row.volume_kg, page.unit)} ${page.unit}·reps`,
-                ]}
-                disabled={busy}
-                onPress={() => onOpen(row.id)}
-              />
-              {deleting?.id === row.id ? (
-                <AuthCard>
-                  <AuthText>
-                    Delete this performed log? Its sets are removed and calculations use the
-                    remaining logs. Templates and splits stay.
-                  </AuthText>
-                  <AuthButton
-                    title="Keep recorded workout"
-                    outlined
-                    disabled={busy}
-                    onPress={() => setDeleting(null)}
-                  />
-                  <AuthButton
-                    title="Delete recorded workout"
-                    busy={busy}
-                    onPress={() => void remove()}
-                  />
-                </AuthCard>
-              ) : (
-                <AuthLink
-                  title="Delete"
-                  accessibilityLabel={`Delete recorded ${row.name}`}
-                  disabled={busy}
-                  onPress={() => setDeleting(row)}
-                />
-              )}
-            </View>
+            <SessionCard
+              key={row.id}
+              row={row}
+              stats={[
+                plural(row.sets, 'set'),
+                `${displayWeight(row.volume_kg, page.unit)} ${page.unit}·reps`,
+              ]}
+              disabled={busy}
+              onPress={() => onOpen(row.id)}
+            />
           ))}
           {error && <AuthButton title="Retry history" onPress={() => refresh({ ...filters })} />}
           {(filters.offset > 0 || !!page?.more) && (
@@ -640,6 +743,26 @@ function SessionCard({
         opacity: pressed || disabled ? 0.6 : 1,
       })}
     >
+      <View
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: 14,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.accent,
+        }}
+      >
+        <ProductIcon
+          name={
+            row.mode === 'timed'
+              ? { ios: 'stopwatch', android: 'timer', web: 'timer' }
+              : { ios: 'list.bullet', android: 'list', web: 'list' }
+          }
+          size={20}
+          color="#ffffff"
+        />
+      </View>
       <View style={{ flex: 1, gap: 6 }}>
         <AuthText kind="eyebrow">{displayDate(row.local_date).toUpperCase()}</AuthText>
         <AuthText kind="heading">{row.name}</AuthText>

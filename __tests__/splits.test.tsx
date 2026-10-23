@@ -128,7 +128,8 @@ test('delete requires confirmation and guards a pending request before reloading
       <SplitsScreen {...props} />
     </FeedbackTestRoot>,
   );
-  await screen.findByText('Week A · Active');
+  await screen.findByText('Week A');
+  expect(screen.getByText('Active split')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Delete split Week A' }));
   expect(mocks.remove).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Keep split' }));

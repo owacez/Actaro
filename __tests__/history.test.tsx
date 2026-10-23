@@ -58,7 +58,7 @@ test('history edits recalculate actual volume and freeze failed save payload unt
   );
   await screen.findByLabelText('Reps · exercise 1 set 1');
   await fireEvent.changeText(screen.getByLabelText('Reps · exercise 1 set 1'), '10');
-  expect(screen.getByText(/Training Volume: 200/)).toBeTruthy();
+  expect(screen.getByLabelText(/Training volume: 200 kg/)).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Save recorded workout' }));
   await screen.findByRole('button', { name: 'Retry history save' });
   expect(screen.getByLabelText('Reps · exercise 1 set 1').props.editable).toBe(false);
@@ -100,7 +100,7 @@ test('calendar marks actual workout dates and defers detailed-history requests u
   await fireEvent.press(screen.getByRole('button', { name: 'History' }));
   await waitFor(() => expect(history.list).toHaveBeenCalledTimes(1));
 });
-test('delete is confirmed and uses the displayed revision; filters are genuine server filters', async () => {
+test('history rows only open records; filters are genuine server filters', async () => {
   const row = recorded();
   history.list
     .mockResolvedValueOnce({
@@ -130,14 +130,10 @@ test('delete is confirmed and uses the displayed revision; filters are genuine s
     </FeedbackTestRoot>,
   );
   await fireEvent.press(screen.getByRole('button', { name: 'History' }));
-  await screen.findByRole('button', { name: 'Delete recorded Test workout' });
-  await fireEvent.press(screen.getByRole('button', { name: 'Delete recorded Test workout' }));
-  expect(history.remove).not.toHaveBeenCalled();
-  await fireEvent.press(screen.getByRole('button', { name: 'Keep recorded workout' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'Delete recorded Test workout' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'Delete recorded workout' }));
-  await waitFor(() => expect(history.remove).toHaveBeenCalledWith(sessionOwner, row.id, 1));
-  await screen.findByText(/No recorded workouts match/);
+  await fireEvent.press(await screen.findByRole('button', { name: /^Test workout, / }));
+  expect(props.onOpen).toHaveBeenCalledWith(row.id);
+  // Deleting is offered only inside the recorded workout.
+  expect(screen.queryByRole('button', { name: 'Delete recorded Test workout' })).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Log Only' }));
   await waitFor(() =>
     expect(history.list).toHaveBeenLastCalledWith(sessionOwner, {
@@ -146,4 +142,21 @@ test('delete is confirmed and uses the displayed revision; filters are genuine s
       mode: 'log_only',
     }),
   );
+});
+test('a recorded workout is deleted from inside it after confirmation, using its revision', async () => {
+  const row = recorded();
+  await render(
+    <FeedbackTestRoot>
+      <HistoryScreen {...props} id={row.id} />
+    </FeedbackTestRoot>,
+  );
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Delete recorded Test workout' }),
+  );
+  expect(history.remove).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Keep recorded workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete recorded Test workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete recorded workout' }));
+  await waitFor(() => expect(history.remove).toHaveBeenCalledWith(sessionOwner, row.id, 1));
+  await waitFor(() => expect(props.onBack).toHaveBeenCalledTimes(1));
 });

@@ -437,8 +437,8 @@ export function StatTile({
     </View>
   );
 }
-// A widget with a soft colour wash, a coloured icon tile and a title. Tints use existing
-// semantic tokens at low opacity, so they read in light and dark themes alike.
+// A widget on the standard Chalk/Carbon surface: the semantic tint marks only its icon
+// tile (and any meters inside), so every card shares one surface and border.
 export function TintCard({
   tint,
   icon,
@@ -454,15 +454,16 @@ export function TintCard({
   /** Use a dark glyph on light tints such as volt. */
   darkIcon?: boolean;
 }>) {
+  const { colors } = useAppTheme();
   return (
     <View
       style={{
         borderRadius: 24,
         padding: 16,
         gap: 10,
-        backgroundColor: tint + '1F',
+        backgroundColor: colors.surface,
         borderWidth: 1,
-        borderColor: tint + '47',
+        borderColor: colors.border,
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>

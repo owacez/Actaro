@@ -4,6 +4,38 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Theme alignment for splits, Today widgets and workout history (2026-10-23):
+implementation and local verification **DONE**; device acceptance **DEFERRED**.
+
+- **Splits** (`splits-screen.tsx`):
+  - The list and editor use the screen header and Chalk/Carbon cards.
+  - The list shows split rows with an icon, "Active split"/"Not active" and a trash
+    button, followed by an inline delete confirmation.
+  - The editor has a name/active card and a weekly schedule card. Each row shows the
+    day, its workout or "Rest day"/"Not set", and Workout and Rest pills.
+  - Pagers appear only when there is more than one page.
+- **Today:** `TintCard` keeps the standard white surface and border. Semantic colour
+  stays only on icon tiles and meters, replacing the pastel washes.
+- **History:**
+  - Rows only open a recorded workout; delete is offered inside it, with
+    confirmation. Deleting uses the loaded revision and returns to history.
+  - History cards gain an accent icon tile for timed or log-only workouts.
+  - The recorded workout has an accent summary header (date, mode, name, duration),
+    stat tiles for exercises, sets, reps and training volume, and compact exercise
+    cards. Each card has a numbered heading, record chips and set rows with
+    weight/reps/RPE side by side plus a note.
+  - Accessible names are unchanged.
+
+No schema change. Evidence:
+
+- `npm run check`: 82 suites with 420 Jest tests pass, plus 6 dataset tests.
+- The split tests were updated for the new row text.
+- The history tests check that rows offer no delete and that deletion inside the
+  record is confirmed, uses revision 1 and returns.
+- Offline web captures show Today, the splits list, the new-split editor, history
+  cards and a recorded workout (with a local session fixture added to the capture
+  harness only), with 0 live requests.
+
 Daily plan confirmation and estimate agreement (2026-10-23): implementation and
 local verification **DONE**; device acceptance **DEFERRED**.
 
