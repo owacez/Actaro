@@ -106,7 +106,14 @@ function NutritionManager({
     );
   }
   const common = { userId, date, meal, onBack };
-  if (view === 'targets') return <TargetsScreen userId={userId} onBack={onBack} />;
+  if (view === 'targets')
+    return (
+      <TargetsScreen
+        userId={userId}
+        onBack={onBack}
+        onDone={() => router.dismissTo('/(tabs)/today')}
+      />
+    );
   if (view === 'custom')
     return <CustomFoodScreen userId={userId} foodId={foodId} onBack={onBack} onSaved={onSaved} />;
   if (view === 'recipe')

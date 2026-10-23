@@ -273,7 +273,7 @@ test('targets validate before writing and kJ values normalize to kcal', async ()
   });
   await render(
     <FeedbackTestRoot>
-      <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} />
+      <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} onDone={jest.fn()} />
     </FeedbackTestRoot>,
   );
   // Without a saved target the calculator opens first; manual entry is one tap away.
@@ -305,7 +305,7 @@ test('calculation prefills saved imperial body details, preserves water, reviews
   jest.mocked(bodyService.form).mockClear().mockResolvedValue(body);
   await render(
     <FeedbackTestRoot>
-      <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} />
+      <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} onDone={jest.fn()} />
     </FeedbackTestRoot>,
   );
   await fireEvent.press(await screen.findByRole('button', { name: 'Enter manually' }));
@@ -328,7 +328,7 @@ test('calculation prefills saved imperial body details, preserves water, reviews
   expect(screen.getByText(/Confirm the general adult/)).toBeTruthy();
   expect(service.targets).not.toHaveBeenCalled();
   await fireEvent.press(
-    screen.getByRole('button', { name: 'This general adult estimate applies to me' }),
+    screen.getByRole('checkbox', { name: 'I agree the 2023 adult energy estimate applies to me.' }),
   );
   await fireEvent.press(screen.getByRole('button', { name: 'Generate targets' }));
   expect(Number(screen.getByLabelText('Energy (kJ)').props.value)).toBeCloseTo(11506);
@@ -366,7 +366,7 @@ test('missing body inputs are entered in the calculator without guessing profile
     });
   await render(
     <FeedbackTestRoot>
-      <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} />
+      <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} onDone={jest.fn()} />
     </FeedbackTestRoot>,
   );
   // No target yet: the calculator is shown straight away.
@@ -386,7 +386,7 @@ test('missing body inputs are entered in the calculator without guessing profile
   await fireEvent.press(screen.getByRole('button', { name: 'Female equation' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Inactive' }));
   await fireEvent.press(
-    screen.getByRole('button', { name: 'This general adult estimate applies to me' }),
+    screen.getByRole('checkbox', { name: 'I agree the 2023 adult energy estimate applies to me.' }),
   );
   await fireEvent.press(screen.getByRole('button', { name: 'Generate targets' }));
   expect(screen.getByLabelText('Energy (kcal)').props.value).toBe('2350');
@@ -516,9 +516,10 @@ test('Food tab shows a recipes section for creating and opening recipes', async 
   expect(open).toHaveBeenLastCalledWith('recipes', '2026-10-13', 'Lunch');
 });
 test('daily plan calculates from saved details with a goal: lose fat matches first-run setup', async () => {
+  const done = jest.fn();
   await render(
     <FeedbackTestRoot>
-      <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} />
+      <TargetsScreen userId={nutritionOwner} onBack={jest.fn()} onDone={done} />
     </FeedbackTestRoot>,
   );
   // Saved male, 30 years, 80 kg, 180 cm prefill the calculator; only goal and activity remain.
@@ -526,8 +527,11 @@ test('daily plan calculates from saved details with a goal: lose fat matches fir
   expect(screen.getByLabelText('Age (years)').props.value).toBe('30');
   await fireEvent.press(screen.getByRole('button', { name: 'Lose fat' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Active' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Learn more' }));
+  expect(screen.getByText(/adults aged 19 or older who are not pregnant/)).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
   await fireEvent.press(
-    screen.getByRole('button', { name: 'This general adult estimate applies to me' }),
+    screen.getByRole('checkbox', { name: 'I agree the 2023 adult energy estimate applies to me.' }),
   );
   await fireEvent.press(screen.getByRole('button', { name: 'Generate targets' }));
   // 2023 DRI maintenance 3,150 kcal − 500 = 2,650 kcal; protein 1.6 g/kg × 80 = 128 g.
@@ -537,4 +541,13 @@ test('daily plan calculates from saved details with a goal: lose fat matches fir
   expect(screen.getByLabelText('Fat (g)').props.value).toBe('74');
   expect(screen.getByLabelText('Carbohydrates (g)').props.value).toBe('368');
   expect(screen.getByText(/Protein starts at 1.6 g per kg of bodyweight/)).toBeTruthy();
+  // Saving shows how the plan was worked out, then returns home.
+  await fireEvent.changeText(screen.getByLabelText('Water (ml)'), '2000');
+  await fireEvent.press(screen.getByRole('button', { name: 'Save daily targets' }));
+  await screen.findByText('How it was worked out');
+  expect(screen.getByText(/Maintenance: 3,150 kcal a day/)).toBeTruthy();
+  expect(screen.getByText(/−500 kcal, giving 2,650 kcal/)).toBeTruthy();
+  expect(screen.queryByText(/You then adjusted/)).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Go to Today' }));
+  expect(done).toHaveBeenCalledTimes(1);
 });

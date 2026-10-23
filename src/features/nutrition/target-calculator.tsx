@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
-import { Linking, View } from 'react-native';
-import { ActionSheet } from '@/components/product-ui';
+import { Linking, Pressable, View } from 'react-native';
+import { ActionSheet, ProductIcon } from '@/components/product-ui';
+import { useAppTheme } from '@/features/profile/theme-context';
 import { NumberStepper } from '@/components/number-stepper';
 import {
   AuthButton,
@@ -35,8 +36,9 @@ export function TargetCalculator({
   userId: string;
   preferences: Preferences;
   disabled: boolean;
-  onGenerated: (values: TargetEstimate, goal: BodyGoal) => void;
+  onGenerated: (values: TargetEstimate, goal: BodyGoal, maintenance: TargetEstimate) => void;
 }) {
+  const { colors } = useAppTheme();
   const [age, setAge] = useState(''),
     [weight, setWeight] = useState(''),
     [height, setHeight] = useState(''),
@@ -45,6 +47,7 @@ export function TargetCalculator({
     [goal, setGoal] = useState<BodyGoal>('maintain'),
     [eligible, setEligible] = useState(false),
     [editingDetails, setEditingDetails] = useState(false),
+    [learning, setLearning] = useState(false),
     [detailsLocked, setDetailsLocked] = useState(false),
     [error, setError] = useState<string | null>(null);
   const load = useCallback(
@@ -156,17 +159,46 @@ export function TargetCalculator({
           {!!activity && (
             <AuthText>{activityLevels.find((level) => level.key === activity)?.detail}</AuthText>
           )}
-          <AuthText>
-            Uses the 2023 DRI maintenance equations for adults 19+ who are not pregnant or
-            breastfeeding. A goal adds a shown, editable deficit or surplus; it is not a
-            prescription and promises no rate of change.
-          </AuthText>
-          <AuthChoice
-            title="This general adult estimate applies to me"
-            selected={eligible}
+          <Pressable
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: eligible, disabled }}
             disabled={disabled}
             onPress={() => setEligible((value) => !value)}
-          />
+            style={({ pressed }) => ({
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 12,
+              minHeight: 44,
+              opacity: disabled || pressed ? 0.6 : 1,
+            })}
+          >
+            <View
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 6,
+                borderWidth: 2,
+                borderColor: colors.text,
+                backgroundColor: eligible ? colors.text : 'transparent',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {eligible && (
+                <ProductIcon
+                  name={{ ios: 'checkmark', android: 'check', web: 'check' }}
+                  size={16}
+                  color={colors.background}
+                />
+              )}
+            </View>
+            <View style={{ flex: 1 }}>
+              <AuthText>I agree the 2023 adult energy estimate applies to me.</AuthText>
+            </View>
+          </Pressable>
+          <View style={{ paddingLeft: 36, marginTop: -12 }}>
+            <AuthLink title="Learn more" disabled={disabled} onPress={() => setLearning(true)} />
+          </View>
           {error && <AuthNotice error>{error}</AuthNotice>}
           <AuthButton
             title="Generate targets"
@@ -183,19 +215,37 @@ export function TargetCalculator({
                   eligible,
                 });
                 setError(null);
-                onGenerated(planTargets(result, goal, weightKg), goal);
+                onGenerated(planTargets(result, goal, weightKg), goal, result);
               } catch (reason) {
                 setError(reason instanceof Error ? reason.message : 'Check your details.');
               }
             }}
           />
-          <AuthLink
-            title="About the calculation"
-            disabled={disabled}
-            onPress={() => void Linking.openURL(targetMethodUrl)}
-          />
         </>
       )}
+      <ActionSheet
+        title="About this estimate"
+        visible={learning}
+        onClose={() => setLearning(false)}
+      >
+        <AuthText>
+          Maintenance energy uses the 2023 Dietary Reference Intake (DRI) equations published by
+          Health Canada, from your age, height, weight and usual activity.
+        </AuthText>
+        <AuthText>
+          They are for adults aged 19 or older who are not pregnant or breastfeeding. If that is not
+          you, or you follow medical advice, enter your targets manually instead.
+        </AuthText>
+        <AuthText>
+          A goal adds a shown, editable deficit or surplus. It is a starting point, not a
+          prescription, and promises no rate of change.
+        </AuthText>
+        <AuthLink
+          title="Read the published equations"
+          onPress={() => void Linking.openURL(targetMethodUrl)}
+        />
+        <AuthButton title="Close" outlined onPress={() => setLearning(false)} />
+      </ActionSheet>
       <ActionSheet
         title="Personal details"
         visible={editingDetails}

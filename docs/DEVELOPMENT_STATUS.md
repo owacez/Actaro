@@ -4,6 +4,30 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Daily plan confirmation and estimate agreement (2026-10-23): implementation and
+local verification **DONE**; device acceptance **DEFERRED**.
+
+- Saving targets used to show only a toast. It now opens "Your daily plan", which
+  shows the saved energy, macros and water. A "How it was worked out" section lists
+  three steps: the 2023 DRI maintenance figure, the goal change with its result, and
+  the macro rule. It notes any manual energy edit, or says "You entered these
+  targets yourself" for manual plans.
+  - "Go to Today" returns home (`router.dismissTo('/(tabs)/today')`).
+  - "Edit targets" reopens the form.
+- The calculator's eligibility pill is now a real checkbox (`accessibilityRole`
+  checkbox, checked state) labelled "I agree the 2023 adult energy estimate
+  applies to me."
+  - The long eligibility and method text moved into a "Learn more" sheet, along with
+    the published-equations link.
+  - `TargetCalculator.onGenerated` also returns the maintenance estimate.
+
+No schema change. Evidence:
+
+- `npm run check`: 82 suites with 419 Jest tests pass, plus 6 dataset tests.
+- The nutrition screen tests cover the checkbox, the Learn more sheet, the summary
+  steps (maintenance 3,150 kcal, −500 kcal giving 2,650 kcal) and "Go to Today".
+- The offline web capture shows the checkbox with Learn more below it.
+
 Expo SDK 58 upgrade (2026-10-23): dependency upgrade and local verification
 **DONE**; device and development-build acceptance **DEFERRED**.
 
