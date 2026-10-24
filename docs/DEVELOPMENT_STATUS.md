@@ -42,8 +42,7 @@ Evidence:
   drag. The builder test drives `onReorder` through a plain stand-in and then
   deletes with the bin.
 - **Real web drag:** a CDP mouse press, 450 ms hold and 180 px move lifted
-  "Bodyweight Squat" while the other rows slid up. Release committed "1. Push-up,
-  2. Barbell Row, 3. Bodyweight Squat" and enabled Save (screenshots in the
+  "Bodyweight Squat" while the other rows slid up. Release committed "1. Push-up, 2. Barbell Row, 3. Bodyweight Squat" and enabled Save (screenshots in the
   session scratchpad).
 - `npx expo install --check` reports new SDK 58 patch releases (expo 58.0.19,
   expo-router 58.0.26 and others) published after the upgrade. They were not
