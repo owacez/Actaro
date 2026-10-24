@@ -9,6 +9,7 @@ import { NumberStepper } from '@/components/number-stepper';
 import { useAppTheme } from '@/features/profile/theme-context';
 import {
   AuthButton,
+  BackLink,
   AuthFrame,
   AuthInput,
   AuthLink,
@@ -366,8 +367,8 @@ export function BuilderScreen({
     );
   return (
     <AuthFrame scrollEnabled={!dragging}>
-      <AuthLink
-        title="← My workouts"
+      <BackLink
+        label="My workouts"
         disabled={saving}
         onPress={() => (dirty ? setConfirmDiscard(true) : onBack())}
       />

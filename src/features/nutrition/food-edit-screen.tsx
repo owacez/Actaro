@@ -5,6 +5,7 @@ import { ActionSheet } from '@/components/product-ui';
 import { useAppTheme } from '@/features/profile/theme-context';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthChoice,
   AuthFrame,
@@ -130,7 +131,7 @@ export function CustomFoodScreen({
   }
   return (
     <AuthFrame>
-      <AuthLink title="← Food" disabled={action.locked} onPress={onBack} />
+      <BackLink label="Food" disabled={action.locked} onPress={onBack} />
       <AuthText kind="title">{foodId ? 'Edit custom food' : 'New custom food'}</AuthText>
       <LoadFeedback {...resource} retry={resource.refresh} />
       {resource.data && !resource.loading && (
@@ -419,7 +420,7 @@ export function RecipeScreen({
   }
   return (
     <AuthFrame>
-      <AuthLink title="← Food" disabled={action.locked} onPress={onBack} />
+      <BackLink label="Food" disabled={action.locked} onPress={onBack} />
       <AuthText kind="title">{foodId ? 'Edit recipe' : 'New recipe'}</AuthText>
       <AuthText>
         Add each ingredient with its amount, such as 70 g oats and 1 medium banana. Calories and

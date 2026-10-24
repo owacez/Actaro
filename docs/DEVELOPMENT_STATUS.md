@@ -4,6 +4,52 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+App-wide UI/UX audit, shared-component pass (2026-10-24): implementation and local
+verification **DONE**; device acceptance **DEFERRED**.
+
+**Audit method:** offline web captures of the main screens (Train, Food, Progress,
+You, Body, Habits, Goals, Profile, Activity, Preferences, Recovery, Log food), plus
+a code search for back links, notices and hard-coded colours.
+
+**Findings and fixes (shared components, so every screen changes together):**
+
+- **Back navigation:** 35 "← X" text links sat above or below the title depending
+  on the screen, and screen readers read "leftwards arrow".
+  - New `BackLink` (chevron + destination pill, 44 pt reach, accessible name "Back
+    to X").
+  - `AuthFrame` always places a direct-child `BackLink` above the screen header.
+  - All 35 links converted by codemod.
+- **Inline messages:** `AuthNotice` errors were bare red text. Notices and errors
+  now use a rounded card with an icon (info, or alert on a light danger tint). Errors
+  stay announced alerts.
+- **Toast:** the "Success/Error/Notice" word label is replaced by a coloured status
+  icon (green check, red alert, orange info) on a rounded carbon card. The tone is
+  kept in the accessible label.
+- **Fields:** `AuthInput` gets an accent border while focused and an icon beside
+  error text.
+- **Buttons:** a light press-down (98% scale) and a distinct disabled opacity
+  (45%) replace one shared dim state.
+- **Section labels:** eyebrows are uppercase by style (`textTransform`) everywhere.
+  The source text and screen-reader text stay in sentence case.
+- **Recovery screen:** uses the standard screen header, a readable date
+  ("Sat, Oct 24") and capitalized field labels.
+- **Hard-coded colours:** the remaining literals are intentional (dark ink on the
+  accent, white icons on coloured tiles, the widget colour, Expo starter files).
+
+**Not changed (follow-ups):**
+
+- Inline delete confirmations could become bottom-sheet dialogs.
+- Log food's three plain text actions could become chips.
+- Auto-scroll while dragging.
+
+Evidence:
+
+- `npm run check` (fresh lint cache): 85 suites with 429 Jest tests pass, plus 6
+  dataset tests.
+- Tests now find back controls by "Back to …" names.
+- Light and dark offline web captures of Body, Habits, Recovery, Log food and
+  Create split show the new back pill, headers, eyebrows and notices.
+
 Press-and-drag exercise reordering in the workout builder (2026-10-24):
 implementation and local verification **DONE**; device feel (iOS/Android haptics,
 scroll interplay) **DEFERRED to phone testing**.

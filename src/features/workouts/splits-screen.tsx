@@ -7,6 +7,7 @@ import {
   AuthText,
   AuthLink,
   AuthButton,
+  BackLink,
   AuthInput,
   AuthCard,
   AuthChoice,
@@ -170,7 +171,7 @@ export function SplitsScreen({
         selecting
         selectionTitle={`${weekdays[picking]} workout`}
         selectionDescription="Choose a saved workout or create one for this day. Save the split to keep the assignment."
-        backTitle="← Back to split"
+        backTitle="Split"
         onBack={() => setPicking(null)}
         onCreate={onCreateWorkout}
         onEdit={(workoutId, workoutName) => {
@@ -192,8 +193,8 @@ export function SplitsScreen({
   const title = id === 'new' ? 'Create split' : id ? 'Edit split' : 'Training splits';
   return (
     <AuthFrame header={<ScreenHeader title={title} />}>
-      <AuthLink
-        title={id ? '← Training splits' : '← My workouts'}
+      <BackLink
+        label={id ? 'Training splits' : 'My workouts'}
         disabled={busy}
         onPress={() => (dirty ? setDiscard(true) : onBack())}
       />

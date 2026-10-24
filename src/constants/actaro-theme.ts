@@ -35,6 +35,8 @@ export const actaroTypography = {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 11,
     letterSpacing: 0.6,
+    // Eyebrows always read as small caps; source text stays sentence case for screen readers.
+    textTransform: 'uppercase' as const,
     color: actaroColors.muted,
   },
   muted: { fontSize: 12, lineHeight: 18, color: actaroColors.muted },

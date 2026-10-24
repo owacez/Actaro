@@ -19,6 +19,7 @@ import {
   type TextInputProps,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { actaroColors, actaroLayout, actaroTypography } from '@/constants/actaro-theme';
 import { useAppTheme } from '@/features/profile/theme-context';
 
@@ -40,6 +41,9 @@ export function AuthFrame({
 }>) {
   const { colors } = useAppTheme();
   const screenStyle = [styles.screen, { backgroundColor: colors.background }];
+  const items = Children.toArray(children),
+    leading = items.filter(leadsFrame),
+    body = items.filter((child) => !leadsFrame(child));
   return (
     <SafeAreaView style={screenStyle}>
       <KeyboardAvoidingView
@@ -53,8 +57,9 @@ export function AuthFrame({
           scrollEnabled={scrollEnabled}
         >
           <View style={styles.content}>
+            {leading}
             {!pinnedHeader && header}
-            {children}
+            {body}
           </View>
         </ScrollView>
         {footer}
@@ -62,6 +67,66 @@ export function AuthFrame({
     </SafeAreaView>
   );
 }
+
+function leadsFrame(child: ReactNode) {
+  return isValidElement(child) && typeof child.type === 'function' && 'leadsFrame' in child.type;
+}
+
+// A small glyph that never reaches screen readers; the surrounding control carries the text.
+function Glyph({
+  name,
+  color,
+  size = 16,
+}: {
+  name: SymbolViewProps['name'];
+  color: string;
+  size?: number;
+}) {
+  return (
+    <View accessible={false} importantForAccessibility="no-hide-descendants">
+      <SymbolView name={name} size={size} tintColor={color} />
+    </View>
+  );
+}
+
+// The one back control: a chevron and the destination, always first on its screen.
+export function BackLink({
+  label,
+  onPress,
+  disabled = false,
+}: {
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+}) {
+  const { colors } = useAppTheme();
+  const name = label === 'Back' ? 'Back' : `Back to ${label}`;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={name}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      hitSlop={6}
+      style={({ pressed }) => [
+        styles.back,
+        { backgroundColor: colors.surface, borderColor: colors.border },
+        (pressed || disabled) && styles.dimmed,
+      ]}
+    >
+      <Glyph
+        name={{ ios: 'chevron.left', android: 'chevron_left', web: 'chevron_left' }}
+        color={colors.text}
+      />
+      <Text numberOfLines={1} style={[styles.backText, { color: colors.text }]}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+// AuthFrame reads this marker to place the back control above the screen header.
+BackLink.leadsFrame = true;
 
 export function AuthText({
   children,
@@ -92,7 +157,8 @@ export function AuthInput({
   hideLabel?: boolean;
 }) {
   const { colors, scheme } = useAppTheme();
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(false),
+    [focused, setFocused] = useState(false);
   return (
     <View style={styles.field}>
       {!hideLabel && <Text style={[styles.label, { color: colors.muted }]}>{label}</Text>}
@@ -100,14 +166,22 @@ export function AuthInput({
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          borderWidth: 1,
+          borderWidth: focused || error ? 1.5 : 1,
           borderRadius: actaroLayout.fieldRadius,
-          borderColor: error ? colors.danger : colors.border,
+          borderColor: error ? colors.danger : focused ? colors.accent : colors.border,
           backgroundColor: colors.surface,
         }}
       >
         <TextInput
           {...props}
+          onFocus={(event) => {
+            setFocused(true);
+            props.onFocus?.(event);
+          }}
+          onBlur={(event) => {
+            setFocused(false);
+            props.onBlur?.(event);
+          }}
           secureTextEntry={props.secureTextEntry && !visible}
           accessibilityLabel={props.accessibilityLabel ?? label}
           keyboardAppearance={props.keyboardAppearance ?? scheme}
@@ -136,9 +210,19 @@ export function AuthInput({
         )}
       </View>
       {error && (
-        <Text accessibilityRole="alert" style={{ color: colors.danger, fontSize: 12 }}>
-          {error}
-        </Text>
+        <View style={styles.inlineMessage}>
+          <Glyph
+            name={{ ios: 'exclamationmark.circle', android: 'error', web: 'error' }}
+            color={colors.danger}
+            size={14}
+          />
+          <Text
+            accessibilityRole="alert"
+            style={[styles.errorText, { color: colors.danger, flex: 1 }]}
+          >
+            {error}
+          </Text>
+        </View>
       )}
     </View>
   );
@@ -177,7 +261,8 @@ export function AuthButton({
           backgroundColor: outlined ? colors.surface : colors.accent,
           borderColor: outlined ? colors.border : colors.accent,
         },
-        (pressed || disabled || busy) && styles.dimmed,
+        pressed && styles.pressed,
+        (disabled || busy) && styles.disabled,
       ]}
     >
       {busy ? (
@@ -289,26 +374,36 @@ export function AuthNotice({
   announce = true,
 }: PropsWithChildren<{ error?: boolean; announce?: boolean }>) {
   const { colors } = useAppTheme();
-  if (error)
-    return (
-      <Text
-        accessibilityRole={announce ? 'alert' : undefined}
-        accessibilityLiveRegion={announce ? 'polite' : undefined}
-        style={[styles.errorText, { color: colors.danger }]}
-      >
-        {children}
-      </Text>
-    );
+  const tone = error ? colors.danger : colors.muted;
   return (
-    <AuthCard>
+    <View
+      style={[
+        styles.message,
+        {
+          backgroundColor: error ? colors.danger + '14' : colors.surface,
+          borderColor: error ? colors.danger + '40' : colors.border,
+        },
+      ]}
+    >
+      <Glyph
+        name={
+          error
+            ? { ios: 'exclamationmark.circle.fill', android: 'error', web: 'error' }
+            : { ios: 'info.circle', android: 'info', web: 'info' }
+        }
+        color={tone}
+      />
       <Text
-        accessibilityRole={error ? 'alert' : undefined}
-        accessibilityLiveRegion="polite"
-        style={[styles.noticeText, { color: colors.muted }]}
+        accessibilityRole={error && announce ? 'alert' : undefined}
+        accessibilityLiveRegion={!error || announce ? 'polite' : undefined}
+        style={[
+          error ? styles.errorText : styles.noticeText,
+          { color: error ? colors.danger : colors.muted, flex: 1 },
+        ]}
       >
         {children}
       </Text>
-    </AuthCard>
+    </View>
   );
 }
 
@@ -365,6 +460,31 @@ const styles = StyleSheet.create({
   },
   outlined: { borderColor: authColors.border, backgroundColor: 'transparent' },
   dimmed: { opacity: 0.65 },
+  pressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },
+  disabled: { opacity: 0.45 },
+  back: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 4,
+    minHeight: 36,
+    maxWidth: '100%',
+    paddingLeft: 8,
+    paddingRight: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+  },
+  backText: { fontFamily: 'Inter_500Medium', fontSize: 14 },
+  inlineMessage: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  message: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
   choiceTarget: {
     minHeight: actaroLayout.minimumTouchHeight,
     minWidth: actaroLayout.minimumTouchHeight,
@@ -386,14 +506,14 @@ const styles = StyleSheet.create({
   },
   noticeText: {
     fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: 13,
+    lineHeight: 19,
     color: authColors.muted,
   },
   errorText: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: 13,
+    lineHeight: 19,
     color: authColors.text,
   },
 });

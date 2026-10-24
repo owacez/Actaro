@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthFrame,
-  AuthLink,
   AuthLoading,
   AuthNotice,
   AuthText,
@@ -53,7 +53,7 @@ export function TrainingScreen({
   }, [userId, attempt]);
   return (
     <AuthFrame>
-      <AuthLink title="← My workouts" onPress={onBack} />
+      <BackLink label="My workouts" onPress={onBack} />
       <AuthText kind="title">Training summary</AuthText>
       {loading ? (
         <AuthLoading>Loading training summary…</AuthLoading>

@@ -3,8 +3,8 @@ import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/features/auth/auth-provider';
 import {
   AuthButton,
+  BackLink,
   AuthFrame,
-  AuthLink,
   AuthLoading,
   AuthNotice,
 } from '@/features/auth/auth-components';
@@ -86,7 +86,7 @@ function NutritionManager({
       <AuthFrame>
         <AuthNotice error>{error}</AuthNotice>
         <AuthButton title="Retry loading" onPress={() => setAttempt((value) => value + 1)} />
-        <AuthLink title="← Food" onPress={onBack} />
+        <BackLink label="Food" onPress={onBack} />
       </AuthFrame>
     );
   if (!date)
@@ -101,7 +101,7 @@ function NutritionManager({
     return (
       <AuthFrame>
         <AuthNotice error>Invalid diary date.</AuthNotice>
-        <AuthLink title="← Food" onPress={onBack} />
+        <BackLink label="Food" onPress={onBack} />
       </AuthFrame>
     );
   }
@@ -126,7 +126,7 @@ function NutritionManager({
   return (
     <AuthFrame>
       <AuthNotice error>Nutrition screen unavailable.</AuthNotice>
-      <AuthLink title="← Food" onPress={onBack} />
+      <BackLink label="Food" onPress={onBack} />
     </AuthFrame>
   );
 }

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthChoice,
   AuthFrame,
@@ -172,11 +173,7 @@ export function HistoryScreen({
   );
   return (
     <AuthFrame header={<ScreenHeader title={id ? 'Recorded workout' : 'Workout history'} />}>
-      <AuthLink
-        title={id ? '← Workout history' : '← My workouts'}
-        disabled={busy}
-        onPress={onBack}
-      />
+      <BackLink label={id ? 'Workout history' : 'My workouts'} disabled={busy} onPress={onBack} />
       {!id && (
         <Segments
           options={[

@@ -1,12 +1,13 @@
-import { Segments } from '@/components/product-ui';
+import { ScreenHeader, Segments } from '@/components/product-ui';
+import { displayDate } from '@/lib/format';
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthFrame,
   AuthInput,
-  AuthLink,
   AuthLoading,
   AuthNotice,
   AuthText,
@@ -105,13 +106,12 @@ export function RecoveryScreen({ userId, onBack }: { userId: string; onBack: () 
     ? recoveryResult(input, data.context.overview, data.context.today, rest)
     : null;
   return (
-    <AuthFrame>
-      <AuthLink
-        title="← Back"
+    <AuthFrame header={<ScreenHeader title="Recovery check" />}>
+      <BackLink
+        label="Back"
         disabled={busy}
         onPress={() => (dirty ? setDiscard(true) : onBack())}
       />
-      <AuthText kind="heading">Recovery check</AuthText>
       {error && <AuthNotice error>{error}</AuthNotice>}
       {loading ? (
         <AuthLoading>Loading recovery checks…</AuthLoading>
@@ -130,7 +130,7 @@ export function RecoveryScreen({ userId, onBack }: { userId: string; onBack: () 
             </>
           )}
           <AuthText>
-            {data.context.today} · {data.context.timeZone}
+            {displayDate(data.context.today)} · {data.context.timeZone}
           </AuthText>
           <AuthText>
             Report how you feel today. Energy, soreness and sleep are required; stress and notes are
@@ -138,7 +138,9 @@ export function RecoveryScreen({ userId, onBack }: { userId: string; onBack: () 
           </AuthText>
           {(['energy', 'soreness', 'sleep', 'stress'] as const).map((field) => (
             <View key={field} style={{ gap: 8 }}>
-              <AuthText kind="eyebrow">{field === 'sleep' ? 'Sleep quality' : field}</AuthText>
+              <AuthText kind="eyebrow">
+                {field === 'sleep' ? 'Sleep quality' : field[0].toUpperCase() + field.slice(1)}
+              </AuthText>
               <Segments
                 label={field === 'sleep' ? 'Sleep' : field[0].toUpperCase() + field.slice(1)}
                 value={input[field] === null ? '' : String(input[field])}
@@ -198,12 +200,12 @@ export function RecoveryScreen({ userId, onBack }: { userId: string; onBack: () 
             Categories use your reports and simple recorded frequency/volume/rest-day rules. No
             readiness score or physiological recovery measurement is inferred.
           </AuthText>
-          <AuthText kind="eyebrow">Recent saved check-ins</AuthText>
+          <AuthText kind="eyebrow">Recent check-ins</AuthText>
           {!data.rows.length && <AuthText>No saved check-ins yet.</AuthText>}
           {data.rows.map((row) => (
             <AuthCard key={row.local_date}>
               <AuthText>
-                {row.local_date}: energy{' '}
+                {displayDate(row.local_date)}: energy{' '}
                 {recoveryChoices.energy.find((choice) => choice.value === row.energy)?.label},
                 soreness{' '}
                 {recoveryChoices.soreness.find((choice) => choice.value === row.soreness)?.label},

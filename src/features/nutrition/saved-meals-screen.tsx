@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { randomUUID } from 'expo-crypto';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthFrame,
   AuthLink,
@@ -56,7 +57,7 @@ export function SavedMealsScreen({
     [remove, setRemove] = useState<string | null>(null);
   return (
     <AuthFrame>
-      <AuthLink title="← Food" disabled={action.locked} onPress={onBack} />
+      <BackLink label="Food" disabled={action.locked} onPress={onBack} />
       <AuthText kind="title">Saved meals</AuthText>
       <AuthText>
         Log to {meal} · {date}. Create a saved meal from any populated meal group in the diary.

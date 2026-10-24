@@ -109,7 +109,7 @@ test('keeps failed edit drafts and confirms discard', async () => {
   await fireEvent.press(screen.getByRole('button', { name: 'Save split' }));
   await screen.findByText('Unable to save split. Your draft is kept; retry.');
   expect(screen.getByLabelText('Split name').props.value).toBe('Changed week');
-  await fireEvent.press(screen.getByRole('button', { name: '← Training splits' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Back to Training splits' }));
   expect(props.onBack).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Discard split changes' }));
   expect(props.onBack).toHaveBeenCalledTimes(1);

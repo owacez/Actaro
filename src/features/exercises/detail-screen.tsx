@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Linking, View } from 'react-native';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthChoice,
   AuthFrame,
@@ -70,7 +71,7 @@ export function DetailScreen({
         ) : undefined
       }
     >
-      <AuthLink title="← Exercise Library" onPress={onBack} />
+      <BackLink label="Exercise Library" onPress={onBack} />
       {loading ? (
         <AuthLoading>Loading exercise…</AuthLoading>
       ) : error || !record ? (

@@ -7,6 +7,7 @@ import { BodyFormEditor } from './body-form';
 import { useFocusEffect } from 'expo-router';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthFrame,
   AuthInput,
@@ -91,7 +92,7 @@ export function BodyScreen({ userId, onBack }: { userId: string; onBack: () => v
   }
   return (
     <AuthFrame header={<ScreenHeader title="Body records" />}>
-      <AuthLink title="← Back" disabled={action.locked} onPress={onBack} />
+      <BackLink label="Back" disabled={action.locked} onPress={onBack} />
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {data && !resource.loading && (
         <>

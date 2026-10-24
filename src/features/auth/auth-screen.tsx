@@ -9,6 +9,7 @@ import {
   AuthInput,
   AuthLink,
   AuthNotice,
+  BackLink,
   AuthText,
   authStyles,
 } from './auth-components';
@@ -151,8 +152,8 @@ export function AuthScreen({ recovery = false }: { recovery?: boolean }) {
           actaro<Text style={{ color: colors.accent }}>.</Text>
         </Text>
       ) : (
-        <AuthLink
-          title="← SIGN IN"
+        <BackLink
+          label="Sign in"
           disabled={busy}
           onPress={() => (recovery ? void cancelRecovery() : changeMode('sign-in'))}
         />

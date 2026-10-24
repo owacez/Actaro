@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   AuthButton,
+  BackLink,
   AuthFrame,
-  AuthLink,
   AuthNotice,
   AuthText,
 } from '@/features/auth/auth-components';
@@ -67,7 +67,7 @@ export function ReminderScreen({ userId, onBack }: { userId: string; onBack: () 
   }
   return (
     <AuthFrame>
-      <AuthLink title="← Preferences" onPress={onBack} disabled={busy} />
+      <BackLink label="Preferences" onPress={onBack} disabled={busy} />
       <AuthText kind="heading">Habit reminders</AuthText>
       <AuthText>
         {enabled === null

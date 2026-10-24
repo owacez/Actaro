@@ -5,6 +5,7 @@ import { useNavigation } from 'expo-router';
 import { usePreventRemove, type NavigationAction } from 'expo-router/react-navigation';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthFrame,
   AuthInput,
@@ -300,7 +301,7 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
     return (
       <AuthFrame>
         {exitDialog}
-        <AuthLink title="← My workouts" onPress={onBack} />
+        <BackLink label="My workouts" onPress={onBack} />
         <AuthText kind="heading">Saved workout</AuthText>
         {error ? (
           <>
@@ -632,8 +633,8 @@ export function SessionScreen({ userId, onBack }: { userId: string; onBack: () =
         />
         <AuthLink title="Keep training" disabled={busy} onPress={() => setFinishOpen(false)} />
       </ActionSheet>
-      <AuthLink
-        title="← My workouts"
+      <BackLink
+        label="My workouts"
         disabled={busy}
         onPress={() => {
           if (draft.status === 'saved') onBack();

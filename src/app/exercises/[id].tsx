@@ -2,7 +2,7 @@ import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/features/auth/auth-provider';
 import { DetailScreen } from '@/features/exercises/detail-screen';
 import { validExerciseId } from '@/features/exercises/exercise-service';
-import { AuthFrame, AuthLink, AuthNotice } from '@/features/auth/auth-components';
+import { AuthFrame, AuthNotice, BackLink } from '@/features/auth/auth-components';
 
 export default function ExerciseRoute() {
   const { session, recovery } = useAuth();
@@ -12,7 +12,7 @@ export default function ExerciseRoute() {
     return (
       <AuthFrame>
         <AuthNotice error>Exercise unavailable.</AuthNotice>
-        <AuthLink title="← Exercise Library" onPress={() => router.replace('/fitness')} />
+        <BackLink label="Exercise Library" onPress={() => router.replace('/fitness')} />
       </AuthFrame>
     );
   return (

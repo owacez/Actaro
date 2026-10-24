@@ -7,6 +7,7 @@ import { DatePicker } from '@/components/date-picker';
 import { randomUUID } from 'expo-crypto';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthChoice,
   AuthFrame,
@@ -66,7 +67,7 @@ export function GoalsScreen({
   );
   return (
     <AuthFrame header={<ScreenHeader title="Goals" />}>
-      <AuthLink title="← You" disabled={action.locked} onPress={onBack} />
+      <BackLink label="You" disabled={action.locked} onPress={onBack} />
       <StepsCard
         title="How goals work"
         steps={[
@@ -420,7 +421,7 @@ export function GoalEditor({
   }
   return (
     <AuthFrame>
-      <AuthLink title="← Goals" disabled={action.locked} onPress={onBack} />
+      <BackLink label="Goals" disabled={action.locked} onPress={onBack} />
       <AuthText kind="title">{goalId ? 'Edit goal' : 'Create goal'}</AuthText>
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {data && !resource.loading && (

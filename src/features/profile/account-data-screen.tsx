@@ -2,9 +2,9 @@ import { ActionSheet, ScreenHeader } from '@/components/product-ui';
 import { useEffect, useRef, useState } from 'react';
 import {
   AuthButton,
+  BackLink,
   AuthFrame,
   AuthInput,
-  AuthLink,
   AuthNotice,
   AuthText,
 } from '@/features/auth/auth-components';
@@ -87,7 +87,7 @@ export function AccountDataScreen({ userId, onBack }: { userId: string; onBack: 
   }
   return (
     <AuthFrame header={<ScreenHeader title="Privacy and data" />}>
-      <AuthLink title="← Profile" disabled={busy} onPress={onBack} />
+      <BackLink label="Profile" disabled={busy} onPress={onBack} />
       <AuthText kind="heading">Privacy & account data</AuthText>
       <AuthText>
         Only your signed-in account is included. Exports contain private health information; choose

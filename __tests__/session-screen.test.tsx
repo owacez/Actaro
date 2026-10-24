@@ -207,7 +207,7 @@ test('the back link uses the same dialog and discard failure cannot navigate or 
     </FeedbackTestRoot>,
   );
   await screen.findByRole('button', { name: 'Complete set 1' });
-  await fireEvent.press(screen.getByRole('button', { name: '← My workouts' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Back to My workouts' }));
   await screen.findByText('Leave workout?');
   store.discard.mockRejectedValueOnce(new Error('disk error'));
   await fireEvent.press(screen.getByRole('button', { name: 'Discard workout' }));

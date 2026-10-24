@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { Linking, View } from 'react-native';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthChoice,
   AuthFrame,
@@ -100,7 +101,7 @@ export function TargetsScreen({
     );
   return (
     <AuthFrame header={<ScreenHeader title="Daily plan & targets" />}>
-      <AuthLink title="← Back" disabled={action.locked} onPress={onBack} />
+      <BackLink label="Back" disabled={action.locked} onPress={onBack} />
       <LoadFeedback {...resource} retry={resource.refresh} />
       {resource.data && !resource.loading && (
         <>

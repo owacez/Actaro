@@ -4,6 +4,7 @@ import { ActionRow, ProductIcon } from '@/components/product-ui';
 import { randomUUID } from 'expo-crypto';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthChoice,
   AuthFrame,
@@ -188,7 +189,7 @@ export function RecipeLibraryScreen({
 }) {
   return (
     <AuthFrame>
-      <AuthLink title="← Food" onPress={onBack} />
+      <BackLink label="Food" onPress={onBack} />
       <AuthText kind="title">Your recipes</AuthText>
       <AuthText>
         A recipe combines ingredients into a dish you cook. Add their amounts and we calculate
@@ -227,7 +228,7 @@ export function FoodSearchScreen({
 }) {
   return (
     <AuthFrame>
-      <AuthLink title="← Food" onPress={onBack} />
+      <BackLink label="Food" onPress={onBack} />
       <AuthText kind="title">Log food</AuthText>
       <AuthText>
         {displayDate(date)} · {meal}
@@ -297,7 +298,7 @@ export function FoodPortionScreen({
   } catch {}
   return (
     <AuthFrame>
-      <AuthLink title="← Food search" disabled={action.locked} onPress={onBack} />
+      <BackLink label="Food search" disabled={action.locked} onPress={onBack} />
       <LoadFeedback {...resource} retry={resource.refresh} />
       {data && !resource.loading && (
         <>

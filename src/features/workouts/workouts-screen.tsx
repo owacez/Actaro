@@ -8,6 +8,7 @@ import {
   AuthFrame,
   AuthCard,
   AuthLink,
+  BackLink,
   AuthLoading,
   AuthNotice,
   AuthText,
@@ -26,7 +27,7 @@ export function WorkoutsScreen({
   selecting = false,
   selectionTitle = 'Add to workout',
   selectionDescription = 'Choose a saved workout or create one. The selected exercise is added to its draft; save the workout to keep it.',
-  backTitle = '← Train',
+  backTitle = 'Train',
   onSplits,
   onPlans,
   onStart,
@@ -119,7 +120,7 @@ export function WorkoutsScreen({
   }
   return (
     <AuthFrame header={<ScreenHeader title={selecting ? selectionTitle : 'Train'} />}>
-      {navigation ?? <AuthLink title={backTitle} disabled={removing} onPress={onBack} />}
+      {navigation ?? <BackLink label={backTitle} disabled={removing} onPress={onBack} />}
       {selecting && <AuthText>{selectionDescription}</AuthText>}
       {navigation && !selecting && onStart && (
         <ScheduledTraining userId={userId} onStart={onStart} onResume={onResume} />

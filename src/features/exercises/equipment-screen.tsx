@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import {
   AuthButton,
+  BackLink,
   AuthChoice,
   AuthFrame,
   AuthInput,
-  AuthLink,
   AuthLoading,
   AuthNotice,
   AuthText,
@@ -69,7 +69,7 @@ export function EquipmentScreen({ userId, onBack }: { userId: string; onBack: ()
   }
   return (
     <AuthFrame>
-      <AuthLink title="← Exercise Library" disabled={saving} onPress={onBack} />
+      <BackLink label="Exercise Library" disabled={saving} onPress={onBack} />
       <AuthText kind="heading">My equipment</AuthText>
       <AuthText>
         Select equipment available to you. No equipment exercises are always included when filtering

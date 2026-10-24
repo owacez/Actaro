@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 
 import {
   AuthButton,
+  BackLink,
   AuthFrame,
   AuthInput,
   AuthLink,
@@ -112,7 +113,7 @@ export function PreferencesScreen({ userId, onBack }: { userId: string; onBack: 
   const theme = draft.theme ?? saved?.theme;
   return (
     <AuthFrame header={<ScreenHeader title="Preferences" />}>
-      <AuthLink title="← You" disabled={saving} onPress={onBack} />
+      <BackLink label="You" disabled={saving} onPress={onBack} />
       {loading ? (
         <AuthLoading>Loading preferences…</AuthLoading>
       ) : !saved ? (

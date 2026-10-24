@@ -4,6 +4,7 @@ import { actaroColors } from '@/constants/actaro-theme';
 import { randomUUID } from 'expo-crypto';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthChoice,
   AuthFrame,
@@ -107,8 +108,8 @@ export function PlansScreen({
     <AuthFrame header={navigation ? <ScreenHeader title="Train" /> : undefined}>
       {navigation}
       {(!navigation || plan) && (
-        <AuthLink
-          title={plan ? '← Training plans' : '← My workouts'}
+        <BackLink
+          label={plan ? 'Training plans' : 'My workouts'}
           disabled={busy}
           onPress={() => {
             if (selection) {

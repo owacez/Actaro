@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { ActionSheet } from '@/components/product-ui';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthFrame,
   AuthLink,
@@ -91,7 +92,7 @@ export function PrestartScreen({
   const totals = prepared ? prestartTotals(prepared.draft) : null;
   return (
     <AuthFrame>
-      <AuthLink title="← My workouts" disabled={busy} onPress={onBack} />
+      <BackLink label="My workouts" disabled={busy} onPress={onBack} />
       <AuthText kind="heading">{prepared?.draft.name ?? 'Workout pre-start'}</AuthText>
       {error && !choosing && <AuthNotice error>{error}</AuthNotice>}
       {loading ? (

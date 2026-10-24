@@ -17,6 +17,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SymbolView } from 'expo-symbols';
 
 import { authColors } from './auth-components';
 
@@ -63,6 +64,24 @@ function FeedbackNotification({
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const web = Platform.OS === 'web';
+  const tone =
+    notification.tone === 'error'
+      ? {
+          label: 'Error',
+          color: authColors.danger,
+          icon: { ios: 'exclamationmark', android: 'priority_high', web: 'priority_high' } as const,
+        }
+      : notification.tone === 'success'
+        ? {
+            label: 'Success',
+            color: authColors.success,
+            icon: { ios: 'checkmark', android: 'check', web: 'check' } as const,
+          }
+        : {
+            label: 'Notice',
+            color: authColors.accent,
+            icon: { ios: 'info', android: 'info_i', web: 'info_i' } as const,
+          };
   useEffect(() => {
     if (hovered || focused) return;
     const timer = setTimeout(
@@ -96,17 +115,18 @@ function FeedbackNotification({
         onAccessibilityEscape={() => dismiss(notification.id)}
         style={[styles.notification, web ? styles.toast : styles.snackbar]}
       >
+        <View
+          accessible={false}
+          importantForAccessibility="no-hide-descendants"
+          style={[styles.badge, { backgroundColor: tone.color }]}
+        >
+          <SymbolView name={tone.icon} size={14} tintColor="#ffffff" />
+        </View>
         <View style={styles.message}>
-          <Text style={styles.label}>
-            {notification.tone === 'error'
-              ? 'Error'
-              : notification.tone === 'success'
-                ? 'Success'
-                : 'Notice'}
-          </Text>
           <Text
             accessibilityRole={notification.tone === 'error' ? 'alert' : undefined}
             accessibilityLiveRegion={notification.tone === 'error' ? 'assertive' : 'polite'}
+            accessibilityLabel={`${tone.label}: ${notification.message}`}
             style={styles.text}
           >
             {notification.message}
@@ -142,20 +162,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingLeft: 16,
-    paddingVertical: 10,
+    paddingLeft: 12,
+    paddingVertical: 8,
     paddingRight: 4,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: authColors.accent,
+    borderRadius: 18,
     backgroundColor: authColors.text,
-    boxShadow: '0 4px 16px rgba(18,18,17,0.18)',
+    boxShadow: '0 10px 30px rgba(18,18,17,0.28)',
   },
   toast: { width: '100%', maxWidth: 360 },
   snackbar: { width: '100%', maxWidth: 430 },
   message: { flex: 1, gap: 4 },
-  label: { fontFamily: 'Inter_600SemiBold', fontSize: 11, color: authColors.accent },
-  text: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 19, color: authColors.surface },
+  badge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text: { fontFamily: 'Inter_500Medium', fontSize: 14, lineHeight: 20, color: authColors.surface },
   dismiss: { minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
   close: { fontFamily: 'Inter_400Regular', fontSize: 22, color: authColors.surface },
 });

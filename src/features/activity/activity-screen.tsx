@@ -3,6 +3,7 @@ import { Platform, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthFrame,
   AuthInput,
@@ -57,7 +58,7 @@ export function ActivityScreen({ userId, onBack }: { userId: string; onBack: () 
   const count = live?.steps ?? data?.current?.steps;
   return (
     <AuthFrame header={<ScreenHeader title="Steps and activity" />}>
-      <AuthLink title="← You" disabled={locked} onPress={onBack} />
+      <BackLink label="You" disabled={locked} onPress={onBack} />
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {data && !resource.loading && (
         <>

@@ -10,6 +10,7 @@ import { TimePicker } from '@/components/time-picker';
 import { CompletionMark } from '@/components/completion-mark';
 import {
   AuthButton,
+  BackLink,
   AuthCard,
   AuthChoice,
   AuthFrame,
@@ -114,7 +115,7 @@ export function HabitsScreen({
   );
   return (
     <AuthFrame header={<ScreenHeader title="Habits" />}>
-      <AuthLink title="← You" disabled={action.locked} onPress={onBack} />
+      <BackLink label="You" disabled={action.locked} onPress={onBack} />
       <StepsCard
         title="How habits work"
         steps={[
@@ -479,7 +480,7 @@ export function HabitEditor({
   }
   return (
     <AuthFrame>
-      <AuthLink title="← Habits" disabled={action.locked} onPress={onBack} />
+      <BackLink label="Habits" disabled={action.locked} onPress={onBack} />
       <AuthText kind="title">{habitId ? 'Edit habit' : 'Create habit'}</AuthText>
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {resource.data && !resource.loading && (
@@ -724,7 +725,7 @@ export function HabitLogScreen({
   }
   return (
     <AuthFrame>
-      <AuthLink title="← Habits" disabled={action.locked} onPress={onBack} />
+      <BackLink label="Habits" disabled={action.locked} onPress={onBack} />
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {resource.data && !resource.loading && (
         <>
@@ -838,7 +839,7 @@ export function HabitHistoryScreen({
     result = data ? habitConsistency(data.record, data.until) : null;
   return (
     <AuthFrame>
-      <AuthLink title="← Habits" onPress={onBack} />
+      <BackLink label="Habits" onPress={onBack} />
       <AuthText kind="title">Habit history</AuthText>
       <RecordLoadFeedback {...resource} retry={resource.refresh} />
       {data && result && !resource.loading && (

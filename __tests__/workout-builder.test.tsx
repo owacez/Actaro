@@ -201,7 +201,7 @@ test('shortcut preserves an existing workout and adds once; discard makes no mut
     </FeedbackTestRoot>,
   );
   await screen.findByText('2. Selected real exercise');
-  await fireEvent.press(screen.getByRole('button', { name: '← My workouts' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Back to My workouts' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Discard and leave' }));
   expect(back).toHaveBeenCalledTimes(1);
   expect(mocks.save).not.toHaveBeenCalled();
@@ -502,7 +502,7 @@ test('loads saved workout, keeps a failed save draft and confirms discard', asyn
   await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
   await screen.findByText('Unable to save workout. Your draft is kept; retry.');
   expect(screen.getByLabelText('Workout name').props.value).toBe('Revised A');
-  await fireEvent.press(screen.getByRole('button', { name: '← My workouts' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Back to My workouts' }));
   expect(back).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Discard and leave' }));
   expect(back).toHaveBeenCalledTimes(1);
@@ -562,7 +562,7 @@ test('delete requires confirmation, keeps failed rows and blocks duplicate pendi
   await fireEvent.press(screen.getByRole('button', { name: 'Keep workout' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Create workout' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Upper A' }));
-  await fireEvent.press(screen.getByRole('button', { name: '← Train' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Back to Train' }));
   expect(mocks.remove).toHaveBeenCalledTimes(2);
   expect(mocks.remove).toHaveBeenLastCalledWith(userId, workoutId);
   expect(back).not.toHaveBeenCalled();
@@ -695,7 +695,7 @@ test('pending save blocks repeated mutation and leaving through discard', async 
   );
   await screen.findByDisplayValue('Upper A');
   await fireEvent.changeText(screen.getByLabelText('Workout name'), 'Revised');
-  await fireEvent.press(screen.getByRole('button', { name: '← My workouts' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Back to My workouts' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Discard and leave' }));
