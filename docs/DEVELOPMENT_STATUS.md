@@ -4,6 +4,37 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Full-screen live run, Strava-style controls (2026-10-24): implementation and local
+verification **DONE**; device acceptance **DEFERRED**.
+
+- **Recording and paused runs** (`/runs/session`, a stack screen with no tab bar):
+  - The street map fills the whole screen (`RunMap fullScreen`, edge to edge, using
+    the map's own attribution).
+  - A minimize button (opens the existing leave sheet) and a status pill
+    (Recording / Paused / Weak GPS / Auto-paused / Recording interrupted) float at
+    the top.
+  - A floating bottom card shows the time, then distance, live pace and average
+    moving pace.
+- **Controls:**
+  - While recording there is one large **Pause** button. Once paused, **Resume** and
+    **Finish** appear.
+  - Finish moves straight to the review screen (nothing is saved until **Save
+    run**), so the old Stop confirmation sheet and footer were removed.
+  - Leave and discard sheets are unchanged and shared.
+- **Review** keeps the scrolling summary with a 280 pt map, splits, notes and Save.
+- **Run start:** the map fills the screen height down to the Start controls
+  (window height − 370 pt). The GPS note moved into the Run settings sheet.
+
+Evidence:
+
+- `npm run check` (fresh lint cache): 85 suites with 430 Jest tests pass, plus 6
+  dataset tests.
+- The run test now covers: Pause only while recording, then Resume and Finish; Finish
+  opens review with no save, and Save still works.
+- Offline web captures of a stored London run (paused) and the start screen: full
+  screen, no tab bar, bottom card with Resume and Finish. Street tiles are blocked by
+  the offline harness, so the route outline fallback shows.
+
 Strava-style run start, compact Today habits, live exercise search (2026-10-24):
 implementation and local verification **DONE**; device acceptance **DEFERRED**.
 

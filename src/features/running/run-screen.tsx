@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useNavigation } from 'expo-router';
 import { usePreventRemove, type NavigationAction } from 'expo-router/react-navigation';
 import { randomUUID } from 'expo-crypto';
-import { Pressable, Text, View, useWindowDimensions } from 'react-native';
+import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActionSheet, NavigationSurface, ProductIcon, ScreenHeader } from '@/components/product-ui';
 import {
   AuthButton,
@@ -197,6 +198,8 @@ export function RunStartScreen({
     };
   }, []);
   const previewPoint = preview.state === 'off' ? null : preview.point;
+  // The map fills the screen down to the Start controls and the tab bar.
+  const startMapHeight = Math.max(300, screenSize.height - 370);
   async function start() {
     if (pending.current || !resource.data) return;
     pending.current = true;
@@ -233,18 +236,14 @@ export function RunStartScreen({
       {navigation}
       <View
         style={{
-          height: Math.max(320, Math.round(screenSize.height * 0.5)),
+          height: startMapHeight,
           borderRadius: 28,
           overflow: 'hidden',
           backgroundColor: colors.fill,
         }}
       >
         {previewPoint ? (
-          <RunMap
-            points={[previewPoint]}
-            live
-            height={Math.max(320, Math.round(screenSize.height * 0.5))}
-          />
+          <RunMap points={[previewPoint]} live height={startMapHeight} />
         ) : (
           <View
             style={{
@@ -374,10 +373,6 @@ export function RunStartScreen({
           />
         </View>
       )}
-      <AuthText kind="muted">
-        GPS is an estimate. Your route is private to your account; steps stay in your activity count
-        and no calories are invented.
-      </AuthText>
       <ActionSheet title="Run settings" visible={settings} onClose={() => setSettings(false)}>
         <AuthChoice
           title="Record with screen locked"
@@ -389,6 +384,10 @@ export function RunStartScreen({
           {supported
             ? 'Uses background location only during an active run. You will be asked for Always/background location after foreground permission.'
             : 'Expo Go and web support foreground recording here. Leaving the app pauses the run. Background GPS needs a development build.'}
+        </AuthText>
+        <AuthText kind="muted">
+          GPS is an estimate. Your route is private to your account; steps stay in your activity
+          count and no calories are invented.
         </AuthText>
         <AuthButton title="Done" outlined onPress={() => setSettings(false)} />
       </ActionSheet>
@@ -424,7 +423,7 @@ export function RunSessionScreen({
   const saved = useRunDraft(userId),
     action = useRecordAction(),
     draft = saved.draft;
-  const [sheet, setSheet] = useState<'stop' | 'leave' | 'discard' | null>(null);
+  const [sheet, setSheet] = useState<'leave' | 'discard' | null>(null);
   const [busy, setBusy] = useState(false),
     [error, setError] = useState<string | null>(null);
   const [noteEdit, setNoteEdit] = useState<{ id: string; value: string } | null>(null);
@@ -432,7 +431,6 @@ export function RunSessionScreen({
   const [exitApproved, setExitApproved] = useState(false),
     [exitAction, setExitAction] = useState<NavigationAction | null>(null),
     [savedId, setSavedId] = useState<string | null>(null);
-  const screenSize = useWindowDimensions();
   const navigation = useNavigation(),
     pending = useRef(false),
     alive = useRef(true);
@@ -484,62 +482,277 @@ export function RunSessionScreen({
   }
   const locked = busy || action.locked;
   const seconds = draft ? runSeconds(draft, saved.error ? draft.updatedAt : saved.now) : 0;
+  const { colors } = useAppTheme();
+  const gpsStale = !!draft && saved.now - draft.lastFix.timestamp > 15000;
+  const liveStatus = !draft
+    ? ''
+    : draft.status === 'paused'
+      ? 'Paused'
+      : saved.error
+        ? 'Recording interrupted'
+        : gpsStale
+          ? 'Weak GPS'
+          : draft.autoPaused
+            ? 'Auto-paused'
+            : 'Recording';
+  const floating = {
+    minWidth: 40,
+    height: 40,
+    width: 40,
+    borderRadius: 20,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    backgroundColor: colors.surface,
+    boxShadow: '0 2px 10px rgba(0,0,0,0.18)',
+  };
+  const liveNumber = {
+    color: colors.text,
+    fontFamily: 'Inter_600SemiBold',
+    fontVariant: ['tabular-nums' as const],
+  };
+  const sheets = (
+    <ActionSheet
+      title={sheet === 'discard' ? 'Discard this run?' : 'Leave this run?'}
+      visible={sheet !== null}
+      onClose={() => {
+        if (!locked) setSheet(null);
+      }}
+    >
+      {sheet === 'leave' && (
+        <>
+          <AuthText>
+            {draft?.background && draft.status === 'recording'
+              ? 'Your run can keep recording while you use the rest of Actaro. Open it again from Train → Run.'
+              : 'Keep the run on this device. Foreground recording pauses before you leave.'}
+          </AuthText>
+          <AuthButton
+            title={
+              draft?.background && draft.status === 'recording'
+                ? 'Keep recording and return'
+                : 'Save draft and return'
+            }
+            disabled={locked}
+            onPress={() => void command(leave)}
+          />
+          <AuthButton
+            title="Discard instead"
+            outlined
+            disabled={locked}
+            onPress={() => setSheet('discard')}
+          />
+        </>
+      )}
+      {sheet === 'discard' && (
+        <>
+          <AuthText>
+            Delete this unsaved run from this device? Its route cannot be recovered.
+          </AuthText>
+          <AuthButton
+            title="Confirm discard run"
+            disabled={locked}
+            onPress={() =>
+              void command(async () => {
+                if (draft) await runTracker.discard(userId, draft.id);
+                setExitApproved(true);
+              })
+            }
+          />
+        </>
+      )}
+      <AuthLink
+        title="Continue with run"
+        disabled={locked}
+        onPress={() => {
+          setExitAction(null);
+          setSheet(null);
+        }}
+      />
+      {error && <AuthNotice error>{error}</AuthNotice>}
+    </ActionSheet>
+  );
+  // Recording and paused runs are map-first and full screen, without tab navigation.
+  if (draft && draft.status !== 'review')
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <View style={StyleSheet.absoluteFill}>
+          <RunMap points={draft.route} live={draft.status === 'recording'} fullScreen />
+        </View>
+        <SafeAreaView
+          edges={['top']}
+          pointerEvents="box-none"
+          style={{ position: 'absolute', top: 0, left: 0, right: 0 }}
+        >
+          <View
+            pointerEvents="box-none"
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12 }}
+          >
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Leave run screen"
+              disabled={locked}
+              onPress={() => setSheet('leave')}
+              style={({ pressed }) => [floating, { opacity: pressed || locked ? 0.6 : 1 }]}
+            >
+              <ProductIcon
+                name={{ ios: 'chevron.down', android: 'expand_more', web: 'expand_more' }}
+                color={colors.text}
+              />
+            </Pressable>
+            <View
+              accessible
+              accessibilityLabel={liveStatus}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+                height: 40,
+                paddingHorizontal: 14,
+                borderRadius: 20,
+                backgroundColor: colors.surface,
+                boxShadow: '0 2px 10px rgba(0,0,0,0.18)',
+              }}
+            >
+              <View
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  backgroundColor:
+                    draft.status === 'recording' && !gpsStale ? colors.danger : colors.muted,
+                }}
+              />
+              <Text style={{ color: colors.text, fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
+                {liveStatus}
+              </Text>
+            </View>
+          </View>
+        </SafeAreaView>
+        <SafeAreaView
+          edges={['bottom']}
+          pointerEvents="box-none"
+          style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}
+        >
+          <View
+            style={{
+              margin: 12,
+              padding: 16,
+              gap: 14,
+              borderRadius: 28,
+              backgroundColor: colors.surface,
+              boxShadow: '0 -4px 24px rgba(0,0,0,0.18)',
+            }}
+          >
+            {sheet === null && (saved.error || error) && (
+              <AuthNotice error>{error ?? saved.error}</AuthNotice>
+            )}
+            {draft.interruption && <AuthNotice>{draft.interruption}</AuthNotice>}
+            <View style={{ alignItems: 'center' }}>
+              <View accessible accessibilityLabel={`Time ${runClock(seconds)}`}>
+                <Text style={[liveNumber, { fontSize: 48, lineHeight: 56, textAlign: 'center' }]}>
+                  {runClock(seconds)}
+                </Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+              {[
+                {
+                  title: 'Distance',
+                  value: `${runDistance(draft.distanceMeters, draft.unit)} ${draft.unit}`,
+                },
+                { title: 'Live pace', value: runLivePace(draft, saved.now) },
+                {
+                  title: 'Avg moving pace',
+                  value: runPace(runMovingSeconds(draft), draft.distanceMeters, draft.unit),
+                },
+              ].map((item) => (
+                <View
+                  key={item.title}
+                  accessible
+                  accessibilityLabel={`${item.title} ${item.value}`}
+                  style={{ flex: 1, alignItems: 'center', gap: 2 }}
+                >
+                  <Text style={[liveNumber, { fontSize: 20, lineHeight: 26 }]}>{item.value}</Text>
+                  <AuthText kind="eyebrow">{item.title}</AuthText>
+                </View>
+              ))}
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 24,
+              }}
+            >
+              {draft.status === 'recording' ? (
+                <LiveControl
+                  label="Pause run"
+                  caption="Pause"
+                  icon={{ ios: 'pause.fill', android: 'pause', web: 'pause' }}
+                  tone="accent"
+                  disabled={locked}
+                  onPress={() => void command(() => runTracker.pause(userId))}
+                />
+              ) : (
+                <>
+                  <LiveControl
+                    label="Resume run"
+                    caption="Resume"
+                    icon={{ ios: 'play.fill', android: 'play_arrow', web: 'play_arrow' }}
+                    tone="accent"
+                    disabled={locked}
+                    onPress={() => void command(() => runTracker.resume(userId))}
+                  />
+                  <LiveControl
+                    label="Finish run"
+                    caption="Finish"
+                    icon={{ ios: 'flag.checkered', android: 'flag', web: 'flag' }}
+                    tone="ink"
+                    disabled={locked}
+                    onPress={() => void command(() => runTracker.finish(userId))}
+                  />
+                </>
+              )}
+            </View>
+          </View>
+        </SafeAreaView>
+        {sheets}
+      </View>
+    );
   return (
     <AuthFrame
       header={
         <ScreenHeader
-          title={draft?.status === 'review' ? 'Review run' : 'Open run'}
+          title="Review run"
           action={<AuthLink title="Back" disabled={locked} onPress={() => setSheet('leave')} />}
         />
       }
       footer={
         draft && (
           <NavigationSurface style={{ padding: 16, gap: 10 }}>
-            {draft.status === 'review' ? (
-              <AuthButton
-                title="Save run"
-                busy={action.busy}
-                disabled={locked || seconds < 1}
-                onPress={() => {
-                  const snapshot = { ...draft, notes };
-                  void action.run(
-                    async () => {
-                      await runStore.update(userId, (value) => ({
-                        ...value,
-                        notes: snapshot.notes,
-                      }));
-                      await runService.save(userId, snapshot);
-                      await runTracker.discard(userId, snapshot.id);
-                    },
-                    'Run saved',
-                    () => {
-                      setSavedId(snapshot.id);
-                      setExitApproved(true);
-                    },
-                  );
-                }}
-              />
-            ) : (
-              <View style={{ flexDirection: 'row', gap: 10 }}>
-                <View style={{ flex: 1 }}>
-                  <AuthButton
-                    title={draft.status === 'recording' ? 'Pause run' : 'Resume run'}
-                    outlined
-                    disabled={locked}
-                    onPress={() =>
-                      void command(() =>
-                        draft.status === 'recording'
-                          ? runTracker.pause(userId)
-                          : runTracker.resume(userId),
-                      )
-                    }
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <AuthButton title="Stop run" disabled={locked} onPress={() => setSheet('stop')} />
-                </View>
-              </View>
-            )}
+            <AuthButton
+              title="Save run"
+              busy={action.busy}
+              disabled={locked || seconds < 1}
+              onPress={() => {
+                const snapshot = { ...draft, notes };
+                void action.run(
+                  async () => {
+                    await runStore.update(userId, (value) => ({
+                      ...value,
+                      notes: snapshot.notes,
+                    }));
+                    await runService.save(userId, snapshot);
+                    await runTracker.discard(userId, snapshot.id);
+                  },
+                  'Run saved',
+                  () => {
+                    setSavedId(snapshot.id);
+                    setExitApproved(true);
+                  },
+                );
+              }}
+            />
           </NavigationSurface>
         )
       }
@@ -563,69 +776,28 @@ export function RunSessionScreen({
       )}
       {draft && (
         <>
-          <AuthText kind="eyebrow">
-            {draft.status === 'recording'
-              ? saved.error
-                ? 'RECORDING INTERRUPTED'
-                : 'RECORDING'
-              : draft.status === 'paused'
-                ? 'PAUSED'
-                : 'RUN SUMMARY'}
-          </AuthText>
-          <RunMap
-            points={draft.route}
-            live={draft.status === 'recording'}
-            height={
-              draft.status === 'review' ? 280 : Math.max(340, Math.round(screenSize.height * 0.6))
-            }
+          <AuthText kind="eyebrow">RUN SUMMARY</AuthText>
+          <RunMap points={draft.route} height={280} />
+          <RunStatPanel
+            hero={{
+              title: 'Distance',
+              value: `${runDistance(draft.distanceMeters, draft.unit)} ${draft.unit}`,
+            }}
+            items={[
+              { title: 'Moving time', value: runClock(runMovingSeconds(draft)) },
+              {
+                title: 'Avg moving pace',
+                value: runPace(runMovingSeconds(draft), draft.distanceMeters, draft.unit),
+              },
+              { title: 'Elapsed time', value: runClock(seconds) },
+            ]}
           />
-          {draft.status === 'review' ? (
-            <RunStatPanel
-              hero={{
-                title: 'Distance',
-                value: `${runDistance(draft.distanceMeters, draft.unit)} ${draft.unit}`,
-              }}
-              items={[
-                { title: 'Moving time', value: runClock(runMovingSeconds(draft)) },
-                {
-                  title: 'Avg moving pace',
-                  value: runPace(runMovingSeconds(draft), draft.distanceMeters, draft.unit),
-                },
-                { title: 'Elapsed time', value: runClock(seconds) },
-              ]}
-            />
-          ) : (
-            <RunStatPanel
-              hero={{ title: 'Time', value: runClock(seconds) }}
-              items={[
-                {
-                  title: 'Distance',
-                  value: `${runDistance(draft.distanceMeters, draft.unit)} ${draft.unit}`,
-                },
-                { title: 'Live pace', value: runLivePace(draft, saved.now) },
-                {
-                  title: 'Avg moving pace',
-                  value: runPace(runMovingSeconds(draft), draft.distanceMeters, draft.unit),
-                },
-                { title: 'Moving time', value: runClock(runMovingSeconds(draft)) },
-              ]}
-            />
-          )}
           <AuthText kind="muted">
             Time excludes manual pauses. Live pace shows — when stopped or GPS is uncertain.
           </AuthText>
           {draft.status === 'review' && <RunSplits points={draft.route} unit={draft.unit} />}
           {draft.interruption && <AuthNotice>{draft.interruption}</AuthNotice>}
-          <AuthText kind="muted">
-            {draft.status === 'recording'
-              ? saved.now - draft.lastFix.timestamp > 15000
-                ? 'GPS signal is stale. Move outdoors; uncertain movement is not counted.'
-                : draft.autoPaused ||
-                    saved.now - draft.route[draft.route.length - 1].timestamp > 10000
-                  ? 'Auto-paused · waiting for clear movement. GPS remains on to resume automatically.'
-                  : `GPS accuracy ±${Math.round(draft.lastFix.accuracy)} m · recording movement`
-              : `${draft.route.length} GPS points kept on this device`}
-          </AuthText>
+          <AuthText kind="muted">{draft.route.length} GPS points kept on this device</AuthText>
           <AuthText>
             {draft.background
               ? 'Background GPS enabled for this run.'
@@ -659,82 +831,7 @@ export function RunSessionScreen({
         </>
       )}
       <RecordSaveFeedback action={action} />
-      <ActionSheet
-        title={
-          sheet === 'stop'
-            ? 'Stop this run?'
-            : sheet === 'discard'
-              ? 'Discard this run?'
-              : 'Leave this run?'
-        }
-        visible={sheet !== null}
-        onClose={() => {
-          if (!locked) setSheet(null);
-        }}
-      >
-        {sheet === 'stop' && (
-          <>
-            <AuthText>
-              Stop location recording and review your run. Nothing is uploaded until you save.
-            </AuthText>
-            <AuthButton
-              title="Stop and review"
-              disabled={locked}
-              onPress={() => void command(() => runTracker.finish(userId))}
-            />
-          </>
-        )}
-        {sheet === 'leave' && (
-          <>
-            <AuthText>
-              {draft?.background && draft.status === 'recording'
-                ? 'Your run can keep recording while you use the rest of Actaro. Open it again from Train → Run.'
-                : 'Keep the run on this device. Foreground recording pauses before you leave.'}
-            </AuthText>
-            <AuthButton
-              title={
-                draft?.background && draft.status === 'recording'
-                  ? 'Keep recording and return'
-                  : 'Save draft and return'
-              }
-              disabled={locked}
-              onPress={() => void command(leave)}
-            />
-            <AuthButton
-              title="Discard instead"
-              outlined
-              disabled={locked}
-              onPress={() => setSheet('discard')}
-            />
-          </>
-        )}
-        {sheet === 'discard' && (
-          <>
-            <AuthText>
-              Delete this unsaved run from this device? Its route cannot be recovered.
-            </AuthText>
-            <AuthButton
-              title="Confirm discard run"
-              disabled={locked}
-              onPress={() =>
-                void command(async () => {
-                  if (draft) await runTracker.discard(userId, draft.id);
-                  setExitApproved(true);
-                })
-              }
-            />
-          </>
-        )}
-        <AuthLink
-          title="Continue with run"
-          disabled={locked}
-          onPress={() => {
-            setExitAction(null);
-            setSheet(null);
-          }}
-        />
-        {error && <AuthNotice error>{error}</AuthNotice>}
-      </ActionSheet>
+      {sheets}
     </AuthFrame>
   );
 }
@@ -782,6 +879,60 @@ function RoundControl({
         <ProductIcon name={icon} color={colors.text} />
       </View>
       <Text style={{ color: colors.muted, fontSize: 12, fontFamily: 'Inter_500Medium' }}>
+        {caption}
+      </Text>
+    </Pressable>
+  );
+}
+
+// A large round control on the live run card.
+function LiveControl({
+  label,
+  caption,
+  icon,
+  tone,
+  disabled,
+  onPress,
+}: {
+  label: string;
+  caption: string;
+  icon: Parameters<typeof ProductIcon>[0]['name'];
+  tone: 'accent' | 'ink';
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  const { colors } = useAppTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => ({
+        alignItems: 'center',
+        gap: 6,
+        opacity: disabled ? 0.5 : 1,
+        transform: [{ scale: pressed ? 0.95 : 1 }],
+      })}
+    >
+      <View
+        style={{
+          width: 76,
+          height: 76,
+          borderRadius: 38,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: tone === 'accent' ? colors.accent : colors.text,
+        }}
+      >
+        <ProductIcon
+          name={icon}
+          size={28}
+          color={tone === 'accent' ? '#111311' : colors.background}
+        />
+      </View>
+      <Text style={{ color: colors.text, fontSize: 13, fontFamily: 'Inter_600SemiBold' }}>
         {caption}
       </Text>
     </Pressable>

@@ -75,16 +75,22 @@ beforeEach(() => {
   });
   service.save.mockResolvedValue(undefined);
 });
-test('stopping requires confirmation, opens review and never saves automatically', async () => {
-  await render(<RunSessionScreen userId={runOwner} onBack={jest.fn()} onSaved={jest.fn()} />, {
-    wrapper: FeedbackTestRoot,
-  });
+test('a live run pauses first, then offers resume or finish; finish opens review without saving', async () => {
+  const screenTree = <RunSessionScreen userId={runOwner} onBack={jest.fn()} onSaved={jest.fn()} />;
+  const view = await render(screenTree, { wrapper: FeedbackTestRoot });
   expect(screen.getByLabelText(/^Time (\d+:)?\d+:\d\d$/)).toBeTruthy();
   expect(screen.getByLabelText('Distance 0.11 km')).toBeTruthy();
   expect(screen.queryByText('SPLITS')).toBeNull();
-  await fireEvent.press(screen.getByRole('button', { name: 'Stop run' }));
+  // Recording shows one Pause control; Finish only appears once paused.
+  expect(screen.queryByRole('button', { name: 'Finish run' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Pause run' }));
+  // The real useRunDraft re-renders on store changes; this stand-in needs a rerender.
+  await view.rerender(screenTree);
+  await screen.findByRole('button', { name: 'Resume run' });
+  expect(tracker.pause).toHaveBeenCalledWith(runOwner);
   expect(tracker.finish).not.toHaveBeenCalled();
-  await fireEvent.press(screen.getByRole('button', { name: 'Stop and review' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Finish run' }));
+  await view.rerender(screenTree);
   await screen.findByRole('button', { name: 'Save run' });
   expect(mockCurrent?.status).toBe('review');
   // Review leads with distance and shows the same GPS movement as per-unit splits.

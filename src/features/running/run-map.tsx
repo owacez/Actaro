@@ -11,10 +11,13 @@ export function RunMap({
   points,
   live = false,
   height = 320,
+  fullScreen = false,
 }: {
   points: readonly RunPoint[];
   live?: boolean;
   height?: number;
+  /** Fill the parent edge to edge; the map shows its own attribution. */
+  fullScreen?: boolean;
 }) {
   const { colors, scheme } = useAppTheme();
   const payload = useMemo(() => runMapPayload(points, live), [points, live]);
@@ -44,7 +47,13 @@ export function RunMap({
   }, [attempt, html]);
   if (status === 'error')
     return (
-      <View style={{ gap: 8 }}>
+      <View
+        style={
+          fullScreen
+            ? { flex: 1, gap: 8, padding: 16, paddingTop: 120, backgroundColor: colors.background }
+            : { gap: 8 }
+        }
+      >
         <RunRoute points={points} />
         <AuthText>
           Street map unavailable. GPS recording still works; showing your route outline.
@@ -62,6 +71,12 @@ export function RunMap({
             setAttempt((value) => value + 1);
           }}
         />
+      </View>
+    );
+  if (fullScreen)
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.fill }}>
+        <MapSurface key={attempt} html={html} payload={payload} onStatus={receive} />
       </View>
     );
   return (
