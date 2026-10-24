@@ -286,7 +286,7 @@ test('targets validate before writing and kJ values normalize to kcal', async ()
     ['Protein (g)', '0'],
     ['Carbohydrates (g)', '0'],
     ['Fat (g)', '0'],
-    ['Water (ml)', '1000'],
+    ['Water (ml, optional)', '1000'],
   ])
     await fireEvent.changeText(screen.getByLabelText(label), value);
   await fireEvent.press(screen.getByRole('button', { name: 'Save daily targets' }));
@@ -309,8 +309,8 @@ test('calculation prefills saved imperial body details, preserves water, reviews
     </FeedbackTestRoot>,
   );
   await fireEvent.press(await screen.findByRole('button', { name: 'Enter manually' }));
-  await screen.findByLabelText('Water (ml)');
-  await fireEvent.changeText(screen.getByLabelText('Water (ml)'), '1800');
+  await screen.findByLabelText('Water (ml, optional)');
+  await fireEvent.changeText(screen.getByLabelText('Water (ml, optional)'), '1800');
   await fireEvent.press(screen.getByRole('button', { name: 'Calculate from my details' }));
   await screen.findByLabelText('Age (years)');
   expect(screen.getByLabelText('Age (years)').props.value).toBe('30');
@@ -332,7 +332,7 @@ test('calculation prefills saved imperial body details, preserves water, reviews
   );
   await fireEvent.press(screen.getByRole('button', { name: 'Generate targets' }));
   expect(Number(screen.getByLabelText('Energy (kJ)').props.value)).toBeCloseTo(11506);
-  expect(screen.getByLabelText('Water (ml)').props.value).toBe('1800');
+  expect(screen.getByLabelText('Water (ml, optional)').props.value).toBe('1800');
   expect(service.targets).not.toHaveBeenCalled();
   expect(bodyService.saveForm).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Edit calculation' }));
@@ -527,7 +527,7 @@ test('daily plan calculates from saved details with a goal: lose fat matches fir
   expect(screen.getByLabelText('Age (years)').props.value).toBe('30');
   await fireEvent.press(screen.getByRole('button', { name: 'Lose fat' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Active' }));
-  await fireEvent.press(screen.getByRole('button', { name: 'Learn more' }));
+  await fireEvent.press(screen.getByRole('link', { name: 'Learn more' }));
   expect(screen.getByText(/adults aged 19 or older who are not pregnant/)).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
   await fireEvent.press(
@@ -542,8 +542,17 @@ test('daily plan calculates from saved details with a goal: lose fat matches fir
   expect(screen.getByLabelText('Carbohydrates (g)').props.value).toBe('368');
   expect(screen.getByText(/Protein starts at 1.6 g per kg of bodyweight/)).toBeTruthy();
   // Saving shows how the plan was worked out, then returns home.
-  await fireEvent.changeText(screen.getByLabelText('Water (ml)'), '2000');
+  // Water is prefilled from adult drinking guidance (male: 3.7 L total, 80% from drinks)
+  // and a blank field saves that guidance.
+  expect(screen.getByLabelText('Water (ml, optional)').props.value).toBe('3000');
+  await fireEvent.changeText(screen.getByLabelText('Water (ml, optional)'), '');
   await fireEvent.press(screen.getByRole('button', { name: 'Save daily targets' }));
+  await waitFor(() =>
+    expect(service.targets).toHaveBeenCalledWith(
+      nutritionOwner,
+      expect.objectContaining({ calories: 2650, water_ml: 3000 }),
+    ),
+  );
   await screen.findByText('How it was worked out');
   expect(screen.getByText(/Maintenance: 3,150 kcal a day/)).toBeTruthy();
   expect(screen.getByText(/−500 kcal, giving 2,650 kcal/)).toBeTruthy();

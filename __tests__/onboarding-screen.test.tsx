@@ -66,16 +66,17 @@ test('setup collects body details and goal, previews an editable plan and saves 
   await press('Continue');
   expect(screen.getByText('Choose your usual activity level.')).toBeTruthy();
   await press('Active');
-  await press('I’m 19 or older and not pregnant or breastfeeding');
+  await fireEvent.press(
+    screen.getByRole('checkbox', { name: 'I agree the 2023 adult energy estimate applies to me.' }),
+  );
   await press('Continue');
   // Age 30 on 2026-10-22: maintenance 3,150 kcal, lose = 2,650 kcal with 128 g protein.
   expect(screen.getByText('Estimated maintenance: 3,150 kcal a day.')).toBeTruthy();
   expect(screen.getByLabelText('Calories (kcal)')).toHaveProp('value', '2650');
   expect(screen.getByLabelText('Protein (g)')).toHaveProp('value', '128');
-  await press('Save my plan');
-  expect(screen.getByText(/Enter a numeric daily water/)).toBeTruthy();
-  expect(service.complete).not.toHaveBeenCalled();
-  await fireEvent.changeText(screen.getByLabelText('Daily water (ml)'), '2500');
+  // Water is optional: prefilled from adult guidance and still editable.
+  expect(screen.getByLabelText('Daily water (ml, optional)')).toHaveProp('value', '3000');
+  await fireEvent.changeText(screen.getByLabelText('Daily water (ml, optional)'), '2500');
   await press('Save my plan');
   await waitFor(() => expect(done).toHaveBeenCalled());
   expect(service.complete).toHaveBeenCalledTimes(1);

@@ -7,7 +7,15 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { authColors } from './auth-components';
@@ -50,7 +58,8 @@ function FeedbackNotification({
   notification: Notification;
   dismiss: (id: number) => void;
 }) {
-  const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets(),
+    { height } = useWindowDimensions();
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const web = Platform.OS === 'web';
@@ -72,7 +81,9 @@ function FeedbackNotification({
         web ? styles.web : styles.mobile,
         {
           paddingTop: insets.top + 16,
-          paddingBottom: insets.bottom + (web ? 16 : 112),
+          // On phones the snackbar sits a fifth of the screen up, clear of the tab bar and
+          // bottom actions on any screen size.
+          paddingBottom: insets.bottom + (web ? 16 : Math.round(height * 0.2)),
           paddingLeft: insets.left + 16,
           paddingRight: insets.right + 16,
         },

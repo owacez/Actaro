@@ -15,7 +15,13 @@ import { energy, formatEnergy, formatNumber, numeric } from './nutrition-model';
 import { nutritionService } from './nutrition-service';
 import { LoadFeedback, SaveFeedback, useNutritionAction, useNutritionLoad } from './nutrition-ui';
 import { TargetCalculator } from './target-calculator';
-import { bodyGoals, targetMacroUrl, type BodyGoal, type TargetEstimate } from './target-estimate';
+import {
+  bodyGoals,
+  targetMacroUrl,
+  waterGuidance,
+  type BodyGoal,
+  type TargetEstimate,
+} from './target-estimate';
 type CalculatedPlan = { goal: BodyGoal; maintenance: TargetEstimate; values: TargetEstimate };
 export function TargetsScreen({
   userId,
@@ -35,7 +41,9 @@ export function TargetsScreen({
     [protein, setProtein] = useState(''),
     [carbs, setCarbs] = useState(''),
     [fat, setFat] = useState(''),
-    [water, setWater] = useState('');
+    [water, setWater] = useState(''),
+    // Used when water is left blank; the calculator refines it from the equation setting.
+    [waterHint, setWaterHint] = useState(() => waterGuidance(null));
   const [mode, setMode] = useState<'manual' | 'calculated'>('manual'),
     [reviewing, setReviewing] = useState(false),
     [plan, setPlan] = useState<CalculatedPlan | null>(null),
@@ -64,7 +72,7 @@ export function TargetsScreen({
         protein: numeric(protein, 'protein target', 2000, true),
         carbs: numeric(carbs, 'carbohydrate target', 3000, true),
         fat: numeric(fat, 'fat target', 1000, true),
-        water_ml: numeric(water, 'water target', 20000),
+        water_ml: water.trim() ? numeric(water, 'water target', 20000) : waterHint,
       };
       if (values.calories < 1 || values.water_ml < 1)
         throw new Error('Energy and water targets must be at least 1.');
@@ -147,8 +155,10 @@ export function TargetsScreen({
                 userId={userId}
                 preferences={resource.data.preferences}
                 disabled={action.locked}
-                onGenerated={(values, chosen, maintenance) => {
+                onGenerated={(values, chosen, maintenance, waterMl) => {
                   setPlan({ goal: chosen, maintenance, values });
+                  setWaterHint(waterMl);
+                  if (!water.trim()) setWater(String(waterMl));
                   const preferences = resource.data?.preferences;
                   if (!preferences) return;
                   setCalories(String(energy(values.calories, preferences.energy_unit)));
@@ -169,7 +179,7 @@ export function TargetsScreen({
                     {plan.goal === 'maintain'
                       ? 'Energy estimates maintenance, rounded to 50 kcal. Macros start at 20% protein, 50% carbohydrate and 30% fat.'
                       : `${bodyGoals.find((option) => option.key === plan.goal)?.detail} Protein starts at 1.6 g per kg of bodyweight; fat is 25% of energy and carbohydrate the rest.`}{' '}
-                    These are editable starting points. Water stays as your own goal.
+                    These are editable starting points. Water starts from adult drinking guidance.
                   </AuthText>
                   <AuthLink
                     title="About the macro starting split"
@@ -219,13 +229,17 @@ export function TargetsScreen({
                 heading
               />
               <NumberStepper
-                label="Water (ml)"
+                label="Water (ml, optional)"
                 value={water}
                 onChange={setWater}
                 step={10}
                 disabled={action.locked}
                 heading
               />
+              <AuthText kind="muted">
+                Leave blank to use general guidance: about {formatNumber(waterHint)} ml of drinks a
+                day for adults. Heat, exercise and medical advice can change this.
+              </AuthText>
               <AuthButton
                 title="Save daily targets"
                 busy={action.busy}

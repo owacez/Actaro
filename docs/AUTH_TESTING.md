@@ -88,6 +88,35 @@ web callback remains accepted. The native tunnel manifest is reachable (HTTP
 Fresh live confirmation remains pending. Successful invalid-token probes verify
 destination selection, not email delivery, PKCE exchange or an iPhone launch.
 
+### Phone confirmation from `npm start` over LAN (2026-10-24)
+
+The user reported a phone confirmation link opening Safari with "Safari cannot open
+the page". The same invalid-token probe (HTTP 303, no email, no session) showed
+that this Expo Go LAN callback and the `actaro://` scheme are not allowed. Supabase
+replaces them with the Site URL:
+
+| Requested destination                       | Observed result                       |
+| ------------------------------------------- | ------------------------------------- |
+| `exp://192.168.18.73:8081/--/auth/callback` | `http://localhost:8081/auth/callback` |
+| `actaro://auth/callback`                    | `http://localhost:8081/auth/callback` |
+| `http://localhost:8081/auth/callback` (web) | Accepted                              |
+
+On the phone, `localhost` is the phone itself, so Safari cannot open it. The email
+is still confirmed at Supabase, and signing in works afterwards.
+
+**Fix:** in the dashboard (Authentication > URL Configuration > Redirect URLs), add
+the exact phone destinations:
+
+- `exp://192.168.18.73:8081/--/auth/callback` and
+  `exp://192.168.18.73:8081/--/auth/recovery` (this computer's current LAN address;
+  re-add them if the address or port changes).
+- `actaro://auth/callback` and `actaro://auth/recovery` for development builds.
+
+Then request a fresh email from the app on the phone and open it while `npm start`
+is running on the same Wi-Fi. Safari offers to open Expo Go (or Actaro). The
+callback screen exchanges the code with the verifier stored by the app and shows
+the confirmation. Older emails keep their old destination.
+
 In the Supabase dashboard, Authentication > URL Configuration, allow the exact
 URLs for the runtime you are testing. The connected MCP tools do not expose Auth
 configuration editing. The probes above verify specific effective destinations;

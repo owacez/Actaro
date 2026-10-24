@@ -22,8 +22,10 @@ import {
   activityLevels,
   ageOnDate,
   estimateTargets,
+  waterGuidance,
   type TargetEstimate,
 } from '@/features/nutrition/target-estimate';
+import { EstimateAgreement } from '@/features/nutrition/estimate-agreement';
 import {
   RecordLoadFeedback,
   RecordSaveFeedback,
@@ -109,6 +111,7 @@ export function OnboardingScreen({ userId, onDone }: { userId: string; onDone: (
         protein: String(values.protein),
         carbs: String(values.carbs),
         fat: String(values.fat),
+        water: current.water || String(waterGuidance(sex)),
       }));
       setEstimateNote(
         `Estimated maintenance: ${maintenance.calories.toLocaleString('en')} kcal a day.`,
@@ -134,7 +137,9 @@ export function OnboardingScreen({ userId, onDone }: { userId: string; onDone: (
         protein: numeric(plan.protein, 'protein', 1000, true),
         carbs: numeric(plan.carbs, 'carbohydrates', 2000, true),
         fat: numeric(plan.fat, 'fat', 1000, true),
-        water_ml: numeric(plan.water, 'daily water', 10000),
+        water_ml: plan.water.trim()
+          ? numeric(plan.water, 'daily water', 10000)
+          : waterGuidance(sex),
       };
       const goalForm =
         goal !== 'maintain' && targetWeight.trim()
@@ -324,15 +329,7 @@ export function OnboardingScreen({ userId, onDone }: { userId: string; onDone: (
                   <AuthText kind="muted">{level.detail}</AuthText>
                 </AuthCard>
               ))}
-              <AuthChoice
-                title="I’m 19 or older and not pregnant or breastfeeding"
-                selected={eligible}
-                onPress={() => setEligible((value) => !value)}
-              />
-              <AuthText kind="muted">
-                The estimate uses the 2023 adult Dietary Reference Intake equations. Without this
-                confirmation you can enter your own targets.
-              </AuthText>
+              <EstimateAgreement checked={eligible} onChange={setEligible} />
             </>
           )}
           {step === 5 && (
@@ -351,14 +348,16 @@ export function OnboardingScreen({ userId, onDone }: { userId: string; onDone: (
                   ['protein', 'Protein (g)'],
                   ['carbs', 'Carbohydrates (g)'],
                   ['fat', 'Fat (g)'],
-                  ['water', 'Daily water (ml)'],
+                  ['water', 'Daily water (ml, optional)'],
                 ] as const
               ).map(([field, label]) => (
                 <AuthInput
                   key={field}
                   label={label}
                   value={plan[field]}
-                  placeholder={field === 'water' ? 'Your choice, for example 2000' : undefined}
+                  placeholder={
+                    field === 'water' ? `Blank uses about ${waterGuidance(sex)} ml` : undefined
+                  }
                   onChangeText={(value) => setPlan((current) => ({ ...current, [field]: value }))}
                   keyboardType="number-pad"
                   maxLength={5}

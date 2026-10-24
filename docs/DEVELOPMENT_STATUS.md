@@ -4,6 +4,45 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Toast position, agreement checkbox, optional water and phone confirmation diagnosis
+(2026-10-24): implementation and local verification **DONE**; device acceptance and
+the Supabase redirect allow-list change **PENDING (user dashboard action)**.
+
+- **Toast:** the mobile snackbar's bottom offset is now safe area + 20% of the
+  window height (`useWindowDimensions`), replacing a fixed 112 px. Web keeps its
+  top-right toast.
+- **Agreement:**
+  - The shared `EstimateAgreement` (`src/features/nutrition/estimate-agreement.tsx`)
+    has a real checkbox and the text "I agree the 2023 adult energy estimate applies
+    to me." followed by an inline underlined **Learn more** link that opens the
+    details sheet.
+  - Used by the Daily plan calculator and first-run setup, replacing setup's
+    "I’m 19 or older…" pill.
+- **Water:**
+  - New `waterGuidance(sex)` starts from the adult DRI Adequate Intake for total
+    water (3.7 L men, 2.7 L women; midpoint when unknown), takes about 80% from
+    drinks and rounds to 100 ml. That gives 3,000 / 2,200 / 2,600 ml.
+  - Water is labelled optional. Calculated plans prefill it unless the user has
+    already entered water, and a blank field saves the guidance value.
+  - No schema change (`water_ml` stays required in the database).
+- **Phone confirmation:** a live invalid-token probe shows Supabase rejects the
+  Expo Go LAN callback (`exp://192.168.18.73:8081/--/auth/callback`) and
+  `actaro://auth/callback`, sending them to `http://localhost:8081/auth/callback`,
+  which the phone cannot open.
+  - The app already sends the correct runtime URL. The fix is adding those exact
+    URLs to Supabase Redirect URLs (steps in `docs/AUTH_TESTING.md`).
+  - Not changed by the agent: no dashboard access or authorization.
+
+Evidence:
+
+- `npm run check` (with a fresh lint cache): 83 suites with 423 Jest tests pass,
+  plus 6 dataset tests.
+- The nutrition and onboarding tests cover the checkbox, the Learn more link role,
+  prefilled 3,000 ml for the male equation, blank water saving guidance, and
+  onboarding prefill.
+- The offline web capture shows the checkbox row with the underlined link and the
+  optional water hint.
+
 Today workout card reflects completion (2026-10-23): implementation and local
 verification **DONE**; device acceptance **DEFERRED**.
 

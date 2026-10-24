@@ -129,3 +129,11 @@ export function planTargets(
   const carbs = Math.max(0, Math.round((calories - protein * 4 - fat * 9) / 4));
   return { calories, protein, carbs, fat };
 }
+
+// Drinking-water guidance for adults: the DRI Adequate Intake for total water is 3.7 L a day
+// for men and 2.7 L for women, about 80% of it from drinks. Unknown sex uses the midpoint.
+// A starting goal, rounded to 100 ml; heat, exercise and medical advice change needs.
+export function waterGuidance(sex: string | null | undefined) {
+  const total = sex === 'male' ? 3700 : sex === 'female' ? 2700 : 3200;
+  return Math.round((total * 0.8) / 100) * 100;
+}
