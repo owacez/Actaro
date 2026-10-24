@@ -73,7 +73,9 @@ test('creates a split with a real named workout and six rest days, then saves', 
   await screen.findByLabelText('Split name');
   await fireEvent.changeText(screen.getByLabelText('Split name'), 'Week A');
   await fireEvent.press(screen.getByRole('button', { name: 'Save split' }));
-  await screen.findByText('Choose a workout or rest for Monday.');
+  await screen.findByText(
+    'Every day needs a workout or rest. Still to set: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday.',
+  );
   expect(mocks.save).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Choose Monday workout' }));
   await screen.findByText('Upper A');

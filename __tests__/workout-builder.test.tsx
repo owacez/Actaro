@@ -356,7 +356,7 @@ test('new workout selects an exercise, validates and saves the entire draft', as
   await fireEvent.changeText(screen.getByLabelText('Workout name'), 'Upper A');
   await fireEvent.press(screen.getByRole('button', { name: '+ Add exercise' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Select real fixture exercise' }));
-  await fireEvent.press(screen.getByRole('button', { name: '← Back to workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Back to workout' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Edit exercise 1' }));
   await fireEvent.changeText(screen.getByLabelText('Reps · exercise 1 set 1'), '0');
   await fireEvent.press(screen.getByRole('button', { name: 'Done editing' }));
@@ -419,7 +419,7 @@ test('quick additions stay in the picker, edit targets in place, and save once t
   await fireEvent.press(screen.getByRole('button', { name: 'Done editing' }));
   expect(screen.getByRole('button', { name: 'Quick add other fixture' })).toBeTruthy();
   expect(mocks.load).toHaveBeenCalledTimes(1);
-  await fireEvent.press(screen.getByRole('button', { name: '← Back to workout' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Back to workout' }));
   expect(screen.getByText('4 sets')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
   await waitFor(() => expect(saved).toHaveBeenCalledTimes(1));
@@ -592,6 +592,42 @@ test('orders exercises and adds/removes sets and exercises before saving', async
       userId,
       expect.objectContaining({
         exercises: [expect.objectContaining({ key: 'one', sets: [blankSet()] })],
+      }),
+      'kg',
+    ),
+  );
+});
+test('each exercise row reorders with arrows and deletes with its bin', async () => {
+  mocks.load.mockResolvedValue({
+    unit: 'kg',
+    draft: {
+      ...draft,
+      exercises: [draft.exercises[0], { ...draft.exercises[0], key: 'two', name: 'Second press' }],
+    },
+  });
+  await render(
+    <FeedbackTestRoot>
+      <BuilderScreen
+        userId={userId}
+        id={workoutId}
+        onBack={() => {}}
+        onSaved={() => {}}
+        onEquipment={() => {}}
+      />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByText('2. Second press');
+  expect(screen.getByRole('button', { name: 'Move exercise 1 up' })).toBeDisabled();
+  await fireEvent.press(screen.getByRole('button', { name: 'Move exercise 2 up' }));
+  expect(screen.getByText('1. Second press')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Delete exercise 1' }));
+  expect(screen.queryByText(/Second press/)).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Save workout' }));
+  await waitFor(() =>
+    expect(mocks.save).toHaveBeenCalledWith(
+      userId,
+      expect.objectContaining({
+        exercises: [expect.objectContaining({ key: draft.exercises[0].key })],
       }),
       'kg',
     ),

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { randomUUID } from 'expo-crypto';
-import { View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import type { SymbolViewProps } from 'expo-symbols';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ActionSheet } from '@/components/product-ui';
+import { ActionSheet, ProductIcon } from '@/components/product-ui';
 import { NumberStepper } from '@/components/number-stepper';
 import { useAppTheme } from '@/features/profile/theme-context';
 import {
@@ -319,11 +320,10 @@ export function BuilderScreen({
 
   if (picking)
     return (
-      <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.background }}>
-        <AuthLink title="← Back to workout" onPress={() => setPicking(false)} />
-        <AuthText>
-          {plural(draft.exercises.length, 'exercise')} in this draft. Return to the workout to save.
-        </AuthText>
+      <SafeAreaView
+        edges={['top', 'bottom']}
+        style={{ flex: 1, backgroundColor: colors.background }}
+      >
         <LibraryScreen
           userId={userId}
           onEquipment={onEquipment}
@@ -342,6 +342,23 @@ export function BuilderScreen({
             else addFromSearch(item);
           }}
         />
+        <View
+          style={{
+            gap: 6,
+            paddingHorizontal: 16,
+            paddingTop: 10,
+            paddingBottom: 8,
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderTopColor: colors.border,
+            backgroundColor: colors.background,
+          }}
+        >
+          <AuthText kind="muted">
+            {plural(draft.exercises.length, 'exercise')} in this draft. Return to the workout to
+            save.
+          </AuthText>
+          <AuthButton title="Back to workout" onPress={() => setPicking(false)} />
+        </View>
         {targetEditor}
       </SafeAreaView>
     );
@@ -404,22 +421,66 @@ export function BuilderScreen({
             <AuthText>Add an exercise from the library to begin.</AuthText>
           )}
           {draft.exercises.map((item, index) => (
-            <View key={item.key} style={{ gap: 8 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                <ExerciseImage url={item.imageUrl} label={`${item.name} technique`} />
-                <View style={{ flex: 1 }}>
-                  <AuthText>
-                    {index + 1}. {item.name}
-                  </AuthText>
-                  <AuthText kind="muted">{plural(item.sets.length, 'set')}</AuthText>
-                </View>
-                <AuthLink
-                  title={editing === item.key ? 'Done' : 'Edit'}
-                  accessibilityLabel={`${editing === item.key ? 'Close' : 'Edit'} exercise ${index + 1}`}
-                  disabled={saving}
-                  onPress={() => setEditing((current) => (current === item.key ? null : item.key))}
+            <View
+              key={item.key}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                padding: 10,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: colors.border,
+                backgroundColor: colors.surface,
+              }}
+            >
+              <View>
+                <SmallIcon
+                  label={`Move exercise ${index + 1} up`}
+                  name={{
+                    ios: 'chevron.up',
+                    android: 'keyboard_arrow_up',
+                    web: 'keyboard_arrow_up',
+                  }}
+                  disabled={saving || index === 0}
+                  onPress={() => move(item.key, -1)}
+                />
+                <SmallIcon
+                  label={`Move exercise ${index + 1} down`}
+                  name={{
+                    ios: 'chevron.down',
+                    android: 'keyboard_arrow_down',
+                    web: 'keyboard_arrow_down',
+                  }}
+                  disabled={saving || index === draft.exercises.length - 1}
+                  onPress={() => move(item.key, 1)}
                 />
               </View>
+              <ExerciseImage url={item.imageUrl} label={`${item.name} technique`} />
+              <View style={{ flex: 1 }}>
+                <AuthText kind="heading">
+                  {index + 1}. {item.name}
+                </AuthText>
+                <AuthText kind="muted">{plural(item.sets.length, 'set')}</AuthText>
+              </View>
+              <SmallIcon
+                label={`${editing === item.key ? 'Close' : 'Edit'} exercise ${index + 1}`}
+                name={{ ios: 'pencil', android: 'edit', web: 'edit' }}
+                disabled={saving}
+                onPress={() => setEditing((current) => (current === item.key ? null : item.key))}
+              />
+              <SmallIcon
+                label={`Delete exercise ${index + 1}`}
+                name={{ ios: 'trash', android: 'delete', web: 'delete' }}
+                disabled={saving}
+                onPress={() => {
+                  if (editing === item.key) setEditing(null);
+                  setDraft((current) => ({
+                    ...current,
+                    exercises: current.exercises.filter((entry) => entry.key !== item.key),
+                  }));
+                }}
+              />
             </View>
           ))}
           <AuthText>
@@ -445,5 +506,39 @@ export function BuilderScreen({
       )}
       {targetEditor}
     </AuthFrame>
+  );
+}
+
+// A compact icon control for exercise rows; the hit area stays at least 44 points.
+function SmallIcon({
+  label,
+  name,
+  disabled,
+  onPress,
+}: {
+  label: string;
+  name: SymbolViewProps['name'];
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  const { colors } = useAppTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      hitSlop={6}
+      style={({ pressed }) => ({
+        minWidth: 34,
+        minHeight: 34,
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: disabled ? 0.25 : pressed ? 0.5 : 1,
+      })}
+    >
+      <ProductIcon name={name} size={20} color={colors.text} />
+    </Pressable>
   );
 }

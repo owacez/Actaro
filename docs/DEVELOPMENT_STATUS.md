@@ -4,6 +4,30 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Workout builder rows, picker exit, split message and popup height (2026-10-24):
+implementation and local verification **DONE**; device acceptance **DEFERRED**.
+
+- **Builder:** each exercise is a card with up/down arrows ("Move exercise N
+  up/down", disabled at the ends), a pencil ("Edit exercise N") and a bin ("Delete
+  exercise N", which removes it from the unsaved draft). The edit sheet keeps its
+  Move/Remove links.
+- **Exercise picker:** the small top "← Back to workout" link is replaced by a
+  bottom bar with the draft count and a full-width **Back to workout** button.
+- **Splits:** saving with unset days now names every missing day: "Every day needs
+  a workout or rest. Still to set: Wednesday, …". Previously it named only the
+  first.
+- **Popup:** the mobile snackbar now sits 30% of the window height above the bottom
+  safe area (was 20%).
+
+Evidence:
+
+- `npm run check` (fresh lint cache): 83 suites with 424 Jest tests pass, plus 6
+  dataset tests.
+- A new builder test covers arrow reordering, the disabled first "up" arrow and
+  deletion before saving.
+- The split and builder tests were updated for the new message and button.
+- Offline web captures show the builder rows and the picker's bottom bar.
+
 Toast position, agreement checkbox, optional water and phone confirmation diagnosis
 (2026-10-24): implementation and local verification **DONE**; device acceptance and
 the Supabase redirect allow-list change **PENDING (user dashboard action)**.

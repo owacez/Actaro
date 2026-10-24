@@ -81,9 +81,9 @@ function FeedbackNotification({
         web ? styles.web : styles.mobile,
         {
           paddingTop: insets.top + 16,
-          // On phones the snackbar sits a fifth of the screen up, clear of the tab bar and
-          // bottom actions on any screen size.
-          paddingBottom: insets.bottom + (web ? 16 : Math.round(height * 0.2)),
+          // On phones the snackbar sits about a third of the screen up, well clear of the tab
+          // bar and bottom actions on any screen size.
+          paddingBottom: insets.bottom + (web ? 16 : Math.round(height * 0.3)),
           paddingLeft: insets.left + 16,
           paddingRight: insets.right + 16,
         },
