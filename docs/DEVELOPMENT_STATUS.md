@@ -4,6 +4,18 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Safe-area fixes (2026-10-24): **DONE** locally; device check **DEFERRED**.
+
+- **Full-screen run map:** the Recenter / Fit route buttons were drawn 12 px from the
+  top, under the iPhone status bar and Dynamic Island. `runMapDocument` now takes a
+  `controlsTop` offset; full-screen `RunMap` passes safe-area top + 64 pt, below the
+  floating run controls. The map attribution moves there too, so the bottom stats card
+  cannot hide it.
+- **Toast:** the mobile snackbar sits 36% of the window height above the bottom safe
+  area (was 30%).
+- **Evidence:** `npm run check` passes (85 suites with 430 Jest tests, plus 6 dataset
+  tests). The run-map test checks the default and offset button positions.
+
 Full-screen live run, Strava-style controls (2026-10-24): implementation and local
 verification **DONE**; device acceptance **DEFERRED**.
 

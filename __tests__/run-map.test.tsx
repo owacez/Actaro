@@ -39,6 +39,11 @@ test('map geometry preserves pause gaps and dateline continuity; document expose
   );
   expect(wrapped.position[0]).toBeCloseTo(180.001);
   const html = runMapDocument(payload, '#ff681e', false);
+  // Default controls sit near the top; full screen moves them below the safe area.
+  expect(html).toContain('#follow{top:12px}#fit{top:54px}');
+  const below = runMapDocument(payload, '#ff681e', false, 111);
+  expect(below).toContain('#follow{top:111px}#fit{top:153px}');
+  expect(below).toContain('.maplibregl-ctrl-bottom-right{top:111px');
   expect(html).toContain('https://tiles.openfreemap.org/styles/positron');
   expect(runMapDocument(payload, '#ff681e', true)).toContain(
     'https://tiles.openfreemap.org/styles/dark',

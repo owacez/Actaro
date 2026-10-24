@@ -24,13 +24,20 @@ export function mapJson(value: unknown) {
 }
 // Status messages: actaro-map:stage:<name>, actaro-map:ready, actaro-map:error:<reason>.
 // Stages and reasons identify where an embedded renderer failed without exposing route data.
-export function runMapDocument(initial: RunMapPayload, accent: string, dark: boolean) {
+// `controlsTop` keeps the map buttons (and, when set, the attribution) below anything
+// drawn over the map, such as the iPhone status bar and the live run pill.
+export function runMapDocument(
+  initial: RunMapPayload,
+  accent: string,
+  dark: boolean,
+  controlsTop = 12,
+) {
   const casing = dark ? '#0c0d0c' : '#ffffff';
   return `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' blob: https://unpkg.com; style-src 'unsafe-inline' https://unpkg.com; connect-src https://tiles.openfreemap.org https://unpkg.com; worker-src blob:; child-src blob:; img-src data: blob: https://tiles.openfreemap.org; font-src data: https://tiles.openfreemap.org;">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
 <style>html,body,#map{margin:0;width:100%;height:100%;background:${dark ? '#171a18' : '#e7e9e3'}}
-button{position:absolute;right:12px;border:0;border-radius:18px;padding:10px 14px;background:#fff;color:#171a18;box-shadow:0 2px 6px #0003;font:600 13px system-ui;z-index:2;cursor:pointer}#follow{top:12px}#fit{top:54px}.maplibregl-ctrl-attrib{font-size:10px}.maplibregl-ctrl-attrib a{color:#171a18}
+button{position:absolute;right:12px;border:0;border-radius:18px;padding:10px 14px;background:#fff;color:#171a18;box-shadow:0 2px 6px #0003;font:600 13px system-ui;z-index:2;cursor:pointer}#follow{top:${controlsTop}px}#fit{top:${controlsTop + 42}px}${controlsTop > 12 ? `.maplibregl-ctrl-bottom-right{top:${controlsTop}px;bottom:auto;right:auto;left:0}` : ''}.maplibregl-ctrl-attrib{font-size:10px}.maplibregl-ctrl-attrib a{color:#171a18}
 .dot{width:14px;height:14px;border-radius:50%;border:3px solid #fff;box-shadow:0 1px 4px #0006}.start{background:#21a359}.finish{background:#111311}.here{width:16px;height:16px;background:${accent};box-shadow:0 0 0 7px ${accent}40,0 1px 4px #0006}</style></head>
 <body><div id="map" role="img" aria-label="Street map and recorded running route"></div>
 <button id="follow" type="button">Recenter</button><button id="fit" type="button">Fit route</button>

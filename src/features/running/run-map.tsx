@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AuthLink, AuthText } from '@/features/auth/auth-components';
 import { useAppTheme } from '@/features/profile/theme-context';
 import type { RunPoint } from './run-model';
@@ -19,12 +20,15 @@ export function RunMap({
   /** Fill the parent edge to edge; the map shows its own attribution. */
   fullScreen?: boolean;
 }) {
-  const { colors, scheme } = useAppTheme();
+  const { colors, scheme } = useAppTheme(),
+    insets = useSafeAreaInsets();
+  // Full screen, controls clear the status bar and the 64 pt row of floating run controls.
+  const controlsTop = fullScreen ? insets.top + 64 : 12;
   const payload = useMemo(() => runMapPayload(points, live), [points, live]);
   const [initial] = useState(payload);
   const html = useMemo(
-    () => runMapDocument(initial, colors.accent, scheme === 'dark'),
-    [initial, colors.accent, scheme],
+    () => runMapDocument(initial, colors.accent, scheme === 'dark', controlsTop),
+    [initial, colors.accent, scheme, controlsTop],
   );
   const [attempt, setAttempt] = useState(0),
     [status, setStatus] = useState('loading'),
