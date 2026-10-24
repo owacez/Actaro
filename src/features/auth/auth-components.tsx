@@ -30,7 +30,14 @@ export function AuthFrame({
   header,
   footer,
   pinnedHeader = false,
-}: PropsWithChildren<{ header?: ReactNode; footer?: ReactNode; pinnedHeader?: boolean }>) {
+  scrollEnabled = true,
+}: PropsWithChildren<{
+  header?: ReactNode;
+  footer?: ReactNode;
+  pinnedHeader?: boolean;
+  /** Paused while a row is being dragged so the page does not scroll under the finger. */
+  scrollEnabled?: boolean;
+}>) {
   const { colors } = useAppTheme();
   const screenStyle = [styles.screen, { backgroundColor: colors.background }];
   return (
@@ -40,7 +47,11 @@ export function AuthFrame({
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         {pinnedHeader && header && <View style={styles.pinnedHeader}>{header}</View>}
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          scrollEnabled={scrollEnabled}
+        >
           <View style={styles.content}>
             {!pinnedHeader && header}
             {children}

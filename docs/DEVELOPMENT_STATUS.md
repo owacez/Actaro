@@ -4,6 +4,51 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Press-and-drag exercise reordering in the workout builder (2026-10-24):
+implementation and local verification **DONE**; device feel (iOS/Android haptics,
+scroll interplay) **DEFERRED to phone testing**.
+
+- **New `ReorderList`** (`src/components/reorder-list.tsx`):
+  - Holding a row for 250 ms lifts it (3% scale and shadow, medium haptic). It
+    follows the finger, and the other rows spring into their new slots.
+  - Release springs it into place, gives a selection haptic and commits the order
+    once.
+  - Gesture and motion run on the UI thread (Gesture Handler 3 `usePanGesture` with
+    `activateAfterLongPress`, Reanimated 4 `.get()/.set()` shared values,
+    `scheduleOnRN`).
+  - The slot math (`shiftPositions`/`orderedKeys` in `reorder-model.ts`) is a pure
+    worklet with unit tests.
+- **Accessibility:** each row's grip is an adjustable control ("Reorder exercise N,
+  name"). VoiceOver/TalkBack swipe up/down moves the row, so pencil and bin stay
+  separately focusable.
+- **Builder:**
+  - The arrow buttons are replaced by the drag list (76 pt cards with grip, image,
+    one-line name, pencil, bin) plus a "Hold an exercise, then drag it to reorder."
+    hint.
+  - `AuthFrame` gains `scrollEnabled`, which pauses page scrolling while a row is
+    held.
+- **App setup:**
+  - The app root is wrapped in `GestureHandlerRootView`, which Gesture Handler
+    requires.
+  - Added `expo-haptics` ~58.0.7 via `npx expo install`; it is bundled in Expo Go.
+- **Not included:** auto-scrolling while dragging near the screen edge (builder
+  lists normally fit on screen).
+
+Evidence:
+
+- `npm run check` (fresh lint cache): 85 suites with 429 Jest tests pass, plus 6
+  dataset tests.
+- New `reorder-model` tests cover down/up moves, no-op and slot integrity across one
+  drag. The builder test drives `onReorder` through a plain stand-in and then
+  deletes with the bin.
+- **Real web drag:** a CDP mouse press, 450 ms hold and 180 px move lifted
+  "Bodyweight Squat" while the other rows slid up. Release committed "1. Push-up,
+  2. Barbell Row, 3. Bodyweight Squat" and enabled Save (screenshots in the
+  session scratchpad).
+- `npx expo install --check` reports new SDK 58 patch releases (expo 58.0.19,
+  expo-router 58.0.26 and others) published after the upgrade. They were not
+  changed here.
+
 Shared Today/Train workout card with a ⋯ menu (2026-10-24): implementation and
 local verification **DONE**; device acceptance **DEFERRED**.
 

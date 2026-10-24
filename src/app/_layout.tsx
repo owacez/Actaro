@@ -5,6 +5,7 @@ import {
   useFonts,
 } from '@expo-google-fonts/inter';
 import { Stack } from 'expo-router';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 
@@ -113,8 +114,10 @@ export default function RootLayout() {
     );
   if (!loaded) return null;
   return (
-    <AuthProvider>
-      <AccountTheme />
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <AccountTheme />
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }

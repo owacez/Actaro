@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { randomUUID } from 'expo-crypto';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { SymbolViewProps } from 'expo-symbols';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActionSheet, ProductIcon } from '@/components/product-ui';
+import { ReorderList } from '@/components/reorder-list';
 import { NumberStepper } from '@/components/number-stepper';
 import { useAppTheme } from '@/features/profile/theme-context';
 import {
@@ -69,7 +70,8 @@ export function BuilderScreen({
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [picking, setPicking] = useState(false);
-  const [editing, setEditing] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null),
+    [dragging, setDragging] = useState(false);
   const [baseline, setBaseline] = useState('');
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const generation = useRef(0),
@@ -363,7 +365,7 @@ export function BuilderScreen({
       </SafeAreaView>
     );
   return (
-    <AuthFrame>
+    <AuthFrame scrollEnabled={!dragging}>
       <AuthLink
         title="← My workouts"
         disabled={saving}
@@ -420,69 +422,70 @@ export function BuilderScreen({
           {!draft.exercises.length && (
             <AuthText>Add an exercise from the library to begin.</AuthText>
           )}
-          {draft.exercises.map((item, index) => (
-            <View
-              key={item.key}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-                padding: 10,
-                borderRadius: 20,
-                borderWidth: 1,
-                borderColor: colors.border,
-                backgroundColor: colors.surface,
-              }}
-            >
-              <View>
-                <SmallIcon
-                  label={`Move exercise ${index + 1} up`}
-                  name={{
-                    ios: 'chevron.up',
-                    android: 'keyboard_arrow_up',
-                    web: 'keyboard_arrow_up',
-                  }}
-                  disabled={saving || index === 0}
-                  onPress={() => move(item.key, -1)}
-                />
-                <SmallIcon
-                  label={`Move exercise ${index + 1} down`}
-                  name={{
-                    ios: 'chevron.down',
-                    android: 'keyboard_arrow_down',
-                    web: 'keyboard_arrow_down',
-                  }}
-                  disabled={saving || index === draft.exercises.length - 1}
-                  onPress={() => move(item.key, 1)}
-                />
-              </View>
-              <ExerciseImage url={item.imageUrl} label={`${item.name} technique`} />
-              <View style={{ flex: 1 }}>
-                <AuthText kind="heading">
-                  {index + 1}. {item.name}
-                </AuthText>
-                <AuthText kind="muted">{plural(item.sets.length, 'set')}</AuthText>
-              </View>
-              <SmallIcon
-                label={`${editing === item.key ? 'Close' : 'Edit'} exercise ${index + 1}`}
-                name={{ ios: 'pencil', android: 'edit', web: 'edit' }}
-                disabled={saving}
-                onPress={() => setEditing((current) => (current === item.key ? null : item.key))}
-              />
-              <SmallIcon
-                label={`Delete exercise ${index + 1}`}
-                name={{ ios: 'trash', android: 'delete', web: 'delete' }}
-                disabled={saving}
-                onPress={() => {
-                  if (editing === item.key) setEditing(null);
-                  setDraft((current) => ({
-                    ...current,
-                    exercises: current.exercises.filter((entry) => entry.key !== item.key),
-                  }));
+          <ReorderList
+            items={draft.exercises}
+            keyOf={(item) => item.key}
+            labelOf={(item, index) => `exercise ${index + 1}, ${item.name}`}
+            rowHeight={76}
+            disabled={saving}
+            onDragChange={setDragging}
+            onReorder={(keys) =>
+              setDraft((current) => ({
+                ...current,
+                exercises: keys.flatMap(
+                  (key) => current.exercises.find((entry) => entry.key === key) ?? [],
+                ),
+              }))
+            }
+            renderItem={(item, index, handle) => (
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 10,
+                  paddingHorizontal: 10,
+                  borderRadius: 20,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  backgroundColor: colors.surface,
                 }}
-              />
-            </View>
-          ))}
+              >
+                {handle}
+                <ExerciseImage url={item.imageUrl} label={`${item.name} technique`} />
+                <View style={{ flex: 1 }}>
+                  <Text
+                    numberOfLines={1}
+                    style={{ color: colors.text, fontSize: 16, fontFamily: 'Inter_600SemiBold' }}
+                  >
+                    {index + 1}. {item.name}
+                  </Text>
+                  <AuthText kind="muted">{plural(item.sets.length, 'set')}</AuthText>
+                </View>
+                <SmallIcon
+                  label={`${editing === item.key ? 'Close' : 'Edit'} exercise ${index + 1}`}
+                  name={{ ios: 'pencil', android: 'edit', web: 'edit' }}
+                  disabled={saving}
+                  onPress={() => setEditing((current) => (current === item.key ? null : item.key))}
+                />
+                <SmallIcon
+                  label={`Delete exercise ${index + 1}`}
+                  name={{ ios: 'trash', android: 'delete', web: 'delete' }}
+                  disabled={saving}
+                  onPress={() => {
+                    if (editing === item.key) setEditing(null);
+                    setDraft((current) => ({
+                      ...current,
+                      exercises: current.exercises.filter((entry) => entry.key !== item.key),
+                    }));
+                  }}
+                />
+              </View>
+            )}
+          />
+          {draft.exercises.length > 1 && (
+            <AuthText kind="muted">Hold an exercise, then drag it to reorder.</AuthText>
+          )}
           <AuthText>
             New sets start with 8 reps and 90 seconds rest. Edit each set; blank weight means
             unspecified, zero means bodyweight.

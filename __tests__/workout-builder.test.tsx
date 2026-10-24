@@ -20,6 +20,43 @@ const exerciseId = '00000000-0000-4000-8000-000000000003';
 const userId = '00000000-0000-4000-8000-000000000001';
 const selectedId = '00000000-0000-4000-8000-000000000004';
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
+// The drag gesture runs on the UI thread; here a plain list calls the same onReorder.
+jest.mock('@/components/reorder-list', () => {
+  const { Pressable, Text, View } =
+    jest.requireActual<typeof import('react-native')>('react-native');
+  return {
+    ReorderList: ({
+      items,
+      keyOf,
+      renderItem,
+      onReorder,
+    }: {
+      items: { key: string }[];
+      keyOf: (item: { key: string }) => string;
+      renderItem: (item: { key: string }, index: number, handle: null) => React.ReactNode;
+      onReorder: (keys: string[]) => void;
+    }) => (
+      <View>
+        {items.map((item, index) => (
+          <View key={keyOf(item)}>
+            {renderItem(item, index, null)}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Drag exercise ${index + 1} up`}
+              onPress={() => {
+                const keys = items.map(keyOf);
+                [keys[index - 1], keys[index]] = [keys[index], keys[index - 1]];
+                onReorder(keys);
+              }}
+            >
+              <Text>drag</Text>
+            </Pressable>
+          </View>
+        ))}
+      </View>
+    ),
+  };
+});
 jest.mock('@/features/workouts/today-workout', () => ({
   todayWorkoutRecords: jest.fn(async () => ({ session: null, completed: [] })),
 }));
@@ -600,7 +637,7 @@ test('orders exercises and adds/removes sets and exercises before saving', async
     ),
   );
 });
-test('each exercise row reorders with arrows and deletes with its bin', async () => {
+test('dragging reorders the draft and each row deletes with its bin', async () => {
   mocks.load.mockResolvedValue({
     unit: 'kg',
     draft: {
@@ -620,8 +657,7 @@ test('each exercise row reorders with arrows and deletes with its bin', async ()
     </FeedbackTestRoot>,
   );
   await screen.findByText('2. Second press');
-  expect(screen.getByRole('button', { name: 'Move exercise 1 up' })).toBeDisabled();
-  await fireEvent.press(screen.getByRole('button', { name: 'Move exercise 2 up' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Drag exercise 2 up' }));
   expect(screen.getByText('1. Second press')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Delete exercise 1' }));
   expect(screen.queryByText(/Second press/)).toBeNull();
