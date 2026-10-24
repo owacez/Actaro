@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { ActionSheet, IconButton } from '@/components/product-ui';
 import { CompletionMark } from '@/components/completion-mark';
 import { NumberStepper } from '@/components/number-stepper';
 import { AuthButton, AuthInput, AuthText } from '@/features/auth/auth-components';
 import { useRecordAction, RecordSaveFeedback } from '@/hooks/use-records';
 import { formatNumber } from '@/features/nutrition/nutrition-model';
+import { useAppTheme } from '@/features/profile/theme-context';
 import { habitService } from '@/features/habits/habit-service';
 import {
   habitToday,
@@ -30,6 +31,7 @@ export function TodayHabit({
   const [open, setOpen] = useState(false),
     [input, setInput] = useState(''),
     [notes, setNotes] = useState('');
+  const { colors } = useAppTheme();
   const action = useRecordAction(),
     date = habitToday(habit),
     version = habitVersion(habit, date);
@@ -54,10 +56,15 @@ export function TodayHabit({
     setOpen(true);
   }
   return (
-    <View style={{ flex: 1, gap: 12, justifyContent: 'space-between' }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+    <View style={{ gap: 6 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
         <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
-          <AuthText kind="heading">{habit.name}</AuthText>
+          <Text
+            numberOfLines={1}
+            style={{ color: colors.text, fontSize: 15, fontFamily: 'Inter_600SemiBold' }}
+          >
+            {habit.name}
+          </Text>
           <View style={{ alignSelf: 'flex-start' }}>
             <CompletionMark
               done={done}
@@ -74,34 +81,39 @@ export function TodayHabit({
             <AuthText kind="muted">Check off once today</AuthText>
           )}
         </View>
-        {log && (
+        {log ? (
           <IconButton
             label={`Options for ${habit.name}`}
             name={{ ios: 'ellipsis', android: 'more_horiz', web: 'more_horiz' }}
             disabled={action.locked}
             onPress={edit}
           />
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Log habit ${habit.name}`}
+            accessibilityState={{ disabled: action.locked }}
+            disabled={action.locked}
+            onPress={() => {
+              if (dailyCheck) save(1);
+              else edit();
+            }}
+            hitSlop={6}
+            style={({ pressed }) => ({
+              minHeight: 36,
+              paddingHorizontal: 14,
+              borderRadius: 18,
+              justifyContent: 'center',
+              backgroundColor: colors.accent,
+              opacity: action.locked ? 0.45 : pressed ? 0.8 : 1,
+            })}
+          >
+            <Text style={{ color: '#111311', fontSize: 13, fontFamily: 'Inter_600SemiBold' }}>
+              {dailyCheck ? 'Done' : habit.kind === 'duration' ? 'Log min' : 'Log'}
+            </Text>
+          </Pressable>
         )}
       </View>
-      {!log && (
-        <AuthButton
-          title={
-            dailyCheck
-              ? 'Log habit'
-              : habit.kind === 'duration'
-                ? 'Log minutes'
-                : habit.kind === 'avoidance'
-                  ? 'Log today’s count'
-                  : 'Log amount'
-          }
-          accessibilityLabel={`Log habit ${habit.name}`}
-          disabled={action.locked}
-          onPress={() => {
-            if (dailyCheck) save(1);
-            else edit();
-          }}
-        />
-      )}
       {!open && <RecordSaveFeedback action={action} />}
       <ActionSheet
         title={habit.name}

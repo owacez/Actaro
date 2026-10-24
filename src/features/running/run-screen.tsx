@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useNavigation } from 'expo-router';
 import { usePreventRemove, type NavigationAction } from 'expo-router/react-navigation';
 import { randomUUID } from 'expo-crypto';
-import { Text, View, useWindowDimensions } from 'react-native';
-import { ActionSheet, NavigationSurface, ScreenHeader } from '@/components/product-ui';
+import { Pressable, Text, View, useWindowDimensions } from 'react-native';
+import { ActionSheet, NavigationSurface, ProductIcon, ScreenHeader } from '@/components/product-ui';
 import {
   AuthButton,
   AuthCard,
@@ -40,6 +40,7 @@ import {
 } from './run-model';
 import { RunMap } from './run-map';
 import { useRunDraft } from './use-run-draft';
+import { runPreview, type RunPreview } from './run-preview';
 
 export function RunMetrics({
   seconds,
@@ -169,7 +170,11 @@ export function RunStartScreen({
     saved = useRunDraft(userId);
   const supported = backgroundRunSupported();
   const [background, setBackground] = useState(supported);
-  const [permissionSheet, setPermissionSheet] = useState(false);
+  const [permissionSheet, setPermissionSheet] = useState(false),
+    [settings, setSettings] = useState(false),
+    [preview, setPreview] = useState<RunPreview>({ state: 'searching', point: null });
+  const { colors } = useAppTheme(),
+    screenSize = useWindowDimensions();
   const [busy, setBusy] = useState(false),
     [error, setError] = useState<string | null>(null);
   const pending = useRef(false),
@@ -180,6 +185,18 @@ export function RunStartScreen({
       alive.current = false;
     };
   }, []);
+  useEffect(() => {
+    let active = true;
+    void runPreview((value) => {
+      if (active) setPreview(value);
+    }).catch(() => {
+      if (active) setPreview({ state: 'off' });
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+  const previewPoint = preview.state === 'off' ? null : preview.point;
   async function start() {
     if (pending.current || !resource.data) return;
     pending.current = true;
@@ -214,10 +231,84 @@ export function RunStartScreen({
   return (
     <AuthFrame header={<ScreenHeader title="Train" subtitle="RUNNING" />}>
       {navigation}
-      <AuthText kind="heading">Go for a run</AuthText>
-      <AuthText>
-        Record your time, distance, pace and GPS route. Your route is private to your account.
-      </AuthText>
+      <View
+        style={{
+          height: Math.max(320, Math.round(screenSize.height * 0.5)),
+          borderRadius: 28,
+          overflow: 'hidden',
+          backgroundColor: colors.fill,
+        }}
+      >
+        {previewPoint ? (
+          <RunMap
+            points={[previewPoint]}
+            live
+            height={Math.max(320, Math.round(screenSize.height * 0.5))}
+          />
+        ) : (
+          <View
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+              padding: 24,
+            }}
+          >
+            <ProductIcon name={{ ios: 'location', android: 'near_me', web: 'near_me' }} size={30} />
+            <AuthText>
+              {preview.state === 'off'
+                ? 'Your map appears here once location is allowed. You will be asked when you start.'
+                : 'Finding your location…'}
+            </AuthText>
+          </View>
+        )}
+        <View
+          accessible
+          accessibilityLabel={
+            preview.state === 'ready'
+              ? `GPS ready, accuracy plus or minus ${Math.round(preview.point.accuracy)} metres`
+              : preview.state === 'off'
+                ? 'Location off'
+                : 'Finding GPS'
+          }
+          style={{
+            position: 'absolute',
+            top: 12,
+            left: 12,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 16,
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.border,
+          }}
+        >
+          <View
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 4,
+              backgroundColor:
+                preview.state === 'ready'
+                  ? colors.success
+                  : preview.state === 'off'
+                    ? colors.muted
+                    : colors.carbs,
+            }}
+          />
+          <Text style={{ color: colors.text, fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
+            {preview.state === 'ready'
+              ? `GPS ready · ±${Math.round(preview.point.accuracy)} m`
+              : preview.state === 'off'
+                ? 'Location off'
+                : 'Finding GPS…'}
+          </Text>
+        </View>
+      </View>
       <RecordLoadFeedback {...resource} retry={resource.reload} />
       {saved.loading && <AuthLoading>Checking for a saved run…</AuthLoading>}
       {saved.error && (
@@ -240,34 +331,67 @@ export function RunStartScreen({
           <AuthButton title="Open saved run" onPress={onStart} />
         </AuthCard>
       ) : (
-        resource.data &&
-        !saved.loading &&
-        !saved.error && (
-          <>
-            <AuthChoice
-              title="Record with screen locked"
-              selected={background && supported}
-              disabled={!supported || busy}
-              onPress={() => setBackground((value) => !value)}
-            />
-            <AuthText kind="muted">
-              {supported
-                ? 'Uses background location only during an active run. You will be asked for Always/background location after foreground permission.'
-                : 'Expo Go and web support foreground recording here. Leaving the app pauses the run. Background GPS needs a development build.'}
-            </AuthText>
-            <AuthButton
-              title="Start run"
-              disabled={busy}
-              onPress={() => setPermissionSheet(true)}
-            />
-          </>
-        )
+        <View
+          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 28 }}
+        >
+          <RoundControl
+            label="Run history"
+            caption="History"
+            icon={{ ios: 'clock.arrow.circlepath', android: 'history', web: 'history' }}
+            disabled={busy}
+            onPress={onHistory}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Start run"
+            accessibilityState={{
+              disabled: busy || !resource.data || saved.loading || !!saved.error,
+            }}
+            disabled={busy || !resource.data || saved.loading || !!saved.error}
+            onPress={() => setPermissionSheet(true)}
+            style={({ pressed }) => ({
+              width: 96,
+              height: 96,
+              borderRadius: 48,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: colors.accent,
+              boxShadow: '0 10px 24px rgba(255,90,31,0.35)',
+              opacity: busy || !resource.data ? 0.5 : 1,
+              transform: [{ scale: pressed ? 0.95 : 1 }],
+            })}
+          >
+            <Text style={{ color: '#111311', fontSize: 18, fontFamily: 'Inter_600SemiBold' }}>
+              Start
+            </Text>
+          </Pressable>
+          <RoundControl
+            label="Run settings"
+            caption="Settings"
+            icon={{ ios: 'gearshape', android: 'settings', web: 'settings' }}
+            disabled={busy}
+            onPress={() => setSettings(true)}
+          />
+        </View>
       )}
-      <AuthButton title="Run history" outlined disabled={busy} onPress={onHistory} />
       <AuthText kind="muted">
-        GPS is an estimate. Weak signal can leave route gaps. Steps stay in your existing activity
-        count; no duplicate steps or invented calories are added.
+        GPS is an estimate. Your route is private to your account; steps stay in your activity count
+        and no calories are invented.
       </AuthText>
+      <ActionSheet title="Run settings" visible={settings} onClose={() => setSettings(false)}>
+        <AuthChoice
+          title="Record with screen locked"
+          selected={background && supported}
+          disabled={!supported || busy}
+          onPress={() => setBackground((value) => !value)}
+        />
+        <AuthText kind="muted">
+          {supported
+            ? 'Uses background location only during an active run. You will be asked for Always/background location after foreground permission.'
+            : 'Expo Go and web support foreground recording here. Leaving the app pauses the run. Background GPS needs a development build.'}
+        </AuthText>
+        <AuthButton title="Done" outlined onPress={() => setSettings(false)} />
+      </ActionSheet>
       <ActionSheet
         title="Allow location for this run"
         visible={permissionSheet}
@@ -452,7 +576,7 @@ export function RunSessionScreen({
             points={draft.route}
             live={draft.status === 'recording'}
             height={
-              draft.status === 'review' ? 280 : Math.max(300, Math.round(screenSize.height * 0.45))
+              draft.status === 'review' ? 280 : Math.max(340, Math.round(screenSize.height * 0.6))
             }
           />
           {draft.status === 'review' ? (
@@ -612,5 +736,54 @@ export function RunSessionScreen({
         {error && <AuthNotice error>{error}</AuthNotice>}
       </ActionSheet>
     </AuthFrame>
+  );
+}
+
+// A round secondary control beside the Start button.
+function RoundControl({
+  label,
+  caption,
+  icon,
+  disabled,
+  onPress,
+}: {
+  label: string;
+  caption: string;
+  icon: Parameters<typeof ProductIcon>[0]['name'];
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  const { colors } = useAppTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => ({
+        alignItems: 'center',
+        gap: 6,
+        opacity: disabled || pressed ? 0.6 : 1,
+      })}
+    >
+      <View
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.surface,
+          borderWidth: 1,
+          borderColor: colors.border,
+        }}
+      >
+        <ProductIcon name={icon} color={colors.text} />
+      </View>
+      <Text style={{ color: colors.muted, fontSize: 12, fontFamily: 'Inter_500Medium' }}>
+        {caption}
+      </Text>
+    </Pressable>
   );
 }

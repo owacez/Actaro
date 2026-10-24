@@ -4,6 +4,46 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Strava-style run start, compact Today habits, live exercise search (2026-10-24):
+implementation and local verification **DONE**; device acceptance **DEFERRED**.
+
+- **Run start (Train → Run):**
+  - A map-first panel (half the screen) centred on the last known position, with a
+    GPS chip ("GPS ready · ±8 m" / "Finding GPS…" / "Location off").
+  - A 96 pt orange **Start** button between round **History** and **Settings**
+    controls. The lock-screen recording choice moved into a Run settings sheet.
+  - `run-preview.ts` reads location only when foreground permission was already
+    granted (`getForegroundPermissionsAsync`, `getLastKnownPositionAsync`, one
+    `getCurrentPositionAsync`). It never prompts; the existing explanation sheet still
+    precedes the first request.
+  - The recording map grows from 45% to 60% of the screen height.
+- **Today habits:** the one-card-at-a-time carousel with arrows is replaced by a
+  compact checklist.
+  - Each row has the name, status and progress, plus a small orange
+    **Done/Log/Log min** pill, or ⋯ once logged.
+  - Rows keep schedule order, and more than four collapse behind "Show all N
+    habits". Accessible names are unchanged.
+- **Exercise search:** live search from three characters, 300 ms after typing
+  pauses.
+  - Current results stay visible with "Searching…", so there is no flicker.
+  - Stale responses are ignored by the existing request generation counter.
+  - Fewer than three characters returns the full list, with a "Keep typing" hint.
+    The Search link is removed; Enter still searches.
+  - The count line names the query.
+
+Evidence:
+
+- `npm run check` (fresh lint cache): 85 suites with 430 Jest tests pass, plus 6
+  dataset tests.
+- New or updated tests:
+  - The run start shows "Location off" without prompting.
+  - The habit checklist logs in place, and Show all / Show fewer work.
+  - Live search sends no request for "pr", and "pre/pres/press" typed quickly sends
+    one request for "press"; clearing restores the full list.
+- Offline web captures of the run start screen, without location and with a
+  simulated location: the chip shows ±8 m and the map mounts. Tiles are blocked by
+  the offline harness.
+
 App-wide UI/UX audit, shared-component pass (2026-10-24): implementation and local
 verification **DONE**; device acceptance **DEFERRED**.
 

@@ -171,7 +171,7 @@ test.each([
   },
 );
 
-test('habit cards page by swipe or arrows, keep the selected result after logging, and resize', async () => {
+test('habits form a compact checklist that logs each habit in place', async () => {
   const records = [1, 2, 3].map((number) => ({
     ...habit(),
     id: `habit-${number}`,
@@ -198,35 +198,24 @@ test('habit cards page by swipe or arrows, keep the selected result after loggin
       <Fixture />
     </FeedbackTestRoot>,
   );
-  await fireEvent(screen.getByTestId('habit-carousel'), 'layout', {
-    nativeEvent: { layout: { width: 300 } },
-  });
-  expect(screen.getByText('Habit 1 of 3')).toBeTruthy();
-  expect(screen.getByRole('button', { name: 'Previous habit' })).toBeDisabled();
+  // Every habit is visible at once; no paging.
+  for (const name of ['Habit 1', 'Habit 2', 'Habit 3'])
+    expect(screen.getByRole('button', { name: `Log habit ${name}` })).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Log habit Habit 2' }));
+  await waitFor(() => expect(service.log).toHaveBeenCalledWith(owner, 'habit-2', day, 1, ''));
+  await screen.findByRole('button', { name: 'Options for Habit 2' });
+  // Logged in place: the other habits keep their Log buttons.
+  expect(screen.getByRole('button', { name: 'Log habit Habit 1' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Log habit Habit 3' })).toBeTruthy();
   expect(screen.queryByRole('button', { name: 'Log habit Habit 2' })).toBeNull();
-  await fireEvent.scroll(screen.getByTestId('habit-cards'), {
-    nativeEvent: { contentOffset: { x: 300, y: 0 } },
-  });
-  expect(screen.getByText('Habit 2 of 3')).toBeTruthy();
-  await fireEvent.press(screen.getByRole('button', { name: 'Next habit' }));
-  expect(screen.getByText('Habit 3 of 3')).toBeTruthy();
-  expect(screen.getByRole('button', { name: 'Next habit' })).toBeDisabled();
-  await fireEvent.press(screen.getByRole('button', { name: 'Log habit Habit 3' }));
-  await waitFor(() => expect(service.log).toHaveBeenCalledWith(owner, 'habit-3', day, 1, ''));
-  await screen.findByRole('button', { name: 'Options for Habit 3' });
-  expect(screen.getByText('Habit 3 of 3')).toBeTruthy();
-  expect(screen.queryByRole('button', { name: 'Log habit Habit 3' })).toBeNull();
-  await fireEvent(screen.getByTestId('habit-carousel'), 'layout', {
-    nativeEvent: { layout: { width: 360 } },
-  });
-  expect(screen.getByText('Habit 3 of 3')).toBeTruthy();
-  await fireEvent.press(screen.getByRole('button', { name: 'Previous habit' }));
-  expect(screen.getByRole('button', { name: 'Log habit Habit 2' })).toBeTruthy();
 });
 
-test('zero/one habit and a shrinking list have safe card counts and arrow boundaries', async () => {
-  const first = habit();
-  const second = { ...habit(), id: 'second', name: 'Second' };
+test('no habits shows a message; more than four collapse behind Show all', async () => {
+  const many = [1, 2, 3, 4, 5, 6].map((number) => ({
+    ...habit(),
+    id: `many-${number}`,
+    name: `Many ${number}`,
+  }));
   const tree = (habits: HabitRecord[]) => (
     <FeedbackTestRoot>
       <TodayHabits userId={owner} habits={habits} onLogged={jest.fn()} />
@@ -234,14 +223,11 @@ test('zero/one habit and a shrinking list have safe card counts and arrow bounda
   );
   const view = await render(tree([]));
   expect(screen.getByText('No scheduled habits today.')).toBeTruthy();
-  await view.rerender(tree([first, second]));
-  await fireEvent(screen.getByTestId('habit-carousel'), 'layout', {
-    nativeEvent: { layout: { width: 300 } },
-  });
-  await fireEvent.press(screen.getByRole('button', { name: 'Next habit' }));
-  expect(screen.getByText('Habit 2 of 2')).toBeTruthy();
-  await view.rerender(tree([first]));
-  expect(screen.getByText('Habit 1 of 1')).toBeTruthy();
-  expect(screen.getByRole('button', { name: 'Next habit' })).toBeDisabled();
-  expect(screen.getByRole('button', { name: 'Previous habit' })).toBeDisabled();
+  await view.rerender(tree(many));
+  expect(screen.getByRole('button', { name: 'Log habit Many 4' })).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Log habit Many 5' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Show all 6 habits' }));
+  expect(screen.getByRole('button', { name: 'Log habit Many 6' })).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Show fewer' }));
+  expect(screen.queryByRole('button', { name: 'Log habit Many 6' })).toBeNull();
 });

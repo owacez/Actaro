@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { ActionSheet, IconButton, ScreenHeader } from '@/components/product-ui';
 import { useFocusEffect } from 'expo-router';
 import { FlatList, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -25,6 +25,7 @@ import {
 } from './exercise-service';
 import { plural } from '@/lib/format';
 
+const minimumQuery = 3;
 const initialFilters: SearchFilters = {
   query: '',
   bodyweight: false,
@@ -89,13 +90,27 @@ export function LibraryScreen({
       };
     }, [filters, userId]),
   );
-  function search(patch: Partial<SearchFilters>) {
+  // keepRows leaves current results visible while a live search loads, so typing never
+  // flashes an empty list.
+  function search(patch: Partial<SearchFilters>, keepRows = false) {
     generation.current += 1;
     setError(null);
     setLoading(true);
-    setRows([]);
+    if (!keepRows) setRows([]);
     setFilters((current) => ({ ...current, offset: 0, ...patch }));
   }
+  // Live search: from three characters, 300 ms after typing pauses; fewer shows everything.
+  const term = query.trim().length >= minimumQuery ? query.trim() : '';
+  useEffect(() => {
+    if (term === filters.query) return;
+    const timer = setTimeout(() => {
+      generation.current += 1;
+      setError(null);
+      setLoading(true);
+      setFilters((current) => ({ ...current, offset: 0, query: term }));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [term, filters.query]);
   function refresh() {
     clearReadCache();
     generation.current += 1;
@@ -129,10 +144,12 @@ export function LibraryScreen({
               autoCorrect={false}
               returnKeyType="search"
               onChangeText={setQuery}
-              onSubmitEditing={() => search({ query })}
+              onSubmitEditing={() => search({ query: term }, true)}
             />
+            {query.trim().length > 0 && query.trim().length < minimumQuery && (
+              <AuthText kind="muted">Keep typing: search starts at 3 characters.</AuthText>
+            )}
             <View style={authStyles.row}>
-              <AuthLink title="Search" onPress={() => search({ query })} />
               <AuthLink
                 title={showFilters ? 'Hide filters' : 'Filters'}
                 onPress={() => setShowFilters((value) => !value)}
@@ -196,11 +213,17 @@ export function LibraryScreen({
                 />
               </>
             )}
-            {!loading && !error && (
-              <AuthText>
-                {plural(total, 'exercise')}
-                {filters.availableOnly ? ' · your equipment' : ''}
-              </AuthText>
+            {loading && rows.length > 0 ? (
+              <AuthLoading>Searching…</AuthLoading>
+            ) : (
+              !loading &&
+              !error && (
+                <AuthText>
+                  {plural(total, 'exercise')}
+                  {filters.query ? ` for “${filters.query}”` : ''}
+                  {filters.availableOnly ? ' · your equipment' : ''}
+                </AuthText>
+              )
             )}
           </View>
         }

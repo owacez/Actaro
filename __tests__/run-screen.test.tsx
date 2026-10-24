@@ -10,6 +10,9 @@ import { runFixture, runId, runOwner, runTime } from './helpers/run-fixture';
 import { nutritionContext } from './helpers/nutrition-fixture';
 let mockCurrent: RunDraft | null;
 jest.mock('@/features/running/run-map', () => ({ RunMap: () => null }));
+jest.mock('@/features/running/run-preview', () => ({
+  runPreview: async (update: (value: { state: 'off' }) => void) => update({ state: 'off' }),
+}));
 let mockRemoval: (value: { data: { action: { type: string } } }) => void;
 const mockDispatch = jest.fn(),
   mockNavigation = { dispatch: mockDispatch };
@@ -129,6 +132,8 @@ test('start explains permission before invoking GPS and foreground fallback is e
     wrapper: FeedbackTestRoot,
   });
   await screen.findByRole('button', { name: 'Start run' });
+  // Without an existing grant the map waits; nothing asks for location before Start.
+  expect(screen.getByLabelText('Location off')).toBeTruthy();
   expect(tracker.begin).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Start run' }));
   expect(tracker.begin).not.toHaveBeenCalled();

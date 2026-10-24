@@ -70,7 +70,6 @@ test('library searches, paginates, filters and opens the actual exercise ID', as
   expect(add).toHaveBeenCalledWith(itemId);
   expect(open).toHaveBeenCalledTimes(1);
   await fireEvent.changeText(screen.getByLabelText('Search exercises'), 'press');
-  await fireEvent.press(screen.getByText('Search'));
   await waitFor(() =>
     expect(mocks.search).toHaveBeenLastCalledWith(
       expect.objectContaining({ query: 'press', offset: 0 }),
@@ -108,7 +107,6 @@ test('quick add and edit are separate row buttons that preserve the search and a
   const view = await render(tree());
   await screen.findByText('Fixture press');
   await fireEvent.changeText(screen.getByLabelText('Search exercises'), 'press');
-  await fireEvent.press(screen.getByRole('button', { name: 'Search' }));
   await waitFor(() => expect(mocks.search).toHaveBeenCalledTimes(2));
   const button = screen.getByRole('button', { name: 'Add Fixture press to workout' });
   for (let parent = button.parent; parent; parent = parent.parent)
@@ -126,6 +124,28 @@ test('quick add and edit are separate row buttons that preserve the search and a
   await fireEvent.press(screen.getByRole('button', { name: 'Edit Fixture press sets' }));
   expect(edit).toHaveBeenCalledWith(itemId);
   expect(mocks.search).toHaveBeenCalledTimes(2);
+});
+test('live search starts at three characters and sends one request after typing pauses', async () => {
+  await render(<LibraryScreen userId={owner} onOpen={() => {}} onEquipment={() => {}} />);
+  await screen.findByText('Fixture press');
+  expect(mocks.search).toHaveBeenCalledTimes(1);
+  await fireEvent.changeText(screen.getByLabelText('Search exercises'), 'pr');
+  expect(screen.getByText('Keep typing: search starts at 3 characters.')).toBeTruthy();
+  await act(() => new Promise((resolve) => setTimeout(resolve, 400)));
+  expect(mocks.search).toHaveBeenCalledTimes(1);
+  for (const text of ['pre', 'pres', 'press'])
+    await fireEvent.changeText(screen.getByLabelText('Search exercises'), text);
+  await waitFor(() => expect(mocks.search).toHaveBeenCalledTimes(2));
+  expect(mocks.search).toHaveBeenLastCalledWith(
+    expect.objectContaining({ query: 'press', offset: 0 }),
+    owner,
+  );
+  await screen.findByText(/for “press”/);
+  // Clearing the field returns to the full list.
+  await fireEvent.changeText(screen.getByLabelText('Search exercises'), '');
+  await waitFor(() =>
+    expect(mocks.search).toHaveBeenLastCalledWith(expect.objectContaining({ query: '' }), owner),
+  );
 });
 test('library shows recoverable errors and an honest empty result', async () => {
   mocks.search.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce([]);
