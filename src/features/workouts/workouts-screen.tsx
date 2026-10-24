@@ -122,7 +122,7 @@ export function WorkoutsScreen({
       {navigation ?? <AuthLink title={backTitle} disabled={removing} onPress={onBack} />}
       {selecting && <AuthText>{selectionDescription}</AuthText>}
       {navigation && !selecting && onStart && (
-        <ScheduledTraining userId={userId} onStart={onStart} />
+        <ScheduledTraining userId={userId} onStart={onStart} onResume={onResume} />
       )}
       <AuthText kind="heading">Your workouts</AuthText>
       {loading ? (

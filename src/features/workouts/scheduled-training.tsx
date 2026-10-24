@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Text, View } from 'react-native';
-import { AuthButton, AuthCard, AuthText } from '@/features/auth/auth-components';
+import { AuthCard, AuthText } from '@/features/auth/auth-components';
 import { useRecords, RecordLoadFeedback } from '@/hooks/use-records';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { actaroColors } from '@/constants/actaro-theme';
@@ -9,23 +9,28 @@ import { trainingService } from './training-service';
 import { workoutService } from './workout-service';
 import { prestartTotals } from './session-model';
 import { shiftDate } from './training-overview';
-import { plural } from '@/lib/format';
+import { todayWorkoutRecords } from './today-workout';
+import { TodayWorkoutCard } from './today-workout-card';
 
 export function ScheduledTraining({
   userId,
   onStart,
+  onResume,
 }: {
   userId: string;
   onStart: (id: string) => void;
+  onResume?: () => void;
 }) {
   const load = useCallback(async () => {
       const context = await trainingService.load(userId),
         weekday = (new Date(context.today + 'T12:00:00').getDay() + 6) % 7,
         day = context.plan?.days[weekday],
         workout =
-          day?.workoutId && !day.isRest ? await workoutService.load(userId, day.workoutId) : null;
+          day?.workoutId && !day.isRest ? await workoutService.load(userId, day.workoutId) : null,
+        records = await todayWorkoutRecords(userId, context.today);
       return {
         ...context,
+        ...records,
         weekday,
         day,
         workout: workout?.draft ? { draft: workout.draft, ...prestartTotals(workout.draft) } : null,
@@ -103,55 +108,27 @@ export function ScheduledTraining({
               </View>
             </AuthCard>
           )}
-          {data.workout ? (
-            <View
-              style={{
-                backgroundColor: colors.accent,
-                padding: 20,
-                borderRadius: 28,
-                gap: 20,
-                overflow: 'hidden',
-              }}
-            >
-              <View
-                pointerEvents="none"
-                style={{
-                  position: 'absolute',
-                  width: 230,
-                  height: 230,
-                  right: -80,
-                  top: -120,
-                  borderRadius: 120,
-                  backgroundColor: actaroColors.surface + '26',
-                }}
-              />
-              <Text style={{ color: actaroColors.text, fontSize: 11 }}>TODAY</Text>
-              <Text
-                style={{ color: actaroColors.text, fontFamily: 'Inter_600SemiBold', fontSize: 25 }}
-              >
-                {data.workout.draft.name}
-              </Text>
-              <Text style={{ color: actaroColors.text, fontSize: 14 }}>
-                {plural(data.workout.draft.exercises.length, 'exercise')} ·{' '}
-                {plural(data.workout.sets, 'set')} · ~{data.workout.estimatedMinutes} min
-              </Text>
-              <AuthButton
-                title="Start today's workout"
-                outlined
-                onPress={() => {
-                  if (data.workout?.draft.id) onStart(data.workout.draft.id);
-                }}
-              />
-            </View>
-          ) : (
-            data.plan && (
-              <AuthCard>
-                <AuthText kind="eyebrow">TODAY</AuthText>
-                <AuthText kind="heading">
-                  {data.day?.isRest ? 'Scheduled rest day' : 'No workout assigned'}
-                </AuthText>
-              </AuthCard>
-            )
+          {(data.plan || data.session || data.completed.length > 0) && (
+            <TodayWorkoutCard
+              eyebrow="TODAY"
+              session={data.session}
+              completed={data.completed}
+              workout={
+                data.workout
+                  ? {
+                      id: data.workout.draft.id,
+                      name: data.workout.draft.name,
+                      exercises: data.workout.draft.exercises.length,
+                      sets: data.workout.sets,
+                      minutes: data.workout.estimatedMinutes,
+                    }
+                  : null
+              }
+              restDay={!!data.day?.isRest}
+              onResume={onResume}
+              onStart={onStart}
+              onView={(id) => router.push({ pathname: '/workouts/history', params: { id } })}
+            />
           )}
         </>
       )}

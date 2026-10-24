@@ -6,6 +6,9 @@ import { workoutService } from '@/features/workouts/workout-service';
 import { splitPayload, weekdays, type SplitDraft } from '@/features/workouts/split-model';
 import { FeedbackTestRoot } from './helpers/feedback-root';
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
+jest.mock('@/features/workouts/today-workout', () => ({
+  todayWorkoutRecords: jest.fn(async () => ({ session: null, completed: [] })),
+}));
 jest.mock('expo-crypto', () => ({ randomUUID: () => '00000000-0000-4000-8000-000000000002' }));
 jest.mock('expo-router', () => ({
   useFocusEffect: (callback: () => void) => {

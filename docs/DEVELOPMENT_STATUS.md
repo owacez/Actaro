@@ -4,6 +4,26 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Shared Today/Train workout card with a ⋯ menu (2026-10-24): implementation and
+local verification **DONE**; device acceptance **DEFERRED**.
+
+- Train's "today" card did not read completions, so it kept offering "Start today's
+  workout".
+- Both tabs now render `TodayWorkoutCard`, fed by `todayWorkoutRecords` (unfinished
+  local session, plus today's completed sessions; clears a server-acknowledged local
+  copy).
+- Done state: green Done badge, "Completed in …" and **View workout**. **Train
+  again** moved into a top-right ⋯ "Workout options" sheet. The ⋯ is shown only when
+  there is something to train.
+
+Evidence:
+
+- `npm run check` (fresh lint cache): 84 suites with 426 Jest tests pass, plus 6
+  dataset tests.
+- New card tests: Done hides Start and Train again, View opens the record, the ⋯
+  menu's Train again starts the scheduled workout, and before completion Start
+  works with no ⋯.
+
 Workout builder rows, picker exit, split message and popup height (2026-10-24):
 implementation and local verification **DONE**; device acceptance **DEFERRED**.
 

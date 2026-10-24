@@ -20,6 +20,9 @@ const exerciseId = '00000000-0000-4000-8000-000000000003';
 const userId = '00000000-0000-4000-8000-000000000001';
 const selectedId = '00000000-0000-4000-8000-000000000004';
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
+jest.mock('@/features/workouts/today-workout', () => ({
+  todayWorkoutRecords: jest.fn(async () => ({ session: null, completed: [] })),
+}));
 const selected: ExerciseDetail = {
   id: selectedId,
   name: 'Selected real exercise',
