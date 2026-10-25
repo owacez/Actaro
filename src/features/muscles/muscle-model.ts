@@ -53,3 +53,8 @@ export function regionExercises(links: readonly MuscleLink[], query = ''): Regio
     .filter((row) => !needle || row.name.toLowerCase().includes(needle))
     .sort((a, b) => Number(b.primary) - Number(a.primary) || a.name.localeCompare(b.name));
 }
+
+// The body figure that matches the profile; other or unset answers keep the choice open.
+export function figureForSex(sex: string | null | undefined): 'male' | 'female' | null {
+  return sex === 'male' || sex === 'female' ? sex : null;
+}

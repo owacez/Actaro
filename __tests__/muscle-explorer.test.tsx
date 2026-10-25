@@ -1,13 +1,26 @@
 import { beforeEach, expect, jest, test } from '@jest/globals';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { MuscleExplorerScreen } from '@/features/muscles/muscle-explorer-screen';
-import { muscleRegions, regionExercises } from '@/features/muscles/muscle-model';
+import { figureForSex, muscleRegions, regionExercises } from '@/features/muscles/muscle-model';
+import { profileService } from '@/features/profile/profile-service';
 import { muscleService } from '@/features/muscles/muscle-service';
 import { bodyPaths } from '@/features/muscles/body-paths';
 import { FeedbackTestRoot } from './helpers/feedback-root';
 
 jest.mock('@/lib/supabase/client', () => ({ getSupabase: jest.fn() }));
 jest.mock('@/features/muscles/muscle-service', () => ({ muscleService: { links: jest.fn() } }));
+jest.mock('@/features/profile/profile-service', () => ({
+  profileService: { getProfile: jest.fn() },
+}));
+const profile = (sex: string | null) => ({
+  id: 'owner',
+  display_name: null,
+  sex,
+  date_of_birth: null,
+  location: null,
+  created_at: '',
+  updated_at: '',
+});
 const service = jest.mocked(muscleService);
 
 // The 31 muscle slugs in the pinned RepDB snapshot (underscores become hyphens on import).
@@ -47,6 +60,7 @@ const catalogMuscles = [
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(profileService.getProfile).mockResolvedValue(profile(null));
   service.links.mockResolvedValue([
     { role: 'secondary', exercise: { id: 'b', name: 'Push-up' } },
     { role: 'primary', exercise: { id: 'a', name: 'Bench Press' } },
@@ -87,7 +101,7 @@ test('choosing a muscle lists its exercises; tapping one opens it', async () => 
   const open = jest.fn();
   await render(
     <FeedbackTestRoot>
-      <MuscleExplorerScreen onBack={jest.fn()} onOpen={open} />
+      <MuscleExplorerScreen userId="owner" onBack={jest.fn()} onOpen={open} />
     </FeedbackTestRoot>,
   );
   expect(service.links).not.toHaveBeenCalled();
@@ -104,4 +118,37 @@ test('choosing a muscle lists its exercises; tapping one opens it', async () => 
   // Tapping the selected muscle again clears it.
   await fireEvent.press(screen.getByRole('button', { name: 'Chest' }));
   expect(screen.queryByText(/Chest · /)).toBeNull();
+});
+
+test('the profile picks the figure; other or unset answers keep the choice', async () => {
+  expect(figureForSex('male')).toBe('male');
+  expect(figureForSex('female')).toBe('female');
+  for (const sex of ['intersex', 'prefer_not_to_say', null, undefined])
+    expect(figureForSex(sex)).toBeNull();
+  for (const [sex, toggle] of [
+    ['male', false],
+    ['female', false],
+    ['intersex', true],
+    [null, true],
+  ] as const) {
+    jest.mocked(profileService.getProfile).mockResolvedValue(profile(sex));
+    const view = await render(
+      <FeedbackTestRoot>
+        <MuscleExplorerScreen userId="owner" onBack={jest.fn()} onOpen={jest.fn()} />
+      </FeedbackTestRoot>,
+    );
+    await waitFor(() => expect(profileService.getProfile).toHaveBeenCalled());
+    if (toggle) await screen.findByRole('button', { name: 'Female figure' });
+    else expect(screen.queryByRole('button', { name: 'Female figure' })).toBeNull();
+    await view.unmount();
+    jest.mocked(profileService.getProfile).mockClear();
+  }
+  // A profile that cannot load keeps the choice available.
+  jest.mocked(profileService.getProfile).mockRejectedValue(new Error('offline'));
+  await render(
+    <FeedbackTestRoot>
+      <MuscleExplorerScreen userId="owner" onBack={jest.fn()} onOpen={jest.fn()} />
+    </FeedbackTestRoot>,
+  );
+  await screen.findByRole('button', { name: 'Male figure' });
 });

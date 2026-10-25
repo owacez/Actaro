@@ -14,9 +14,11 @@ import {
   authStyles,
 } from '@/features/auth/auth-components';
 import { plural } from '@/lib/format';
+import { profileService } from '@/features/profile/profile-service';
 import { BodyMap } from './body-map';
 import type { BodyFigure } from './body-paths';
 import {
+  figureForSex,
   muscleRegions,
   regionExercises,
   regionOf,
@@ -30,9 +32,11 @@ const page = 40;
 // Browse the exercise library by tapping a muscle on the body map. Kept separate from the
 // main library while the feature matures.
 export function MuscleExplorerScreen({
+  userId,
   onBack,
   onOpen,
 }: {
+  userId: string;
   onBack: () => void;
   onOpen: (exerciseId: string) => void;
 }) {
@@ -42,7 +46,26 @@ export function MuscleExplorerScreen({
     [error, setError] = useState<string | null>(null),
     [attempt, setAttempt] = useState(0),
     [query, setQuery] = useState(''),
-    [shown, setShown] = useState(page);
+    [shown, setShown] = useState(page),
+    // undefined while the profile loads; null when the profile leaves the figure open.
+    [profileFigure, setProfileFigure] = useState<BodyFigure | null | undefined>(undefined);
+  useEffect(() => {
+    let active = true;
+    void profileService
+      .getProfile(userId)
+      .then((profile) => {
+        if (!active) return;
+        const match = figureForSex(profile.sex);
+        setProfileFigure(match);
+        if (match) setFigure(match);
+      })
+      .catch(() => {
+        if (active) setProfileFigure(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [userId]);
   useEffect(() => {
     if (!selected) return;
     let active = true;
@@ -73,14 +96,16 @@ export function MuscleExplorerScreen({
       <AuthText>
         Tap a muscle on the body, or choose one below, to see exercises that train it.
       </AuthText>
-      <Segments
-        options={[
-          { value: 'male', label: 'Male figure' },
-          { value: 'female', label: 'Female figure' },
-        ]}
-        value={figure}
-        onChange={setFigure}
-      />
+      {profileFigure === null && (
+        <Segments
+          options={[
+            { value: 'male', label: 'Male figure' },
+            { value: 'female', label: 'Female figure' },
+          ]}
+          value={figure}
+          onChange={setFigure}
+        />
+      )}
       <AuthCard>
         <BodyMap figure={figure} selected={selected} onSelect={choose} height={320} />
         <View style={[authStyles.row, { justifyContent: 'space-around' }]}>

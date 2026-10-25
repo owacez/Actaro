@@ -4,6 +4,18 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Muscle explorer figure follows the profile (2026-10-25): **DONE** locally. The user
+tested the explorer and asked for this change.
+
+- A male or female profile sex shows only that figure, with no toggle.
+- An unset, Intersex or Prefer not to say profile shows the Male/Female figure toggle.
+  So does a profile that cannot load.
+- The toggle stays hidden while the profile loads, so it does not flash.
+- `figureForSex` lives in `muscle-model.ts`. The screen now receives `userId` and reads
+  `profileService.getProfile`.
+- **Evidence:** `npm run check` passes (87 suites with 439 Jest tests, plus 6 dataset
+  tests). A new test covers male, female, intersex, unset and a failed profile load.
+
 Apple Health / Health Connect setup import (2026-10-24): implementation and local
 verification **DONE**; device acceptance **DEFERRED to a development build** (the user
 will test with the final build).
