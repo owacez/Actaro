@@ -50,4 +50,41 @@ describe('Supabase public configuration', () => {
       }
     },
   );
+
+  // Builds an unsigned JWT-shaped key; only its payload role is read by the check.
+  const jwt = (role: string) =>
+    [
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+      Buffer.from(JSON.stringify({ role, iss: 'supabase' })).toString('base64url'),
+      'signature',
+    ].join('.');
+
+  test('accepts a self-hosted backend on this computer or local network with its anon key', () => {
+    for (const url of [
+      'http://localhost:8000',
+      'http://192.168.18.73:8000',
+      'http://10.0.0.5:8000',
+      'http://172.20.1.2:8000',
+    ])
+      expect(readSupabaseConfiguration(url, jwt('anon'))).toEqual({
+        url,
+        publishableKey: jwt('anon'),
+      });
+    expect(readSupabaseConfiguration('https://supabase.example.org', jwt('anon')).url).toBe(
+      'https://supabase.example.org',
+    );
+  });
+
+  test('keeps public HTTP and service-role keys rejected', () => {
+    for (const url of [
+      'http://supabase.example.org',
+      'http://8.8.8.8:8000',
+      'http://172.32.0.1:8000',
+    ])
+      expect(() => readSupabaseConfiguration(url, publicKey)).toThrow(/HTTPS project API/);
+    for (const key of [jwt('service_role'), jwt('authenticated'), 'a.b', 'not.a!.jwt'])
+      expect(() => readSupabaseConfiguration('http://localhost:8000', key)).toThrow(
+        'public publishable key',
+      );
+  });
 });

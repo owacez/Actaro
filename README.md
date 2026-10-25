@@ -11,6 +11,22 @@ remain documented in [Development Status](docs/DEVELOPMENT_STATUS.md#v01-develop
 Version `0.1.0` is project metadata; deferred checks have not passed and the full
 v0.1 release gate is not accepted.
 
+## Run your own copy
+
+Actaro runs on your own Supabase backend, either Supabase Cloud or self-hosted Docker.
+After cloning, fill `.env` and run one command. It applies the database, imports the
+exercise and food datasets, and checks the connection:
+
+```bash
+npm ci
+cp .env.example .env          # then fill it in (see the guide)
+npm run setup:backend -- --dry-run
+npm run setup:backend
+npm start
+```
+
+Step-by-step instructions are in **[Run Actaro with your own backend](docs/SELF_HOSTING.md)**.
+
 ## Project authority
 
 - [Source of Truth](docs/ACTARO_SOURCE_OF_TRUTH_FINAL.md): product behavior.

@@ -60,6 +60,7 @@
     "jest": "~30.5.2",
     "jest-expo": "~58.0.12",
     "prettier": "^3.9.9",
+    "supabase": "^2.120.0",
     "test-renderer": "1.2.0",
     "typescript": "~6.0.3"
   },
@@ -78,7 +79,8 @@
     "check:supabase": "node --env-file=.env scripts/check-supabase.mjs",
     "import:repdb": "node --env-file=.env scripts/import-repdb.mjs",
     "import:usda": "node --env-file=.env scripts/import-usda.mjs",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm test"
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test",
+    "setup:backend": "node --env-file-if-exists=.env --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/setup-backend.mjs"
   },
   "private": true
 }

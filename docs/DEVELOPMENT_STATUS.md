@@ -4,6 +4,48 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Self-hosting setup (2026-10-25): implementation and a no-write verification **DONE**. A
+full write run against a fresh project is **PENDING** (needs a database URL for a test
+project).
+
+- **Why:** the user wants anyone to clone Actaro, add their own keys and run it.
+- **`npm run setup:backend`** (`scripts/setup-backend.mjs`) does each step in turn; every
+  step is safe to rerun:
+  1. Validates `.env` without printing secrets.
+  2. Applies all migrations through the pinned Supabase CLI devDependency (`supabase`
+     2.120.0, `db push --db-url`), against Cloud or self-hosted databases.
+  3. Deploys `delete-account` (Cloud with `SUPABASE_ACCESS_TOKEN`; otherwise prints the
+     command or the self-hosted steps).
+  4. Adds sign-in redirect URLs through the Management API, never removing existing
+     ones, or prints them.
+  5. Downloads and imports RepDB, and downloads, unzips and imports USDA.
+  6. Runs the existing read-only `check-supabase`.
+
+  Flags: `--dry-run`, `--skip-data`, `--skip-function`, `--skip-auth`.
+
+- **Guide:** `docs/SELF_HOSTING.md` covers Supabase Cloud and self-hosted Docker, the
+  value table, what setup does, phone redirect URLs, production notes, data licences
+  and troubleshooting. The README gains a "Run your own copy" quickstart, and
+  `.env.example` documents the setup-only server values.
+- **Self-hosted support in the app config** (`src/lib/supabase/config.ts`):
+  - Plain HTTP is accepted only for localhost and private network addresses.
+  - A classic anon JWT is accepted only when its payload role is `anon`.
+  - Public HTTP, secret keys and service-role or other JWT roles stay rejected.
+
+Evidence:
+
+- `npm run check`: 87 suites with 441 Jest tests pass, plus 6 dataset tests. New config
+  tests cover local and LAN HTTP, anon keys, and rejected public HTTP and
+  service-role keys.
+- Config validation paths fail fast with clear messages: an empty configuration, and a
+  missing `SUPABASE_DB_URL`.
+- Full `--dry-run` with an unreachable test database (no writes anywhere):
+  - The migration step failed cleanly, and setup continued.
+  - The function and redirect-URL steps printed their manual instructions.
+  - RepDB validated 643 exercises and 1,138 poses.
+  - USDA downloaded, unzipped automatically and validated 7,793 foods.
+  - The read-only checks passed against the existing project.
+
 Muscle explorer figure follows the profile (2026-10-25): **DONE** locally. The user
 tested the explorer and asked for this change.
 
