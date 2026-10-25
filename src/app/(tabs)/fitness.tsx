@@ -72,6 +72,7 @@ export default function FitnessRoute() {
         onResume={() => router.push('/workouts/session')}
         onHistory={() => router.push('/workouts/history')}
         onTraining={() => router.push('/workouts/training')}
+        onMuscles={() => router.push('/workouts/muscles')}
       />
     );
   return (

@@ -66,6 +66,7 @@ function AuthRoutes() {
         <Stack.Screen name="workouts/history" />
         <Stack.Screen name="workouts/training" />
         <Stack.Screen name="workouts/recovery" />
+        <Stack.Screen name="workouts/muscles" />
         <Stack.Screen name="habits/index" />
         <Stack.Screen name="habits/manage" />
         <Stack.Screen name="goals/index" />

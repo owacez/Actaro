@@ -4,6 +4,30 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+openGym-inspired work (2026-10-24): muscle explorer **DONE** locally (device check
+deferred); local-only database, health onboarding and catalogue merge **AWAITING USER
+DECISIONS**.
+
+- **Research:** `docs/research/opengym-review-2026-10-24.md` covers openGym's local mode
+  (JSON in localStorage, optional sync), health plugins, catalogue licences and the body
+  map's MIT source.
+- **Muscle explorer** (new, separate): Train → Workouts → Explore by muscle
+  (`/workouts/muscles`).
+  - MuscleMap (MIT) front and back figures, male or female, rendered with the already
+    installed `react-native-svg`. `scripts/musclemap-paths.mjs` generates
+    `src/features/muscles/body-paths.ts` with the MIT notice.
+  - Actaro's own mapping covers all 31 RepDB muscles across 18 regions.
+  - A single-select map plus accessible chips. The list puts primary targets first,
+    then "Also trains", with a name filter and 40 rows at a time, and opens exercise
+    detail.
+  - Data comes from one `exercise_muscles` read; no schema change.
+- **Evidence:**
+  - `npm run check`: 86 suites with 433 Jest tests pass, plus 6 dataset tests.
+  - New tests: mapping coverage and drawn regions, list rules, and the screen flow.
+  - Offline web capture of the map with Chest selected and its list.
+- **Catalogue:** 301 of 643 RepDB exercises match openGym by name. About 1,172 more are
+  MIT (text only); about 4,174 are AGPL. Nothing is merged pending the user's decision.
+
 Safe-area fixes (2026-10-24): **DONE** locally; device check **DEFERRED**.
 
 - **Full-screen run map:** the Recenter / Fit route buttons were drawn 12 px from the

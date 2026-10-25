@@ -34,6 +34,7 @@ export function WorkoutsScreen({
   onResume,
   onHistory,
   onTraining,
+  onMuscles,
 }: {
   userId: string;
   navigation?: ReactNode;
@@ -50,6 +51,7 @@ export function WorkoutsScreen({
   onResume?: () => void;
   onHistory?: () => void;
   onTraining?: () => void;
+  onMuscles?: () => void;
 }) {
   const [page, setPage] = useState<Page | null>(null);
   const [query, setQuery] = useState({ offset: 0 });
@@ -203,6 +205,19 @@ export function WorkoutsScreen({
         <>
           <AuthText kind="heading">Plan and review</AuthText>
           <AuthCard>
+            {onMuscles && (
+              <ActionRow
+                title="Explore by muscle"
+                detail="New · find exercises on a body map"
+                icon={{
+                  ios: 'figure.arms.open',
+                  android: 'accessibility_new',
+                  web: 'accessibility_new',
+                }}
+                onPress={onMuscles}
+                disabled={removing}
+              />
+            )}
             {onSplits && (
               <ActionRow title="Training splits" onPress={onSplits} disabled={removing} />
             )}
