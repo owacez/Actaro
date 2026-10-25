@@ -4,6 +4,52 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Database review and optimization (2026-10-25): migration and SQL tests **DONE and verified
+on real PostgreSQL 18**. It applies to the hosted project at the planned development reset
+(`npm run setup:backend`).
+
+**Review**
+
+- All 36 tables are used by the app, a database function or a foreign key, so none were
+  dropped.
+- Every per-day table already has a "user + date" index for the Progress time filters
+  (7D–All) and the source-of-truth analytics, and every foreign key has an index.
+- Row Level Security is on for all tables and uses the efficient `(select auth.uid())`
+  form.
+- Rejected after verification:
+  - **Account deletion with habit-linked goals:** it works; a test now guards it.
+  - **Direct table writes:** these are legitimate app paths, and RLS prevents
+    cross-account access.
+  - **Date-of-birth CHECK:** it cannot fail on restore.
+
+**Migration `20261025090000_schema_optimizations.sql`**
+
+1. Time-zone validation (CHECKs on 12 tables) reads a cached indexed
+   `private.time_zones` table instead of scanning `pg_timezone_names`. The measured cost
+   fell from 2,805 ms to 4 ms per 200 checks.
+   `private.refresh_time_zones()` adds zones after Postgres upgrades.
+2. Two redundant indexes were dropped, covered by unique keys: `habit_logs_habit_owner_fk`
+   and `habit_versions_habit_owner_fk`.
+3. Added `workout_session_exercises (user_id, exercise_id)` for per-exercise history,
+   strength progression and PRs.
+4. Four read-only reporting functions are marked `stable`.
+5. `nutrition_copy_requests` gains `created_at`, and a user's rows older than 30 days are
+   pruned on insert. The unneeded `(user_id, id)` index was replaced by
+   `(user_id, created_at)`.
+
+`database.types.ts` now includes the new `created_at` column.
+
+**Evidence**
+
+- All 32 migrations applied to PostgreSQL 18 (PGlite 0.5.8) with a minimal Supabase shim,
+  plus the real RepDB (643) and USDA (7,793) catalogues.
+- 17/17 SQL test files pass: the 16 existing files (unchanged results) and the new
+  `schema_optimizations.sql`, which covers time zones, indexes, function volatility,
+  ledger pruning and account deletion.
+- `npm run check`: 87 suites with 441 Jest tests pass, plus 6 dataset tests.
+- **Not run:** against hosted Supabase. The harness lives in the session scratchpad and
+  is not committed.
+
 Self-hosting setup (2026-10-25): implementation and a no-write verification **DONE**. A
 full write run against a fresh project is **PENDING** (needs a database URL for a test
 project).

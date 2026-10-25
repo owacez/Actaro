@@ -804,18 +804,21 @@ export type Database = {
       };
       nutrition_copy_requests: {
         Row: {
+          created_at: string;
           entry_count: number;
           id: string;
           request: Json;
           user_id: string;
         };
         Insert: {
+          created_at?: string;
           entry_count: number;
           id: string;
           request: Json;
           user_id: string;
         };
         Update: {
+          created_at?: string;
           entry_count?: number;
           id?: string;
           request?: Json;
