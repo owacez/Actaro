@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { randomUUID } from 'expo-crypto';
 import { View } from 'react-native';
 import { Meter, ScreenHeader } from '@/components/product-ui';
@@ -16,7 +16,9 @@ import {
 } from '@/features/auth/auth-components';
 import { useAppTheme } from '@/features/profile/theme-context';
 import { bodyService } from '@/features/body/body-service';
-import { bodySexOptions, canonicalInput } from '@/features/body/body-model';
+import { bodySexOptions, canonicalInput, unitFactor } from '@/features/body/body-model';
+import { health } from '@/features/health/health';
+import { importSummary, round1 } from '@/features/health/health-model';
 import { numeric } from '@/features/nutrition/nutrition-model';
 import {
   activityLevels,
@@ -56,7 +58,42 @@ export function OnboardingScreen({ userId, onDone }: { userId: string; onDone: (
     [eligible, setEligible] = useState(false),
     [estimateNote, setEstimateNote] = useState<string | null>(null),
     [plan, setPlan] = useState<Plan>({ calories: '', protein: '', carbs: '', fat: '', water: '' }),
-    [goalId] = useState(() => randomUUID());
+    [goalId] = useState(() => randomUUID()),
+    [healthReady, setHealthReady] = useState(false),
+    [importing, setImporting] = useState(false),
+    [healthNote, setHealthNote] = useState<{ text: string; error: boolean } | null>(null);
+  // Offer the platform health store only where this build can read it.
+  useEffect(() => {
+    let active = true;
+    void health.available().then((value) => {
+      if (active) setHealthReady(value);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+  // Read-only import that fills only fields still empty; anything declined stays manual.
+  async function importHealth() {
+    setImporting(true);
+    setHealthNote(null);
+    const result = await health.importForSetup();
+    setImporting(false);
+    if (result.status !== 'imported') {
+      setHealthNote({ text: result.reason, error: result.status === 'error' });
+      return;
+    }
+    const found = result.data;
+    if (found.sex && !sex) setSex(found.sex);
+    if (found.birthDate && !birthDate) setBirthDate(found.birthDate);
+    if (found.heightCm !== null && !height.trim())
+      setHeight(String(round1(found.heightCm * unitFactor(lengthUnit))));
+    if (found.weight && !weight.trim())
+      setWeight(String(round1(found.weight.kg * unitFactor(weightUnit))));
+    setHealthNote({
+      text: importSummary(found, weightUnit, unitFactor(weightUnit)),
+      error: false,
+    });
+  }
   const onLoaded = useCallback((data: Awaited<ReturnType<typeof bodyService.form>>) => {
     setWeightUnit(data.preferences.weight_unit === 'lb' ? 'lb' : 'kg');
     setLengthUnit(data.preferences.length_unit === 'in' ? 'in' : 'cm');
@@ -232,6 +269,23 @@ export function OnboardingScreen({ userId, onDone }: { userId: string; onDone: (
             <>
               <AuthText kind="title">About you</AuthText>
               <AuthText>Used to estimate your daily energy needs. Kept private to you.</AuthText>
+              {healthReady && health.source && (
+                <AuthCard>
+                  <AuthText kind="heading">Fill this in from {health.source}</AuthText>
+                  <AuthText>
+                    Actaro reads your weight, height
+                    {health.source === 'Apple Health' ? ', sex, date of birth' : ''}, recent
+                    workouts and resting heart rate. Nothing is written back, and you can review
+                    every value below.
+                  </AuthText>
+                  <AuthButton
+                    title={`Connect ${health.source}`}
+                    busy={importing}
+                    onPress={() => void importHealth()}
+                  />
+                </AuthCard>
+              )}
+              {healthNote && <AuthNotice error={healthNote.error}>{healthNote.text}</AuthNotice>}
               <AuthText kind="heading">Sex</AuthText>
               <View style={authStyles.choices}>
                 {bodySexOptions

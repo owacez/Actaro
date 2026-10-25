@@ -4,6 +4,57 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Apple Health / Health Connect setup import (2026-10-24): implementation and local
+verification **DONE**; device acceptance **DEFERRED to a development build** (the user
+will test with the final build).
+
+**User decisions (2026-10-24)**
+
+- Sign-in stays required; the no-sign-in local mode is dropped.
+- The full on-device database migration is set aside: in-progress workouts and runs
+  already persist on the device and retry.
+- The exercise catalogue waits for the user's Gym visual licence application.
+- Google Fit is retired, so Android uses Health Connect.
+
+**What it does**
+
+- The setup "About you" step offers **Connect Apple Health** (iOS) or **Connect Health
+  Connect** (Android) when the build can read them. The import is read-only: weight,
+  height and resting heart rate, workouts from the last 30 days, and sex and date of
+  birth on Apple Health only.
+- It fills only empty fields, converted to the chosen units, shows a one-line summary
+  of what was read, and leaves every value editable.
+- Declined access, no data, unavailable stores, Expo Go and web all keep manual entry,
+  with a clear message. Nothing is written back.
+
+**Implementation**
+
+- `src/features/health/`: `health-model.ts` (pure, tested), plus `health.ios.ts`
+  (`@kingstinct/react-native-healthkit` 16.2 with `react-native-nitro-modules` 0.37),
+  `health.android.ts` (`react-native-health-connect` 4.1.3) and a web/default
+  `health.ts`.
+- Native libraries load lazily inside try/catch, so Expo Go does not crash.
+- Implausible readings are ignored (weight 25–455 kg, height 90–275 cm, resting heart
+  rate 25–220 bpm).
+- `app.json`:
+  - HealthKit plugin with a read-only usage description and background delivery off.
+  - Health Connect plugin (privacy-policy rationale activity).
+  - Four `android.permission.health.READ_*` permissions.
+  - `expo-build-properties` with Android `minSdkVersion` 26.
+- Imported resting heart rate and workout counts are shown in the summary but not
+  stored. Storing them needs a schema decision.
+
+**Evidence**
+
+- `npm run check`: 87 suites with 438 Jest tests pass, plus 6 dataset tests.
+- New tests cover reading selection, workout totals, local dates and the summary
+  text, plus the setup flow: empty fields are filled in lb/in, typed values are kept,
+  and an unavailable store shows its message.
+- `npx expo export --platform all` succeeds, `npm ls` shows no invalid or unmet peers,
+  and `expo config` resolves.
+- **Not verified:** native compile and on-device permission sheets (needs an EAS
+  development build).
+
 openGym-inspired work (2026-10-24): muscle explorer **DONE** locally (device check
 deferred); local-only database, health onboarding and catalogue merge **AWAITING USER
 DECISIONS**.

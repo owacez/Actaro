@@ -19,7 +19,13 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.health.READ_WEIGHT",
+        "android.permission.health.READ_HEIGHT",
+        "android.permission.health.READ_RESTING_HEART_RATE",
+        "android.permission.health.READ_EXERCISE"
+      ]
     },
     "web": {
       "output": "static",
@@ -54,7 +60,28 @@
       "expo-sharing",
       "expo-notifications",
       "@react-native-community/datetimepicker",
-      ["expo-widgets", { "frequentUpdates": true }]
+      [
+        "expo-widgets",
+        {
+          "frequentUpdates": true
+        }
+      ],
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "Allow Actaro to read your weight, height, sex, date of birth, workouts and resting heart rate to set up your plan. Actaro does not write to Apple Health.",
+          "background": false
+        }
+      ],
+      "react-native-health-connect",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
