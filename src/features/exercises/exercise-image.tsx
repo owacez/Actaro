@@ -21,13 +21,17 @@ export function ExerciseImage({
   const [failed, setFailed] = useState<string | null>(null);
   const { colors } = useAppTheme();
   const size = requestedSize ?? (large ? 200 : 58);
+  // The technique pictures are square, so the large frame is square too: the picture fills it
+  // edge to edge instead of sitting between blank side bars. Wide screens cap its size.
+  const hero = large && framed && requestedSize === undefined;
   return (
     <View
       style={{
         width: large && framed ? '100%' : size,
-        maxWidth: '100%',
-        height: size,
-        alignSelf: framed ? undefined : 'center',
+        maxWidth: hero ? 420 : '100%',
+        height: hero ? undefined : size,
+        aspectRatio: hero ? 1 : undefined,
+        alignSelf: hero || !framed ? 'center' : undefined,
         borderRadius: 14,
         borderWidth: framed ? 1 : 0,
         borderColor: colors.border,
@@ -41,7 +45,7 @@ export function ExerciseImage({
         <Image
           source={url}
           accessibilityLabel={label}
-          contentFit="contain"
+          contentFit={hero ? 'cover' : 'contain'}
           cachePolicy="memory-disk"
           recyclingKey={url}
           style={{ width: '100%', height: '100%' }}

@@ -4,6 +4,18 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Exercise detail image framing (2026-10-27): **DONE** locally.
+
+- **Problem:** the user reported the technique picture sitting between blank side bars. The
+  square pictures were fitted inside a full-width 200 pt frame.
+- **Fix:** the large framed `ExerciseImage` is now square (`aspectRatio: 1`), full width on
+  phones and capped at 420 pt (centred) on wide screens. The picture uses `cover`, so it
+  fills the frame. Thumbnails are unchanged.
+- **Evidence:**
+  - `npm run check` passes (87 suites with 441 Jest tests, plus 6 dataset tests).
+  - An offline web capture of exercise detail with a real local RepDB picture shows it
+    filling the frame.
+
 Database review and optimization (2026-10-25): migration and SQL tests **DONE and verified
 on real PostgreSQL 18**. It applies to the hosted project at the planned development reset
 (`npm run setup:backend`).
