@@ -4,6 +4,37 @@ Updated: 2026-10-23 (America/Los_Angeles).
 
 ## Overall
 
+Credits section (2026-10-27): **DONE** locally. The user asked for data-source mentions to
+move into a credits section under Privacy.
+
+- **New section:** You → Privacy & account data ends with "Credits & data sources"
+  (`src/features/profile/credits.tsx`). Each entry is a link with a one-line description:
+  - RepDB, with its required wording "Exercise data by RepDB (repdb.co)" and licence;
+  - USDA FoodData Central SR Legacy (public domain);
+  - © OpenStreetMap contributors (OpenFreeMap/OpenMapTiles);
+  - MuscleMap (MIT);
+  - Health Canada 2023 DRI equations.
+- **Removed from screens:**
+  - exercise detail: the licence line and RepDB link;
+  - Library footer: the RepDB link;
+  - the muscle explorer credit line;
+  - the duplicate attribution line under card maps;
+  - food: "USDA SR Legacy" now reads "Common food", and the Log food intro no longer names
+    USDA.
+- **Licensing check:**
+  - RepDB's free tier explicitly allows the credit on an about/credits screen (term 2), and
+    the README keeps it too.
+  - USDA is public domain.
+  - MuscleMap's MIT notice stays in `body-paths.ts`.
+  - OpenStreetMap attribution stays on the map itself, because maps show their own
+    attribution control.
+  - The Health Canada method link in the calorie "Learn more" sheet is an explanation, not a
+    credit, so it stays.
+- **Evidence:**
+  - `npm run check` passes (87 suites with 442 Jest tests, plus 6 dataset tests).
+  - A new test requires every credit, including RepDB's link.
+  - An offline web capture of Privacy and data shows the section.
+
 Exercise detail image framing (2026-10-27): **DONE** locally.
 
 - **Problem:** the user reported the technique picture sitting between blank side bars. The

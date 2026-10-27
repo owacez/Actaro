@@ -1,6 +1,6 @@
 import { NavigationSurface, Segments } from '@/components/product-ui';
 import { useEffect, useRef, useState } from 'react';
-import { Linking, View } from 'react-native';
+import { View } from 'react-native';
 import {
   AuthButton,
   BackLink,
@@ -149,11 +149,6 @@ export function DetailScreen({
             ))}
           </AuthCard>
           {record.movement_pattern && <AuthText>Movement: {record.movement_pattern}</AuthText>}
-          <AuthText>{record.license}</AuthText>
-          <AuthLink
-            title={record.attribution}
-            onPress={() => void Linking.openURL('https://repdb.co')}
-          />
         </>
       )}
     </AuthFrame>

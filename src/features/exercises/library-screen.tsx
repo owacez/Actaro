@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { ActionSheet, IconButton, ScreenHeader } from '@/components/product-ui';
 import { useFocusEffect } from 'expo-router';
-import { FlatList, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { actaroLayout } from '@/constants/actaro-theme';
 import {
@@ -325,10 +325,6 @@ export function LibraryScreen({
               </View>
             )}
             <AuthLink title="Refresh exercises and images" onPress={refresh} />
-            <AuthLink
-              title="Exercise data by RepDB (repdb.co)"
-              onPress={() => void Linking.openURL('https://repdb.co')}
-            />
           </View>
         }
       />

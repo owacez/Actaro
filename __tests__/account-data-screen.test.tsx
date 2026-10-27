@@ -92,3 +92,15 @@ test('an export finishing after account screen unmount cannot open a share sheet
   );
   expect(shareExport).not.toHaveBeenCalled();
 });
+test('credits list every data source, including the link RepDB requires', async () => {
+  await open();
+  expect(screen.getByText('Credits & data sources')).toBeTruthy();
+  for (const name of [
+    'Exercise data by RepDB (repdb.co)',
+    'USDA FoodData Central',
+    '© OpenStreetMap contributors',
+    'MuscleMap by Melih Colpan',
+    'Health Canada Dietary Reference Intakes',
+  ])
+    expect(screen.getByRole('button', { name })).toBeTruthy();
+});

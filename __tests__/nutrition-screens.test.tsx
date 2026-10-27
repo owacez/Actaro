@@ -51,7 +51,7 @@ test('ingredient picker searches individual foods and keeps personal recipes sep
   // One page of results shows no pager; each row carries its nutrition and source.
   expect(screen.queryByRole('button', { name: 'Next food page' })).toBeNull();
   expect(
-    screen.getByText('165 kcal · P 31 g · C 0 g · F 3.6 g per 100 g · USDA SR Legacy'),
+    screen.getByText('165 kcal · P 31 g · C 0 g · F 3.6 g per 100 g · Common food'),
   ).toBeTruthy();
   await fireEvent.changeText(screen.getByLabelText('Search foods'), 'banana');
   await fireEvent.press(screen.getByRole('button', { name: 'Search food database' }));

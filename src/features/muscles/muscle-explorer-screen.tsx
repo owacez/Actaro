@@ -181,9 +181,6 @@ export function MuscleExplorerScreen({
           )}
         </>
       )}
-      <AuthText kind="muted">
-        Body outlines from MuscleMap by Melih Colpan (MIT). Exercise data by RepDB (repdb.co).
-      </AuthText>
     </AuthFrame>
   );
 }

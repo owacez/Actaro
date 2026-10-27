@@ -16,6 +16,7 @@ import { runTracker } from '@/features/running/run-tracker';
 import { reminderService } from '@/features/notifications/reminder-service';
 import { exportAccount, deleteOwnAccount } from './account-data-service';
 import { shareExport } from './share-export';
+import { Credits } from './credits';
 
 export function AccountDataScreen({ userId, onBack }: { userId: string; onBack: () => void }) {
   const [password, setPassword] = useState(''),
@@ -158,6 +159,7 @@ export function AccountDataScreen({ userId, onBack }: { userId: string; onBack: 
         </>
       )}
       {!!error && (!confirming || deleted) && <AuthNotice error>{error}</AuthNotice>}
+      <Credits />
     </AuthFrame>
   );
 }

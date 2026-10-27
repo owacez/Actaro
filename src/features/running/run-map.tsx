@@ -91,7 +91,6 @@ export function RunMap({
       {status === 'loading' && (
         <AuthText kind="muted">Loading street map… Recording continues while it loads.</AuthText>
       )}
-      <AuthText kind="muted">OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors</AuthText>
     </View>
   );
 }

@@ -126,7 +126,7 @@ export function FoodPicker({
                 title={food.name}
                 detail={`${nutritionLabel(food)} per ${formatNumber(food.base_amount)} ${food.base_unit} · ${
                   food.kind === 'reference'
-                    ? 'USDA SR Legacy'
+                    ? 'Common food'
                     : food.kind === 'recipe'
                       ? 'Your recipe'
                       : 'Your custom food'
@@ -234,8 +234,8 @@ export function FoodSearchScreen({
         {displayDate(date)} · {meal}
       </AuthText>
       <AuthText>
-        USDA’s historical common-food catalog and your own foods. Check the exact product or
-        preparation; use its current label when it differs.
+        Common foods and your own foods. Check the exact product or preparation; use its current
+        label when it differs.
       </AuthText>
       <View style={authStyles.choices}>
         <AuthLink title="Create food from label" onPress={() => onOpen('custom')} />

@@ -186,7 +186,7 @@ test('equipment blocks duplicate saves, keeps failed drafts, retries and reloads
   );
   await screen.findByText('1 selected');
 });
-test('detail shows persisted instructions, muscles, equipment and attribution', async () => {
+test('detail shows persisted instructions, muscles and equipment', async () => {
   const record: ExerciseDetail = {
     id: itemId,
     name: 'Fixture press',
@@ -211,7 +211,8 @@ test('detail shows persisted instructions, muscles, equipment and attribution', 
   await screen.findByText('Fixture press');
   expect(screen.getByText('1. Move with control.')).toBeTruthy();
   expect(screen.getByText('Fixture muscle · primary')).toBeTruthy();
-  expect(screen.getByText('Exercise data by RepDB (repdb.co)')).toBeTruthy();
+  // Data credits live on the Privacy and data screen, not on each exercise.
+  expect(screen.queryByText('Exercise data by RepDB (repdb.co)')).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Add to workout' }));
   expect(add).toHaveBeenCalledWith(itemId);
 });
